@@ -9,7 +9,9 @@ export default async function Login() {
     redirect(data?.redirectTo || "/");
   }
 
-  return <AuthPage type="login" registerLink={false} />;
+  return (
+    <AuthPage type="login" registerLink={false} forgotPasswordLink={false} />
+  );
 }
 
 async function getData() {
