@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
-    extend: {},
+    extend: {
+      ringColor: (theme) => ({
+        DEFAULT: theme("colors.grey.500"),
+      }),
+    },
   },
   plugins: [require("@tailwindcss/forms")],
 };

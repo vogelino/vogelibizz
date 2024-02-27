@@ -1,0 +1,23 @@
+.form input {
+  @apply mb-4;
+}
+
+.form hr {
+  @apply border-gray-100;
+}
+
+.form h1 {
+  @apply font-sans font-bold text-xl my-6 !text-left px-6;
+}
+
+.form input[type="submit"] {
+  @apply bg-black text-white rounded py-3 px-4 m-0;
+}
+
+.form label[for="remember-me-input"] {
+  @apply inline-flex items-center gap-2;
+}
+
+.form label[for="remember-me-input"] input[type="checkbox"] {
+  @apply m-0;
+}
