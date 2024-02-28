@@ -6,6 +6,7 @@ import {
 	mapStatusToLabel,
 } from '@utility/statusUtil'
 import { IconBadge } from '@components/ui/icon-badge'
+import InternalLink from '@components/ui/internal-link'
 
 export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
@@ -17,6 +18,11 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 		id: 'name',
 		accessorKey: 'name',
 		header: 'Name',
+		cell: function render({ getValue, row }) {
+			const id = row.original.id
+			const value = getValue<string>()
+			return <InternalLink href={`/projects/show/${id}`}>{value}</InternalLink>
+		},
 	},
 	{
 		id: 'status',
