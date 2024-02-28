@@ -1,8 +1,8 @@
 import { ProjectType } from '@db/schema'
 import {
 	CheckCircle2,
+	Circle,
 	Handshake,
-	LayoutList,
 	MessageCircleMore,
 	PauseCircle,
 	PlayCircle,
@@ -31,7 +31,7 @@ const statusToLabelMap: Record<StatusType, string> = {
 	waiting_for_feedback: 'Waiting for feedback',
 }
 const statusToIconMap: Record<StatusType, ReactNode> = {
-	todo: <LayoutList size={16} />,
+	todo: <Circle size={16} />,
 	active: <PlayCircle size={16} />,
 	paused: <PauseCircle size={16} />,
 	done: <CheckCircle2 size={16} />,

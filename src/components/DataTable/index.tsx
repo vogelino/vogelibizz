@@ -1,11 +1,6 @@
 'use client'
 
-import {
-	ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from '@tanstack/react-table'
+import { flexRender } from '@tanstack/react-table'
 
 import {
 	Table,
@@ -15,22 +10,14 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
+import { UseTableReturnType, useTable } from '@refinedev/react-table'
+import { BaseRecord } from '@refinedev/core'
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[]
-	data: TData[]
-}
-
-export function DataTable<TData, TValue>({
-	columns,
-	data,
-}: DataTableProps<TData, TValue>) {
-	const table = useReactTable({
-		data,
-		columns,
-		getCoreRowModel: getCoreRowModel(),
-	})
-
+export function DataTable<RecordType extends BaseRecord>({
+	table,
+}: {
+	table: UseTableReturnType<RecordType>
+}) {
 	return (
 		<>
 			<Table>
@@ -39,7 +26,11 @@ export function DataTable<TData, TValue>({
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
 								return (
-									<TableHead key={header.id}>
+									<TableHead
+										key={header.id}
+										colSpan={header.colSpan}
+										style={{ width: `${header.getSize()}px` }}
+									>
 										{header.isPlaceholder
 											? null
 											: flexRender(
@@ -60,7 +51,10 @@ export function DataTable<TData, TValue>({
 								data-state={row.getIsSelected() && 'selected'}
 							>
 								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
+									<TableCell
+										key={cell.id}
+										style={{ width: `${cell.column.getSize()}px` }}
+									>
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}
 									</TableCell>
 								))}
@@ -68,7 +62,10 @@ export function DataTable<TData, TValue>({
 						))
 					) : (
 						<TableRow>
-							<TableCell colSpan={columns.length} className="h-24 text-center">
+							<TableCell
+								colSpan={table.getAllColumns().length}
+								className="h-24 text-center"
+							>
 								No results.
 							</TableCell>
 						</TableRow>

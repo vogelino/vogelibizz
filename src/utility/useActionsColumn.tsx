@@ -20,6 +20,7 @@ export function useActionsColumn<ColumnType = any>(
 		id: 'actions',
 		accessorKey: 'id',
 		header: ' ',
+		size: 50,
 		cell: function render({ getValue }) {
 			return (
 				<DropdownMenu>
