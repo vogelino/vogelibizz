@@ -7,13 +7,20 @@ import {
 } from '@utility/statusUtil'
 import { IconBadge } from '@components/ui/icon-badge'
 import InternalLink from '@components/ui/internal-link'
-import { format } from '@formkit/tempo'
+import { getSortableHeaderTemplate } from '@components/DataTable/dataTableUtil'
 
 export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
 		id: 'id',
 		accessorKey: 'id',
-		header: () => <span className="text-xs font-mono text-grayDark">ID</span>,
+		size: 50,
+		minSize: 50,
+		maxSize: 50,
+		header: getSortableHeaderTemplate<ProjectType>(
+			<span className="text-xs font-mono text-grayDark group-hover:text-inherit">
+				ID
+			</span>,
+		),
 		cell: function render({ getValue }) {
 			return (
 				<span className="text-xs font-mono text-grayDark">
@@ -25,7 +32,8 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
 		id: 'name',
 		accessorKey: 'name',
-		header: 'Name',
+		size: 1000,
+		header: getSortableHeaderTemplate<ProjectType>('Name'),
 		cell: function render({ getValue, row }) {
 			const id = row.original.id
 			const value = getValue<string>()
@@ -35,7 +43,8 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
 		id: 'status',
 		accessorKey: 'status',
-		header: 'Status',
+		size: 100,
+		header: getSortableHeaderTemplate<ProjectType>('Status'),
 		cell: function render({ getValue }) {
 			const value = getValue<StatusType>()
 			return (
@@ -43,24 +52,6 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 					icon={mapStatusToIcon(value)}
 					label={mapStatusToLabel(value)}
 				/>
-			)
-		},
-	},
-	{
-		id: 'created_at',
-		accessorKey: 'created_at',
-
-		header: () => (
-			<span className="text-xs font-mono text-grayDark">Created at</span>
-		),
-		cell: function render({ getValue }) {
-			const formattedDate = format({
-				date: new Date(),
-				format: { date: 'medium' },
-				tz: 'America/Santiago',
-			})
-			return (
-				<span className="text-xs font-mono text-grayDark">{formattedDate}</span>
 			)
 		},
 	},

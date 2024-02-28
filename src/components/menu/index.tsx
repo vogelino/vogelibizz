@@ -28,7 +28,7 @@ export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
 			)}
 		>
 			<Link
-				href="/"
+				href="/projects"
 				className={cn(
 					'group',
 					'px-4 -ml-4 py-2 rounded-full',
