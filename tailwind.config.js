@@ -53,6 +53,14 @@ module.exports = {
 				'.text-pretty': {
 					'text-wrap': 'pretty',
 				},
+				'.text-stroke-grayMed': {
+					'-webkit-text-stroke-width': '5px',
+					'-webkit-text-stroke-color': 'var(--greyMed)',
+				},
+				'.text-stroke-fg': {
+					'-webkit-text-stroke-width': '5px',
+					'-webkit-text-stroke-color': 'var(--fg)',
+				},
 			})
 		}),
 	],
