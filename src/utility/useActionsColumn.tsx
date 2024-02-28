@@ -34,13 +34,13 @@ export function useActionsColumn<ColumnType = any>(
 						<DropdownMenuItem
 							onClick={() => show(ressource, getValue<ColumnType>() as string)}
 						>
-							<Eye />
+							<Eye size={20} />
 							<span className="mt-1">Show details</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => edit(ressource, getValue<ColumnType>() as string)}
 						>
-							<Pencil />
+							<Pencil size={20} />
 							<span className="mt-1">Edit</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>

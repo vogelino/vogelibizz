@@ -50,8 +50,10 @@ export default function ProjectList() {
 	return (
 		<div className="px-10">
 			<div className="flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center">
-				<h1 className="font-special text-3xl antialiased">All projects</h1>
-				<Button onClick={() => create(RESOURCE_NAME)}>{'New project'}</Button>
+				<h1 className="font-special text-3xl antialiased">{RESOURCE_NAME}</h1>
+				<Button variant="outline" onClick={() => create(RESOURCE_NAME)}>
+					New {RESOURCE_NAME.toLocaleLowerCase().replace(/s$/, '')}
+				</Button>
 			</div>
 			<div className="w-full overflow-auto">
 				{tableData && <DataTable columns={columns} data={tableData.data} />}

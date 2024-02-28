@@ -1,11 +1,11 @@
 import { ProjectType } from '@db/schema'
 import {
-	AlarmClockCheck,
-	CheckSquare,
+	CheckCircle2,
 	Handshake,
-	Hourglass,
 	LayoutList,
+	MessageCircleMore,
 	PauseCircle,
+	PlayCircle,
 	XCircle,
 } from 'lucide-react'
 import { ReactNode } from 'react'
@@ -32,12 +32,12 @@ const statusToLabelMap: Record<StatusType, string> = {
 }
 const statusToIconMap: Record<StatusType, ReactNode> = {
 	todo: <LayoutList size={16} />,
-	active: <AlarmClockCheck size={16} />,
+	active: <PlayCircle size={16} />,
 	paused: <PauseCircle size={16} />,
-	done: <CheckSquare size={16} />,
+	done: <CheckCircle2 size={16} />,
 	cancelled: <XCircle size={16} />,
 	negotiating: <Handshake size={16} />,
-	waiting_for_feedback: <Hourglass size={16} />,
+	waiting_for_feedback: <MessageCircleMore size={20} />,
 }
 
 export const statusList = Object.keys(statusToLabelMap).map((key) => ({
