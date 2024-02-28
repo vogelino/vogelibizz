@@ -1,12 +1,59 @@
+const plugin = require('tailwindcss/plugin')
+
+const fallbackFonts = [
+	'ui-sans-serif',
+	'system-ui',
+	'-apple-system',
+	'BlinkMacSystemFont',
+	'Segoe UI',
+	'Roboto',
+	'Helvetica Neue',
+	'Arial',
+	'Noto Sans',
+	'sans-serif',
+	'Apple Color Emoji',
+	'Segoe UI Emoji',
+	'Segoe UI Symbol',
+	'Noto Color Emoji',
+]
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  theme: {
-    extend: {
-      ringColor: (theme) => ({
-        DEFAULT: theme("colors.grey.500"),
-      }),
-    },
-  },
-  plugins: [require("@tailwindcss/forms")],
-};
+	darkMode: ['class', '[data-applied-mode="dark"]'],
+	content: ['./src/**/*.{js,jsx,md,mdx,ts,tsx}'],
+	theme: {
+		extend: {
+			fontFamily: {
+				special: ['var(--font-lobular)', ...fallbackFonts],
+				sans: ['var(--font-fungis)', ...fallbackFonts],
+				serif: ['serif'],
+				mono: ['monospace'],
+			},
+			colors: {
+				fg: 'var(--fg)',
+				bg: 'var(--bg)',
+				alt: 'var(--alt)',
+				grayDark: 'var(--grayDark)',
+				grayMed: 'var(--grayMed)',
+				grayLight: 'var(--grayLight)',
+				grayUltraLight: 'var(--grayUltraLight)',
+			},
+			height: { screen: '100lvh' },
+			width: { screen: '100lvw' },
+		},
+	},
+	plugins: [
+		require('@tailwindcss/container-queries'),
+		require('@tailwindcss/forms'),
+		plugin(function ({ addUtilities }) {
+			addUtilities({
+				'.text-balance': {
+					'text-wrap': 'balance',
+				},
+				'.text-pretty': {
+					'text-wrap': 'pretty',
+				},
+			})
+		}),
+	],
+}
