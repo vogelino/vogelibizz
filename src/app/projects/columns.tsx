@@ -7,12 +7,20 @@ import {
 } from '@utility/statusUtil'
 import { IconBadge } from '@components/ui/icon-badge'
 import InternalLink from '@components/ui/internal-link'
+import { format } from '@formkit/tempo'
 
 export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
 		id: 'id',
 		accessorKey: 'id',
-		header: 'ID',
+		header: () => <span className="text-xs font-mono text-grayDark">ID</span>,
+		cell: function render({ getValue }) {
+			return (
+				<span className="text-xs font-mono text-grayDark">
+					{getValue<string>()}
+				</span>
+			)
+		},
 	},
 	{
 		id: 'name',
@@ -41,12 +49,19 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 	{
 		id: 'created_at',
 		accessorKey: 'created_at',
-		header: 'Created At',
 
+		header: () => (
+			<span className="text-xs font-mono text-grayDark">Created at</span>
+		),
 		cell: function render({ getValue }) {
-			return new Date(getValue<Date>()).toLocaleString(undefined, {
-				timeZone: 'UTC',
+			const formattedDate = format({
+				date: new Date(),
+				format: { date: 'medium' },
+				tz: 'America/Santiago',
 			})
+			return (
+				<span className="text-xs font-mono text-grayDark">{formattedDate}</span>
+			)
 		},
 	},
 ]
