@@ -1,23 +1,26 @@
 .form input {
-  @apply mb-4;
+	@apply mb-4;
 }
 
 .form hr {
-  @apply border-gray-100;
+	@apply border-grayLight;
 }
 
 .form h1 {
-  @apply font-sans font-bold text-xl my-6 !text-left px-6;
+	@apply font-sans font-bold text-xl mt-6 mb-5 !text-left px-6;
+	@apply uppercase;
 }
 
-.form input[type="submit"] {
-  @apply bg-black text-white rounded py-3 px-4 m-0;
+.form input[type='submit'] {
+	@apply bg-alt text-fg rounded-full text-xl pt-1 pb-0.5 px-4 m-0 cursor-pointer inline-flex w-24 self-end;
+	@apply hover:bg-fg hover:text-bg transition-colors;
+	@apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fg focus:ring-offset-bg;
 }
 
-.form label[for="remember-me-input"] {
-  @apply inline-flex items-center gap-2;
+.form label[for='remember-me-input'] {
+	@apply inline-flex items-center gap-2 cursor-pointer;
 }
 
-.form label[for="remember-me-input"] input[type="checkbox"] {
-  @apply m-0;
+.form label[for='remember-me-input'] input[type='checkbox'] {
+	@apply m-0 checked:bg-fg checked:text-bg bg-bg;
 }
