@@ -35,7 +35,7 @@ export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
 					'focus:outline-none focus:ring-2 focus:ring-fg',
 				)}
 			>
-				<BizzLogo className="group-hover:text-alt" />
+				<BizzLogo textClassName="group-hover:text-alt" />
 			</Link>
 			<button
 				aria-label="Hide the main navitation menu"

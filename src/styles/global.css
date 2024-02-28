@@ -196,6 +196,10 @@
 		-webkit-text-stroke-width: 2px;
 	}
 
+	.text-stroke-4 {
+		-webkit-text-stroke-width: 5px;
+	}
+
 	.text-stroke-line {
 		-webkit-text-stroke-color: var(--fg);
 	}
