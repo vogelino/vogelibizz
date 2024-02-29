@@ -2,6 +2,7 @@
 
 import { useNavigation, useOne, useResource, useShow } from '@refinedev/core'
 
+const RESOURCE_NAME = 'clients'
 export default function ProjectShow() {
 	const { edit, list } = useNavigation()
 	const { id } = useResource()
@@ -25,8 +26,10 @@ export default function ProjectShow() {
 			>
 				<h1>{'Show'}</h1>
 				<div style={{ display: 'flex', gap: '8px' }}>
-					<button onClick={() => list('projects')}>{'List'}</button>
-					<button onClick={() => edit('projects', id ?? '')}>{'Edit'}</button>
+					<button onClick={() => list(RESOURCE_NAME)}>{'List'}</button>
+					<button onClick={() => edit(RESOURCE_NAME, id ?? '')}>
+						{'Edit'}
+					</button>
 				</div>
 			</div>
 			<div>
@@ -37,10 +40,6 @@ export default function ProjectShow() {
 				<div style={{ marginTop: '6px' }}>
 					<h5>{'Name'}</h5>
 					<div>{record?.name}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Status'}</h5>
-					<div>{record?.status}</div>
 				</div>
 				<div style={{ marginTop: '6px' }}>
 					<h5>{'Created at'}</h5>
