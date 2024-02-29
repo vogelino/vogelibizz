@@ -6,6 +6,7 @@ import HeaderMenuLink from './HeaderMenuLink'
 import ThemeToggle from '@components/ThemeToggle'
 import BizzLogo from '@components/BizzLogo'
 import Link from 'next/link'
+import { LogOut } from 'lucide-react'
 
 export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
 	const { mutate: logout } = useLogout()
@@ -68,7 +69,12 @@ export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
 							active={item.key === selectedKey}
 						/>
 					))}
-					<HeaderMenuLink as="button" onClick={() => logout()} title="Logout" />
+					<HeaderMenuLink
+						as="button"
+						onClick={() => logout()}
+						title={<LogOut />}
+						className="w-10 sm:w-10 h-10 flex items-center justify-center sm:p-0"
+					/>
 					<li
 						aria-label="Main menu link: Other actions"
 						className={cn(
