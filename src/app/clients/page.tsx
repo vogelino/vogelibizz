@@ -10,7 +10,7 @@ import { DataTable } from '@components/DataTable'
 import { Button } from '@components/ui/button'
 import TablePagination from '@components/DataTable/table-pagination'
 
-const RESOURCE_NAME = 'projects'
+const RESOURCE_NAME = 'clients'
 export default function ProjectList() {
 	const { create } = useNavigation()
 	const actions = useActionsColumn<ProjectType>(RESOURCE_NAME)
