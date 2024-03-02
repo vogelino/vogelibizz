@@ -1,11 +1,5 @@
 import { ProjectType } from '@db/schema'
 import { ColumnDef } from '@tanstack/react-table'
-import {
-	StatusType,
-	mapStatusToIcon,
-	mapStatusToLabel,
-} from '@utility/statusUtil'
-import { IconBadge } from '@components/ui/icon-badge'
 import InternalLink from '@components/ui/internal-link'
 import { getSortableHeaderTemplate } from '@components/DataTable/dataTableUtil'
 
