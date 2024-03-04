@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { Cross2Icon } from '@radix-ui/react-icons'
 
 import { cn } from '@/utility/classNames'
+import { X } from 'lucide-react'
 
 const Dialog = DialogPrimitive.Root
 
@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
 	<DialogPrimitive.Overlay
 		ref={ref}
 		className={cn(
-			'fixed inset-0 z-50 bg-black/80',
+			'fixed inset-0 z-50 bg-bgOverlay',
 			'data-[state=open]:animate-in',
 			'data-[state=closed]:animate-out',
 			'data-[state=closed]:fade-out-0',
@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef<
 			className={cn(
 				'fixed left-[50%] top-[50%] z-50 grid w-full',
 				'max-w-lg translate-x-[-50%] translate-y-[-50%]',
-				'gap-4 border bg-bg p-6 duration-200',
+				'gap-4 border border-grayMed bg-bg p-6 duration-200',
 				'data-[state=open]:animate-in',
 				'data-[state=closed]:animate-out',
 				'data-[state=closed]:fade-out-0',
@@ -61,7 +61,7 @@ const DialogContent = React.forwardRef<
 		>
 			{children}
 			<DialogPrimitive.Close className="absolute right-4 top-4 opacity-70 ring-offset-bg transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-fg focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-fg data-[state=open]:text-grayDark">
-				<Cross2Icon className="h-4 w-4" />
+				<X />
 				<span className="sr-only">Close</span>
 			</DialogPrimitive.Close>
 		</DialogPrimitive.Content>

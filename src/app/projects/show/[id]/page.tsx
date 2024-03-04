@@ -1,56 +1,35 @@
-'use client'
+import ProjectDisplay from '@components/ProjectDisplay'
+import { Button } from '@components/ui/button'
+import { ListIcon, PencilIcon } from 'lucide-react'
+import Link from 'next/link'
 
-import { useNavigation, useOne, useResource, useShow } from '@refinedev/core'
-
-export default function ProjectShow() {
-	const { edit, list } = useNavigation()
-	const { id } = useResource()
-	const { queryResult } = useShow({
-		meta: {
-			select: '*',
-		},
-	})
-	const { data } = queryResult
-
-	const record = data?.data
-
+export default function ProjectShow({
+	params: { id },
+}: {
+	params: { id: string }
+}) {
 	return (
-		<div style={{ padding: '16px' }}>
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'space-between',
-				}}
-			>
+		<div className="p-4">
+			<div className="flex items-center justify-between">
 				<h1>{'Show'}</h1>
-				<div style={{ display: 'flex', gap: '8px' }}>
-					<button onClick={() => list('projects')}>{'List'}</button>
-					<button onClick={() => edit('projects', id ?? '')}>{'Edit'}</button>
+				<div className="flex gap-2">
+					<Button asChild variant="outline">
+						<Link href={`/projects`}>
+							<ListIcon />
+							<span>{'List'}</span>
+						</Link>
+					</Button>
+					{id && (
+						<Button asChild>
+							<Link href={`/projects/${id}/edit`}>
+								<PencilIcon />
+								{'Edit'}
+							</Link>
+						</Button>
+					)}
 				</div>
 			</div>
-			<div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'ID'}</h5>
-					<div>{record?.id ?? ''}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Name'}</h5>
-					<div>{record?.name}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Status'}</h5>
-					<div>{record?.status}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Created at'}</h5>
-					<div>
-						{new Date(record?.created_at).toLocaleString(undefined, {
-							timeZone: 'UTC',
-						})}
-					</div>
-				</div>
-			</div>
+			<ProjectDisplay id={id} />
 		</div>
 	)
 }

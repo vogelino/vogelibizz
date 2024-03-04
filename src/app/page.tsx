@@ -1,16 +1,5 @@
-'use client'
-
-import { Suspense } from 'react'
-
-import { Authenticated } from '@refinedev/core'
-import { NavigateToResource } from '@refinedev/nextjs-router'
+import { redirect } from 'next/navigation'
 
 export default function IndexPage() {
-	return (
-		<Suspense>
-			<Authenticated key="home-page">
-				<NavigateToResource resource="projects" />
-			</Authenticated>
-		</Suspense>
-	)
+	return redirect('/projects')
 }

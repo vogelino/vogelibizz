@@ -32,6 +32,7 @@ module.exports = {
 			colors: {
 				fg: 'var(--fg)',
 				bg: 'var(--bg)',
+				bgOverlay: 'var(--bgOverlay)',
 				alt: 'var(--alt)',
 				grayDark: 'var(--grayDark)',
 				grayMed: 'var(--grayMed)',
@@ -45,6 +46,7 @@ module.exports = {
 	plugins: [
 		require('@tailwindcss/container-queries'),
 		require('@tailwindcss/forms'),
+		require('tailwindcss-animate'),
 		plugin(function ({ addUtilities }) {
 			addUtilities({
 				'.text-balance': {
