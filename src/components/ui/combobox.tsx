@@ -23,6 +23,7 @@ export function Combobox({
 	onChange = () => undefined,
 	value: initialValue,
 	searchable = false,
+	className,
 }: {
 	options: {
 		label: string
@@ -31,6 +32,7 @@ export function Combobox({
 	searchable?: boolean
 	onChange?: (value: string) => void
 	value?: string
+	className?: string
 }) {
 	const [open, setOpen] = React.useState(false)
 	const [value, setValue] = React.useState(initialValue || options[0]?.value)
@@ -45,6 +47,7 @@ export function Combobox({
 					className={cn(
 						'w-fit justify-between rounded-none h-[38px]',
 						'hover:bg-alt hover:text-fg border-grayLight',
+						className,
 					)}
 				>
 					{value

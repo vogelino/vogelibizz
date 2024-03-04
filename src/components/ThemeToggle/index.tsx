@@ -1,3 +1,4 @@
+'use client'
 import { cn } from '@utility/classNames'
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from './ThemeToggle.module.css'

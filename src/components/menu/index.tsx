@@ -1,16 +1,29 @@
-'use client'
-
-import { useLogout, useMenu } from '@refinedev/core'
 import { cn } from '@utility/classNames'
 import HeaderMenuLink from './HeaderMenuLink'
 import ThemeToggle from '@components/ThemeToggle'
 import BizzLogo from '@components/BizzLogo'
 import Link from 'next/link'
-import { LogOut } from 'lucide-react'
+import LogoutButton from '@components/LogoutButton'
 
-export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
-	const { mutate: logout } = useLogout()
-	const { menuItems, selectedKey } = useMenu()
+export const Menu = ({
+	withBg = true,
+	currentPage = '',
+}: {
+	withBg?: boolean
+	currentPage: string
+}) => {
+	const menuItems = [
+		{
+			key: 'projects',
+			label: 'Projects',
+			route: '/projects',
+		},
+		{
+			key: 'clients',
+			label: 'Clients',
+			route: '/clients',
+		},
+	]
 
 	const withBgClasses = 'bg-bg border-grayMed'
 	const withoutBgClasses = 'border-b-transparent'
@@ -66,15 +79,10 @@ export const Menu = ({ withBg = true }: { withBg?: boolean }) => {
 							key={item.key}
 							href={item.route ?? '/'}
 							title={item.label ?? '-'}
-							active={item.key === selectedKey}
+							active={currentPage.split('/')[0] === item.key}
 						/>
 					))}
-					<HeaderMenuLink
-						as="button"
-						onClick={() => logout()}
-						title={<LogOut />}
-						className="w-10 sm:w-10 h-10 flex items-center justify-center sm:p-0"
-					/>
+					<LogoutButton />
 					<li
 						aria-label="Main menu link: Other actions"
 						className={cn(

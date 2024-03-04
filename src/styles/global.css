@@ -12,6 +12,7 @@
 	:root[data-applied-mode='light'] {
 		--fg: #e30002;
 		--bg: #fcfeff;
+		--bgOverlay: rgba(93, 114, 128, 0.5);
 		--alt: #ffef9b;
 		--grayDark: #5d7280;
 		--grayMed: #d0dfe7;
@@ -22,10 +23,11 @@
 	:root[data-applied-mode='dark'] {
 		--fg: #ffef9b;
 		--bg: #1c1c1c;
+		--bgOverlay: rgba(66, 66, 66, 0.5);
 		--alt: #e30002;
 		--grayDark: #ababab;
 		--grayMed: #000000;
-		--grayLight: #2c2c2c;
+		--grayLight: hwb(0 17% 83%);
 		--grayUltraLight: #0d0d0d;
 	}
 
@@ -33,6 +35,7 @@
 		:root[data-applied-mode='light'] {
 			--fg: #b60003;
 			--bg: #ffffff;
+			--bgOverlay: rgba(93, 114, 128, 0.8);
 			--alt: #ffef9b;
 			--grayDark: #1d2022;
 			--grayMed: #666c6f;
@@ -42,6 +45,7 @@
 		:root[data-applied-mode='dark'] {
 			--fg: #fff6c8;
 			--bg: #000000;
+			--bgOverlay: rgba(0, 0, 0, 0.8);
 			--alt: #000000;
 			--grayDark: #fff6c8;
 			--grayMed: #e30002;
@@ -197,6 +201,6 @@
 @layer components {
 	.focusable {
 		@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-fg;
-		@apply focus-visible:ring-offset-8 focus-visible:ring-offset-bg focus-visible:bg-bg;
+		@apply focus-visible:ring-offset-8 focus-visible:ring-offset-bg;
 	}
 }
