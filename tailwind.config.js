@@ -55,9 +55,9 @@ module.exports = {
 				'.text-pretty': {
 					'text-wrap': 'pretty',
 				},
-				'.text-stroke-grayMed': {
+				'.text-stroke-grayDark': {
 					'-webkit-text-stroke-width': '5px',
-					'-webkit-text-stroke-color': 'var(--greyMed)',
+					'-webkit-text-stroke-color': 'var(--grayDark)',
 				},
 				'.text-stroke-fg': {
 					'-webkit-text-stroke-width': '5px',

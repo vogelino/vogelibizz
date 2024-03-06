@@ -16,12 +16,12 @@ function Footer() {
 			<section
 				className={cn(
 					`px-6 flex justify-between gap-4 flex-wrap uppercase items-center`,
-					`tracking-wide text-grayMed`,
+					`tracking-wide text-grayDark`,
 				)}
 			>
 				<span aria-label={`Copyright ${year}`}>{year}</span>
 				<span>
-					<BizzLogo className="scale-75" color="grayMed" />
+					<BizzLogo className="scale-75" color="grayDark" />
 				</span>
 				<button
 					id="back-to-top"

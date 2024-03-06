@@ -3,7 +3,7 @@ import { PropsWithChildren, ReactNode } from 'react'
 import { Breadcrumb } from '../breadcrumb'
 import { Menu } from '../menu'
 import Footer from '@components/Footer'
-import { usePathname, useSelectedLayoutSegment } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 export const Layout: React.FC<
 	PropsWithChildren<{
@@ -11,7 +11,6 @@ export const Layout: React.FC<
 	}>
 > = ({ modal = null, children }) => {
 	const pathname = usePathname()
-	console.log(pathname)
 	return (
 		<>
 			<div className="layout pt-[101px]">
