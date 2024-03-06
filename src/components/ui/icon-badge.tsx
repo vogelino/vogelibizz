@@ -15,7 +15,7 @@ export function IconBadge({
 		<Badge
 			variant="outline"
 			{...badgeProps}
-			className={cn('pl-1.5 pt-0.5', badgeProps.className)}
+			className={cn('w-fit pl-1.5 pt-0.5', badgeProps.className)}
 		>
 			{icon}
 			{label && <span className="mt-0.5">{label}</span>}

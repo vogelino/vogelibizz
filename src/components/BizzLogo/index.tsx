@@ -4,14 +4,14 @@ import { cn } from '@utility/classNames'
 type BizzLogoProps = {
 	className?: string
 	textClassName?: string
-	color?: 'fg' | 'grayMed'
+	color?: 'fg' | 'grayDark'
 }
 function BizzLogo({ className, textClassName, color = 'fg' }: BizzLogoProps) {
 	return (
 		<span
 			className={cn(
 				color === 'fg' && 'text-fg',
-				color === 'grayMed' && 'text-grayMed',
+				color === 'grayDark' && 'text-grayDark',
 				'font-special text-3xl inline-block',
 				'antialiased transition-colors',
 				'relative w-fit pr-[4.5rem]',
@@ -22,7 +22,7 @@ function BizzLogo({ className, textClassName, color = 'fg' }: BizzLogoProps) {
 				className={cn(
 					'text-bg text-strokewidth-4 select-none pointer-events-none',
 					color === 'fg' && 'text-stroke-fg',
-					color === 'grayMed' && 'text-stroke-grayMed',
+					color === 'grayDark' && 'text-stroke-grayDark',
 				)}
 				aria-hidden="true"
 			>
