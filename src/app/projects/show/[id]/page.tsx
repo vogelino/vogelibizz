@@ -1,8 +1,7 @@
+import FormPageLayout from '@components/FormPageLayout'
 import ProjectDisplay from '@components/ProjectDisplay'
-import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
-import { cn } from '@utility/classNames'
-import { ListIcon, PencilIcon } from 'lucide-react'
+import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProjectShow({
@@ -11,24 +10,15 @@ export default function ProjectShow({
 	params: { id: string }
 }) {
 	return (
-		<div className="px-10 pb-8 max-w-3xl mx-auto">
-			<div
-				className={cn(
-					'flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center',
-					'border-b border-grayLight pb-6',
-				)}
-			>
-				<h1 className="font-special text-3xl antialiased flex items-center gap-4">
-					<span>Project Info</span>
-					<Badge variant="outline" className="font-mono mt-1">
-						{id}
-					</Badge>
-				</h1>
-				<div className="flex gap-2">
+		<FormPageLayout
+			id={id}
+			title="Project details"
+			allLink="/projects"
+			footerButtons={
+				<>
 					<Button asChild variant="outline">
 						<Link href={`/projects`}>
-							<ListIcon />
-							<span>{'List'}</span>
+							<span>{'Cancel'}</span>
 						</Link>
 					</Button>
 					{id && (
@@ -39,9 +29,10 @@ export default function ProjectShow({
 							</Link>
 						</Button>
 					)}
-				</div>
-			</div>
+				</>
+			}
+		>
 			<ProjectDisplay id={id} />
-		</div>
+		</FormPageLayout>
 	)
 }

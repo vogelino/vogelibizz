@@ -2,24 +2,27 @@
 
 import { useNavigation } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
-import React from 'react'
-import { projectTableColumns } from './columns'
+import { clientTableColumns } from './columns'
 import { useActionsColumn } from '@utility/useActionsColumn'
-import { ProjectType } from '@db/schema'
+import { ClientType } from '@db/schema'
 import { DataTable } from '@components/DataTable'
 import { Button } from '@components/ui/button'
 import TablePagination from '@components/DataTable/table-pagination'
+import { useDefaultSort } from '@utility/useDefaultSort'
+import { useLastModifiedColumn } from '@utility/useLastModifiedColumn'
 
 const RESOURCE_NAME = 'clients'
-export default function ProjectList() {
+export default function ClientList() {
 	const { create } = useNavigation()
-	const actions = useActionsColumn<ProjectType>(RESOURCE_NAME)
+	const actions = useActionsColumn<ClientType>(RESOURCE_NAME)
+	const lastModifiedColumn = useLastModifiedColumn<ClientType>()
 
-	const columns = [...projectTableColumns, actions]
+	const columns = [...clientTableColumns, lastModifiedColumn, actions]
 
 	const table = useTable({
 		columns,
 		refineCoreProps: {
+			resource: 'clients',
 			meta: {
 				select: '*',
 			},
@@ -27,6 +30,7 @@ export default function ProjectList() {
 	})
 	const {
 		setOptions,
+		setSorting,
 		refineCore: {
 			tableQueryResult: { data: tableData },
 		},
@@ -38,6 +42,8 @@ export default function ProjectList() {
 			...prev.meta,
 		},
 	}))
+
+	useDefaultSort({ setSorting, defaultColumnId: 'last_modified' })
 
 	return (
 		<div className="px-10 pb-8">

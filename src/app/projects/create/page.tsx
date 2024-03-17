@@ -1,22 +1,30 @@
-'use client'
-
+import FormPageLayout from '@components/FormPageLayout'
 import ProjectCreate from '@components/ProjectCreate'
-import { useNavigation } from '@refinedev/core'
-
-const RESOURCE_NAME = 'projects'
+import { Button } from '@components/ui/button'
+import { SaveIcon } from 'lucide-react'
+import Link from 'next/link'
+import React from 'react'
 
 export default function ProjectCreatePageRoute() {
-	const { list } = useNavigation()
-
 	return (
-		<div style={{ padding: '16px' }}>
-			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-				<h1>Create</h1>
-				<div>
-					<button onClick={() => list(RESOURCE_NAME)}>List</button>
-				</div>
-			</div>
+		<FormPageLayout
+			title="Create Project"
+			allLink="/projects"
+			footerButtons={
+				<>
+					<Button asChild variant="outline">
+						<Link href={`/projects`}>
+							<span>{'Cancel'}</span>
+						</Link>
+					</Button>
+					<Button type="submit" form={`project-create-form`}>
+						<SaveIcon />
+						{'Create project'}
+					</Button>
+				</>
+			}
+		>
 			<ProjectCreate />
-		</div>
+		</FormPageLayout>
 	)
 }

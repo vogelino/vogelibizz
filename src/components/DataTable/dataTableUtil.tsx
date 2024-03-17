@@ -2,7 +2,13 @@ import { Button } from '@components/ui/button'
 import { BaseRecord } from '@refinedev/core'
 import { ColumnDefTemplate, HeaderContext } from '@tanstack/react-table'
 import { cn } from '@utility/classNames'
-import { ArrowDownAZ, ArrowUpDown, ArrowUpZA } from 'lucide-react'
+import {
+	ArrowDown01,
+	ArrowDownAZ,
+	ArrowUp01,
+	ArrowUpDown,
+	ArrowUpAZ,
+} from 'lucide-react'
 import { ReactNode } from 'react'
 
 type ColumnHeaderFunction<P extends BaseRecord> = ColumnDefTemplate<
@@ -11,10 +17,13 @@ type ColumnHeaderFunction<P extends BaseRecord> = ColumnDefTemplate<
 
 export function getSortableHeaderTemplate<P extends BaseRecord>(
 	label: ReactNode,
+	numeric = false,
 ) {
 	const templateFunction: ColumnHeaderFunction<P> = ({ column }) => {
 		const sort = column.getIsSorted()
 		const iconClass = cn('ml-2 h-4 w-4', sort && 'text-fg')
+		const AscIcon = numeric ? ArrowDown01 : ArrowDownAZ
+		const DescIcon = numeric ? ArrowUp01 : ArrowUpAZ
 		return (
 			<Button
 				variant="ghost"
@@ -26,8 +35,8 @@ export function getSortableHeaderTemplate<P extends BaseRecord>(
 			>
 				{label}
 				{!sort && <ArrowUpDown className={iconClass} />}
-				{sort === 'asc' && <ArrowDownAZ className={iconClass} />}
-				{sort === 'desc' && <ArrowUpZA className={iconClass} />}
+				{sort === 'asc' && <AscIcon className={iconClass} />}
+				{sort === 'desc' && <DescIcon className={iconClass} />}
 			</Button>
 		)
 	}

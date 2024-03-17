@@ -5,7 +5,7 @@ import { Menu } from '../menu'
 import Footer from '@components/Footer'
 import { usePathname } from 'next/navigation'
 
-export const Layout: React.FC<
+export const PageLayout: React.FC<
 	PropsWithChildren<{
 		modal?: ReactNode
 	}>
