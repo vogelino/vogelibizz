@@ -1,21 +1,23 @@
-import { ResourceType } from '@db/schema'
-import { useNavigation } from '@refinedev/core'
-import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Eye, MoreHorizontal, Pencil } from 'lucide-react'
+import { ResourceType } from '@db/schema'
+import { useDelete, useNavigation } from '@refinedev/core'
+import { ColumnDef } from '@tanstack/react-table'
+import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react'
 import { cn } from './classNames'
 
 export function useActionsColumn<ColumnType = any>(
-	ressource: ResourceType,
+	resource: ResourceType,
 ): ColumnDef<ColumnType> {
 	const { show, edit } = useNavigation()
+	const { mutate: remove } = useDelete()
 	return {
 		id: 'actions',
 		accessorKey: 'id',
@@ -33,13 +35,18 @@ export function useActionsColumn<ColumnType = any>(
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem onClick={() => show(ressource, id)}>
+						<DropdownMenuItem onClick={() => show(resource, id)}>
 							<Eye size={20} />
 							<span className="mt-1">Show details</span>
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => edit(ressource, id)}>
+						<DropdownMenuItem onClick={() => edit(resource, id)}>
 							<Pencil size={20} />
 							<span className="mt-1">Edit</span>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem onClick={() => remove({ resource, id })}>
+							<Trash size={20} />
+							<span className="mt-1">Delete</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
