@@ -25,6 +25,7 @@ export const projects = pgTable('projects', {
 	id: serial('id').primaryKey(),
 	name: text('name').notNull().unique(),
 	created_at: timestamp('created_at').defaultNow().notNull(),
+	last_modified: timestamp('last_modified').defaultNow().notNull(),
 	description: text('description'),
 	status: projectStatusEnum('status').default('todo').notNull(),
 })
@@ -41,7 +42,10 @@ export const clients = pgTable('clients', {
 	id: serial('id').primaryKey(),
 	name: text('name').notNull().unique(),
 	created_at: timestamp('created_at').defaultNow().notNull(),
+	last_modified: timestamp('last_modified').defaultNow().notNull(),
 })
+
+export type ClientType = typeof clients.$inferSelect
 
 export const clientsRelations = relations(clients, ({ many }) => ({
 	projectsToClients: many(projectsToClients),
@@ -79,6 +83,7 @@ export const projectsToClientsRelations = relations(
 export const invoices = pgTable('invoices', {
 	id: serial('id').primaryKey(),
 	created_at: timestamp('created_at').defaultNow().notNull(),
+	last_modified: timestamp('last_modified'),
 	date: date('date').notNull().defaultNow(),
 	name: text('name').notNull().unique(),
 })
@@ -119,6 +124,7 @@ export const projectsToInvoicesRelations = relations(
 export const quotes = pgTable('quotes', {
 	id: serial('id').primaryKey(),
 	created_at: timestamp('created_at').defaultNow().notNull(),
+	last_modified: timestamp('last_modified').defaultNow().notNull(),
 	date: date('date').notNull().defaultNow(),
 	name: text('name').notNull().unique(),
 })

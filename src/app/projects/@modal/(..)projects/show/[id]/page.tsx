@@ -2,7 +2,9 @@
 import ProjectDisplay from '@components/ProjectDisplay'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
-import { PencilIcon, X } from 'lucide-react'
+import { ProjectType } from '@db/schema'
+import { useShow } from '@refinedev/core'
+import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -13,11 +15,17 @@ export default function ProjectShow({
 }) {
 	const router = useRouter()
 	const pathname = usePathname()
+	const { queryResult } = useShow({
+		resource: 'projects',
+		id,
+		meta: { select: '*' },
+	})
+	const record = queryResult.data?.data as ProjectType | undefined
 	return (
 		<ResponsiveModal
 			open={pathname === `/projects/show/${id}`}
-			title={'Show'}
-			description={'Show Project'}
+			title={record?.name || 'Show'}
+			description={'Project details'}
 			onClose={() => router.push('/projects')}
 			footer={
 				<>
@@ -28,7 +36,7 @@ export default function ProjectShow({
 						<Button asChild>
 							<Link href={`/projects/edit/${id}`}>
 								<PencilIcon />
-								{'Edit'}
+								{'Edit project'}
 							</Link>
 						</Button>
 					)}

@@ -1,4 +1,4 @@
-import { Layout as BaseLayout } from '@components/layout'
+import { PageLayout } from '@components/PageLayout'
 import { authProviderServer } from '@providers/auth-provider'
 import { redirect } from 'next/navigation'
 import React, { ReactNode } from 'react'
@@ -15,7 +15,7 @@ export default async function Layout({
 		return redirect(data?.redirectTo || '/login')
 	}
 
-	return <BaseLayout modal={modal}>{children}</BaseLayout>
+	return <PageLayout modal={modal}>{children}</PageLayout>
 }
 
 async function getData() {

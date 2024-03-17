@@ -1,55 +1,38 @@
-'use client'
+import FormPageLayout from '@components/FormPageLayout'
+import ClientDisplay from '@components/ClientDisplay'
+import { Button } from '@components/ui/button'
+import { PencilIcon } from 'lucide-react'
+import Link from 'next/link'
 
-import { useNavigation, useOne, useResource, useShow } from '@refinedev/core'
-
-const RESOURCE_NAME = 'clients'
-export default function ProjectShow() {
-	const { edit, list } = useNavigation()
-	const { id } = useResource()
-	const { queryResult } = useShow({
-		meta: {
-			select: '*',
-		},
-	})
-	const { data } = queryResult
-
-	const record = data?.data
-
+export default function ClientShow({
+	params: { id },
+}: {
+	params: { id: string }
+}) {
 	return (
-		<div style={{ padding: '16px' }}>
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'space-between',
-				}}
-			>
-				<h1>{'Show'}</h1>
-				<div style={{ display: 'flex', gap: '8px' }}>
-					<button onClick={() => list(RESOURCE_NAME)}>{'List'}</button>
-					<button onClick={() => edit(RESOURCE_NAME, id ?? '')}>
-						{'Edit'}
-					</button>
-				</div>
-			</div>
-			<div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'ID'}</h5>
-					<div>{record?.id ?? ''}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Name'}</h5>
-					<div>{record?.name}</div>
-				</div>
-				<div style={{ marginTop: '6px' }}>
-					<h5>{'Created at'}</h5>
-					<div>
-						{new Date(record?.created_at).toLocaleString(undefined, {
-							timeZone: 'UTC',
-						})}
-					</div>
-				</div>
-			</div>
-		</div>
+		<FormPageLayout
+			id={id}
+			title="Client details"
+			allLink="/clients"
+			footerButtons={
+				<>
+					<Button asChild variant="outline">
+						<Link href={`/clients`}>
+							<span>{'Cancel'}</span>
+						</Link>
+					</Button>
+					{id && (
+						<Button asChild>
+							<Link href={`/clients/edit/${id}`}>
+								<PencilIcon />
+								{'Edit client'}
+							</Link>
+						</Button>
+					)}
+				</>
+			}
+		>
+			<ClientDisplay id={id} />
+		</FormPageLayout>
 	)
 }

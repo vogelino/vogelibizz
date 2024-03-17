@@ -1,14 +1,14 @@
 'use client'
-import ProjectEdit from '@components/ProjectEdit'
+import ClientEdit from '@components/ClientEdit'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
-import { ProjectType } from '@db/schema'
+import { ClientType } from '@db/schema'
 import { useShow } from '@refinedev/core'
 import { SaveIcon, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-export default function ProjectEditModalRoute({
+export default function ClientEditModalRoute({
 	params: { id },
 }: {
 	params: { id: string }
@@ -16,32 +16,32 @@ export default function ProjectEditModalRoute({
 	const router = useRouter()
 	const pathname = usePathname()
 	const { queryResult } = useShow({
-		resource: 'projects',
+		resource: 'clients',
 		id,
 		meta: { select: '*' },
 	})
-	const record = queryResult.data?.data as ProjectType | undefined
+	const record = queryResult.data?.data as ClientType | undefined
 	return (
 		<ResponsiveModal
-			open={pathname === `/projects/edit/${id}`}
+			open={pathname === `/clients/edit/${id}`}
 			title={record?.name || 'Edit'}
-			description={'Edit Project'}
-			onClose={() => router.push('/projects')}
+			description={'Edit Client'}
+			onClose={() => router.push('/clients')}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/projects`}>Cancel</Link>
+						<Link href={`/clients`}>Cancel</Link>
 					</Button>
 					{id && (
-						<Button type="submit" form={`project-edit-form-${id}`}>
+						<Button type="submit" form={`client-edit-form-${id}`}>
 							<SaveIcon />
-							{'Edit project'}
+							{'Edit client'}
 						</Button>
 					)}
 				</>
 			}
 		>
-			<ProjectEdit id={id} />
+			<ClientEdit id={id} />
 		</ResponsiveModal>
 	)
 }

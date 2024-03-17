@@ -50,7 +50,7 @@ export function ResponsiveModal({
 							)}
 						</DialogHeader>
 					)}
-					{children}
+					<div className="p-6">{children}</div>
 					{footer && <DialogFooter>{footer}</DialogFooter>}
 				</DialogContent>
 			</Dialog>

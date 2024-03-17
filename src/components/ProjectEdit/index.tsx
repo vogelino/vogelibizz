@@ -23,13 +23,20 @@ export default function ProjectEdit({ id }: { id: string }) {
 
 	return (
 		<form onSubmit={handleSubmit(onFinish)} id={`project-edit-form-${id}`}>
-			<div className="flex flex-col gap-2">
+			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
-					<span>Name</span>
+					<span className="text-grayDark">Name</span>
 					<input
 						type="text"
 						{...register('name', {
 							required: 'This field is required',
+						})}
+					/>
+					<input
+						type="hidden"
+						{...register('last_modified', {
+							required: 'This field is required',
+							setValueAs: () => new Date().toISOString(),
 						})}
 					/>
 					<span style={{ color: 'red' }}>
@@ -37,7 +44,7 @@ export default function ProjectEdit({ id }: { id: string }) {
 					</span>
 				</label>
 				<label className="flex flex-col gap-2 w-fit">
-					<span>Status</span>
+					<span className="text-grayDark">Status</span>
 					<Combobox
 						className="h-auto pt-2 pb-1 border-grayMed"
 						options={statusList}

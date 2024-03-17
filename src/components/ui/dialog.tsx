@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef<
 			className={cn(
 				'fixed left-[50%] top-[50%] z-50 grid w-full',
 				'max-w-lg translate-x-[-50%] translate-y-[-50%]',
-				'gap-4 border border-grayMed bg-bg p-6 duration-200',
+				'border border-grayLight bg-bg duration-200',
 				'data-[state=open]:animate-in',
 				'data-[state=closed]:animate-out',
 				'data-[state=closed]:fade-out-0',
@@ -76,6 +76,7 @@ const DialogHeader = ({
 	<div
 		className={cn(
 			'flex flex-col space-y-1.5 text-center sm:text-left',
+			'border-b border-grayLight p-6 pb-4',
 			className,
 		)}
 		{...props}
@@ -90,6 +91,7 @@ const DialogFooter = ({
 	<div
 		className={cn(
 			'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
+			`px-6 py-4 border-t border-grayLight`,
 			className,
 		)}
 		{...props}
