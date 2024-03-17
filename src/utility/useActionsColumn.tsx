@@ -22,6 +22,7 @@ export function useActionsColumn<ColumnType = any>(
 		header: ' ',
 		size: 50,
 		cell: function render({ getValue }) {
+			const id = String(getValue<ColumnType>())
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -32,15 +33,11 @@ export function useActionsColumn<ColumnType = any>(
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem
-							onClick={() => show(ressource, getValue<ColumnType>() as string)}
-						>
+						<DropdownMenuItem onClick={() => show(ressource, id)}>
 							<Eye size={20} />
 							<span className="mt-1">Show details</span>
 						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => edit(ressource, getValue<ColumnType>() as string)}
-						>
+						<DropdownMenuItem onClick={() => edit(ressource, id)}>
 							<Pencil size={20} />
 							<span className="mt-1">Edit</span>
 						</DropdownMenuItem>
