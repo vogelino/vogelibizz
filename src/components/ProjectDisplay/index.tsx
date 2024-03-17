@@ -3,7 +3,6 @@ import { IconBadge } from '@components/ui/icon-badge'
 import { ProjectType } from '@db/schema'
 import { useShow } from '@refinedev/core'
 import { mapStatusToIcon, mapStatusToLabel } from '@utility/statusUtil'
-import React from 'react'
 
 function ProjectDisplay({ id }: { id: string }) {
 	const { queryResult } = useShow({

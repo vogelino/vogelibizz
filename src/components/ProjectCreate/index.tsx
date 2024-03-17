@@ -3,15 +3,30 @@
 import { Combobox } from '@components/ui/combobox'
 import { useForm } from '@refinedev/react-hook-form'
 import { statusList } from '@utility/statusUtil'
-import React from 'react'
+import React, { useRef } from 'react'
 
 export default function ProjectCreate() {
+	const [status, setStatus] = React.useState('todo')
+	const [name, setName] = React.useState('')
+	const last_modified = useRef(new Date().toISOString())
+
 	const {
 		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm({})
+	} = useForm({
+		refineCoreProps: {
+			resource: 'projects',
+			meta: {
+				select: '*',
+			},
+		},
+		values: { name, status, last_modified: last_modified.current },
+	})
+	const statusProps = register('status', {
+		required: 'This field is required',
+	})
 
 	return (
 		<form onSubmit={handleSubmit(onFinish)} id={`project-create-form`}>
@@ -23,13 +38,8 @@ export default function ProjectCreate() {
 						{...register('name', {
 							required: 'This field is required',
 						})}
-					/>
-					<input
-						type="hidden"
-						{...register('last_modified', {
-							required: 'This field is required',
-							setValueAs: () => new Date().toISOString(),
-						})}
+						placeholder="Enter name for your project"
+						onChange={(evt) => setName(evt.target.value)}
 					/>
 					<span style={{ color: 'red' }}>
 						{(errors as any)?.title?.message as string}
@@ -37,14 +47,12 @@ export default function ProjectCreate() {
 				</label>
 				<label className="flex flex-col gap-2 w-fit">
 					<span className="text-grayDark">Status</span>
+					<input type="hidden" {...statusProps} />
 					<Combobox
 						className="h-auto pt-2 pb-1 border-grayMed"
 						options={statusList}
-						onChange={(value) => {
-							register('status', {
-								required: 'This field is required',
-							}).onChange({ target: { value } })
-						}}
+						value={status}
+						onChange={setStatus}
 					/>
 					<span style={{ color: 'red' }}>
 						{(errors as any)?.status?.message as string}

@@ -1,9 +1,8 @@
 'use client'
 
-import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
+import * as React from 'react'
 
-import { cn } from '@/utility/classNames'
 import { Button } from '@/components/ui/button'
 import {
 	Command,
@@ -17,6 +16,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover'
+import { cn } from '@/utility/classNames'
+import { useEffect } from 'react'
 
 export function Combobox({
 	options,
@@ -36,6 +37,11 @@ export function Combobox({
 }) {
 	const [open, setOpen] = React.useState(false)
 	const [value, setValue] = React.useState(initialValue || options[0]?.value)
+
+	useEffect(() => {
+		if (!initialValue) return
+		setValue(initialValue)
+	}, [initialValue])
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
