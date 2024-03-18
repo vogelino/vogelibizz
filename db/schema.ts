@@ -1,12 +1,12 @@
 import { relations } from 'drizzle-orm'
 import {
+	date,
+	pgEnum,
 	pgTable,
-	timestamp,
+	primaryKey,
 	serial,
 	text,
-	pgEnum,
-	primaryKey,
-	date,
+	timestamp,
 } from 'drizzle-orm/pg-core'
 
 export type ResourceType = 'projects' | 'clients'
@@ -28,6 +28,7 @@ export const projects = pgTable('projects', {
 	last_modified: timestamp('last_modified').defaultNow().notNull(),
 	description: text('description'),
 	status: projectStatusEnum('status').default('todo').notNull(),
+	content: text('content').default(''),
 })
 
 export type ProjectType = typeof projects.$inferSelect
