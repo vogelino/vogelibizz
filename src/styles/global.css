@@ -12,7 +12,7 @@
 	:root[data-applied-mode='light'] {
 		--fg: #e30002;
 		--bg: #fcfeff;
-		--bgOverlay: rgba(93, 114, 128, 0.5);
+		--bgOverlay: rgba(241, 250, 255, 0.7);
 		--alt: #ffef9b;
 		--grayDark: #5d7280;
 		--grayMed: #d0dfe7;
@@ -23,7 +23,7 @@
 	:root[data-applied-mode='dark'] {
 		--fg: #ffef9b;
 		--bg: #1c1c1c;
-		--bgOverlay: rgba(66, 66, 66, 0.5);
+		--bgOverlay: rgba(13, 13, 13, 0.7);
 		--alt: #e30002;
 		--grayDark: #ababab;
 		--grayMed: #000000;
