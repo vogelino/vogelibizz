@@ -37,6 +37,8 @@ export function ResponsiveModal({
 		>
 			<DrawerContent
 				className={cn(
+					` border-grayMed`,
+					isDesktop ? 'border-l' : 'border-t',
 					isDesktop
 						? 'h-full w-[640px] mt-24 right-0'
 						: `inset-x-0 z-50 mt-24 flex h-auto`,
