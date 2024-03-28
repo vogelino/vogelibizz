@@ -37,7 +37,7 @@ export function ResponsiveModal({
 		>
 			<DrawerContent
 				className={cn(
-					` border-grayMed`,
+					`border-grayMed`,
 					isDesktop ? 'border-l' : 'border-t',
 					isDesktop
 						? 'h-full w-[640px] mt-24 right-0'
@@ -58,7 +58,7 @@ export function ResponsiveModal({
 				<div
 					className={cn(
 						'p-6 overflow-auto',
-						isDesktop ? 'h-[calc(100vh-200px)]' : 'h-[calc(100%-200px)]',
+						isDesktop ? 'h-[calc(100vh-208px)]' : 'h-[calc(100%-208px)]',
 					)}
 				>
 					{children}

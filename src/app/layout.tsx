@@ -10,6 +10,7 @@ import { dataProvider } from '@providers/data-provider'
 import '@styles/global.css'
 import { cn } from '@utility/classNames'
 import { fungis, lobular } from '@utility/fonts'
+import NextTopLoader from 'nextjs-toploader'
 
 export const metadata: Metadata = {
 	title: 'Vogelibizz',
@@ -49,6 +50,14 @@ export default function RootLayout({
 				></script>
 			</head>
 			<body>
+				<NextTopLoader
+					color="var(--fg)"
+					height={1}
+					shadow={''}
+					showSpinner={false}
+					easing="ease-in-out"
+					speed={400}
+				/>
 				<Suspense>
 					<RefineKbarProvider>
 						<DevtoolsProvider>

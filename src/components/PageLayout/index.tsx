@@ -1,9 +1,9 @@
 'use client'
+import Footer from '@components/Footer'
+import { usePathname } from 'next/navigation'
 import { PropsWithChildren, ReactNode } from 'react'
 import { Breadcrumb } from '../breadcrumb'
 import { Menu } from '../menu'
-import Footer from '@components/Footer'
-import { usePathname } from 'next/navigation'
 
 export const PageLayout: React.FC<
 	PropsWithChildren<{
