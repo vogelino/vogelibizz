@@ -1,15 +1,6 @@
 'use client'
 import * as React from 'react'
 
-import useMediaQuery from '@custom-react-hooks/use-media-query'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog'
 import {
 	Drawer,
 	DrawerContent,
@@ -18,6 +9,8 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer'
+import useMediaQuery from '@custom-react-hooks/use-media-query'
+import { cn } from '@utility/classNames'
 
 export function ResponsiveModal({
 	children,
@@ -35,31 +28,23 @@ export function ResponsiveModal({
 }>) {
 	const isDesktop = useMediaQuery('(min-width: 768px)')
 
-	if (isDesktop) {
-		return (
-			<Dialog
-				open={open}
-				onOpenChange={(open) => !open && onClose && onClose()}
-			>
-				<DialogContent className="sm:max-w-[425px]">
-					{(title || description) && (
-						<DialogHeader>
-							{title && <DialogTitle>{title}</DialogTitle>}
-							{description && (
-								<DialogDescription>{description}</DialogDescription>
-							)}
-						</DialogHeader>
-					)}
-					<div className="p-6">{children}</div>
-					{footer && <DialogFooter>{footer}</DialogFooter>}
-				</DialogContent>
-			</Dialog>
-		)
-	}
-
 	return (
-		<Drawer open={open} onOpenChange={(open) => !open && onClose && onClose()}>
-			<DrawerContent>
+		<Drawer
+			open={open}
+			direction={isDesktop ? 'right' : 'bottom'}
+			onOpenChange={(open) => !open && onClose && onClose()}
+			activeSnapPoint={isDesktop ? undefined : 0}
+		>
+			<DrawerContent
+				className={cn(
+					isDesktop
+						? 'h-full w-[640px] mt-24 right-0'
+						: `inset-x-0 z-50 mt-24 flex h-auto`,
+				)}
+			>
+				{isDesktop ? null : (
+					<div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-grayMed" />
+				)}
 				{(title || description) && (
 					<DrawerHeader className="text-left">
 						{title && <DrawerTitle>{title}</DrawerTitle>}
@@ -68,7 +53,14 @@ export function ResponsiveModal({
 						)}
 					</DrawerHeader>
 				)}
-				<div className="px-4">{children}</div>
+				<div
+					className={cn(
+						'p-6 overflow-auto',
+						isDesktop ? 'h-[calc(100vh-200px)]' : 'h-[calc(100%-200px)]',
+					)}
+				>
+					{children}
+				</div>
 				{footer && <DrawerFooter>{footer}</DrawerFooter>}
 			</DrawerContent>
 		</Drawer>
