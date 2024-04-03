@@ -1,9 +1,9 @@
-import { cn } from '@utility/classNames'
-import HeaderMenuLink from './HeaderMenuLink'
-import ThemeToggle from '@components/ThemeToggle'
 import BizzLogo from '@components/BizzLogo'
-import Link from 'next/link'
 import LogoutButton from '@components/LogoutButton'
+import ThemeToggle from '@components/ThemeToggle'
+import { cn } from '@utility/classNames'
+import Link from 'next/link'
+import HeaderMenuLink from './HeaderMenuLink'
 
 export const Menu = ({
 	withBg = true,
@@ -22,6 +22,11 @@ export const Menu = ({
 			key: 'clients',
 			label: 'Clients',
 			route: '/clients',
+		},
+		{
+			key: 'expenses',
+			label: 'Expenses',
+			route: '/expenses',
 		},
 	]
 
