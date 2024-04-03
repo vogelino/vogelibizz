@@ -1,14 +1,14 @@
 'use client'
-import ClientEdit from '@components/ClientEdit'
+import ExpenseEdit from '@components/ExpenseEdit'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
-import { ClientType } from '@db/schema'
+import { ExpenseType } from '@db/schema'
 import { useShow } from '@refinedev/core'
-import { SaveIcon, X } from 'lucide-react'
+import { SaveIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-export default function ClientEditModalRoute({
+export default function ExpenseEditModalRoute({
 	params: { id },
 }: {
 	params: { id: string }
@@ -20,20 +20,20 @@ export default function ClientEditModalRoute({
 		id,
 		meta: { select: '*' },
 	})
-	const record = queryResult.data?.data as ClientType | undefined
+	const record = queryResult.data?.data as ExpenseType | undefined
 	return (
 		<ResponsiveModal
-			open={pathname === `/clients/edit/${id}`}
+			open={pathname === `/expenses/edit/${id}`}
 			title={record?.name || 'Edit'}
-			description={'Edit Client'}
-			onClose={() => router.push('/clients')}
+			description={'Edit Expense'}
+			onClose={() => router.push('/expenses')}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/clients`}>Cancel</Link>
+						<Link href={`/expenses`}>Cancel</Link>
 					</Button>
 					{id && (
-						<Button type="submit" form={`client-edit-form-${id}`}>
+						<Button type="submit" form={`expense-edit-form-${id}`}>
 							<SaveIcon />
 							{'Edit client'}
 						</Button>
@@ -41,7 +41,7 @@ export default function ClientEditModalRoute({
 				</>
 			}
 		>
-			<ClientEdit id={id} />
+			<ExpenseEdit id={id} />
 		</ResponsiveModal>
 	)
 }

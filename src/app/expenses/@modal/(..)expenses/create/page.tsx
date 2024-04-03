@@ -1,32 +1,32 @@
 'use client'
-import ClientCreate from '@components/ClientCreate'
+import ExpenseCreate from '@components/ExpenseCreate'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { SaveIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-export default function ClientCreateModalRoute() {
+export default function ExpenseCreateModalRoute() {
 	const router = useRouter()
 	const pathname = usePathname()
 	return (
 		<ResponsiveModal
-			open={pathname === `/clients/create`}
-			title={'New Client'}
-			onClose={() => router.push('/clients')}
+			open={pathname === `/expenses/create`}
+			title={'New Expense'}
+			onClose={() => router.push('/expenses')}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/clients`}>Cancel</Link>
+						<Link href={`/expenses`}>Cancel</Link>
 					</Button>
-					<Button type="submit" form={`client-create-form`}>
+					<Button type="submit" form={`expense-create-form`}>
 						<SaveIcon />
-						{'Create client'}
+						{'Create expense'}
 					</Button>
 				</>
 			}
 		>
-			<ClientCreate />
+			<ExpenseCreate />
 		</ResponsiveModal>
 	)
 }
