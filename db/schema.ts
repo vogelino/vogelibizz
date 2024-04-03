@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm'
 import {
 	date,
+	doublePrecision,
 	pgEnum,
 	pgTable,
 	primaryKey,
@@ -9,7 +10,7 @@ import {
 	timestamp,
 } from 'drizzle-orm/pg-core'
 
-export type ResourceType = 'projects' | 'clients'
+export type ResourceType = 'projects' | 'clients' | 'expenses'
 
 export const projectStatusEnum = pgEnum('project_status', [
 	'todo',
@@ -148,6 +149,96 @@ export const projectsToQuotes = pgTable(
 		pk: primaryKey({ columns: [t.projectId, t.quoteId] }),
 	}),
 )
+
+export const expenseCategory = pgEnum('expense_category', [
+	'Essentials',
+	'Home',
+	'Domain',
+	'Health & Wellbeing',
+	'Entertainment',
+	'Charity',
+	'Present',
+	'Services',
+	'Hardware',
+	'Software',
+	'Hobby',
+	'Savings',
+	'Transport',
+	'Travel',
+])
+
+export const expenseType = pgEnum('expense_type', ['Personal', 'Freelance'])
+
+export const expenseRate = pgEnum('expense_rate', [
+	'Monthly',
+	'Daily',
+	'Hourly',
+	'Weekly',
+	'Yearly',
+	'Quarterly',
+	'Semester',
+	'Bi-Weekly',
+	'Bi-Monthly',
+	'Bi-Yearly',
+	'One-time',
+])
+
+export const currency = pgEnum('currency', [
+	'CLF',
+	'CLP',
+	'EUR',
+	'CHF',
+	'USD',
+	'JPY',
+	'GBP',
+	'CNY',
+	'AUD',
+	'CAD',
+	'HKD',
+	'SGD',
+	'SEK',
+	'KRW',
+	'NOK',
+	'NZD',
+	'INR',
+	'MXN',
+	'TWD',
+	'ZAR',
+	'BRL',
+	'DKK',
+	'PLN',
+	'THB',
+	'ILS',
+	'IDR',
+	'CZK',
+	'AED',
+	'TRY',
+	'HUF',
+	'SAR',
+	'PHP',
+	'MYR',
+	'COP',
+	'RUB',
+	'RON',
+	'PEN',
+	'BHD',
+	'BGN',
+	'ARS',
+])
+
+export const expenses = pgTable('expenses', {
+	id: serial('id').primaryKey(),
+	created_at: timestamp('created_at').defaultNow().notNull(),
+	last_modified: timestamp('last_modified').defaultNow().notNull(),
+	name: text('name').notNull().unique(),
+	category: expenseCategory('category').notNull().default('Software'),
+	type: expenseType('type').notNull().default('Personal'),
+	rate: expenseRate('rate').notNull().default('Monthly'),
+	price: doublePrecision('price').notNull().default(0.0),
+	original_currency: currency('original_currency').notNull().default('CLP'),
+})
+
+export type ExpenseType = typeof expenses.$inferSelect
 
 export const projectsToQuotesRelations = relations(
 	projectsToQuotes,

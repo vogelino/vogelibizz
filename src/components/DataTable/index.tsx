@@ -1,6 +1,6 @@
 'use client'
 
-import { flexRender } from '@tanstack/react-table'
+import { flexRender, type Table as ReactTableType } from '@tanstack/react-table'
 
 import {
 	Table,
@@ -10,13 +10,13 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { UseTableReturnType, useTable } from '@refinedev/react-table'
 import { BaseRecord } from '@refinedev/core'
+import { UseTableReturnType } from '@refinedev/react-table'
 
 export function DataTable<RecordType extends BaseRecord>({
 	table,
 }: {
-	table: UseTableReturnType<RecordType>
+	table: UseTableReturnType<RecordType> | ReactTableType<RecordType>
 }) {
 	return (
 		<>
