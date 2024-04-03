@@ -1,14 +1,14 @@
 'use client'
-import ClientDisplay from '@components/ClientDisplay'
+import ExpenseDisplay from '@components/ExpenseDisplay'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
-import { ClientType } from '@db/schema'
+import { ExpenseType } from '@db/schema'
 import { useShow } from '@refinedev/core'
 import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-export default function ClientShow({
+export default function ExpenseShow({
 	params: { id },
 }: {
 	params: { id: string }
@@ -16,25 +16,25 @@ export default function ClientShow({
 	const router = useRouter()
 	const pathname = usePathname()
 	const { queryResult } = useShow({
-		resource: 'clients',
+		resource: 'expenses',
 		id,
 		meta: { select: '*' },
 	})
-	const record = queryResult.data?.data as ClientType | undefined
+	const record = queryResult.data?.data as ExpenseType | undefined
 	return (
 		<ResponsiveModal
-			open={pathname === `/clients/show/${id}`}
+			open={pathname === `/expenses/show/${id}`}
 			title={record?.name || 'Show'}
-			description={'Client details'}
-			onClose={() => router.push('/clients')}
+			description={'Expense details'}
+			onClose={() => router.push('/expenses')}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/clients`}>Close</Link>
+						<Link href={`/expenses`}>Close</Link>
 					</Button>
 					{id && (
 						<Button asChild>
-							<Link href={`/clients/edit/${id}`}>
+							<Link href={`/expenses/edit/${id}`}>
 								<PencilIcon />
 								{'Edit'}
 							</Link>
@@ -43,7 +43,7 @@ export default function ClientShow({
 				</>
 			}
 		>
-			<ClientDisplay id={id} />
+			<ExpenseDisplay id={id} />
 		</ResponsiveModal>
 	)
 }
