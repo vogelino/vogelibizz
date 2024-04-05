@@ -1,48 +1,33 @@
-'use client'
-import PageHeaderTitle from '@components/PageHeaderTitle'
+import EditResourceModal from '@components/EditResourceModal'
 import ProjectEdit from '@components/ProjectEdit'
-import { Button } from '@components/ui/button'
-import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { ProjectType } from '@db/schema'
-import { useShow } from '@refinedev/core'
-import { SaveIcon } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { supabaseClient } from '@utility/supabase-client'
 
-export default function ProjectEditModalRoute({
+type ResourceType = ProjectType
+const resource = 'project'
+const action = 'edit'
+
+export default async function ProjectEditModalRoute({
 	params: { id },
 }: {
 	params: { id: string }
 }) {
-	const router = useRouter()
-	const pathname = usePathname()
-	const { queryResult } = useShow({
-		resource: 'projects',
-		id,
-		meta: { select: '*' },
-	})
-	const record = queryResult.data?.data as ProjectType | undefined
+	const formId = `${resource}-${action}-form-${id}`
+	const record = await supabaseClient
+		.from(`${resource}s`)
+		.select('*')
+		.eq('id', id)
+		.single()
+	const data = record.data as ResourceType
 	return (
-		<ResponsiveModal
-			open={pathname === `/projects/edit/${id}`}
-			title={<PageHeaderTitle name={record?.name || 'Edit project'} id={id} />}
-			description={'Edit Project'}
-			onClose={() => router.push('/projects')}
-			footer={
-				<>
-					<Button asChild variant="outline">
-						<Link href={`/projects`}>Cancel</Link>
-					</Button>
-					{id && (
-						<Button type="submit" form={`project-edit-form-${id}`}>
-							<SaveIcon />
-							{'Edit project'}
-						</Button>
-					)}
-				</>
-			}
+		<EditResourceModal
+			id={`${id}`}
+			title={data.name}
+			formId={formId}
+			resourceSingularName={resource}
+			crudAction="edit"
 		>
-			<ProjectEdit id={id} />
-		</ResponsiveModal>
+			<ProjectEdit id={`${id}`} formId={formId} initialData={data} />
+		</EditResourceModal>
 	)
 }

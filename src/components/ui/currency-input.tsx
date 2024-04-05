@@ -1,6 +1,7 @@
 import FormInputWrapper from '@components/FormInputWrapper'
 import { ExpenseType, currency as currencyEnum } from '@db/schema'
 import { cn } from '@utility/classNames'
+import { locale } from '@utility/formatUtil'
 import { Banknote } from 'lucide-react'
 import { HTMLProps, PropsWithChildren, useMemo } from 'react'
 import ReactCurrencyInput, {
@@ -23,9 +24,9 @@ function CurrencyInput({
 	inputProps: CurrencyInputProps
 	currencyProps: HTMLProps<HTMLInputElement>
 	onCurrencyChange: (currency: ExpenseType['original_currency']) => void
-	onValueChange: (value: ExpenseType['price']) => void
+	onValueChange: (value: number) => void
 	currency: ExpenseType['original_currency']
-	value: ExpenseType['price'] | undefined
+	value: number | undefined
 	label?: string
 	className?: string
 }>) {
@@ -64,10 +65,12 @@ function CurrencyInput({
 						)}
 						placeholder="0.00"
 						required
-						value={value}
-						onValueChange={(_str, _name, values) =>
-							onValueChange(values?.float || 0)
+						defaultValue={value}
+						onValueChange={(_value, _name, values) =>
+							values?.float && onValueChange(values?.float)
 						}
+						intlConfig={{ locale }}
+						decimalScale={2}
 					/>
 				</div>
 				<input type="hidden" {...currencyProps} value={currency} />

@@ -10,6 +10,7 @@ import {
 	mapTypeToIcon,
 	typeToColorClass,
 } from '@utility/expensesUtil'
+import { formatCurrency } from '@utility/formatUtil'
 
 const columnHelper = createColumnHelper<ExpenseType>()
 
@@ -40,14 +41,7 @@ export const getExpensesTableColumns = (
 			header: 'CLP/Month',
 			cell: function render({ getValue, row }) {
 				let value = getValue<ExpenseType['price']>()
-				return (
-					<span>
-						{value?.toLocaleString('en-US', {
-							style: 'currency',
-							currency: 'CLP',
-						})}
-					</span>
-				)
+				return <span>{value && formatCurrency(value)}</span>
 			},
 		},
 	),
@@ -58,14 +52,7 @@ export const getExpensesTableColumns = (
 		cell: function render({ getValue, row }) {
 			const currency = row.original.original_currency
 			const value = getValue<ExpenseType['price']>()
-			return (
-				<span>
-					{value.toLocaleString('en-US', {
-						style: 'currency',
-						currency: currency,
-					})}
-				</span>
-			)
+			return <span>{value && formatCurrency(value, currency)}</span>
 		},
 	}),
 	columnHelper.accessor('rate', {

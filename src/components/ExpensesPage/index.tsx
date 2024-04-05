@@ -6,6 +6,7 @@ import { type ExpenseType } from '@db/schema'
 import { useNavigation } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { getValueInCLPPerMonth, type RatesTypes } from '@utility/expensesUtil'
+import { formatCurrency } from '@utility/formatUtil'
 import { useActionsColumn } from '@utility/useActionsColumn'
 import { useDefaultSort } from '@utility/useDefaultSort'
 import { useMemo } from 'react'
@@ -50,20 +51,16 @@ export default function ExpensesPage({ rates }: { rates: RatesTypes }) {
 	useDefaultSort({ setSorting, defaultColumnId: 'last_modified' })
 
 	const totalPerMonth = useMemo(() => {
-		return tableData?.data
-			.reduce((a, b) => {
-				const monthlyPrice = getValueInCLPPerMonth({
-					value: b.price,
-					currency: b.original_currency,
-					rates,
-					billingRate: b.rate,
-				})
-				return a + (monthlyPrice ?? 0)
-			}, 0)
-			.toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'CLP',
+		const total = tableData?.data.reduce((a, b) => {
+			const monthlyPrice = getValueInCLPPerMonth({
+				value: b.price,
+				currency: b.original_currency,
+				rates,
+				billingRate: b.rate,
 			})
+			return a + (monthlyPrice ?? 0)
+		}, 0)
+		return total ? formatCurrency(total) : '–'
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [tableData])
 
@@ -79,7 +76,7 @@ export default function ExpensesPage({ rates }: { rates: RatesTypes }) {
 				<strong>Total per month:</strong>
 				<span>{totalPerMonth}</span>
 			</div>
-			<div className="w-full overflow-auto mb-6">
+			<div className="w-full mb-6">
 				{tableData && <DataTable table={table} />}
 			</div>
 		</div>
