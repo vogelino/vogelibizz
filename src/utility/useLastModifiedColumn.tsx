@@ -1,6 +1,5 @@
 import { BaseRecord } from '@refinedev/core'
 import { ColumnDef } from '@tanstack/react-table'
-import { getSortableHeaderTemplate } from '@components/DataTable/dataTableUtil'
 
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
 	year: 'numeric',
@@ -17,7 +16,7 @@ export function useLastModifiedColumn<
 		id: 'last_modified',
 		accessorKey: 'last_modified',
 		size: 100,
-		header: getSortableHeaderTemplate<ColumnType>('Last modified', true),
+		header: 'Last modified',
 		sortingFn: 'datetime',
 		cell: function render({ getValue }) {
 			const formattedDateWithTime = dateFormatter.format(

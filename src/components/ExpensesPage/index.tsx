@@ -8,7 +8,6 @@ import { useTable } from '@refinedev/react-table'
 import { getValueInCLPPerMonth, type RatesTypes } from '@utility/expensesUtil'
 import { useActionsColumn } from '@utility/useActionsColumn'
 import { useDefaultSort } from '@utility/useDefaultSort'
-import { useLastModifiedColumn } from '@utility/useLastModifiedColumn'
 import { useMemo } from 'react'
 import { getExpensesTableColumns } from '../../app/expenses/columns'
 
@@ -16,10 +15,9 @@ const RESOURCE_NAME = 'expenses'
 export default function ExpensesPage({ rates }: { rates: RatesTypes }) {
 	const { create } = useNavigation()
 	const actions = useActionsColumn<ExpenseType>(RESOURCE_NAME)
-	const lastModifiedColumn = useLastModifiedColumn<ExpenseType>()
 
 	const columns = useMemo(
-		() => [...getExpensesTableColumns(rates), lastModifiedColumn, actions],
+		() => [...getExpensesTableColumns(rates), actions],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)

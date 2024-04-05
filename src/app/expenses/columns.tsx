@@ -1,57 +1,60 @@
-import { getSortableHeaderTemplate } from '@components/DataTable/dataTableUtil'
 import { IconBadge } from '@components/ui/icon-badge'
 import InternalLink from '@components/ui/internal-link'
 import { type ExpenseType } from '@db/schema'
-import { ColumnDef } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
+import { cn } from '@utility/classNames'
 import {
 	categoryToColorClass,
+	categoryToOptionClass,
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
 	typeToColorClass,
 } from '@utility/expensesUtil'
 
+const columnHelper = createColumnHelper<ExpenseType>()
+
 export const getExpensesTableColumns = (
 	rates: null | Record<ExpenseType['original_currency'], number>,
-): ColumnDef<ExpenseType>[] => [
-	{
+) => [
+	columnHelper.accessor('name', {
 		id: 'name',
-		accessorKey: 'name',
 		size: 1000,
-		header: getSortableHeaderTemplate<ExpenseType>('Name'),
+		header: 'Name',
 		cell: function render({ getValue, row }) {
 			const id = row.original.id
 			const value = getValue<string>()
-			return <InternalLink href={`/expenses/show/${id}`}>{value}</InternalLink>
+			return <InternalLink href={`/expenses/edit/${id}`}>{value}</InternalLink>
 		},
-	},
-	{
-		id: 'monthly_price_clp',
-		accessorFn: (row) =>
+	}),
+	columnHelper.accessor(
+		(row) =>
 			getValueInCLPPerMonth({
 				value: row.price,
 				currency: row.original_currency,
 				rates,
 				billingRate: row.rate,
 			}) ?? 0,
-		size: 100,
-		header: getSortableHeaderTemplate<ExpenseType>('CLP/Month'),
-		cell: function render({ getValue, row }) {
-			let value = getValue<ExpenseType['price']>()
-			return (
-				<span>
-					{value?.toLocaleString('en-US', {
-						style: 'currency',
-						currency: 'CLP',
-					})}
-				</span>
-			)
+		{
+			id: 'monthly_price_clp',
+			size: 100,
+			header: 'CLP/Month',
+			cell: function render({ getValue, row }) {
+				let value = getValue<ExpenseType['price']>()
+				return (
+					<span>
+						{value?.toLocaleString('en-US', {
+							style: 'currency',
+							currency: 'CLP',
+						})}
+					</span>
+				)
+			},
 		},
-	},
-	{
+	),
+	columnHelper.accessor('price', {
 		id: 'price',
-		accessorKey: 'price',
 		size: 100,
-		header: getSortableHeaderTemplate<ExpenseType>('Original price'),
+		header: 'Original price',
 		cell: function render({ getValue, row }) {
 			const currency = row.original.original_currency
 			const value = getValue<ExpenseType['price']>()
@@ -64,34 +67,41 @@ export const getExpensesTableColumns = (
 				</span>
 			)
 		},
-	},
-	{
+	}),
+	columnHelper.accessor('rate', {
 		id: 'rate',
-		accessorKey: 'rate',
 		size: 100,
-		header: getSortableHeaderTemplate<ExpenseType>('Billing Freq.'),
-	},
-	{
+		header: 'Billing Freq.',
+	}),
+	columnHelper.accessor('category', {
 		id: 'category',
-		accessorKey: 'category',
-		size: 100,
-		header: getSortableHeaderTemplate<ExpenseType>('Category'),
+		size: 200,
+		header: 'Category',
 		cell: function render({ getValue }) {
 			const value = getValue<ExpenseType['category']>()
 			return (
 				<IconBadge
 					icon={null}
-					label={value}
+					label={
+						<span className="flex gap-2 items-center">
+							<span
+								className={cn(
+									'size-2 rounded-full inline-block -mt-[2px]',
+									categoryToOptionClass(value),
+								)}
+							/>
+							{value}
+						</span>
+					}
 					className={categoryToColorClass(value)}
 				/>
 			)
 		},
-	},
-	{
+	}),
+	columnHelper.accessor('type', {
 		id: 'type',
-		accessorKey: 'type',
 		size: 100,
-		header: getSortableHeaderTemplate<ExpenseType>('Type'),
+		header: 'Type',
 		cell: function render({ getValue }) {
 			const value = getValue<ExpenseType['type']>()
 			return (
@@ -102,5 +112,5 @@ export const getExpensesTableColumns = (
 				/>
 			)
 		},
-	},
+	}),
 ]

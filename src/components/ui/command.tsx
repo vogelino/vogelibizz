@@ -1,11 +1,11 @@
 'use client'
 
-import * as React from 'react'
 import { type DialogProps } from '@radix-ui/react-dialog'
 import { Command as CommandPrimitive } from 'cmdk'
+import * as React from 'react'
 
-import { cn } from '@/utility/classNames'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { cn } from '@/utility/classNames'
 import { SearchIcon } from 'lucide-react'
 
 const Command = React.forwardRef<
@@ -56,13 +56,14 @@ const CommandInput = React.forwardRef<
 	React.ElementRef<typeof CommandPrimitive.Input>,
 	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-	<div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-		<SearchIcon className="mr-2 shrink-0 opacity-50" />
+	<div className="flex items-center border-b pl-3" cmdk-input-wrapper="">
+		<SearchIcon className="mr-2 shrink-0 opacity-50 text-grayDark" />
 		<CommandPrimitive.Input
 			ref={ref}
 			className={cn(
-				'flex h-10 w-full bg-transparent py-3 text-sm outline-none',
+				'flex h-10 w-full bg-transparent pb-3 outline-none pt-4 border-none',
 				'placeholder:text-grayDark disabled:cursor-not-allowed disabled:opacity-50',
+				`focus-visible:ring-2 focus-visible:ring-fg focus-visible:ring-inset`,
 				className,
 			)}
 			{...props}
@@ -139,7 +140,7 @@ const CommandItem = React.forwardRef<
 		ref={ref}
 		className={cn(
 			'relative flex cursor-default select-none',
-			'items-center px-4 py-2',
+			'items-center px-4 py-2 gap-2',
 			'outline-none aria-selected:bg-alt',
 			'aria-selected:text-fg aria-selected:cursor-pointer',
 			'data-[disabled]:pointer-events-none',
@@ -173,11 +174,11 @@ CommandShortcut.displayName = 'CommandShortcut'
 export {
 	Command,
 	CommandDialog,
-	CommandInput,
-	CommandList,
 	CommandEmpty,
 	CommandGroup,
+	CommandInput,
 	CommandItem,
-	CommandShortcut,
+	CommandList,
 	CommandSeparator,
+	CommandShortcut,
 }

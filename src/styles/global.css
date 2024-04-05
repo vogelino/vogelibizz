@@ -54,34 +54,31 @@
 		}
 	}
 
-	input[type='text'],
-	input[type='password'],
-	input[type='email'],
-	input[type='number'],
-	input[type='url'],
-	input[type='date'],
-	input[type='datetime-local'],
-	input[type='month'],
-	input[type='week'],
-	input[type='time'],
-	input[type='search'],
-	input[type='tel'],
-	input[type='checkbox'],
-	select,
-	select[multiple],
-	textarea {
+	html .form-input,
+	html .form-textarea,
+	html .form-select,
+	html .form-multiselect,
+	html .form-checkbox,
+	html .form-radio {
 		@apply border-grayMed focus:outline-none focus:ring-2;
 		@apply focus:ring-offset-2 focus:ring-fg focus:ring-offset-bg;
 		@apply focus:border-grayMed bg-bg;
 	}
-
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
+	html .form-input::-webkit-outer-spin-button,
+	html .form-input::-webkit-inner-spin-button,
+	html .form-number::-webkit-outer-spin-button,
+	html .form-number::-webkit-inner-spin-button,
+	html .form-textarea::-webkit-outer-spin-button,
+	html .form-textarea::-webkit-inner-spin-button,
+	html .form-select::-webkit-outer-spin-button,
+	html .form-select::-webkit-inner-spin-button,
+	html .form-multiselect::-webkit-outer-spin-button,
+	html .form-multiselect::-webkit-inner-spin-button {
 		-webkit-appearance: none;
 		margin: 0;
 	}
 
-	input[type='number'] {
+	.form-input[type='number'] {
 		-moz-appearance: textfield;
 	}
 

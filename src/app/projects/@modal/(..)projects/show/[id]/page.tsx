@@ -1,4 +1,5 @@
 'use client'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import ProjectDisplay from '@components/ProjectDisplay'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
@@ -24,7 +25,7 @@ export default function ProjectShow({
 	return (
 		<ResponsiveModal
 			open={pathname === `/projects/show/${id}`}
-			title={record?.name || 'Show'}
+			title={<PageHeaderTitle name={record?.name || 'Edit project'} id={id} />}
 			description={'Project details'}
 			onClose={() => router.push('/projects')}
 			footer={

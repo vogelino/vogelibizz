@@ -4,37 +4,39 @@ import PageHeaderTitle from '@components/PageHeaderTitle'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { ExpenseType } from '@db/schema'
-import { useShow } from '@refinedev/core'
 import { SaveIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-export default function ExpenseEditModalRoute() {
+function ExpenseEditModal(record: ExpenseType) {
+	const { id, name } = record
 	const router = useRouter()
 	const pathname = usePathname()
-	const { queryResult } = useShow({
-		resource: 'expenses',
-		meta: { select: '*' },
-	})
-	const record = queryResult.data?.data as ExpenseType | undefined
 	return (
 		<ResponsiveModal
-			open={pathname === `/expenses/create`}
-			title={<PageHeaderTitle name="Create expense" />}
+			open={pathname === `/expenses/edit/${id}`}
+			title={<PageHeaderTitle name={name} id={`${id}`} />}
+			description="Edit the expense's details"
 			onClose={() => router.push('/expenses')}
 			footer={
 				<>
 					<Button asChild variant="outline">
 						<Link href={`/expenses`}>Cancel</Link>
 					</Button>
-					<Button type="submit" form={`expense-create-form`}>
+					<Button type="submit" form={`expense-edit-form-${id}`}>
 						<SaveIcon />
-						{'Create expense'}
+						{'Edit expense'}
 					</Button>
 				</>
 			}
 		>
-			<ExpenseEdit formId={`expense-create-form`} />
+			<ExpenseEdit
+				id={`${id}`}
+				formId={`expense-edit-form-${id}`}
+				initialData={record}
+			/>
 		</ResponsiveModal>
 	)
 }
+
+export default ExpenseEditModal

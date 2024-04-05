@@ -1,10 +1,11 @@
 'use client'
 import ClientEdit from '@components/ClientEdit'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { ClientType } from '@db/schema'
 import { useShow } from '@refinedev/core'
-import { SaveIcon, X } from 'lucide-react'
+import { SaveIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -24,7 +25,7 @@ export default function ClientEditModalRoute({
 	return (
 		<ResponsiveModal
 			open={pathname === `/clients/edit/${id}`}
-			title={record?.name || 'Edit'}
+			title={<PageHeaderTitle name={record?.name || 'Edit client'} id={id} />}
 			description={'Edit Client'}
 			onClose={() => router.push('/clients')}
 			footer={

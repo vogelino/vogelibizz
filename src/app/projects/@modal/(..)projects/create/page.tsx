@@ -1,4 +1,5 @@
 'use client'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import ProjectCreate from '@components/ProjectCreate'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
@@ -12,7 +13,7 @@ export default function ProjectCreateModalRoute() {
 	return (
 		<ResponsiveModal
 			open={pathname === `/projects/create`}
-			title={'New Project'}
+			title={<PageHeaderTitle name="Create project" />}
 			onClose={() => router.push('/projects')}
 			footer={
 				<>
