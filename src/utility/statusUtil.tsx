@@ -42,7 +42,7 @@ const statusToIconMap: Record<StatusType, ReactNode> = {
 
 export const statusList = Object.keys(statusToLabelMap).map((key) => ({
 	label: statusToLabelMap[key as StatusType],
-	value: key,
+	value: key as StatusType,
 }))
 
 export function mapStatusToColor(status: StatusType): ColorType {

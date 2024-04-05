@@ -1,15 +1,15 @@
 'use client'
 
+import { DataTable } from '@components/DataTable'
+import TablePagination from '@components/DataTable/table-pagination'
+import { Button } from '@components/ui/button'
+import { ClientType } from '@db/schema'
 import { useNavigation } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
-import { clientTableColumns } from './columns'
 import { useActionsColumn } from '@utility/useActionsColumn'
-import { ClientType } from '@db/schema'
-import { DataTable } from '@components/DataTable'
-import { Button } from '@components/ui/button'
-import TablePagination from '@components/DataTable/table-pagination'
 import { useDefaultSort } from '@utility/useDefaultSort'
 import { useLastModifiedColumn } from '@utility/useLastModifiedColumn'
+import { clientTableColumns } from './columns'
 
 const RESOURCE_NAME = 'clients'
 export default function ClientList() {
@@ -53,7 +53,7 @@ export default function ClientList() {
 					New {RESOURCE_NAME.toLocaleLowerCase().replace(/s$/, '')}
 				</Button>
 			</div>
-			<div className="w-full overflow-auto mb-6">
+			<div className="w-full mb-6">
 				{tableData && <DataTable table={table} />}
 			</div>
 			<TablePagination {...table} />

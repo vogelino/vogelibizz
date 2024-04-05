@@ -34,7 +34,7 @@ export const projectTableColumns = [
 		cell: function render({ getValue, row }) {
 			const id = row.original.id
 			const value = getValue<string>()
-			return <InternalLink href={`/projects/show/${id}`}>{value}</InternalLink>
+			return <InternalLink href={`/projects/edit/${id}`}>{value}</InternalLink>
 		},
 	}),
 	columnHelper.accessor('status', {

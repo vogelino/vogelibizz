@@ -1,12 +1,12 @@
 'use client'
 
-import { Combobox } from '@components/ui/combobox'
+import FormInputCombobox from '@components/FormInputCombobox'
+import FormInputWrapper from '@components/FormInputWrapper'
 import { ProjectType } from '@db/schema'
-import { useShow } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
 import { statusList } from '@utility/statusUtil'
 import dynamic from 'next/dynamic'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { forwardRef, useRef, useState } from 'react'
 import { SimpleMDEReactProps } from 'react-simplemde-editor'
 
 const DynamicEditor = dynamic(
@@ -18,21 +18,21 @@ const ForwardedEditor = forwardRef<HTMLDivElement, SimpleMDEReactProps>(
 )
 ForwardedEditor.displayName = 'ForwardedEditor'
 
-export default function ProjectEdit({ id }: { id: string }) {
-	const [status, setStatus] = useState('todo')
-	const [name, setName] = useState('')
-	const [description, setDescription] = useState('')
-	const [content, setContent] = useState('')
+export default function ProjectEdit({
+	id,
+	formId,
+	initialData,
+}: {
+	id?: string
+	formId: string
+	initialData?: ProjectType
+}) {
+	const [status, setStatus] = useState(initialData?.status || 'todo')
+	const [name, setName] = useState(initialData?.name || '')
+	const [description, setDescription] = useState(initialData?.description || '')
+	const [content, setContent] = useState(initialData?.content || '')
 	const last_modified = useRef(new Date().toISOString())
-	const {
-		queryResult: { data },
-	} = useShow<ProjectType>({
-		resource: 'projects',
-		id,
-		meta: {
-			select: '*',
-		},
-	})
+
 	const {
 		refineCore: { onFinish },
 		register,
@@ -57,62 +57,40 @@ export default function ProjectEdit({ id }: { id: string }) {
 	const statusProps = register('status', {
 		required: 'This field is required',
 	})
-	const initialStatus = data?.data?.status
-	const initialName = data?.data?.name
-	const initialDescription = data?.data?.description
-	const initialContent = data?.data?.content
-
-	useEffect(() => {
-		if (!initialName) return
-		setName(initialName)
-	}, [initialName])
-
-	useEffect(() => {
-		if (!initialDescription) return
-		setDescription(initialDescription)
-	}, [initialDescription])
-
-	useEffect(() => {
-		if (!initialStatus) return
-		setStatus(initialStatus)
-	}, [initialStatus])
-
-	useEffect(() => {
-		if (!initialContent) return
-		setContent(initialContent)
-	}, [initialContent])
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={`project-edit-form-${id}`}>
+		<form onSubmit={handleSubmit(onFinish)} id={formId}>
 			<div className="flex flex-col gap-4">
-				<label className="flex flex-col gap-2">
-					<span className="text-grayDark">Name</span>
+				<FormInputWrapper
+					label="Name"
+					error={(errors as any)?.name?.message as string}
+				>
 					<input
 						type="text"
 						{...register('name', {
 							required: 'This field is required',
 						})}
 						onChange={(evt) => setName(evt.target.value)}
+						className="form-input"
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.title?.message as string}
-					</span>
-				</label>
-				<label className="flex flex-col gap-2">
-					<span className="text-grayDark">Description</span>
+				</FormInputWrapper>
+				<FormInputWrapper
+					label="Description"
+					error={(errors as any)?.description?.message as string}
+				>
 					<input
 						type="text"
 						{...register('description', {
 							required: 'This field is required',
 						})}
+						className="form-input"
 						onChange={(evt) => setDescription(evt.target.value)}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.description?.message as string}
-					</span>
-				</label>
-				<label className="flex flex-col gap-2">
-					<span className="text-grayDark">Content</span>
+				</FormInputWrapper>
+				<FormInputWrapper
+					label="Content"
+					error={(errors as any)?.content?.message as string}
+				>
 					<ForwardedEditor
 						{...register('content', {
 							required: 'This field is required',
@@ -120,23 +98,16 @@ export default function ProjectEdit({ id }: { id: string }) {
 						value={content}
 						onChange={setContent}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.content?.message as string}
-					</span>
-				</label>
-				<label className="flex flex-col gap-2 w-fit">
-					<span className="text-grayDark">Status</span>
-					<input type="hidden" {...statusProps} />
-					<Combobox
-						className="h-auto pt-2 pb-1 border-grayMed"
-						options={statusList}
-						value={status}
-						onChange={setStatus}
-					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.status?.message as string}
-					</span>
-				</label>
+				</FormInputWrapper>
+				<FormInputCombobox<ProjectType['status']>
+					options={statusList}
+					inputProps={statusProps}
+					label="Status"
+					value={status}
+					onChange={setStatus}
+					error={(errors as any)?.status?.message as string}
+					className="w-full"
+				/>
 			</div>
 		</form>
 	)
