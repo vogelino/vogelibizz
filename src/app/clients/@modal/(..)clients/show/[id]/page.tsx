@@ -1,5 +1,6 @@
 'use client'
 import ClientDisplay from '@components/ClientDisplay'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { ClientType } from '@db/schema'
@@ -24,7 +25,7 @@ export default function ClientShow({
 	return (
 		<ResponsiveModal
 			open={pathname === `/clients/show/${id}`}
-			title={record?.name || 'Show'}
+			title={<PageHeaderTitle name={record?.name || 'Edit client'} id={id} />}
 			description={'Client details'}
 			onClose={() => router.push('/clients')}
 			footer={

@@ -1,10 +1,10 @@
-import ExpenseCreate from '@components/ExpenseCreate'
+import ExpenseEdit from '@components/ExpenseEdit'
 import FormPageLayout from '@components/FormPageLayout'
 import { Button } from '@components/ui/button'
 import { SaveIcon } from 'lucide-react'
 import Link from 'next/link'
 
-export default function ExpenseCreatePageRoute() {
+export default async function ExpenseCreatePageRoute() {
 	return (
 		<FormPageLayout
 			title="Create Expense"
@@ -23,7 +23,7 @@ export default function ExpenseCreatePageRoute() {
 				</>
 			}
 		>
-			<ExpenseCreate />
+			<ExpenseEdit formId={`expense-create-form`} />
 		</FormPageLayout>
 	)
 }

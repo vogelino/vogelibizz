@@ -1,25 +1,24 @@
+import { IconBadge } from '@components/ui/icon-badge'
+import InternalLink from '@components/ui/internal-link'
 import { ProjectType } from '@db/schema'
-import { ColumnDef } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import {
 	StatusType,
 	mapStatusToIcon,
 	mapStatusToLabel,
 } from '@utility/statusUtil'
-import { IconBadge } from '@components/ui/icon-badge'
-import InternalLink from '@components/ui/internal-link'
-import { getSortableHeaderTemplate } from '@components/DataTable/dataTableUtil'
 
-export const projectTableColumns: ColumnDef<ProjectType>[] = [
-	{
-		id: 'id',
-		accessorKey: 'id',
+const columnHelper = createColumnHelper<ProjectType>()
+
+export const projectTableColumns = [
+	columnHelper.accessor('id', {
 		size: 50,
 		minSize: 50,
 		maxSize: 50,
-		header: getSortableHeaderTemplate<ProjectType>(
+		header: () => (
 			<span className="text-xs font-mono text-grayDark group-hover:text-inherit">
 				ID
-			</span>,
+			</span>
 		),
 		cell: function render({ getValue }) {
 			return (
@@ -28,23 +27,19 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 				</span>
 			)
 		},
-	},
-	{
-		id: 'name',
-		accessorKey: 'name',
+	}),
+	columnHelper.accessor('name', {
 		size: 1000,
-		header: getSortableHeaderTemplate<ProjectType>('Name'),
+		header: 'Name',
 		cell: function render({ getValue, row }) {
 			const id = row.original.id
 			const value = getValue<string>()
 			return <InternalLink href={`/projects/show/${id}`}>{value}</InternalLink>
 		},
-	},
-	{
-		id: 'status',
-		accessorKey: 'status',
+	}),
+	columnHelper.accessor('status', {
 		size: 100,
-		header: getSortableHeaderTemplate<ProjectType>('Status'),
+		header: 'Status',
 		cell: function render({ getValue }) {
 			const value = getValue<StatusType>()
 			return (
@@ -54,5 +49,5 @@ export const projectTableColumns: ColumnDef<ProjectType>[] = [
 				/>
 			)
 		},
-	},
+	}),
 ]

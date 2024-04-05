@@ -1,7 +1,6 @@
 'use client'
 
 import { Check, ChevronsUpDown } from 'lucide-react'
-import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -17,32 +16,41 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/utility/classNames'
-import { useEffect } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
-export function Combobox({
+export function Combobox<OptionValueType extends string = string>({
 	options,
 	onChange = () => undefined,
 	value: initialValue,
 	searchable = false,
 	className,
+	selectedValueFormater = (value) =>
+		value
+			? options.find((option) => option.value === value)?.label
+			: 'Select value...',
 }: {
 	options: {
-		label: string
-		value: string
+		label: ReactNode
+		value: OptionValueType
 	}[]
 	searchable?: boolean
-	onChange?: (value: string) => void
+	onChange?: (value: OptionValueType) => void
 	value?: string
 	className?: string
+	selectedValueFormater?: (value: OptionValueType) => ReactNode
 }) {
-	const [open, setOpen] = React.useState(false)
-	const [value, setValue] = React.useState(initialValue || options[0]?.value)
+	const [open, setOpen] = useState(false)
+	const [value, setValue] = useState(initialValue || options[0]?.value)
 
 	useEffect(() => {
 		if (!initialValue) return
 		setValue(initialValue)
 	}, [initialValue])
 
+	const selectedOption = useMemo(
+		() => options.find((option) => option.value === value),
+		[options, value],
+	)
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
@@ -53,26 +61,25 @@ export function Combobox({
 					className={cn(
 						'w-fit justify-between rounded-none h-[38px]',
 						'hover:bg-alt hover:text-fg border-grayLight',
+						'text-base',
 						className,
 					)}
 				>
-					{value
-						? options.find((option) => option.value === value)?.label
-						: 'Select value...'}
+					<div className="w-full flex gap-3 items-center">
+						{selectedOption
+							? selectedValueFormater(selectedOption.value)
+							: 'Select value...'}
+					</div>
 					<ChevronsUpDown
 						size={16}
-						className="-mt-1 ml-2 shrink-0 opacity-50"
+						className="translate-y-[3px] ml-2 shrink-0 opacity-50"
 					/>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-fit p-0">
 				<Command>
-					{searchable && (
-						<>
-							<CommandInput placeholder="Search..." />
-							<CommandEmpty>Nothing found.</CommandEmpty>
-						</>
-					)}
+					<CommandInput placeholder="Search..." />
+					<CommandEmpty>Nothing found.</CommandEmpty>
 					<CommandGroup>
 						{options.map((option) => (
 							<CommandItem
@@ -80,8 +87,14 @@ export function Combobox({
 								value={option.value}
 								onSelect={(currentValue) => {
 									const newValue = currentValue === value ? '' : currentValue
-									setValue(newValue)
-									onChange(newValue)
+									const item = options.find(
+										(item) =>
+											item.value.toLocaleLowerCase() ===
+											newValue.toLocaleLowerCase(),
+									)
+									if (!item) return
+									setValue(item.value)
+									onChange(item.value)
 									setOpen(false)
 								}}
 							>
@@ -91,7 +104,10 @@ export function Combobox({
 										value === option.value ? 'opacity-100' : 'opacity-0',
 									)}
 								/>
-								{option.label}
+
+								<div className="w-full flex gap-3 items-center">
+									{option.label}
+								</div>
 							</CommandItem>
 						))}
 					</CommandGroup>

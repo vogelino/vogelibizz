@@ -1,9 +1,9 @@
-import React, { PropsWithChildren } from 'react'
-import { Badge } from '@components/ui/badge'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import { Button } from '@components/ui/button'
 import { cn } from '@utility/classNames'
 import { ListIcon } from 'lucide-react'
 import Link from 'next/link'
+import React, { PropsWithChildren } from 'react'
 
 function FormPageLayout({
 	id,
@@ -25,13 +25,8 @@ function FormPageLayout({
 					'border-b border-grayLight pb-6',
 				)}
 			>
-				<h1 className="font-special text-3xl antialiased flex items-center gap-4">
-					<span>{title}</span>
-					{id && (
-						<Badge variant="outline" className="font-mono mt-1">
-							{id}
-						</Badge>
-					)}
+				<h1>
+					<PageHeaderTitle name={title} id={id} />
 				</h1>
 				<div className="flex gap-2">
 					<Button asChild variant="outline">

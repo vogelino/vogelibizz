@@ -1,5 +1,6 @@
 'use client'
 import ClientCreate from '@components/ClientCreate'
+import PageHeaderTitle from '@components/PageHeaderTitle'
 import { Button } from '@components/ui/button'
 import { ResponsiveModal } from '@components/ui/responsive-dialog'
 import { SaveIcon } from 'lucide-react'
@@ -12,7 +13,7 @@ export default function ClientCreateModalRoute() {
 	return (
 		<ResponsiveModal
 			open={pathname === `/clients/create`}
-			title={'New Client'}
+			title={<PageHeaderTitle name="Create client" />}
 			onClose={() => router.push('/clients')}
 			footer={
 				<>

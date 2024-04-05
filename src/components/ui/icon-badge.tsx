@@ -10,7 +10,7 @@ export function IconBadge({
 }: {
 	icon: ReactNode
 	badgeProps?: BadgeProps
-	label?: string
+	label?: ReactNode
 	className?: string
 }) {
 	return (
@@ -18,7 +18,8 @@ export function IconBadge({
 			variant="outline"
 			{...badgeProps}
 			className={cn(
-				'w-fit pl-1.5 pt-0.5 text-fg',
+				'w-fit pt-0.5 text-fg',
+				icon && `pl-1.5`,
 				badgeProps.className,
 				className,
 			)}

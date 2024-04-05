@@ -23,6 +23,7 @@ export function useActionsColumn<ColumnType = any>(
 		accessorKey: 'id',
 		header: ' ',
 		size: 50,
+		enableSorting: false,
 		cell: function render({ getValue }) {
 			const id = String(getValue<ColumnType>())
 			return (
