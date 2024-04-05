@@ -4,10 +4,16 @@ import FormInputCombobox from '@components/FormInputCombobox'
 import FormInputWrapper from '@components/FormInputWrapper'
 import { PillText } from '@components/PillText'
 import CurrencyInput from '@components/ui/currency-input'
-import { ExpenseType, expenseCategory, expenseType } from '@db/schema'
+import {
+	ExpenseType,
+	expenseCategory,
+	expenseRate,
+	expenseType,
+} from '@db/schema'
 import { useForm } from '@refinedev/react-hook-form'
 import { categoryToOptionClass, mapTypeToIcon } from '@utility/expensesUtil'
-import { ReactNode, useMemo, useRef, useState } from 'react'
+import useComboboxOptions from '@utility/useComboboxOptions'
+import { ReactNode, useRef, useState } from 'react'
 
 type OptionsType<T extends string> = {
 	label: ReactNode
@@ -35,6 +41,9 @@ export default function ExpenseEdit({
 	const [currency, setCurrency] = useState<ExpenseType['original_currency']>(
 		initialData?.original_currency || 'USD',
 	)
+	const [rate, setRate] = useState<ExpenseType['rate']>(
+		initialData?.rate || 'Monthly',
+	)
 	const last_modified = useRef(new Date().toISOString())
 	const {
 		refineCore: { onFinish },
@@ -42,13 +51,7 @@ export default function ExpenseEdit({
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		refineCoreProps: {
-			resource: 'expenses',
-			id,
-			meta: {
-				select: '*',
-			},
-		},
+		refineCoreProps: { resource: 'expenses', id, meta: { select: '*' } },
 		values: {
 			name,
 			last_modified: last_modified.current,
@@ -56,42 +59,30 @@ export default function ExpenseEdit({
 			type,
 			price: price ?? 0,
 			original_currency: currency,
+			rate,
 		},
 	})
-	const categoryProps = register('category', {
-		required: 'This field is required',
-	})
-	const typeProps = register('type', {
-		required: 'This field is required',
-	})
-	const currencyProps = register('original_currency', {
-		required: 'This field is required',
-	})
 
-	const categoryOptions = useMemo(() => {
-		const options: OptionsType<ExpenseType['category']> =
-			expenseCategory.enumValues.map((cat) => ({
-				label: (
-					<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-				),
-				value: cat,
-			}))
-		return options
-	}, [])
+	const categoryOptions = useComboboxOptions<ExpenseType['category']>(
+		expenseCategory.enumValues,
+		(cat) => (
+			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
+		),
+	)
 
-	const typeOptions = useMemo(() => {
-		const options: OptionsType<ExpenseType['type']> =
-			expenseType.enumValues.map((type) => ({
-				label: (
-					<>
-						{mapTypeToIcon(type, 24)}
-						<span className="pt-1">{type}</span>
-					</>
-				),
-				value: type,
-			}))
-		return options
-	}, [])
+	const typeOptions = useComboboxOptions<ExpenseType['type']>(
+		expenseType.enumValues,
+		(type) => (
+			<>
+				{mapTypeToIcon(type, 24)}
+				<span className="pt-1">{type}</span>
+			</>
+		),
+	)
+
+	const rateOptions = useComboboxOptions<ExpenseType['rate']>(
+		expenseRate.enumValues,
+	)
 
 	return (
 		<form onSubmit={handleSubmit(onFinish)} id={formId} className="@container">
@@ -104,9 +95,7 @@ export default function ExpenseEdit({
 						className="form-input"
 						placeholder="Expense name"
 						type="text"
-						{...register('name', {
-							required: 'This field is required',
-						})}
+						{...register('name', { required: true })}
 						value={name}
 						onChange={(evt) => setName(evt.target.value)}
 					/>
@@ -114,7 +103,7 @@ export default function ExpenseEdit({
 				<div className="grid @md:grid-cols-2 gap-x-6 gap-y-4">
 					<FormInputCombobox<ExpenseType['category']>
 						options={categoryOptions}
-						inputProps={categoryProps}
+						inputProps={register('category')}
 						label="Category"
 						value={category}
 						onChange={setCategory}
@@ -123,25 +112,30 @@ export default function ExpenseEdit({
 					/>
 					<FormInputCombobox<ExpenseType['type']>
 						options={typeOptions}
-						inputProps={typeProps}
+						inputProps={register('type')}
 						label="Type"
 						value={type}
 						onChange={setType}
 						className="w-full"
 						error={(errors as any)?.type?.message as string}
 					/>
-				</div>
-				<div className="grid @md:grid-cols-2 gap-x-6 gap-y-4">
 					<CurrencyInput
 						label="Original price"
-						inputProps={register('price', {
-							required: 'This field is required',
-						})}
-						currencyProps={currencyProps}
+						inputProps={register('price')}
+						currencyProps={register('original_currency')}
 						onCurrencyChange={setCurrency}
 						onValueChange={setPrice}
 						currency={currency}
 						value={price}
+					/>
+					<FormInputCombobox<ExpenseType['rate']>
+						options={rateOptions}
+						inputProps={register('rate')}
+						label="Billing Rate"
+						value={rate}
+						onChange={setRate}
+						className="w-full"
+						error={(errors as any)?.rate?.message as string}
 					/>
 				</div>
 			</div>
