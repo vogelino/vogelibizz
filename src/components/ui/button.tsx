@@ -1,6 +1,6 @@
-import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '@/utility/classNames'
 
@@ -8,7 +8,7 @@ const buttonVariants = cva(
 	cn(
 		'inline-flex items-center justify-center whitespace-nowrap gap-2',
 		'rounded-full text-lg font-medium transition-colors focusable',
-		'disabled:pointer-events-none disabled:opacity-50 [&>svg]:-mt-1.5',
+		'disabled:pointer-events-none disabled:opacity-50 [&>svg]:-mt-1',
 	),
 	{
 		variants: {
