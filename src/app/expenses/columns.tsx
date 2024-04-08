@@ -43,6 +43,24 @@ export const getExpensesTableColumns = (
 				let value = getValue<ExpenseType['price']>()
 				return <span>{value && formatCurrency(value)}</span>
 			},
+			sortingFn: (rowA, rowB) => {
+				const valueAInCLPPerMonth =
+					getValueInCLPPerMonth({
+						value: rowA.original.price,
+						currency: rowA.original.original_currency,
+						rates,
+						billingRate: rowA.original.rate,
+					}) || 0
+				const valueBInCLPPerMonth =
+					getValueInCLPPerMonth({
+						value: rowB.original.price,
+						currency: rowB.original.original_currency,
+						rates,
+						billingRate: rowB.original.rate,
+					}) || 0
+
+				return valueAInCLPPerMonth - valueBInCLPPerMonth
+			},
 		},
 	),
 	columnHelper.accessor('price', {
