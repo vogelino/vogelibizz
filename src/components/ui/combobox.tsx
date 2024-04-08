@@ -61,7 +61,7 @@ export function Combobox<OptionValueType extends string = string>({
 					className={cn(
 						'w-fit justify-between rounded-none h-[38px]',
 						'hover:bg-alt hover:text-fg border-grayLight',
-						'text-base',
+						'text-base bg-bg dark:bg-grayUltraLight',
 						className,
 					)}
 				>

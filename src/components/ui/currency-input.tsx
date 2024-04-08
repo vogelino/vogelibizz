@@ -58,7 +58,7 @@ function CurrencyInput({
 					<input type="hidden" {...inputProps} />
 					<ReactCurrencyInput
 						className={cn(
-							'form-input',
+							'form-input dark:bg-grayUltraLight',
 							'ps-12 w-full font-mono border-r-0',
 							inputProps?.className,
 							className,

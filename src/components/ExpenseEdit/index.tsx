@@ -86,13 +86,13 @@ export default function ExpenseEdit({
 
 	return (
 		<form onSubmit={handleSubmit(onFinish)} id={formId} className="@container">
-			<div className="flex flex-col gap-4">
+			<div className="flex flex-col gap-6">
 				<FormInputWrapper
 					label="Name"
 					error={(errors as any)?.name?.message as string}
 				>
 					<input
-						className="form-input"
+						className="form-input dark:bg-grayUltraLight"
 						placeholder="Expense name"
 						type="text"
 						{...register('name', { required: true })}
@@ -100,7 +100,7 @@ export default function ExpenseEdit({
 						onChange={(evt) => setName(evt.target.value)}
 					/>
 				</FormInputWrapper>
-				<div className="grid @md:grid-cols-2 gap-x-6 gap-y-4">
+				<div className="grid @md:grid-cols-2 gap-6">
 					<FormInputCombobox<ExpenseType['category']>
 						options={categoryOptions}
 						inputProps={register('category')}
