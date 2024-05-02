@@ -16,36 +16,33 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/utility/classNames'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { PopoverContentProps } from '@radix-ui/react-popover'
+import { ReactNode, useMemo, useState } from 'react'
 
+export type ComboboxProps<OptionValueType extends string = string> = {
+	options: {
+		label: ReactNode
+		value: OptionValueType
+	}[]
+	onChange?: (value: OptionValueType) => void
+	value?: string
+	className?: string
+	selectedValueFormater?: (value: OptionValueType) => ReactNode
+	align?: PopoverContentProps['align']
+}
 export function Combobox<OptionValueType extends string = string>({
 	options,
 	onChange = () => undefined,
 	value: initialValue,
-	searchable = false,
 	className,
 	selectedValueFormater = (value) =>
 		value
 			? options.find((option) => option.value === value)?.label
 			: 'Select value...',
-}: {
-	options: {
-		label: ReactNode
-		value: OptionValueType
-	}[]
-	searchable?: boolean
-	onChange?: (value: OptionValueType) => void
-	value?: string
-	className?: string
-	selectedValueFormater?: (value: OptionValueType) => ReactNode
-}) {
+	align = 'end',
+}: ComboboxProps<OptionValueType>) {
 	const [open, setOpen] = useState(false)
 	const [value, setValue] = useState(initialValue || options[0]?.value)
-
-	useEffect(() => {
-		if (!initialValue) return
-		setValue(initialValue)
-	}, [initialValue])
 
 	const selectedOption = useMemo(
 		() => options.find((option) => option.value === value),
@@ -76,7 +73,7 @@ export function Combobox<OptionValueType extends string = string>({
 					/>
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-fit p-0">
+			<PopoverContent className="w-fit p-0" align={align}>
 				<Command>
 					<CommandInput placeholder="Search..." />
 					<CommandEmpty>Nothing found.</CommandEmpty>
@@ -104,7 +101,6 @@ export function Combobox<OptionValueType extends string = string>({
 										value === option.value ? 'opacity-100' : 'opacity-0',
 									)}
 								/>
-
 								<div className="w-full flex gap-3 items-center">
 									{option.label}
 								</div>

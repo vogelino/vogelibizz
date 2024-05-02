@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useRef } from 'react'
 
 export type OptionType<T extends string> = {
 	label: ReactNode
@@ -11,14 +11,12 @@ function useComboboxOptions<OptionValueType extends string = string>(
 		<span className="pt-1">{value}</span>
 	),
 ) {
-	return useMemo(
-		() =>
-			optionValues.map((value) => ({
-				label: renderer(value),
-				value,
-			})),
-		[optionValues, renderer],
-	)
+	return useRef(
+		optionValues.map((value) => ({
+			label: renderer(value),
+			value,
+		})),
+	).current
 }
 
 export default useComboboxOptions

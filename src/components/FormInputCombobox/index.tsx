@@ -31,7 +31,6 @@ function FormInputCombobox<OptionValueType extends string>({
 				options={options}
 				value={value}
 				onChange={onChange}
-				searchable
 			/>
 		</FormInputWrapper>
 	)
