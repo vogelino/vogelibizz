@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import 'easymde/dist/easymde.min.css'
-import { useMemo } from 'react'
-import SimpleMDE, { type SimpleMDEReactProps } from 'react-simplemde-editor'
+import "easymde/dist/easymde.min.css";
+import { useMemo } from "react";
+import SimpleMDE, { type SimpleMDEReactProps } from "react-simplemde-editor";
 
 const TextareaEditor = ({
 	forwardedRef,
 	...props
 }: SimpleMDEReactProps & {
-	forwardedRef?: React.Ref<HTMLDivElement>
+	forwardedRef?: React.Ref<HTMLDivElement>;
 }) => {
 	const options = useMemo(
 		() =>
@@ -16,13 +16,13 @@ const TextareaEditor = ({
 				autofocus: false,
 				spellChecker: false,
 				toolbar: false,
-			}) as SimpleMDEReactProps['options'],
+			}) as SimpleMDEReactProps["options"],
 		[],
-	)
+	);
 
-	return <SimpleMDE options={options} ref={forwardedRef} {...props} />
-}
+	return <SimpleMDE options={options} ref={forwardedRef} {...props} />;
+};
 
-TextareaEditor.displayName = 'TextareaEditor'
+TextareaEditor.displayName = "TextareaEditor";
 
-export { TextareaEditor }
+export { TextareaEditor };

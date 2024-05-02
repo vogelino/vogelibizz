@@ -1,17 +1,17 @@
-import { IconBadge } from '@components/ui/icon-badge'
-import InternalLink from '@components/ui/internal-link'
-import { ProjectType } from '@db/schema'
-import { createColumnHelper } from '@tanstack/react-table'
+import { IconBadge } from "@components/ui/icon-badge";
+import InternalLink from "@components/ui/internal-link";
+import type { ProjectType } from "@db/schema";
+import { createColumnHelper } from "@tanstack/react-table";
 import {
-	StatusType,
+	type StatusType,
 	mapStatusToIcon,
 	mapStatusToLabel,
-} from '@utility/statusUtil'
+} from "@utility/statusUtil";
 
-const columnHelper = createColumnHelper<ProjectType>()
+const columnHelper = createColumnHelper<ProjectType>();
 
 export const projectTableColumns = [
-	columnHelper.accessor('id', {
+	columnHelper.accessor("id", {
 		size: 50,
 		minSize: 50,
 		maxSize: 50,
@@ -25,29 +25,29 @@ export const projectTableColumns = [
 				<span className="text-xs font-mono text-grayDark">
 					{getValue<string>()}
 				</span>
-			)
+			);
 		},
 	}),
-	columnHelper.accessor('name', {
+	columnHelper.accessor("name", {
 		size: 1000,
-		header: 'Name',
+		header: "Name",
 		cell: function render({ getValue, row }) {
-			const id = row.original.id
-			const value = getValue<string>()
-			return <InternalLink href={`/projects/edit/${id}`}>{value}</InternalLink>
+			const id = row.original.id;
+			const value = getValue<string>();
+			return <InternalLink href={`/projects/edit/${id}`}>{value}</InternalLink>;
 		},
 	}),
-	columnHelper.accessor('status', {
+	columnHelper.accessor("status", {
 		size: 100,
-		header: 'Status',
+		header: "Status",
 		cell: function render({ getValue }) {
-			const value = getValue<StatusType>()
+			const value = getValue<StatusType>();
 			return (
 				<IconBadge
 					icon={mapStatusToIcon(value)}
 					label={mapStatusToLabel(value)}
 				/>
-			)
+			);
 		},
 	}),
-]
+];

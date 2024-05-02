@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react'
+import type { PropsWithChildren, ReactNode } from "react";
 
 function FormInputWrapper({
 	label,
@@ -9,9 +9,9 @@ function FormInputWrapper({
 		<label className="flex flex-col gap-2">
 			<span className="text-grayDark">{label}</span>
 			{children}
-			{error && <span style={{ color: 'red' }}>{error}</span>}
+			{error && <span style={{ color: "red" }}>{error}</span>}
 		</label>
-	)
+	);
 }
 
-export default FormInputWrapper
+export default FormInputWrapper;

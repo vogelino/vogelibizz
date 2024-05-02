@@ -1,5 +1,5 @@
-import { cn } from '@utility/classNames'
-import { PropsWithChildren } from 'react'
+import { cn } from "@utility/classNames";
+import type { PropsWithChildren } from "react";
 
 export function PillText({
 	children,
@@ -15,5 +15,5 @@ export function PillText({
 			/>
 			<span className="pt-1">{children}</span>
 		</>
-	)
+	);
 }

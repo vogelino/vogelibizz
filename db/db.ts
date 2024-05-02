@@ -8,7 +8,7 @@ const password = process.env.DB_PASSWORD;
 const database = process.env.DB_NAME;
 
 if (!host || !user || !password || !database) {
-  throw new Error("Missing required environment variables for drizzle-kit");
+	throw new Error("Missing required environment variables for drizzle-kit");
 }
 
 const pgConnectionString = `postgres://${user}:${password}@${host}:5432/${database}`;

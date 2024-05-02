@@ -1,19 +1,19 @@
-import EditResourceModal from '@components/EditResourceModal'
-import ExpenseEdit from '@components/ExpenseEdit'
-import { ExpenseType } from '@db/schema'
-import { supabaseClient } from '@utility/supabase-client'
+import EditResourceModal from "@components/EditResourceModal";
+import ExpenseEdit from "@components/ExpenseEdit";
+import type { ExpenseType } from "@db/schema";
+import { supabaseClient } from "@utility/supabase-client";
 
 export default async function ExpenseEditModalRoute({
 	params: { id },
 }: {
-	params: { id: string }
+	params: { id: string };
 }) {
 	const record = await supabaseClient
-		.from('expenses')
-		.select('*')
-		.eq('id', id)
-		.single()
-	const data = record.data as ExpenseType
+		.from("expenses")
+		.select("*")
+		.eq("id", id)
+		.single();
+	const data = record.data as ExpenseType;
 	return (
 		<EditResourceModal
 			id={`${id}`}
@@ -28,5 +28,5 @@ export default async function ExpenseEditModalRoute({
 				initialData={data}
 			/>
 		</EditResourceModal>
-	)
+	);
 }

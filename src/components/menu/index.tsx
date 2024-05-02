@@ -1,37 +1,37 @@
-import BizzLogo from '@components/BizzLogo'
-import LogoutButton from '@components/LogoutButton'
-import ThemeToggle from '@components/ThemeToggle'
-import { cn } from '@utility/classNames'
-import Link from 'next/link'
-import HeaderMenuLink from './HeaderMenuLink'
+import BizzLogo from "@components/BizzLogo";
+import LogoutButton from "@components/LogoutButton";
+import ThemeToggle from "@components/ThemeToggle";
+import { cn } from "@utility/classNames";
+import Link from "next/link";
+import HeaderMenuLink from "./HeaderMenuLink";
 
 export const Menu = ({
 	withBg = true,
-	currentPage = '',
+	currentPage = "",
 }: {
-	withBg?: boolean
-	currentPage: string
+	withBg?: boolean;
+	currentPage: string;
 }) => {
 	const menuItems = [
 		{
-			key: 'projects',
-			label: 'Projects',
-			route: '/projects',
+			key: "projects",
+			label: "Projects",
+			route: "/projects",
 		},
 		{
-			key: 'clients',
-			label: 'Clients',
-			route: '/clients',
+			key: "clients",
+			label: "Clients",
+			route: "/clients",
 		},
 		{
-			key: 'expenses',
-			label: 'Expenses',
-			route: '/expenses',
+			key: "expenses",
+			label: "Expenses",
+			route: "/expenses",
 		},
-	]
+	];
 
-	const withBgClasses = 'bg-bg border-grayMed'
-	const withoutBgClasses = 'border-b-transparent'
+	const withBgClasses = "bg-bg border-grayMed";
+	const withoutBgClasses = "border-b-transparent";
 	return (
 		<header
 			aria-label="Main header"
@@ -49,21 +49,22 @@ export const Menu = ({
 			<Link
 				href="/projects"
 				className={cn(
-					'group',
-					'px-4 -ml-4 py-2 rounded-full',
-					'focus:outline-none focus:ring-2 focus:ring-fg',
+					"group",
+					"px-4 -ml-4 py-2 rounded-full",
+					"focus:outline-none focus:ring-2 focus:ring-fg",
 				)}
 			>
 				<BizzLogo textClassName="group-hover:text-alt" />
 			</Link>
 			<button
+				type="button"
 				aria-label="Hide the main navitation menu"
 				id="burger-menu"
 				aria-hidden="false"
 				aria-expanded="false"
 				className="md:hidden md:invisible"
 			>
-				<span></span>
+				<span />
 			</button>
 			<nav
 				id="menu"
@@ -82,9 +83,9 @@ export const Menu = ({
 					{menuItems.map((item) => (
 						<HeaderMenuLink
 							key={item.key}
-							href={item.route ?? '/'}
-							title={item.label ?? '-'}
-							active={currentPage.split('/')[0] === item.key}
+							href={item.route ?? "/"}
+							title={item.label ?? "-"}
+							active={currentPage.split("/")[0] === item.key}
 						/>
 					))}
 					<LogoutButton />
@@ -102,5 +103,5 @@ export const Menu = ({
 				</ul>
 			</nav>
 		</header>
-	)
-}
+	);
+};

@@ -1,13 +1,13 @@
-import FormPageLayout from '@components/FormPageLayout'
-import ClientDisplay from '@components/ClientDisplay'
-import { Button } from '@components/ui/button'
-import { PencilIcon } from 'lucide-react'
-import Link from 'next/link'
+import ClientDisplay from "@components/ClientDisplay";
+import FormPageLayout from "@components/FormPageLayout";
+import { Button } from "@components/ui/button";
+import { PencilIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function ClientShow({
 	params: { id },
 }: {
-	params: { id: string }
+	params: { id: string };
 }) {
 	return (
 		<FormPageLayout
@@ -18,14 +18,14 @@ export default function ClientShow({
 				<>
 					<Button asChild variant="outline">
 						<Link href={`/clients`}>
-							<span>{'Cancel'}</span>
+							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
 					{id && (
 						<Button asChild>
 							<Link href={`/clients/edit/${id}`}>
 								<PencilIcon />
-								{'Edit client'}
+								{"Edit client"}
 							</Link>
 						</Button>
 					)}
@@ -34,5 +34,5 @@ export default function ClientShow({
 		>
 			<ClientDisplay id={id} />
 		</FormPageLayout>
-	)
+	);
 }

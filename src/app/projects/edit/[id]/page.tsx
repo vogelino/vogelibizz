@@ -1,14 +1,13 @@
-import FormPageLayout from '@components/FormPageLayout'
-import ProjectEdit from '@components/ProjectEdit'
-import { Button } from '@components/ui/button'
-import { SaveIcon } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+import FormPageLayout from "@components/FormPageLayout";
+import ProjectEdit from "@components/ProjectEdit";
+import { Button } from "@components/ui/button";
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function ProjectEditPageRoute({
 	params: { id },
 }: {
-	params: { id: string }
+	params: { id: string };
 }) {
 	return (
 		<FormPageLayout
@@ -19,17 +18,17 @@ export default function ProjectEditPageRoute({
 				<>
 					<Button asChild variant="outline">
 						<Link href={`/projects/show/${id}`}>
-							<span>{'Cancel'}</span>
+							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
 					<Button type="submit" form={`project-edit-form-${id}`}>
 						<SaveIcon />
-						{'save'}
+						{"save"}
 					</Button>
 				</>
 			}
 		>
-			<ProjectEdit id={id} />
+			<ProjectEdit id={id} formId={`project-edit-form-${id}`} />
 		</FormPageLayout>
-	)
+	);
 }

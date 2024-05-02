@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -6,30 +6,30 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ResourceType } from '@db/schema'
-import { useDelete, useNavigation } from '@refinedev/core'
-import { ColumnDef } from '@tanstack/react-table'
-import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react'
-import { cn } from './classNames'
+} from "@/components/ui/dropdown-menu";
+import type { ResourceType } from "@db/schema";
+import { useDelete, useNavigation } from "@refinedev/core";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { cn } from "./classNames";
 
-export function useActionsColumn<ColumnType = any>(
+export function useActionsColumn<ColumnType = unknown>(
 	resource: ResourceType,
 ): ColumnDef<ColumnType> {
-	const { show, edit } = useNavigation()
-	const { mutate: remove } = useDelete()
+	const { show, edit } = useNavigation();
+	const { mutate: remove } = useDelete();
 	return {
-		id: 'actions',
-		accessorKey: 'id',
-		header: ' ',
+		id: "actions",
+		accessorKey: "id",
+		header: " ",
 		size: 50,
 		enableSorting: false,
 		cell: function render({ getValue }) {
-			const id = String(getValue<ColumnType>())
+			const id = String(getValue<ColumnType>());
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className={cn('w-8 h-8 p-0', 'focusable')}>
+						<Button variant="ghost" className={cn("w-8 h-8 p-0", "focusable")}>
 							<span className="sr-only">Open menu</span>
 							<MoreHorizontal className="h-4 w-4" />
 						</Button>
@@ -51,7 +51,7 @@ export function useActionsColumn<ColumnType = any>(
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-			)
+			);
 		},
-	}
+	};
 }

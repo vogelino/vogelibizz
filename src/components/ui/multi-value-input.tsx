@@ -1,77 +1,77 @@
-'use client'
+"use client";
 
-import { Check, ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, X } from "lucide-react";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
 	Command,
 	CommandEmpty,
 	CommandGroup,
 	CommandInput,
 	CommandItem,
-} from '@/components/ui/command'
+} from "@/components/ui/command";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn } from '@/utility/classNames'
-import { ReactNode, useCallback, useState } from 'react'
-import { IconBadge } from './icon-badge'
+} from "@/components/ui/popover";
+import { cn } from "@/utility/classNames";
+import { type ReactNode, useCallback, useState } from "react";
+import { IconBadge } from "./icon-badge";
 
 type OptionType<OptionValueType extends string = string> = {
-	label: ReactNode
-	value: OptionValueType
-}
+	label: ReactNode;
+	value: OptionValueType;
+};
 
 type MultiValueInputProps<OptionValueType extends string = string> = {
-	options: OptionType<OptionValueType>[]
-	onChange?: (newOptions: OptionType<OptionValueType>[]) => void
-	values?: OptionValueType[]
-	className?: string
-	placeholder?: string
-	selectedValueFormater?: (value: OptionValueType) => ReactNode
-}
+	options: OptionType<OptionValueType>[];
+	onChange?: (newOptions: OptionType<OptionValueType>[]) => void;
+	values?: OptionValueType[];
+	className?: string;
+	placeholder?: string;
+	selectedValueFormater?: (value: OptionValueType) => ReactNode;
+};
 
 export function MultiValueInput<OptionValueType extends string = string>({
 	options,
 	onChange = () => undefined,
 	values: initialValues = [],
 	className,
-	placeholder = 'Select options',
+	placeholder = "Select options",
 	selectedValueFormater = getDefaultValueFormatter(options),
 }: MultiValueInputProps<OptionValueType>) {
-	const [open, setOpen] = useState(false)
+	const [open, setOpen] = useState(false);
 	const initialOptions = initialValues.map(
 		(optionValue) => options.find(getOptionComparator(optionValue))!,
-	)
+	);
 	const [selectedOptions, setSelectedOptions] =
-		useState<OptionType<OptionValueType>[]>(initialOptions)
+		useState<OptionType<OptionValueType>[]>(initialOptions);
 
 	const onOptionSelect = useCallback(
 		(newOptionValue: string) => {
-			const findNewOption = getOptionComparator(newOptionValue)
+			const findNewOption = getOptionComparator(newOptionValue);
 
-			const optionAlreadySelected = selectedOptions.find(findNewOption)
+			const optionAlreadySelected = selectedOptions.find(findNewOption);
 			if (optionAlreadySelected) {
 				const newOptions = selectedOptions.filter(
 					(option) =>
 						option.value.toLowerCase() !== newOptionValue.toLowerCase(),
-				)
-				setSelectedOptions(newOptions)
-				onChange(newOptions)
-				return
+				);
+				setSelectedOptions(newOptions);
+				onChange(newOptions);
+				return;
 			}
 
-			const newOption = options.find(findNewOption)!
-			if (!newOption) return selectedOptions
+			const newOption = options.find(findNewOption)!;
+			if (!newOption) return selectedOptions;
 
-			const newOptions = [...selectedOptions, newOption]
-			setSelectedOptions(newOptions)
-			onChange(newOptions)
+			const newOptions = [...selectedOptions, newOption];
+			setSelectedOptions(newOptions);
+			onChange(newOptions);
 		},
 		[selectedOptions, options, onChange],
-	)
+	);
 
 	return (
 		<div className="flex items-center border border-grayMed rounded-full">
@@ -82,10 +82,10 @@ export function MultiValueInput<OptionValueType extends string = string>({
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'w-fit justify-between rounded-none h-[38px]',
-							'hover:bg-alt hover:text-fg border-grayLight',
-							'text-base bg-bg dark:bg-grayUltraLight',
-							'p-0 pr-2 rounded-full',
+							"w-fit justify-between rounded-none h-[38px]",
+							"hover:bg-alt hover:text-fg border-grayLight",
+							"text-base bg-bg dark:bg-grayUltraLight",
+							"p-0 pr-2 rounded-full",
 							className,
 						)}
 					>
@@ -100,11 +100,12 @@ export function MultiValueInput<OptionValueType extends string = string>({
 									<div className="flex gap-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
 											<button
+												type="button"
 												key={option.value}
 												className="focusable rounded-full"
 												onClick={(evt) => {
-													evt.stopPropagation()
-													onOptionSelect(option.value)
+													evt.stopPropagation();
+													onOptionSelect(option.value);
 												}}
 											>
 												{selectedValueFormater(option.value)}
@@ -122,15 +123,15 @@ export function MultiValueInput<OptionValueType extends string = string>({
 
 									<X
 										onClick={(evt) => {
-											setSelectedOptions([])
-											onChange([])
-											setOpen(false)
+											setSelectedOptions([]);
+											onChange([]);
+											setOpen(false);
 										}}
 										onKeyDown={(evt) => {
-											if (evt.key === 'Enter' || evt.key === ' ') {
-												setOpen(false)
-												onChange([])
-												setSelectedOptions([])
+											if (evt.key === "Enter" || evt.key === " ") {
+												setOpen(false);
+												onChange([]);
+												setSelectedOptions([]);
 											}
 										}}
 										className="bg-grayDark text-bg rounded-full focusable"
@@ -158,10 +159,10 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								>
 									<Check
 										className={cn(
-											'mr-2 h-4 w-4',
+											"mr-2 h-4 w-4",
 											selectedOptions.find(getOptionComparator(option.value))
-												? 'opacity-100'
-												: 'opacity-0',
+												? "opacity-100"
+												: "opacity-0",
 										)}
 									/>
 
@@ -175,25 +176,25 @@ export function MultiValueInput<OptionValueType extends string = string>({
 				</PopoverContent>
 			</Popover>
 		</div>
-	)
+	);
 }
 
 function getOptionComparator<OptionValueType extends string = string>(
 	optionToCompareTo: OptionValueType,
-	include: boolean = true,
+	include = true,
 ) {
-	const a = optionToCompareTo.toLowerCase()
+	const a = optionToCompareTo.toLowerCase();
 	return (option: OptionType<OptionValueType>) => {
-		const b = option.value.toLowerCase()
-		return include ? a === b : a !== b
-	}
+		const b = option.value.toLowerCase();
+		return include ? a === b : a !== b;
+	};
 }
 
 function getDefaultValueFormatter<OptionValueType extends string = string>(
 	options: OptionType<OptionValueType>[],
 ) {
 	return function defaultFormatter(value: OptionValueType) {
-		const label = options.find((option) => option.value === value)?.label
-		return <IconBadge icon={<X />} label={label} />
-	}
+		const label = options.find((option) => option.value === value)?.label;
+		return <IconBadge icon={<X />} label={label} />;
+	};
 }
