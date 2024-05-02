@@ -1,9 +1,9 @@
-import FormPageLayout from '@components/FormPageLayout'
-import ClientCreate from '@components/ClientCreate'
-import { Button } from '@components/ui/button'
-import { SaveIcon } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+import ClientCreate from "@components/ClientCreate";
+import FormPageLayout from "@components/FormPageLayout";
+import { Button } from "@components/ui/button";
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 export default function ClientCreatePageRoute() {
 	return (
@@ -14,17 +14,17 @@ export default function ClientCreatePageRoute() {
 				<>
 					<Button asChild variant="outline">
 						<Link href={`/clients`}>
-							<span>{'Cancel'}</span>
+							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
 					<Button type="submit" form={`client-create-form`}>
 						<SaveIcon />
-						{'Create client'}
+						{"Create client"}
 					</Button>
 				</>
 			}
 		>
 			<ClientCreate />
 		</FormPageLayout>
-	)
+	);
 }

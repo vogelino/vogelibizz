@@ -1,9 +1,10 @@
-import PageHeaderTitle from '@components/PageHeaderTitle'
-import { Button } from '@components/ui/button'
-import { cn } from '@utility/classNames'
-import { ListIcon } from 'lucide-react'
-import Link from 'next/link'
-import React, { PropsWithChildren } from 'react'
+import PageHeaderTitle from "@components/PageHeaderTitle";
+import { Button } from "@components/ui/button";
+import { cn } from "@utility/classNames";
+import { ListIcon } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 
 function FormPageLayout({
 	id,
@@ -12,17 +13,17 @@ function FormPageLayout({
 	footerButtons,
 	children,
 }: PropsWithChildren<{
-	id?: string
-	title: string
-	allLink: string
-	footerButtons?: React.ReactNode
+	id?: string;
+	title: string;
+	allLink: string;
+	footerButtons?: React.ReactNode;
 }>) {
 	return (
 		<div className="px-10 pb-8 max-w-3xl mx-auto">
 			<div
 				className={cn(
-					'flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center',
-					'border-b border-grayLight pb-6',
+					"flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center",
+					"border-b border-grayLight pb-6",
 				)}
 			>
 				<h1>
@@ -45,7 +46,7 @@ function FormPageLayout({
 				</div>
 			)}
 		</div>
-	)
+	);
 }
 
-export default FormPageLayout
+export default FormPageLayout;

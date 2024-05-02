@@ -1,11 +1,11 @@
-import InternalLink from '@components/ui/internal-link'
-import { ClientType } from '@db/schema'
-import { createColumnHelper } from '@tanstack/react-table'
+import InternalLink from "@components/ui/internal-link";
+import type { ClientType } from "@db/schema";
+import { createColumnHelper } from "@tanstack/react-table";
 
-const columnHelper = createColumnHelper<ClientType>()
+const columnHelper = createColumnHelper<ClientType>();
 
 export const clientTableColumns = [
-	columnHelper.accessor('id', {
+	columnHelper.accessor("id", {
 		size: 50,
 		minSize: 50,
 		maxSize: 50,
@@ -19,16 +19,16 @@ export const clientTableColumns = [
 				<span className="text-xs font-mono text-grayDark">
 					{getValue<string>()}
 				</span>
-			)
+			);
 		},
 	}),
-	columnHelper.accessor('name', {
+	columnHelper.accessor("name", {
 		size: 1000,
-		header: 'Name',
+		header: "Name",
 		cell: function render({ getValue, row }) {
-			const id = row.original.id
-			const value = getValue<string>()
-			return <InternalLink href={`/clients/show/${id}`}>{value}</InternalLink>
+			const id = row.original.id;
+			const value = getValue<string>();
+			return <InternalLink href={`/clients/show/${id}`}>{value}</InternalLink>;
 		},
 	}),
-]
+];

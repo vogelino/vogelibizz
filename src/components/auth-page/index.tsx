@@ -1,9 +1,9 @@
-'use client'
-import type { AuthPageProps } from '@refinedev/core'
-import { AuthPage as AuthPageBase } from '@refinedev/core'
-import { cn } from '@utility/classNames'
-import styles from './auth-page.module.css'
-import BizzLogo from '@components/BizzLogo'
+"use client";
+import BizzLogo from "@components/BizzLogo";
+import type { AuthPageProps } from "@refinedev/core";
+import { AuthPage as AuthPageBase } from "@refinedev/core";
+import { cn } from "@utility/classNames";
+import styles from "./auth-page.module.css";
 
 export const AuthPage = (props: AuthPageProps) => {
 	return (
@@ -17,16 +17,16 @@ export const AuthPage = (props: AuthPageProps) => {
 			)}
 			wrapperProps={{
 				className: cn(
-					'w-screen h-screen flex items-center justify-center bg-grayUltraLight',
+					"w-screen h-screen flex items-center justify-center bg-grayUltraLight",
 				),
 			}}
 			contentProps={{
 				className: cn(
 					`w-full max-w-sm`,
-					'border border-grayMed bg-bg',
+					"border border-grayMed bg-bg",
 					styles.form,
 				),
 			}}
 		/>
-	)
-}
+	);
+};

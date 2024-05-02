@@ -1,28 +1,36 @@
-'use client'
+"use client";
 
-import { Combobox } from '@components/ui/combobox'
-import { useForm } from '@refinedev/react-hook-form'
-import { statusList } from '@utility/statusUtil'
-import dynamic from 'next/dynamic'
-import { forwardRef, useRef, useState } from 'react'
-import { SimpleMDEReactProps } from 'react-simplemde-editor'
+import { Combobox } from "@components/ui/combobox";
+import { useForm } from "@refinedev/react-hook-form";
+import type { FormErrorsType } from "@utility/formUtil";
+import { statusList } from "@utility/statusUtil";
+import dynamic from "next/dynamic";
+import { forwardRef, useRef, useState } from "react";
+import type { SimpleMDEReactProps } from "react-simplemde-editor";
 
 const DynamicEditor = dynamic(
-	async () => (await import('@components/ui/text-editor')).TextareaEditor,
+	async () => (await import("@components/ui/text-editor")).TextareaEditor,
 	{ ssr: false },
-)
+);
 const ForwardedEditor = forwardRef<HTMLDivElement, SimpleMDEReactProps>(
 	(props, ref) => <DynamicEditor forwardedRef={ref} {...props} />,
-)
-ForwardedEditor.displayName = 'ForwardedEditor'
+);
+ForwardedEditor.displayName = "ForwardedEditor";
 
 export default function ProjectCreate() {
-	const [status, setStatus] = useState('todo')
-	const [name, setName] = useState('')
-	const [description, setDescription] = useState('')
-	const [content, setContent] = useState('')
-	const last_modified = useRef(new Date().toISOString())
+	const [status, setStatus] = useState("todo");
+	const [name, setName] = useState("");
+	const [description, setDescription] = useState("");
+	const [content, setContent] = useState("");
+	const last_modified = useRef(new Date().toISOString());
 
+	const values = {
+		name,
+		description,
+		content,
+		status,
+		last_modified: last_modified.current,
+	};
 	const {
 		refineCore: { onFinish },
 		register,
@@ -30,22 +38,17 @@ export default function ProjectCreate() {
 		formState: { errors },
 	} = useForm({
 		refineCoreProps: {
-			resource: 'projects',
+			resource: "projects",
 			meta: {
-				select: '*',
+				select: "*",
 			},
 		},
-		values: {
-			name,
-			description,
-			content,
-			status,
-			last_modified: last_modified.current,
-		},
-	})
-	const statusProps = register('status', {
-		required: 'This field is required',
-	})
+		values,
+	});
+	const statusProps = register("status", {
+		required: "This field is required",
+	});
+	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
 		<form onSubmit={handleSubmit(onFinish)} id={`project-create-form`}>
@@ -54,40 +57,38 @@ export default function ProjectCreate() {
 					<span className="text-grayDark">Name</span>
 					<input
 						type="text"
-						{...register('name', {
-							required: 'This field is required',
+						{...register("name", {
+							required: "This field is required",
 						})}
 						placeholder="Enter name for your project"
 						onChange={(evt) => setName(evt.target.value)}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.title?.message as string}
-					</span>
+					<span style={{ color: "red" }}>{allErrors?.name?.message}</span>
 				</label>
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Description</span>
 					<input
 						type="text"
-						{...register('description', {
-							required: 'This field is required',
+						{...register("description", {
+							required: "This field is required",
 						})}
 						onChange={(evt) => setDescription(evt.target.value)}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.description?.message as string}
+					<span style={{ color: "red" }}>
+						{allErrors?.description?.message}
 					</span>
 				</label>
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Content</span>
 					<ForwardedEditor
-						{...register('content', {
-							required: 'This field is required',
+						{...register("content", {
+							required: "This field is required",
 						})}
 						value={content}
 						onChange={setContent}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.content?.message as string}
+					<span style={{ color: "red" }}>
+						{allErrors?.content?.message as string}
 					</span>
 				</label>
 				<label className="flex flex-col gap-2 w-fit">
@@ -99,11 +100,11 @@ export default function ProjectCreate() {
 						value={status}
 						onChange={setStatus}
 					/>
-					<span style={{ color: 'red' }}>
-						{(errors as any)?.status?.message as string}
+					<span style={{ color: "red" }}>
+						{allErrors?.status?.message as string}
 					</span>
 				</label>
 			</div>
 		</form>
-	)
+	);
 }

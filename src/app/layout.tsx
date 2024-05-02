@@ -1,38 +1,40 @@
-import { DevtoolsProvider } from '@providers/devtools'
-import { Refine } from '@refinedev/core'
-import { RefineKbar, RefineKbarProvider } from '@refinedev/kbar'
-import routerProvider from '@refinedev/nextjs-router'
-import { Metadata } from 'next'
-import React, { Suspense } from 'react'
+import { DevtoolsProvider } from "@providers/devtools";
+import { Refine } from "@refinedev/core";
+import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
+import routerProvider from "@refinedev/nextjs-router";
+import type { Metadata } from "next";
+import type React from "react";
+import { Suspense } from "react";
 
-import { authProvider } from '@providers/auth-provider'
-import { dataProvider } from '@providers/data-provider'
-import '@styles/global.css'
-import { cn } from '@utility/classNames'
-import { fungis, lobular } from '@utility/fonts'
-import NextTopLoader from 'nextjs-toploader'
+import { authProvider } from "@providers/auth-provider";
+import { dataProvider } from "@providers/data-provider";
+import "@styles/global.css";
+import { cn } from "@utility/classNames";
+import { fungis, lobular } from "@utility/fonts";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
-	title: 'Vogelibizz',
-	description: 'Daily business by vogelino',
+	title: "Vogelibizz",
+	description: "Daily business by vogelino",
 	icons: {
-		icon: '/favicon.ico',
+		icon: "/favicon.ico",
 	},
-}
+};
 
 export default function RootLayout({
 	children,
 }: Readonly<{
-	children: React.ReactNode
+	children: React.ReactNode;
 }>) {
 	return (
 		<html
 			lang="en"
-			className={cn(lobular.variable, fungis.variable, 'font-sans')}
+			className={cn(lobular.variable, fungis.variable, "font-sans")}
 			data-applied-mode="light"
 		>
 			<head>
 				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
 					dangerouslySetInnerHTML={{
 						__html: `
               function loadUserPrefTheme() {
@@ -47,13 +49,13 @@ export default function RootLayout({
               }
               loadUserPrefTheme()`,
 					}}
-				></script>
+				/>
 			</head>
 			<body>
 				<NextTopLoader
 					color="var(--fg)"
 					height={1}
-					shadow={''}
+					shadow={""}
 					showSpinner={false}
 					easing="ease-in-out"
 					speed={400}
@@ -67,31 +69,31 @@ export default function RootLayout({
 								dataProvider={dataProvider}
 								resources={[
 									{
-										name: 'projects',
-										list: '/projects',
-										create: '/projects/create',
-										edit: '/projects/edit/:id',
-										show: '/projects/show/:id',
+										name: "projects",
+										list: "/projects",
+										create: "/projects/create",
+										edit: "/projects/edit/:id",
+										show: "/projects/show/:id",
 										meta: {
 											canDelete: true,
 										},
 									},
 									{
-										name: 'clients',
-										list: '/clients',
-										create: '/clients/create',
-										edit: '/clients/edit/:id',
-										show: '/clients/show/:id',
+										name: "clients",
+										list: "/clients",
+										create: "/clients/create",
+										edit: "/clients/edit/:id",
+										show: "/clients/show/:id",
 										meta: {
 											canDelete: true,
 										},
 									},
 									{
-										name: 'expenses',
-										list: '/expenses',
-										create: '/expenses/create',
-										edit: '/expenses/edit/:id',
-										show: '/expenses/show/:id',
+										name: "expenses",
+										list: "/expenses",
+										create: "/expenses/create",
+										edit: "/expenses/edit/:id",
+										show: "/expenses/show/:id",
 										meta: {
 											canDelete: true,
 										},
@@ -101,7 +103,7 @@ export default function RootLayout({
 									syncWithLocation: true,
 									warnWhenUnsavedChanges: true,
 									useNewQueryKeys: true,
-									projectId: 'KAIuDr-qfjUWD-4P0y94',
+									projectId: "KAIuDr-qfjUWD-4P0y94",
 								}}
 							>
 								{children}
@@ -112,5 +114,5 @@ export default function RootLayout({
 				</Suspense>
 			</body>
 		</html>
-	)
+	);
 }

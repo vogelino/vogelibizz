@@ -1,5 +1,5 @@
-'use client'
-import * as React from 'react'
+"use client";
+import type * as React from "react";
 
 import {
 	Drawer,
@@ -8,9 +8,9 @@ import {
 	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
-} from '@/components/ui/drawer'
-import useMediaQuery from '@custom-react-hooks/use-media-query'
-import { cn } from '@utility/classNames'
+} from "@/components/ui/drawer";
+import useMediaQuery from "@custom-react-hooks/use-media-query";
+import { cn } from "@utility/classNames";
 
 export function ResponsiveModal({
 	children,
@@ -20,27 +20,27 @@ export function ResponsiveModal({
 	onClose,
 	open,
 }: React.PropsWithChildren<{
-	open: boolean
-	title?: React.ReactNode
-	description?: React.ReactNode
-	footer?: React.ReactNode
-	onClose?: () => void
+	open: boolean;
+	title?: React.ReactNode;
+	description?: React.ReactNode;
+	footer?: React.ReactNode;
+	onClose?: () => void;
 }>) {
-	const isDesktop = useMediaQuery('(min-width: 768px)')
+	const isDesktop = useMediaQuery("(min-width: 768px)");
 
 	return (
 		<Drawer
 			open={open}
-			direction={isDesktop ? 'right' : 'bottom'}
+			direction={isDesktop ? "right" : "bottom"}
 			onOpenChange={(open) => !open && onClose && onClose()}
 			activeSnapPoint={isDesktop ? undefined : 0}
 		>
 			<DrawerContent
 				className={cn(
 					`border-grayMed`,
-					isDesktop ? 'border-l' : 'border-t',
+					isDesktop ? "border-l" : "border-t",
 					isDesktop
-						? 'h-full w-[640px] mt-24 right-0'
+						? "h-full w-[640px] mt-24 right-0"
 						: `inset-x-0 z-50 mt-24 flex h-auto`,
 				)}
 			>
@@ -57,8 +57,8 @@ export function ResponsiveModal({
 				)}
 				<div
 					className={cn(
-						'p-6 overflow-auto',
-						isDesktop ? 'h-[calc(100vh-208px)]' : 'h-[calc(100%-208px)]',
+						"p-6 overflow-auto",
+						isDesktop ? "h-[calc(100vh-208px)]" : "h-[calc(100%-208px)]",
 					)}
 				>
 					{children}
@@ -66,5 +66,5 @@ export function ResponsiveModal({
 				{footer && <DrawerFooter>{footer}</DrawerFooter>}
 			</DrawerContent>
 		</Drawer>
-	)
+	);
 }

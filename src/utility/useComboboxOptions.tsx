@@ -1,9 +1,9 @@
-import { ReactNode, useRef } from 'react'
+import { type ReactNode, useRef } from "react";
 
 export type OptionType<T extends string> = {
-	label: ReactNode
-	value: T
-}
+	label: ReactNode;
+	value: T;
+};
 
 function useComboboxOptions<OptionValueType extends string = string>(
 	optionValues: OptionValueType[],
@@ -16,7 +16,7 @@ function useComboboxOptions<OptionValueType extends string = string>(
 			label: renderer(value),
 			value,
 		})),
-	).current
+	).current;
 }
 
-export default useComboboxOptions
+export default useComboboxOptions;

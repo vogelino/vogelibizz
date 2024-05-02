@@ -1,32 +1,32 @@
-'use client'
-import { ClientType } from '@db/schema'
-import { useShow } from '@refinedev/core'
-import React from 'react'
+"use client";
+import type { ClientType } from "@db/schema";
+import { useShow } from "@refinedev/core";
+import React from "react";
 
 function ClientDisplay({ id }: { id: string }) {
 	const { queryResult } = useShow({
-		resource: 'clients',
+		resource: "clients",
 		id,
-		meta: { select: '*' },
-	})
-	const isLoading = queryResult.isFetching
-	const record = queryResult.data?.data as ClientType | undefined
+		meta: { select: "*" },
+	});
+	const isLoading = queryResult.isFetching;
+	const record = queryResult.data?.data as ClientType | undefined;
 
 	if (isLoading) {
-		return <div>Loading...</div>
+		return <div>Loading...</div>;
 	}
 
 	if (!record) {
-		return <div>No project found</div>
+		return <div>No project found</div>;
 	}
 
-	const { name } = record
+	const { name } = record;
 
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col">{name}</div>
 		</div>
-	)
+	);
 }
 
-export default ClientDisplay
+export default ClientDisplay;

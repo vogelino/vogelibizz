@@ -1,6 +1,9 @@
-'use client'
+"use client";
 
-import { flexRender, type Table as ReactTableType } from '@tanstack/react-table'
+import {
+	type Table as ReactTableType,
+	flexRender,
+} from "@tanstack/react-table";
 
 import {
 	Table,
@@ -9,17 +12,17 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@/components/ui/table'
-import { Button } from '@components/ui/button'
-import { BaseRecord } from '@refinedev/core'
-import { UseTableReturnType } from '@refinedev/react-table'
-import { cn } from '@utility/classNames'
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+} from "@/components/ui/table";
+import { Button } from "@components/ui/button";
+import type { BaseRecord } from "@refinedev/core";
+import type { UseTableReturnType } from "@refinedev/react-table";
+import { cn } from "@utility/classNames";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 export function DataTable<RecordType extends BaseRecord>({
 	table,
 }: {
-	table: UseTableReturnType<RecordType> | ReactTableType<RecordType>
+	table: UseTableReturnType<RecordType> | ReactTableType<RecordType>;
 }) {
 	return (
 		<>
@@ -28,15 +31,15 @@ export function DataTable<RecordType extends BaseRecord>({
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
-								const { column } = header
-								const sort = column.getIsSorted()
-								const iconClass = cn('ml-2 h-4 w-4', sort && 'text-fg')
+								const { column } = header;
+								const sort = column.getIsSorted();
+								const iconClass = cn("ml-2 h-4 w-4", sort && "text-fg");
 								const label = header.isPlaceholder
 									? null
 									: flexRender(
 											header.column.columnDef.header,
 											header.getContext(),
-										)
+										);
 								return (
 									<TableHead
 										key={header.id}
@@ -47,18 +50,18 @@ export function DataTable<RecordType extends BaseRecord>({
 											<Button
 												variant="ghost"
 												onClick={column.getToggleSortingHandler()}
-												className={cn('-ml-4 hover:text-fg group')}
+												className={cn("-ml-4 hover:text-fg group")}
 											>
 												{label}
 												{!sort && <ArrowUpDown className={iconClass} />}
-												{sort === 'asc' && <ArrowDown className={iconClass} />}
-												{sort === 'desc' && <ArrowUp className={iconClass} />}
+												{sort === "asc" && <ArrowDown className={iconClass} />}
+												{sort === "desc" && <ArrowUp className={iconClass} />}
 											</Button>
 										) : (
 											label
 										)}
 									</TableHead>
-								)
+								);
 							})}
 						</TableRow>
 					))}
@@ -68,7 +71,7 @@ export function DataTable<RecordType extends BaseRecord>({
 						table.getRowModel().rows.map((row) => (
 							<TableRow
 								key={row.id}
-								data-state={row.getIsSelected() && 'selected'}
+								data-state={row.getIsSelected() && "selected"}
 							>
 								{row.getVisibleCells().map((cell) => (
 									<TableCell
@@ -93,5 +96,5 @@ export function DataTable<RecordType extends BaseRecord>({
 				</TableBody>
 			</Table>
 		</>
-	)
+	);
 }

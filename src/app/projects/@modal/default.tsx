@@ -1,7 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function DefaultModal() {
-	return null
+	return null;
 }
 
-export default DefaultModal
+export default DefaultModal;
