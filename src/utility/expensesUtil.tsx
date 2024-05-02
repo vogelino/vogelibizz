@@ -142,25 +142,34 @@ export async function getExchangeRates(
 		typeof base
 	>;
 
-	const json = z
-		.object({
-			disclamer: z.string(),
-			license: z.string(),
-			timestamp: z.number(),
-			base: z.string(),
-			rates: z.record(z.number()),
-		})
-		.parse(rawJson);
+	try {
+		const json = z
+			.object({
+				disclamer: z.string(),
+				license: z.string(),
+				timestamp: z.number(),
+				base: z.string(),
+				rates: z.record(z.number()),
+			})
+			.parse(rawJson);
 
-	let rates = json.rates;
-	if (base !== "USD") {
-		rates = Object.entries(json.rates).reduce(
-			(obj, [k, v]) => Object.assign(obj, { [k]: v / json.rates[base] }),
-			{} as RatesTypes,
-		);
+		let rates = json.rates;
+		if (base !== "USD") {
+			rates = Object.entries(json.rates).reduce(
+				(obj, [k, v]) => Object.assign(obj, { [k]: v / json.rates[base] }),
+				{} as RatesTypes,
+			);
+		}
+
+		return rates as RatesTypes;
+	} catch (err) {
+		console.log("Error parsing OpenExchangeRates response");
+		console.log("----------------------------------------");
+		console.log("API_ID: ", API_ID);
+		console.log("Error: ", err);
+		console.log("----------------------------------------");
+		return {} as RatesTypes;
 	}
-
-	return rates as RatesTypes;
 }
 
 export function getValueInCLPPerMonth({
