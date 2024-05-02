@@ -1,5 +1,5 @@
 import type { ExpenseType } from "@db/schema";
-import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
+import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { z } from "zod";
 
@@ -143,15 +143,7 @@ export async function getExchangeRates(
 	>;
 
 	try {
-		const json = z
-			.object({
-				disclamer: z.string(),
-				license: z.string(),
-				timestamp: z.number(),
-				base: z.string(),
-				rates: z.record(z.number()),
-			})
-			.parse(rawJson);
+		const json = z.object({ rates: z.record(z.number()) }).parse(rawJson);
 
 		let rates = json.rates;
 		if (base !== "USD") {
