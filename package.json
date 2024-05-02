@@ -6,7 +6,7 @@
     "node": "20.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 next dev", 
+    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 next dev",
     "build": "bun run check && next build",
     "start": "next start",
     "check": "bunx @biomejs/biome check --apply src",
@@ -43,7 +43,8 @@
     "react-currency-input-field": "3.8.0",
     "react-dom": "18.0.0",
     "react-simplemde-editor": "5.2.0",
-    "vaul": "0.9.0"
+    "vaul": "0.9.0",
+    "zod": "3.23.5"
   },
   "devDependencies": {
     "@biomejs/biome": "1.7.2",

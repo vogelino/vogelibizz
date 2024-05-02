@@ -1,6 +1,7 @@
 import type { ExpenseType } from "@db/schema";
-import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
+import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { z } from "zod";
 
 type TailwindColorType = string;
 
@@ -137,16 +138,29 @@ export async function getExchangeRates(
 	const res = await fetch(
 		`https://openexchangerates.org/api/latest.json?app_id=${API_ID}`,
 	);
-	const json = (await res.json()) as OpenExchangeRatesReturnType<typeof base>;
+	const rawJson = (await res.json()) as OpenExchangeRatesReturnType<
+		typeof base
+	>;
 
+	const json = z
+		.object({
+			disclamer: z.string(),
+			license: z.string(),
+			timestamp: z.number(),
+			base: z.string(),
+			rates: z.record(z.number()),
+		})
+		.parse(rawJson);
+
+	let rates = json.rates;
 	if (base !== "USD") {
-		json.rates = Object.entries(json.rates).reduce(
+		rates = Object.entries(json.rates).reduce(
 			(obj, [k, v]) => Object.assign(obj, { [k]: v / json.rates[base] }),
 			{} as RatesTypes,
 		);
 	}
 
-	return json.rates;
+	return rates as RatesTypes;
 }
 
 export function getValueInCLPPerMonth({
