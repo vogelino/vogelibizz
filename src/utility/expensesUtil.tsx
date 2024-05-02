@@ -1,5 +1,5 @@
 import { ExpenseType } from '@db/schema'
-import { Handshake, LucideIcon, User } from 'lucide-react'
+import { Handshake, ListChecks, LucideIcon, User } from 'lucide-react'
 import { ReactNode } from 'react'
 
 type TailwindColorType = string
@@ -41,8 +41,10 @@ export const categoryToColorClass = (
 	}
 }
 
-export const categoryToOptionClass = (
-	category: ExpenseType['category'],
+export const categoryToOptionClass = <
+	CatType extends string = ExpenseType['category'],
+>(
+	category: CatType,
 ): TailwindColorType => {
 	switch (category) {
 		case 'Charity':
@@ -74,12 +76,12 @@ export const categoryToOptionClass = (
 		case 'Travel':
 			return 'bg-emerald-500'
 		default:
-			return 'inherit'
+			return 'bg-gradient-to-r from-red-500 via-yellow-500 to-green-500'
 	}
 }
 
-export const typeToColorClass = (
-	type: ExpenseType['type'],
+export const typeToColorClass = <CatType extends string = ExpenseType['type']>(
+	type: CatType,
 ): TailwindColorType => {
 	switch (type) {
 		case 'Freelance':
@@ -91,8 +93,8 @@ export const typeToColorClass = (
 	}
 }
 
-const typeToOptionClass = (
-	type: ExpenseType['type'],
+const typeToOptionClass = <CatType extends string = ExpenseType['type']>(
+	type: CatType,
 	lighter = true,
 ): TailwindColorType => {
 	switch (type) {
@@ -105,15 +107,14 @@ const typeToOptionClass = (
 	}
 }
 
-const typeToIconMap: Record<ExpenseType['type'], LucideIcon> = {
+type IconKeyType = ExpenseType['type'] | 'All types'
+const typeToIconMap: Record<IconKeyType, LucideIcon> = {
+	'All types': ListChecks,
 	Freelance: Handshake,
 	Personal: User,
 }
 
-export const mapTypeToIcon = (
-	type: ExpenseType['type'],
-	size = 16,
-): ReactNode => {
+export const mapTypeToIcon = (type: IconKeyType, size = 16): ReactNode => {
 	const Icon = typeToIconMap[type] || (() => null)
 	return <Icon size={size} className={typeToOptionClass(type, false)} />
 }
