@@ -6,9 +6,9 @@
     "node": "20.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 refine dev",
-    "build": "bun run check && refine build",
-    "start": "refine start",
+    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 next dev", 
+    "build": "bun run check && next build",
+    "start": "next start",
     "check": "bunx @biomejs/biome check --apply src",
     "migrate": "bun run ./db/migrate.ts",
     "refine": "refine"
