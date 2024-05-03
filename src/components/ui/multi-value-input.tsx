@@ -16,7 +16,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
-import { type ReactNode, useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { IconBadge } from "./icon-badge";
 
 type OptionType<OptionValueType extends string = string> = {
@@ -122,7 +122,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 									</div>
 
 									<X
-										onClick={(evt) => {
+										onClick={() => {
 											setSelectedOptions([]);
 											onChange([]);
 											setOpen(false);
