@@ -1,5 +1,4 @@
-import { cn } from "@utility/classNames";
-import React from "react";
+import { cn } from "@/utility/classNames";
 
 type BizzLogoProps = {
 	className?: string;

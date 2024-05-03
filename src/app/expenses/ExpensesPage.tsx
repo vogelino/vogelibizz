@@ -1,24 +1,24 @@
 "use client";
 
-import { DataTable } from "@components/DataTable";
-import ExpenseCategoryBadge from "@components/ExpenseCategoryBadge";
-import { PillText } from "@components/PillText";
-import { Button } from "@components/ui/button";
-import { Combobox } from "@components/ui/combobox";
-import { MultiValueInput } from "@components/ui/multi-value-input";
-import { type ExpenseType, expenseCategory, expenseType } from "@db/schema";
-import { type LogicalFilter, useNavigation } from "@refinedev/core";
-import { useTable } from "@refinedev/react-table";
+import { DataTable } from "@/components/DataTable";
+import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
+import { PillText } from "@/components/PillText";
+import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
+import { MultiValueInput } from "@/components/ui/multi-value-input";
+import { expenseCategory, expenseType, type ExpenseType } from "@/db/schema";
 import {
-	type RatesTypes,
 	categoryToOptionClass,
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
-} from "@utility/expensesUtil";
-import { formatCurrency } from "@utility/formatUtil";
-import { useActionsColumn } from "@utility/useActionsColumn";
-import useComboboxOptions from "@utility/useComboboxOptions";
-import { useDefaultSort } from "@utility/useDefaultSort";
+	type RatesTypes,
+} from "@/utility/expensesUtil";
+import { formatCurrency } from "@/utility/formatUtil";
+import { useActionsColumn } from "@/utility/useActionsColumn";
+import useComboboxOptions from "@/utility/useComboboxOptions";
+import { useDefaultSort } from "@/utility/useDefaultSort";
+import { useNavigation, type LogicalFilter } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
 import { useCallback, useMemo } from "react";
 import { getExpensesTableColumns } from "./columns";
 

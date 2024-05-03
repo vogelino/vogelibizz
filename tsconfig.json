@@ -19,12 +19,17 @@
 			}
 		],
 		"paths": {
-			"@*": ["./src/*"],
-			"@pages/*": ["./pages/*"],
-			"@db/*": ["./db/*"]
+			"@/*": ["./src/*"],
+			"@/db/*": ["./db/*"]
 		},
 		"incremental": true
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts",
+		"node_modules/.cache/providers.tsx"
+	],
 	"exclude": ["node_modules"]
 }

@@ -1,8 +1,8 @@
 "use client";
-import BizzLogo from "@components/BizzLogo";
+import BizzLogo from "@/components/BizzLogo";
+import { cn } from "@/utility/classNames";
 import type { AuthPageProps } from "@refinedev/core";
 import { AuthPage as AuthPageBase } from "@refinedev/core";
-import { cn } from "@utility/classNames";
 import styles from "./auth-page.module.css";
 
 export const AuthPage = (props: AuthPageProps) => {

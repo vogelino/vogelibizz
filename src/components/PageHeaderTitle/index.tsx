@@ -1,5 +1,5 @@
-import { Badge } from "@components/ui/badge";
-import { cn } from "@utility/classNames";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/utility/classNames";
 
 function PageHeaderTitle({
 	name = "Edit expense",

@@ -15,11 +15,6 @@
 .toggle[aria-checked='false'] > .toggleWithin g path {
 	transform: scale(0.65);
 }
-.toggle {
-	border: none;
-	background: 0 0;
-	cursor: pointer;
-}
 @media (prefers-reduced-motion: reduce) {
 	.toggle:not(.toggleForceMotion) * {
 		transition: none !important;

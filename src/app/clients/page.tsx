@@ -1,14 +1,20 @@
 "use client";
 
-import { DataTable } from "@components/DataTable";
-import TablePagination from "@components/DataTable/table-pagination";
-import { Button } from "@components/ui/button";
-import type { ClientType } from "@db/schema";
+import { DataTable } from "@/components/DataTable";
+import TablePagination from "@/components/DataTable/table-pagination";
+import { Button } from "@/components/ui/button";
+import type { ClientType } from "@/db/schema";
+import useClients from "@/utility/data/useClients";
+import { useActionsColumn } from "@/utility/useActionsColumn";
+import { useDefaultSort } from "@/utility/useDefaultSort";
+import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useNavigation } from "@refinedev/core";
-import { useTable } from "@refinedev/react-table";
-import { useActionsColumn } from "@utility/useActionsColumn";
-import { useDefaultSort } from "@utility/useDefaultSort";
-import { useLastModifiedColumn } from "@utility/useLastModifiedColumn";
+import {
+	getCoreRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { clientTableColumns } from "./columns";
 
 const RESOURCE_NAME = "clients";
@@ -16,25 +22,18 @@ export default function ClientList() {
 	const { create } = useNavigation();
 	const actions = useActionsColumn<ClientType>(RESOURCE_NAME);
 	const lastModifiedColumn = useLastModifiedColumn<ClientType>();
+	const { data, isPending, error } = useClients();
 
 	const columns = [...clientTableColumns, lastModifiedColumn, actions];
 
-	const table = useTable({
+	const table = useReactTable({
 		columns,
-		refineCoreProps: {
-			resource: "clients",
-			meta: {
-				select: "*",
-			},
-		},
+		data: !error && data ? data : [],
+		getCoreRowModel: getCoreRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		getSortedRowModel: getSortedRowModel(),
 	});
-	const {
-		setOptions,
-		setSorting,
-		refineCore: {
-			tableQueryResult: { data: tableData },
-		},
-	} = table;
+	const { setOptions, setSorting } = table;
 
 	setOptions((prev) => ({
 		...prev,
@@ -54,7 +53,7 @@ export default function ClientList() {
 				</Button>
 			</div>
 			<div className="w-full mb-6">
-				{tableData && <DataTable table={table} />}
+				{!error && data?.length > 0 && <DataTable table={table} />}
 			</div>
 			<TablePagination {...table} />
 		</div>

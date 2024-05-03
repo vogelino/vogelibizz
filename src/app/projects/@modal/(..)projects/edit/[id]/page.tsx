@@ -1,7 +1,7 @@
-import EditResourceModal from "@components/EditResourceModal";
-import ProjectEdit from "@components/ProjectEdit";
-import type { ProjectType } from "@db/schema";
-import { supabaseClient } from "@utility/supabase-client";
+import EditResourceModal from "@/components/EditResourceModal";
+import ProjectEdit from "@/components/ProjectEdit";
+import type { ProjectType } from "@/db/schema";
+import { supabaseClient } from "@/utility/supabase-client";
 
 type ResourceType = ProjectType;
 const resource = "project";

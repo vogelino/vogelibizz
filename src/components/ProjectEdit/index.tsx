@@ -1,17 +1,17 @@
 "use client";
 
-import FormInputCombobox from "@components/FormInputCombobox";
-import FormInputWrapper from "@components/FormInputWrapper";
-import type { ProjectType } from "@db/schema";
+import FormInputCombobox from "@/components/FormInputCombobox";
+import FormInputWrapper from "@/components/FormInputWrapper";
+import type { ProjectType } from "@/db/schema";
+import type { FormErrorsType } from "@/utility/formUtil";
+import { statusList } from "@/utility/statusUtil";
 import { useForm } from "@refinedev/react-hook-form";
-import type { FormErrorsType } from "@utility/formUtil";
-import { statusList } from "@utility/statusUtil";
 import dynamic from "next/dynamic";
 import { forwardRef, useRef, useState } from "react";
 import type { SimpleMDEReactProps } from "react-simplemde-editor";
 
 const DynamicEditor = dynamic(
-	async () => (await import("@components/ui/text-editor")).TextareaEditor,
+	async () => (await import("@/components/ui/text-editor")).TextareaEditor,
 	{ ssr: false },
 );
 const ForwardedEditor = forwardRef<HTMLDivElement, SimpleMDEReactProps>(

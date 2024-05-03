@@ -1,6 +1,6 @@
-import type { ExpenseType } from "@db/schema";
-import { getExchangeRates } from "@utility/expensesUtil";
-import { supabaseClient } from "@utility/supabase-client";
+import type { ExpenseType } from "@/db/schema";
+import { getExchangeRates } from "@/utility/expensesUtil";
+import { supabaseClient } from "@/utility/supabase-client";
 import ExpensesPage from "./ExpensesPage";
 
 export default async function ClientList() {

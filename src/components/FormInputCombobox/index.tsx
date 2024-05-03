@@ -1,6 +1,6 @@
-import FormInputWrapper from "@components/FormInputWrapper";
-import { Combobox } from "@components/ui/combobox";
-import { cn } from "@utility/classNames";
+import FormInputWrapper from "@/components/FormInputWrapper";
+import { Combobox } from "@/components/ui/combobox";
+import { cn } from "@/utility/classNames";
 import type { HTMLProps, ReactNode } from "react";
 
 function FormInputCombobox<OptionValueType extends string>({

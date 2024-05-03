@@ -1,10 +1,11 @@
 "use client";
 
 import {
-	type Table as ReactTableType,
 	flexRender,
+	type Table as ReactTableType,
 } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -13,10 +14,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@components/ui/button";
+import { cn } from "@/utility/classNames";
 import type { BaseRecord } from "@refinedev/core";
 import type { UseTableReturnType } from "@refinedev/react-table";
-import { cn } from "@utility/classNames";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 export function DataTable<RecordType extends BaseRecord>({

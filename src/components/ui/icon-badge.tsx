@@ -1,4 +1,4 @@
-import { cn } from "@utility/classNames";
+import { cn } from "@/utility/classNames";
 import type { ReactNode } from "react";
 import { Badge, type BadgeProps } from "./badge";
 

@@ -1,8 +1,7 @@
 "use client";
-import HeaderMenuLink from "@components/menu/HeaderMenuLink";
+import HeaderMenuLink from "@/components/menu/HeaderMenuLink";
 import { useLogout } from "@refinedev/core";
 import { LogOut } from "lucide-react";
-import React from "react";
 
 function LogoutButton() {
 	const { mutate: logout } = useLogout();

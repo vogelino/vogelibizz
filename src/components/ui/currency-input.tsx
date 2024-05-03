@@ -1,9 +1,9 @@
-import FormInputWrapper from "@components/FormInputWrapper";
-import { type ExpenseType, currency as currencyEnum } from "@db/schema";
-import { cn } from "@utility/classNames";
-import { locale } from "@utility/formatUtil";
+import FormInputWrapper from "@/components/FormInputWrapper";
+import { currency as currencyEnum, type ExpenseType } from "@/db/schema";
+import { cn } from "@/utility/classNames";
+import { locale } from "@/utility/formatUtil";
 import { Banknote } from "lucide-react";
-import { type HTMLProps, type PropsWithChildren, useMemo } from "react";
+import { useMemo, type HTMLProps, type PropsWithChildren } from "react";
 import ReactCurrencyInput, {
 	type CurrencyInputProps,
 } from "react-currency-input-field";

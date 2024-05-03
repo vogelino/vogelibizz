@@ -1,7 +1,6 @@
 "use client";
-import type { ClientType } from "@db/schema";
+import type { ClientType } from "@/db/schema";
 import { useShow } from "@refinedev/core";
-import React from "react";
 
 function ClientDisplay({ id }: { id: string }) {
 	const { queryResult } = useShow({

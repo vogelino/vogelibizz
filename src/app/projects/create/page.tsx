@@ -1,9 +1,8 @@
-import FormPageLayout from "@components/FormPageLayout";
-import ProjectCreate from "@components/ProjectCreate";
-import { Button } from "@components/ui/button";
+import FormPageLayout from "@/components/FormPageLayout";
+import ProjectCreate from "@/components/ProjectCreate";
+import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { Link } from "next-view-transitions";
 
 export default function ProjectCreatePageRoute() {
 	return (

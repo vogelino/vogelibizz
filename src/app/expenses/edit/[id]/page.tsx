@@ -1,10 +1,10 @@
-import ExpenseEdit from "@components/ExpenseEdit";
-import FormPageLayout from "@components/FormPageLayout";
-import { Button } from "@components/ui/button";
-import type { ExpenseType } from "@db/schema";
-import { supabaseClient } from "@utility/supabase-client";
+import ExpenseEdit from "@/components/ExpenseEdit";
+import FormPageLayout from "@/components/FormPageLayout";
+import { Button } from "@/components/ui/button";
+import type { ExpenseType } from "@/db/schema";
+import { supabaseClient } from "@/utility/supabase-client";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 
 export default async function ExpenseEditPageRoute({
 	params: { id },

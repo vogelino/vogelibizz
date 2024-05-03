@@ -1,5 +1,5 @@
-import { PageLayout } from "@components/PageLayout";
-import { authProviderServer } from "@providers/auth-provider";
+import { PageLayout } from "@/components/PageLayout";
+import { authProviderServer } from "@/providers/auth-provider";
 import { redirect } from "next/navigation";
 import type React from "react";
 import type { ReactNode } from "react";

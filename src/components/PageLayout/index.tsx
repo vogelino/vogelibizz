@@ -1,5 +1,5 @@
 "use client";
-import Footer from "@components/Footer";
+import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";
 import type { PropsWithChildren, ReactNode } from "react";
 import { Breadcrumb } from "../breadcrumb";

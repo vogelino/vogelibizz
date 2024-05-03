@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import * as React from "react";
 
-import { type ButtonProps, buttonVariants } from "@/components/ui/button";
+import { buttonVariants, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/utility/classNames";
 import {
 	ChevronLeft,
@@ -142,11 +142,11 @@ PaginationEllipsis.displayName = "PaginationEllipsis";
 export {
 	Pagination,
 	PaginationContent,
-	PaginationLink,
-	PaginationItem,
-	PaginationPrevious,
-	PaginationNext,
 	PaginationEllipsis,
-	PaginationLast,
 	PaginationFirst,
+	PaginationItem,
+	PaginationLast,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
 };

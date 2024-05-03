@@ -1,10 +1,10 @@
-import { IconBadge } from "@components/ui/icon-badge";
-import type { ExpenseType } from "@db/schema";
-import { cn } from "@utility/classNames";
+import { IconBadge } from "@/components/ui/icon-badge";
+import type { ExpenseType } from "@/db/schema";
+import { cn } from "@/utility/classNames";
 import {
 	categoryToColorClass,
 	categoryToOptionClass,
-} from "@utility/expensesUtil";
+} from "@/utility/expensesUtil";
 
 function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 	value,

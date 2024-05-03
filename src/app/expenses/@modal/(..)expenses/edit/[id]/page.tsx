@@ -1,7 +1,7 @@
-import EditResourceModal from "@components/EditResourceModal";
-import ExpenseEdit from "@components/ExpenseEdit";
-import type { ExpenseType } from "@db/schema";
-import { supabaseClient } from "@utility/supabase-client";
+import EditResourceModal from "@/components/EditResourceModal";
+import ExpenseEdit from "@/components/ExpenseEdit";
+import type { ExpenseType } from "@/db/schema";
+import { supabaseClient } from "@/utility/supabase-client";
 
 export default async function ExpenseEditModalRoute({
 	params: { id },

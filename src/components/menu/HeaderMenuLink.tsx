@@ -1,6 +1,6 @@
-import { cn } from "@utility/classNames";
-import Link from "next/link";
-import React, { ReactElement, type ReactNode } from "react";
+import { cn } from "@/utility/classNames";
+import { Link } from "next-view-transitions";
+import type { ReactNode } from "react";
 
 function HeaderMenuLink({
 	as = Link,

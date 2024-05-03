@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
 import type { PopoverContentProps } from "@radix-ui/react-popover";
-import { type ReactNode, useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 export type ComboboxProps<OptionValueType extends string = string> = {
 	options: {
