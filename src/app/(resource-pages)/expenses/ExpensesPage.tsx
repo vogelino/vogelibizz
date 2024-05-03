@@ -8,23 +8,23 @@ import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { expenseCategory, expenseType } from "@/db/schema";
 import useExpenses, { type ExpenseType } from "@/utility/data/useExpenses";
 import {
+	type RatesTypes,
 	categoryToOptionClass,
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
-	type RatesTypes,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import type { LogicalFilter } from "@refinedev/core";
 import {
+	type ColumnFiltersState,
+	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnFiltersState,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { getExpensesTableColumns } from "./columns";
@@ -71,7 +71,10 @@ export default function ExpensesPage({
 		},
 	});
 
-	const totalPerMonth = useMemo(() => getTotalPerMonth(data, rates), [data, rates]);
+	const totalPerMonth = useMemo(
+		() => getTotalPerMonth(data, rates),
+		[data, rates],
+	);
 
 	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
 		expenseCategory.enumValues,
@@ -91,46 +94,34 @@ export default function ExpensesPage({
 	);
 
 	const typeFilter = useMemo(() => {
-		const typeFilterValue = columnFilters.find(
-			(f) => f.id === "type",
-		);
+		const typeFilterValue = columnFilters.find((f) => f.id === "type");
 		return typeFilterValue as
 			| (Omit<LogicalFilter, "value"> & { value: ExpenseType["type"] })
 			| undefined;
 	}, [columnFilters]);
 
-	const setType = useCallback(
-		(type: TypeFilterType) => {
-			setFilters((prev) => {
-				const otherFilters = prev.filter(
-					(f) => f.id !== "type",
-				);
-				if (type === "All types") return otherFilters;
-				return [
-					...otherFilters,
-					{ id: "type", value: type },
-				];
-			});
-		},
-		[setFilters],
-	);
+	const setType = useCallback((type: TypeFilterType) => {
+		setFilters((prev) => {
+			const otherFilters = prev.filter((f) => f.id !== "type");
+			if (type === "All types") return otherFilters;
+			return [...otherFilters, { id: "type", value: type }];
+		});
+	}, []);
 
-	const categoryFilter = useMemo(() => columnFilters.filter((f) => f.id === "category"), [columnFilters]);
+	const categoryFilter = useMemo(
+		() => columnFilters.filter((f) => f.id === "category"),
+		[columnFilters],
+	);
 
 	const setCategoryFilter = useCallback(
 		(categories: ExpenseType["category"][]) => {
 			setFilters((prev) => {
-				const otherFilters = prev.filter(
-					(f) => f.id !== "category",
-				);
+				const otherFilters = prev.filter((f) => f.id !== "category");
 				if (categories.length === 0) return otherFilters;
-				return [
-					...otherFilters,
-					{ id: "category", value: categories },
-				];
+				return [...otherFilters, { id: "category", value: categories }];
 			});
 		},
-		[setFilters],
+		[],
 	);
 
 	const categoryValues = categoryFilter[0]?.value as ExpenseType["category"][];
@@ -164,15 +155,15 @@ export default function ExpensesPage({
 	);
 }
 
-function getTotalPerMonth(data: ExpenseType[], rates: RatesTypes ) {
-		const total = data?.reduce((a, b) => {
-			const monthlyPrice = getValueInCLPPerMonth({
-				value: b.price,
-				currency: b.original_currency,
-				rates,
-				billingRate: b.rate,
-			});
-			return a + (monthlyPrice ?? 0);
-		}, 0);
-		return total ? formatCurrency(total) : "–";
+function getTotalPerMonth(data: ExpenseType[], rates: RatesTypes) {
+	const total = data?.reduce((a, b) => {
+		const monthlyPrice = getValueInCLPPerMonth({
+			value: b.price,
+			currency: b.original_currency,
+			rates,
+			billingRate: b.rate,
+		});
+		return a + (monthlyPrice ?? 0);
+	}, 0);
+	return total ? formatCurrency(total) : "–";
 }
