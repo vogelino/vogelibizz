@@ -15,7 +15,7 @@ import { cn } from "./classNames";
 
 export function useActionsColumn<ColumnType = unknown>(
 	resource: ResourceType,
-): ColumnDef<ColumnType> {
+): ColumnDef<ColumnType, any> {
 	const { show, edit } = useNavigation();
 	const { mutate: remove } = useDelete();
 	return {

@@ -11,7 +11,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 
 export function useLastModifiedColumn<
 	ColumnType extends BaseRecord,
->(): ColumnDef<ColumnType> {
+>(): ColumnDef<ColumnType, any> {
 	return {
 		id: "last_modified",
 		accessorKey: "last_modified",
