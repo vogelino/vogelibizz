@@ -1,5 +1,5 @@
 import type { ExpenseType } from "@/db/schema";
-import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
+import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { z } from "zod";
 

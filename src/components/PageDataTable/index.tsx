@@ -8,12 +8,12 @@ import { useActionsColumn } from "@/utility/useActionsColumn";
 import { useDefaultSort } from "@/utility/useDefaultSort";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {
+	type ColumnDef,
+	type SortingState,
 	getCoreRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnDef,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 

@@ -5,10 +5,10 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
+	type ExpenseType,
 	expenseCategory,
 	expenseRate,
 	expenseType,
-	type ExpenseType,
 } from "@/db/schema";
 import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
 import type { FormErrorsType } from "@/utility/formUtil";

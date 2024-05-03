@@ -1,10 +1,10 @@
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import { ProjectType } from "@/utility/data/useProjects";
+import type { ProjectType } from "@/utility/data/useProjects";
 import {
+	type StatusType,
 	mapStatusToIcon,
 	mapStatusToLabel,
-	type StatusType,
 } from "@/utility/statusUtil";
 import { createColumnHelper } from "@tanstack/react-table";
 
