@@ -1,14 +1,14 @@
 "use client";
 
-import { DataTable } from "@components/DataTable";
-import TablePagination from "@components/DataTable/table-pagination";
-import { Button } from "@components/ui/button";
-import type { ProjectType } from "@db/schema";
+import { DataTable } from "@/components/DataTable";
+import TablePagination from "@/components/DataTable/table-pagination";
+import { Button } from "@/components/ui/button";
+import type { ProjectType } from "@/db/schema";
+import { useActionsColumn } from "@/utility/useActionsColumn";
+import { useDefaultSort } from "@/utility/useDefaultSort";
+import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useNavigation } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
-import { useActionsColumn } from "@utility/useActionsColumn";
-import { useDefaultSort } from "@utility/useDefaultSort";
-import { useLastModifiedColumn } from "@utility/useLastModifiedColumn";
 import { projectTableColumns } from "./columns";
 
 const RESOURCE_NAME = "projects";

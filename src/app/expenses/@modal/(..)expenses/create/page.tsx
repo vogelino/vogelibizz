@@ -1,5 +1,5 @@
-import EditResourceModal from "@components/EditResourceModal";
-import ExpenseEdit from "@components/ExpenseEdit";
+import EditResourceModal from "@/components/EditResourceModal";
+import ExpenseEdit from "@/components/ExpenseEdit";
 
 export default async function ExpenseCreateModalRoute() {
 	return (

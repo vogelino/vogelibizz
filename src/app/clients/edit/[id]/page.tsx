@@ -1,8 +1,8 @@
-import ClientEdit from "@components/ClientEdit";
-import FormPageLayout from "@components/FormPageLayout";
-import { Button } from "@components/ui/button";
+import ClientEdit from "@/components/ClientEdit";
+import FormPageLayout from "@/components/FormPageLayout";
+import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 
 export default function ClientEditPageRoute({
 	params: { id },

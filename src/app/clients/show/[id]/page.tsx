@@ -1,8 +1,8 @@
-import ClientDisplay from "@components/ClientDisplay";
-import FormPageLayout from "@components/FormPageLayout";
-import { Button } from "@components/ui/button";
+import ClientDisplay from "@/components/ClientDisplay";
+import FormPageLayout from "@/components/FormPageLayout";
+import { Button } from "@/components/ui/button";
 import { PencilIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 
 export default function ClientShow({
 	params: { id },

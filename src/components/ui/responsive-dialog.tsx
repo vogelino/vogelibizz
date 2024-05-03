@@ -9,8 +9,8 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "@/components/ui/drawer";
+import { cn } from "@/utility/classNames";
 import useMediaQuery from "@custom-react-hooks/use-media-query";
-import { cn } from "@utility/classNames";
 
 export function ResponsiveModal({
 	children,

@@ -1,9 +1,9 @@
 "use client";
-import PageHeaderTitle from "@components/PageHeaderTitle";
-import { Button } from "@components/ui/button";
-import { ResponsiveModal } from "@components/ui/responsive-dialog";
+import PageHeaderTitle from "@/components/PageHeaderTitle";
+import { Button } from "@/components/ui/button";
+import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { usePathname, useRouter } from "next/navigation";
 import type { PropsWithChildren } from "react";
 

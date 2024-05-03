@@ -1,8 +1,8 @@
-import BizzLogo from "@components/BizzLogo";
-import LogoutButton from "@components/LogoutButton";
-import ThemeToggle from "@components/ThemeToggle";
-import { cn } from "@utility/classNames";
-import Link from "next/link";
+import BizzLogo from "@/components/BizzLogo";
+import LogoutButton from "@/components/LogoutButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import { cn } from "@/utility/classNames";
+import { Link } from "next-view-transitions";
 import HeaderMenuLink from "./HeaderMenuLink";
 
 export const Menu = ({

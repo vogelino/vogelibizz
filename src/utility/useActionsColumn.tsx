@@ -7,7 +7,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { ResourceType } from "@db/schema";
+import type { ResourceType } from "@/db/schema";
 import { useDelete, useNavigation } from "@refinedev/core";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";

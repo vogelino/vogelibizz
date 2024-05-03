@@ -1,8 +1,8 @@
 "use client";
-import { IconBadge } from "@components/ui/icon-badge";
-import type { ProjectType } from "@db/schema";
+import { IconBadge } from "@/components/ui/icon-badge";
+import type { ProjectType } from "@/db/schema";
+import { mapStatusToIcon, mapStatusToLabel } from "@/utility/statusUtil";
 import { useShow } from "@refinedev/core";
-import { mapStatusToIcon, mapStatusToLabel } from "@utility/statusUtil";
 import Markdown from "marked-react";
 
 function ProjectDisplay({ id }: { id: string }) {

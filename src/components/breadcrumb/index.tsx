@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/utility/classNames";
 import { useBreadcrumb } from "@refinedev/core";
-import { cn } from "@utility/classNames";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 
 export const Breadcrumb = () => {
 	const { breadcrumbs } = useBreadcrumb();

@@ -1,4 +1,4 @@
-import type { ProjectType } from "@db/schema";
+import type { ProjectType } from "@/db/schema";
 import {
 	CheckCircle2,
 	Circle,

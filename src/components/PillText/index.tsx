@@ -1,4 +1,4 @@
-import { cn } from "@utility/classNames";
+import { cn } from "@/utility/classNames";
 import type { PropsWithChildren } from "react";
 
 export function PillText({

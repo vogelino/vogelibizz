@@ -1,14 +1,14 @@
-import ExpenseCategoryBadge from "@components/ExpenseCategoryBadge";
-import { IconBadge } from "@components/ui/icon-badge";
-import InternalLink from "@components/ui/internal-link";
-import type { ExpenseType } from "@db/schema";
-import { createColumnHelper } from "@tanstack/react-table";
+import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
+import { IconBadge } from "@/components/ui/icon-badge";
+import InternalLink from "@/components/ui/internal-link";
+import type { ExpenseType } from "@/db/schema";
 import {
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
 	typeToColorClass,
-} from "@utility/expensesUtil";
-import { formatCurrency } from "@utility/formatUtil";
+} from "@/utility/expensesUtil";
+import { formatCurrency } from "@/utility/formatUtil";
+import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ExpenseType>();
 

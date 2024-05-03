@@ -1,12 +1,12 @@
-import { IconBadge } from "@components/ui/icon-badge";
-import InternalLink from "@components/ui/internal-link";
-import type { ProjectType } from "@db/schema";
-import { createColumnHelper } from "@tanstack/react-table";
+import { IconBadge } from "@/components/ui/icon-badge";
+import InternalLink from "@/components/ui/internal-link";
+import type { ProjectType } from "@/db/schema";
 import {
-	type StatusType,
 	mapStatusToIcon,
 	mapStatusToLabel,
-} from "@utility/statusUtil";
+	type StatusType,
+} from "@/utility/statusUtil";
+import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ProjectType>();
 

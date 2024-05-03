@@ -1,12 +1,12 @@
 "use client";
-import ClientDisplay from "@components/ClientDisplay";
-import PageHeaderTitle from "@components/PageHeaderTitle";
-import { Button } from "@components/ui/button";
-import { ResponsiveModal } from "@components/ui/responsive-dialog";
-import type { ClientType } from "@db/schema";
+import ClientDisplay from "@/components/ClientDisplay";
+import PageHeaderTitle from "@/components/PageHeaderTitle";
+import { Button } from "@/components/ui/button";
+import { ResponsiveModal } from "@/components/ui/responsive-dialog";
+import type { ClientType } from "@/db/schema";
 import { useShow } from "@refinedev/core";
 import { PencilIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function ClientShow({

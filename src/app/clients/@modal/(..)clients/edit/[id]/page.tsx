@@ -1,12 +1,12 @@
 "use client";
-import ClientEdit from "@components/ClientEdit";
-import PageHeaderTitle from "@components/PageHeaderTitle";
-import { Button } from "@components/ui/button";
-import { ResponsiveModal } from "@components/ui/responsive-dialog";
-import type { ClientType } from "@db/schema";
+import ClientEdit from "@/components/ClientEdit";
+import PageHeaderTitle from "@/components/PageHeaderTitle";
+import { Button } from "@/components/ui/button";
+import { ResponsiveModal } from "@/components/ui/responsive-dialog";
+import type { ClientType } from "@/db/schema";
 import { useShow } from "@refinedev/core";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function ClientEditModalRoute({

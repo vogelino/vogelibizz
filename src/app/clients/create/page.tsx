@@ -1,9 +1,8 @@
-import ClientCreate from "@components/ClientCreate";
-import FormPageLayout from "@components/FormPageLayout";
-import { Button } from "@components/ui/button";
+import ClientCreate from "@/components/ClientCreate";
+import FormPageLayout from "@/components/FormPageLayout";
+import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { Link } from "next-view-transitions";
 
 export default function ClientCreatePageRoute() {
 	return (

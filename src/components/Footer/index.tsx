@@ -1,7 +1,7 @@
 "use client";
 
-import BizzLogo from "@components/BizzLogo";
-import { cn } from "@utility/classNames";
+import BizzLogo from "@/components/BizzLogo";
+import { cn } from "@/utility/classNames";
 import { ArrowUp } from "lucide-react";
 
 const year = new Date().getFullYear();

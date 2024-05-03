@@ -1,4 +1,4 @@
-import type { ExpenseType } from "@db/schema";
+import type { ExpenseType } from "@/db/schema";
 import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { z } from "zod";
