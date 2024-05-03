@@ -144,6 +144,5 @@ export {
 	PaginationLast,
 	PaginationLink,
 	PaginationNext,
-	PaginationPrevious
+	PaginationPrevious,
 };
-
