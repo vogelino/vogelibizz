@@ -1,20 +1,21 @@
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ExpenseType } from "@/db/schema";
+import type { ExpenseType } from "@/utility/data/useExpenses";
 import {
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
 	typeToColorClass,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ExpenseType>();
 
 export const getExpensesTableColumns = (
 	rates: null | Record<ExpenseType["original_currency"], number>,
-) => [
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): ColumnDef<ExpenseType, any>[] => [
 	columnHelper.accessor("name", {
 		id: "name",
 		size: 1000,
@@ -90,6 +91,11 @@ export const getExpensesTableColumns = (
 			const value = getValue<ExpenseType["category"]>();
 			return <ExpenseCategoryBadge value={value} />;
 		},
+		filterFn: (row, columnId, filterValue) => {
+			const filterValues = filterValue as ExpenseType["category"][];
+			console.log('filterValues', filterValues)
+			return filterValues.includes(row.getValue(columnId));
+		}
 	}),
 	columnHelper.accessor("type", {
 		id: "type",

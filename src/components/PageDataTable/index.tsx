@@ -5,15 +5,14 @@ import TablePagination from "@/components/DataTable/table-pagination";
 import type { ResourceType } from "@/db/schema";
 import type { ProjectType } from "@/utility/data/useProjects";
 import { useActionsColumn } from "@/utility/useActionsColumn";
-import { useDefaultSort } from "@/utility/useDefaultSort";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {
-	type ColumnDef,
-	type SortingState,
 	getCoreRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnDef,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 
@@ -51,11 +50,15 @@ export default function PageDataTable<
 		onSortingChange: setSorting,
 		state: { sorting },
 		initialState: {
+			sorting: [
+				{
+					id: defaultSortColumn,
+					desc: true,
+				},
+			],
 			pagination: { pageIndex: 0, pageSize: 50 },
 		},
 	});
-
-	useDefaultSort({ setSorting, defaultColumnId: defaultSortColumn });
 
 	return (
 		<>
