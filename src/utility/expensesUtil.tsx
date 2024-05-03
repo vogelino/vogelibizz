@@ -1,5 +1,5 @@
 import type { ExpenseType } from "@db/schema";
-import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
+import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { z } from "zod";
 
@@ -199,6 +199,9 @@ export function getValueInCLPPerMonth({
 				break;
 			case "Bi-Yearly":
 				monthlyPrice /= 24;
+				break;
+			case "Tri-Yearly":
+				monthlyPrice /= 36;
 				break;
 			case "Hourly":
 				monthlyPrice = (monthlyPrice * 24 * 365) / 12;
