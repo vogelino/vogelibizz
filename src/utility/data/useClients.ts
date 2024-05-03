@@ -1,29 +1,21 @@
 import { supabaseClient } from "@/utility/supabase-client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { z } from "zod";
+import { handleSupabaseResponse } from "./supabaseUtil";
 
-const ClientZodSchema = z.object({
+export const ClientZodSchema = z.object({
   id: z.number(),
   name: z.string(),
   created_at: z.string(),
   last_modified: z.string(),
 });
+export type ClientType = z.infer<typeof ClientZodSchema>;
 
 function useClients() {
   const queryKey = ["clients"];
   const { data, isPending, error } = useSuspenseQuery({
     queryKey,
-    queryFn: async () => {
-      const clientsRes = await supabaseClient.from("clients").select("*");
-
-      if (clientsRes.error) throw new Error(clientsRes.error.message);
-
-      if (clientsRes.status !== 200) throw new Error(clientsRes.statusText);
-
-      const parsedClients = z.array(ClientZodSchema).parse(clientsRes.data);
-
-      return parsedClients;
-    },
+    queryFn: getClients,
   });
 
   return {
@@ -31,6 +23,14 @@ function useClients() {
     isPending,
     error,
   };
+}
+
+export async function getClients() {
+  const response = await supabaseClient.from("clients").select("*");
+  return handleSupabaseResponse({
+    response,
+    schema: ClientZodSchema.array(),
+  });
 }
 
 export default useClients;

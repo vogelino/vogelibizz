@@ -1,10 +1,12 @@
 import InternalLink from "@/components/ui/internal-link";
-import type { ClientType } from "@/db/schema";
-import { createColumnHelper } from "@tanstack/react-table";
+import type { ClientType } from "@/utility/data/useClients";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type ColumnsType<T> = ColumnDef<T, any>;
 
-export const clientTableColumns = [
+export const clientTableColumns: ColumnsType<ClientType>[] = [
 	columnHelper.accessor("id", {
 		size: 50,
 		minSize: 50,

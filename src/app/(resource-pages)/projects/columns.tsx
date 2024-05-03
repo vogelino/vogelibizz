@@ -1,6 +1,6 @@
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ProjectType } from "@/db/schema";
+import { ProjectType } from "@/utility/data/useProjects";
 import {
 	mapStatusToIcon,
 	mapStatusToLabel,
