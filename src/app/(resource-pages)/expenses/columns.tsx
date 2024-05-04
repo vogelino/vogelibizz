@@ -8,7 +8,7 @@ import {
 	typeToColorClass,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ExpenseType>();
 
@@ -93,7 +93,6 @@ export const getExpensesTableColumns = (
 		},
 		filterFn: (row, columnId, filterValue) => {
 			const filterValues = filterValue as ExpenseType["category"][];
-			console.log("filterValues", filterValues);
 			return filterValues.includes(row.getValue(columnId));
 		},
 	}),
