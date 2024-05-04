@@ -8,7 +8,7 @@ import {
 	typeToColorClass,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ExpenseType>();
 
