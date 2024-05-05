@@ -1,12 +1,11 @@
 import db from "@/db";
+import serverQueryClient from "@/utility/data/serverQueryClient";
 import { getExchangeRates } from "@/utility/expensesUtil";
-import { QueryClient } from "@tanstack/react-query";
 import ExpensesPage from "./ExpensesPage";
 
 export default async function ExpensesPageServer() {
 	const rates = await getExchangeRates();
-	const queryClient = new QueryClient();
-	queryClient.prefetchQuery({
+	serverQueryClient.prefetchQuery({
 		queryKey: ["clients"],
 		queryFn: () => db.query.expenses.findMany(),
 	});
