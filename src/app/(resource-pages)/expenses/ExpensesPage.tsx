@@ -6,34 +6,33 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
+	type ExpenseType,
 } from "@/db/schema";
+import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
 import {
-	type RatesTypes,
 	categoryToOptionClass,
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
+	type RatesTypes,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { getExpensesTableColumns } from "./columns";
-
-const RESOURCE_NAME = "expenses";
 
 type TypeFilterType = ExpenseType["type"] | "All types";
 
@@ -42,7 +41,10 @@ export default function ExpensesPage({
 }: {
 	rates: RatesTypes;
 }) {
-	const actions = useActionsColumn<ExpenseType>(RESOURCE_NAME);
+	const deleteMutation = useExpenseDelete();
+	const actions = useActionsColumn<ExpenseType>((id) =>
+		deleteMutation.mutate(id),
+	);
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setFilters] = useState<ColumnFiltersState>([]);
 	const { data, error } = useExpenses();
@@ -65,7 +67,7 @@ export default function ExpensesPage({
 		onColumnFiltersChange: setFilters,
 		state: { sorting, columnFilters },
 		initialState: {
-			pagination: { pageIndex: 0, pageSize: 50 },
+			pagination: { pageIndex: 0, pageSize: 1000 },
 			sorting: [
 				{
 					id: "last_modified",

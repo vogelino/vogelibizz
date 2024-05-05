@@ -38,6 +38,8 @@ export const categoryToColorClass = (
 			return "bg-violet-500/5 border-violet-500/20 text-violet-700 dark:text-grayDark";
 		case "Travel":
 			return "bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-grayDark";
+		case "Administrative":
+			return "bg-sky-500/5 border-sky-500/20 text-sky-700 dark:text-grayDark";
 		default:
 			return "inherit";
 	}
@@ -77,6 +79,8 @@ export const categoryToOptionClass = <
 			return "bg-violet-500";
 		case "Travel":
 			return "bg-emerald-500";
+		case "Administrative":
+			return "bg-sky-500";
 		default:
 			return "bg-gradient-to-r from-red-500 via-yellow-500 to-green-500";
 	}
