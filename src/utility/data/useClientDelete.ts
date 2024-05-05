@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientType } from "@/db/schema";
+import type { ClientType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { clientsQueryKey } from "./useClients";

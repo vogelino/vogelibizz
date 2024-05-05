@@ -1,5 +1,5 @@
 import db from "@/db";
-import { expenses } from "@/db/schema";
+import { expenseSelectSchema, expenses } from "@/db/schema";
 import { getMutationRouteWithId, getQueryRouteWithId } from "@/utility/apiUtil";
 import { eq } from "drizzle-orm";
 
@@ -12,4 +12,9 @@ export const GET = getQueryRouteWithId(
 
 export const DELETE = getMutationRouteWithId(
   async (id) => await db.delete(expenses).where(eq(expenses.id, id))
+);
+
+export const PATCH = getMutationRouteWithId(
+  (id, body) => db.update(expenses).set(body).where(eq(expenses.id, id)),
+  expenseSelectSchema
 );

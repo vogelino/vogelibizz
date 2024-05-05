@@ -3,7 +3,7 @@ import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 function useProject(id: number | undefined) {
-  const queryKey = ["project", id];
+  const queryKey = ["projects", id];
   const { data, isPending, error } = useSuspenseQuery({
     queryKey,
     queryFn: () => getProject(id),

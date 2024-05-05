@@ -28,14 +28,24 @@ export async function handleNotFoundDbQuery<T>(data: T, notFoundMessage = "") {
 
 const RouteWithIdSchema = z.object({ id: z.coerce.number() });
 
-export function getMutationRouteWithId(
-  mutateData: (id: number) => Promise<unknown>
+export function getMutationRouteWithId<T>(
+  mutateData: (
+    id: number,
+    body: T extends z.AnyZodObject ? z.infer<T> : undefined
+  ) => Promise<unknown>,
+  bodySchema?: T extends z.AnyZodObject ? T : undefined
 ) {
-  return auth(async (_req, { params }) => {
+  return auth(async (req, { params }) => {
     const { id, error } = await validateParams(params, RouteWithIdSchema);
     if (error) return NextResponse.json({ error }, { status: 400 });
+    let body;
+    if (bodySchema) {
+      const bodyJson = await req.json();
+      body = await validateParams(bodyJson, bodySchema);
+    }
     try {
-      return NextResponse.json(await mutateData(id));
+      await mutateData(id, body);
+      return NextResponse.json({ success: true }, { status: 200 });
     } catch (err) {
       return NextResponse.json({ error: err }, { status: 500 });
     }
