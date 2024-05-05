@@ -5,16 +5,16 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
+	type ExpenseType,
 } from "@/db/schema";
 import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
 import type { FormErrorsType } from "@/utility/formUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import { useForm } from "@refinedev/react-hook-form";
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function ExpenseEdit({
 	id,
@@ -54,12 +54,10 @@ export default function ExpenseEdit({
 		rate,
 	};
 	const {
-		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		refineCoreProps: { resource: "expenses", id, meta: { select: "*" } },
 		values,
 	});
 
@@ -86,7 +84,11 @@ export default function ExpenseEdit({
 	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={formId} className="@container">
+		<form
+			onSubmit={handleSubmit(console.log)}
+			id={formId}
+			className="@container"
+		>
 			<div className="flex flex-col gap-6">
 				<FormInputWrapper
 					label="Name"

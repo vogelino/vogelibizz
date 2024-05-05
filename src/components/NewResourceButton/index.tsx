@@ -1,5 +1,6 @@
 "use client";
-import { useNavigation } from "@refinedev/core";
+import type { ResourceType } from "@/db/schema";
+import { Link } from "next-view-transitions";
 import { Button } from "../ui/button";
 
 function ResourceButton({
@@ -7,16 +8,13 @@ function ResourceButton({
 	action: actionName,
 }: {
 	resource: string;
-	action: keyof Pick<
-		ReturnType<typeof useNavigation>,
-		"create" | "show" | "edit"
-	>;
+	action: ResourceType;
 }) {
-	const navigation = useNavigation();
-	const action = navigation[actionName];
 	return (
-		<Button variant="outline" onClick={() => action(resource, "push")}>
-			{ucFirst(actionName)} {resource.toLocaleLowerCase().replace(/s$/, "")}
+		<Button variant="outline" asChild>
+			<Link href={`/${resource}/${actionName}`}>
+				{ucFirst(actionName)} {resource.toLocaleLowerCase().replace(/s$/, "")}
+			</Link>
 		</Button>
 	);
 }

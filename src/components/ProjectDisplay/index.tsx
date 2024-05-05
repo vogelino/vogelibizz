@@ -1,28 +1,16 @@
 "use client";
 import { IconBadge } from "@/components/ui/icon-badge";
-import type { ProjectType } from "@/db/schema";
+import useProject from "@/utility/data/useProject";
 import { mapStatusToIcon, mapStatusToLabel } from "@/utility/statusUtil";
-import { useShow } from "@refinedev/core";
 import Markdown from "marked-react";
 
 function ProjectDisplay({ id }: { id: string }) {
-	const { queryResult } = useShow({
-		resource: "projects",
-		id,
-		meta: { select: "*" },
-	});
-	const isLoading = queryResult.isFetching;
-	const record = queryResult.data?.data as ProjectType | undefined;
+	const { data, isPending } = useProject(+id);
 
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
+	if (isPending) return <div>Loading...</div>;
+	if (!data) return <div>No project found</div>;
 
-	if (!record) {
-		return <div>No project found</div>;
-	}
-
-	const { description, content, status } = record;
+	const { description, content, status } = data;
 
 	return (
 		<div className="flex flex-col gap-4">

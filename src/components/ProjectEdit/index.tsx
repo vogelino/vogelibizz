@@ -5,9 +5,9 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import type { ProjectType } from "@/db/schema";
 import type { FormErrorsType } from "@/utility/formUtil";
 import { statusList } from "@/utility/statusUtil";
-import { useForm } from "@refinedev/react-hook-form";
 import dynamic from "next/dynamic";
 import { forwardRef, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import type { SimpleMDEReactProps } from "react-simplemde-editor";
 
 const DynamicEditor = dynamic(
@@ -44,18 +44,10 @@ export default function ProjectEdit({
 		content,
 	};
 	const {
-		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		refineCoreProps: {
-			resource: "projects",
-			id,
-			meta: {
-				select: "*",
-			},
-		},
 		values,
 	});
 	const statusProps = register("status", {
@@ -64,7 +56,7 @@ export default function ProjectEdit({
 	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={formId}>
+		<form onSubmit={handleSubmit(console.log)} id={formId}>
 			<div className="flex flex-col gap-4">
 				<FormInputWrapper label="Name" error={allErrors?.name?.message}>
 					<input

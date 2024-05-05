@@ -3,8 +3,7 @@ import ClientDisplay from "@/components/ClientDisplay";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
-import type { ClientType } from "@/db/schema";
-import { useShow } from "@refinedev/core";
+import useClient from "@/utility/data/useClient";
 import { PencilIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,16 +15,11 @@ export default function ClientShow({
 }) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { queryResult } = useShow({
-		resource: "clients",
-		id,
-		meta: { select: "*" },
-	});
-	const record = queryResult.data?.data as ClientType | undefined;
+	const { data } = useClient(+id);
 	return (
 		<ResponsiveModal
 			open={pathname === `/clients/show/${id}`}
-			title={<PageHeaderTitle name={record?.name || "Edit client"} id={id} />}
+			title={<PageHeaderTitle name={data?.name || "Edit client"} id={id} />}
 			description={"Client details"}
 			onClose={() => router.push("/clients")}
 			footer={
