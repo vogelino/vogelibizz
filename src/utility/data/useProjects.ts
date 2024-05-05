@@ -1,11 +1,14 @@
+"use client";
+
 import type { ProjectType } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 
+export const projectsQueryKey = ["projects"];
 function useProjects() {
-  const queryKey = ["projects"];
   const { data, isPending, error } = useSuspenseQuery({
-    queryKey,
+    queryKey: projectsQueryKey,
     queryFn: getProjects,
   });
 
@@ -21,6 +24,9 @@ export async function getProjects() {
     `${env.client.NEXT_PUBLIC_BASE_URL}/api/projects`
   );
   const json = await response.json();
+
+  if (json.error === "Unauthorized") return redirect("/login");
+  if (json.error) throw new Error(json.error);
 
   return json as ProjectType[];
 }

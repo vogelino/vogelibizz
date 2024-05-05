@@ -6,12 +6,12 @@ import type { ProjectType, ResourceType } from "@/db/schema";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {
-	type ColumnDef,
-	type SortingState,
 	getCoreRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnDef,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 
@@ -22,14 +22,16 @@ export default function PageDataTable<
 	columns: pageSpecificColumns,
 	data,
 	defaultSortColumn = "last_modified",
+	deleteAction = () => undefined,
 }: {
 	resource: ResourceType;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	columns: ColumnDef<DataType, any>[];
 	data: DataType[];
 	defaultSortColumn: string;
+	deleteAction: (id: number) => void;
 }) {
-	const actions = useActionsColumn<DataType>(resource);
+	const actions = useActionsColumn<DataType>(deleteAction);
 	const lastModifiedColumn = useLastModifiedColumn<ProjectType>();
 	const [sorting, setSorting] = useState<SortingState>([]);
 

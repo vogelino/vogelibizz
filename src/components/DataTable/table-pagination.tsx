@@ -1,4 +1,3 @@
-import { Combobox } from "@/components/ui/combobox";
 import {
 	Pagination,
 	PaginationContent,
@@ -87,14 +86,14 @@ function TablePagination({
 					</PaginationItem>
 				)}
 			</PaginationContent>
-			<Combobox
+			{/* <Combobox
 				options={["10", "20", "30", "40", "50"].map((pageSize) => ({
 					label: `${pageSize} items`,
 					value: pageSize,
 				}))}
 				value={getState().pagination.pageSize.toString()}
 				onChange={(value) => setPageSize(Number.parseInt(value, 10))}
-			/>
+			/> */}
 		</Pagination>
 	);
 }

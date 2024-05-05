@@ -1,11 +1,14 @@
+"use client";
+
 import type { ExpenseType } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 
+export const expensesQueryKey = ["expenses"];
 function useExpenses() {
-  const queryKey = ["expenses"];
   const { data, isPending, error } = useSuspenseQuery({
-    queryKey,
+    queryKey: expensesQueryKey,
     queryFn: getExpenses,
   });
 
@@ -21,6 +24,9 @@ export async function getExpenses() {
     `${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses`
   );
   const json = await response.json();
+
+  if (json.error === "Unauthorized") return redirect("/login");
+  if (json.error) throw new Error(json.error);
 
   return json as ExpenseType[];
 }
