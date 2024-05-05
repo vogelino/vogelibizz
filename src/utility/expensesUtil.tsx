@@ -1,6 +1,6 @@
 import type { ExpenseType } from "@/db/schema";
 import env from "@/env";
-import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
+import { Handshake, ListChecks, User, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { z } from "zod";
 
@@ -133,7 +133,7 @@ export type RatesTypes = Record<CurrencyType, number>;
 export async function getExchangeRates(
 	base: CurrencyType = "CLP",
 ): Promise<RatesTypes> {
-	const API_ID = process.env.NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY;
+	const API_ID = env.client.NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY;
 
 	if (!API_ID) throw new Error("Missing OpenExchangeRates API key");
 	const res = await fetch(

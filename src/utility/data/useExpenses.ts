@@ -18,7 +18,7 @@ function useExpenses() {
 
 export async function getExpenses() {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/expenses`
+    `${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses`
   );
   const json = await response.json();
 

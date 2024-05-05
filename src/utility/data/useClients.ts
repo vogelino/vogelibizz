@@ -18,7 +18,7 @@ function useClients() {
 
 export async function getClients() {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/clients`
+    `${env.client.NEXT_PUBLIC_BASE_URL}/api/clients`
   );
   const json = await response.json();
 
