@@ -1,10 +1,9 @@
 import db from "@/db";
-import { QueryClient } from "@tanstack/react-query";
+import serverQueryClient from "@/utility/data/serverQueryClient";
 import ProjectsList from "./page.client";
 
 export default function ProjectsPageServer() {
-	const queryClient = new QueryClient();
-	queryClient.prefetchQuery({
+	serverQueryClient.prefetchQuery({
 		queryKey: ["projects"],
 		queryFn: () => db.query.projects.findMany(),
 	});

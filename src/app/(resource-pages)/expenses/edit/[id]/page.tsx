@@ -3,6 +3,7 @@ import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
 import db from "@/db";
 import { expenses } from "@/db/schema";
+import serverQueryClient from "@/utility/data/serverQueryClient";
 import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
@@ -16,6 +17,10 @@ export default async function ExpenseEditPageRoute({
 		where: eq(expenses.id, +id),
 	});
 	if (!record) return null;
+	serverQueryClient.prefetchQuery({
+		queryKey: ['expense', id],
+		queryFn: () => record
+	})
 	return (
 		<FormPageLayout
 			id={id}

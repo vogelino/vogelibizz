@@ -1,6 +1,10 @@
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
+import db from "@/db";
+import { projects } from "@/db/schema";
+import serverQueryClient from "@/utility/data/serverQueryClient";
+import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 
@@ -9,6 +13,12 @@ export default function ProjectEditPageRoute({
 }: {
 	params: { id: string };
 }) {
+	serverQueryClient.prefetchQuery({
+		queryKey: ['project', id],
+		queryFn: () => db.query.projects.findFirst({
+			where: eq(projects.id, +id),
+		})
+	})
 	return (
 		<FormPageLayout
 			id={id}

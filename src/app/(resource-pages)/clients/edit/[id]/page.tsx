@@ -1,6 +1,10 @@
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
+import db from "@/db";
+import { clients } from "@/db/schema";
+import serverQueryClient from "@/utility/data/serverQueryClient";
+import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 
@@ -9,6 +13,12 @@ export default function ClientEditPageRoute({
 }: {
 	params: { id: string };
 }) {
+	serverQueryClient.prefetchQuery({
+		queryKey: ['client', id],
+		queryFn: () => db.query.clients.findFirst({
+			where: eq(clients.id, +id),
+		})
+	})
 	return (
 		<FormPageLayout
 			id={id}
