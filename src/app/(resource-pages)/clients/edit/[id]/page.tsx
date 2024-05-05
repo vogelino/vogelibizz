@@ -17,7 +17,7 @@ export default function ClientEditPageRoute({
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/clients/show/${id}`}>
+						<Link href={`/clients/edit/${id}`}>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
