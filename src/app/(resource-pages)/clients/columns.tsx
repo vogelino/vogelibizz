@@ -1,6 +1,6 @@
 import InternalLink from "@/components/ui/internal-link";
 import type { ClientType } from "@/db/schema";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -30,7 +30,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 		cell: function render({ getValue, row }) {
 			const id = row.original.id;
 			const value = getValue<string>();
-			return <InternalLink href={`/clients/show/${id}`}>{value}</InternalLink>;
+			return <InternalLink href={`/clients/edit/${id}`}>{value}</InternalLink>;
 		},
 	}),
 ];

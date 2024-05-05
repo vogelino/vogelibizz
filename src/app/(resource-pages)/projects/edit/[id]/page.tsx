@@ -17,7 +17,7 @@ export default function ProjectEditPageRoute({
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/projects/show/${id}`}>
+						<Link href={`/projects/edit/${id}`}>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
