@@ -1,8 +1,9 @@
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import type { ExpenseType } from "@/db/schema";
-import { supabaseClient } from "@/utility/supabase-client";
+import db from "@/db";
+import { expenses } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 
@@ -11,16 +12,14 @@ export default async function ExpenseEditPageRoute({
 }: {
 	params: { id: string };
 }) {
-	const record = await supabaseClient
-		.from("expenses")
-		.select("*")
-		.eq("id", id)
-		.single();
-	const data = record.data as ExpenseType;
+	const record = await db.query.expenses.findFirst({
+		where: eq(expenses.id, +id),
+	});
+	if (!record) return null;
 	return (
 		<FormPageLayout
 			id={id}
-			title={data?.name || "Edit expense"}
+			title={record.name || "Edit expense"}
 			allLink="/expenses"
 			footerButtons={
 				<>
@@ -39,7 +38,7 @@ export default async function ExpenseEditPageRoute({
 			<ExpenseEdit
 				id={id}
 				formId={`expense-edit-form-${id}`}
-				initialData={data}
+				initialData={record}
 			/>
 		</FormPageLayout>
 	);

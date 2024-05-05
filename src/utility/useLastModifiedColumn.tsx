@@ -1,4 +1,3 @@
-import type { BaseRecord } from "@refinedev/core";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -10,7 +9,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 export function useLastModifiedColumn<
-	ColumnType extends BaseRecord,
+	ColumnType,
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 >(): ColumnDef<ColumnType, any> {
 	return {

@@ -1,7 +1,8 @@
 "use client";
 
 import PageDataTable from "@/components/PageDataTable";
-import useClients, { type ClientType } from "@/utility/data/useClients";
+import type { ClientType } from "@/db/schema";
+import useClients from "@/utility/data/useClients";
 import { clientTableColumns } from "./columns";
 
 export default function ProjectList() {

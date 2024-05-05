@@ -5,8 +5,12 @@ import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
-import { expenseCategory, expenseType } from "@/db/schema";
-import useExpenses, { type ExpenseType } from "@/utility/data/useExpenses";
+import {
+	type ExpenseType,
+	expenseCategoryEnum,
+	expenseTypeEnum,
+} from "@/db/schema";
+import useExpenses from "@/utility/data/useExpenses";
 import {
 	type RatesTypes,
 	categoryToOptionClass,
@@ -16,8 +20,8 @@ import {
 import { formatCurrency } from "@/utility/formatUtil";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import type { LogicalFilter } from "@refinedev/core";
 import {
+	type ColumnFilter,
 	type ColumnFiltersState,
 	type SortingState,
 	getCoreRowModel,
@@ -77,14 +81,14 @@ export default function ExpensesPage({
 	);
 
 	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
-		expenseCategory.enumValues,
+		expenseCategoryEnum.enumValues,
 		(cat) => (
 			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
 		),
 	);
 
 	const typeOptions = useComboboxOptions<TypeFilterType>(
-		["All types", ...expenseType.enumValues],
+		["All types", ...expenseTypeEnum.enumValues],
 		(type) => (
 			<>
 				{mapTypeToIcon(type, 24)}
@@ -96,7 +100,7 @@ export default function ExpensesPage({
 	const typeFilter = useMemo(() => {
 		const typeFilterValue = columnFilters.find((f) => f.id === "type");
 		return typeFilterValue as
-			| (Omit<LogicalFilter, "value"> & { value: ExpenseType["type"] })
+			| (Omit<ColumnFilter, "value"> & { value: ExpenseType["type"] })
 			| undefined;
 	}, [columnFilters]);
 

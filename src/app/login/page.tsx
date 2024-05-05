@@ -1,25 +1,14 @@
-import { AuthPage } from "@/components/auth-page";
-import { authProviderServer } from "@/providers/auth-provider";
+import { isAuthenticatedAndAdmin } from "@/auth";
+import { SignInButton } from "@/components/SignInButton";
 import { redirect } from "next/navigation";
 
 export default async function Login() {
-	const data = await getData();
-
-	if (data.authenticated) {
-		redirect(data?.redirectTo || "/");
-	}
+	const isAuthenticated = await isAuthenticatedAndAdmin();
+	if (isAuthenticated) return redirect("/projects");
 
 	return (
-		<AuthPage type="login" registerLink={false} forgotPasswordLink={false} />
+		<div className="min-h-screen flex items-center justify-center">
+			<SignInButton />
+		</div>
 	);
-}
-
-async function getData() {
-	const { authenticated, redirectTo, error } = await authProviderServer.check();
-
-	return {
-		authenticated,
-		redirectTo,
-		error,
-	};
 }

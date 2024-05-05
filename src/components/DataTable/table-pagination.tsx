@@ -11,10 +11,10 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/utility/classNames";
-import type { useTable } from "@refinedev/react-table";
+import type { useReactTable } from "@tanstack/react-table";
 
 type TablePaginationProps = Pick<
-	ReturnType<typeof useTable>,
+	ReturnType<typeof useReactTable>,
 	| "getState"
 	| "setPageIndex"
 	| "getCanPreviousPage"

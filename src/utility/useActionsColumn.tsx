@@ -8,7 +8,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ResourceType } from "@/db/schema";
-import { useDelete, useNavigation } from "@refinedev/core";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { cn } from "./classNames";
@@ -17,8 +16,6 @@ export function useActionsColumn<ColumnType = unknown>(
 	resource: ResourceType,
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): ColumnDef<ColumnType, any> {
-	const { show, edit } = useNavigation();
-	const { mutate: remove } = useDelete();
 	return {
 		id: "actions",
 		accessorKey: "id",
@@ -37,16 +34,16 @@ export function useActionsColumn<ColumnType = unknown>(
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem onClick={() => show(resource, id)}>
+						<DropdownMenuItem onClick={() => null}>
 							<Eye size={20} />
 							<span className="mt-1">Show details</span>
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => edit(resource, id)}>
+						<DropdownMenuItem onClick={() => null}>
 							<Pencil size={20} />
 							<span className="mt-1">Edit</span>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => remove({ resource, id })}>
+						<DropdownMenuItem onClick={() => null}>
 							<Trash size={20} />
 							<span className="mt-1">Delete</span>
 						</DropdownMenuItem>

@@ -6,7 +6,7 @@ export default defineConfig({
   out: "./src/db/migrations",
   driver: "pg",
   dbCredentials: {
-    connectionString: env.DATABASE_URL,
+    connectionString: env.server.POSTGRES_URL,
   },
   verbose: true,
   strict: true,

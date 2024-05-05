@@ -1,5 +1,5 @@
 import InternalLink from "@/components/ui/internal-link";
-import type { ClientType } from "@/utility/data/useClients";
+import type { ClientType } from "@/db/schema";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
