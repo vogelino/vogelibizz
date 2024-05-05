@@ -3,9 +3,9 @@
 import { Combobox } from "@/components/ui/combobox";
 import type { FormErrorsType } from "@/utility/formUtil";
 import { statusList } from "@/utility/statusUtil";
-import { useForm } from "@refinedev/react-hook-form";
 import dynamic from "next/dynamic";
 import { forwardRef, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import type { SimpleMDEReactProps } from "react-simplemde-editor";
 
 const DynamicEditor = dynamic(
@@ -32,17 +32,10 @@ export default function ProjectCreate() {
 		last_modified: last_modified.current,
 	};
 	const {
-		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		refineCoreProps: {
-			resource: "projects",
-			meta: {
-				select: "*",
-			},
-		},
 		values,
 	});
 	const statusProps = register("status", {
@@ -51,7 +44,7 @@ export default function ProjectCreate() {
 	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={`project-create-form`}>
+		<form onSubmit={handleSubmit(console.log)} id={`project-create-form`}>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>

@@ -1,25 +1,23 @@
 "use client";
 
-import { useForm } from "@refinedev/react-hook-form";
+import useClient from "@/utility/data/useClient";
+import { useForm } from "react-hook-form";
 
 export default function ClientEdit({ id }: { id: string }) {
+	const { data } = useClient(+id);
 	const {
-		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		refineCoreProps: {
-			resource: "clients",
-			id,
-			meta: {
-				select: "*",
-			},
+		defaultValues: {
+			name: data?.name,
+			last_modified: new Date().toISOString(),
 		},
 	});
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={`client-edit-form-${id}`}>
+		<form onSubmit={handleSubmit(console.log)} id={`client-edit-form-${id}`}>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>
@@ -33,11 +31,10 @@ export default function ClientEdit({ id }: { id: string }) {
 						type="hidden"
 						{...register("last_modified", {
 							required: "This field is required",
-							setValueAs: () => new Date().toISOString(),
 						})}
 					/>
 
-					{errors?.title?.message as string}
+					{errors?.name?.message}
 				</label>
 			</div>
 		</form>

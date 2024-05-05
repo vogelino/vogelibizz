@@ -1,25 +1,13 @@
 "use client";
-import type { ClientType } from "@/db/schema";
-import { useShow } from "@refinedev/core";
+import useClient from "@/utility/data/useClient";
 
 function ClientDisplay({ id }: { id: string }) {
-	const { queryResult } = useShow({
-		resource: "clients",
-		id,
-		meta: { select: "*" },
-	});
-	const isLoading = queryResult.isFetching;
-	const record = queryResult.data?.data as ClientType | undefined;
+	const { data, isPending } = useClient(+id);
 
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
+	if (isPending) return <div>Loading...</div>;
+	if (!data) return <div>No project found</div>;
 
-	if (!record) {
-		return <div>No project found</div>;
-	}
-
-	const { name } = record;
+	const { name } = data;
 
 	return (
 		<div className="flex flex-col gap-4">

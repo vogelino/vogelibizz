@@ -1,17 +1,16 @@
 "use client";
 
-import { useForm } from "@refinedev/react-hook-form";
+import { useForm } from "react-hook-form";
 
 export default function ExpenseCreate() {
 	const {
-		refineCore: { onFinish },
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({});
 
 	return (
-		<form onSubmit={handleSubmit(onFinish)} id={`expense-create-form`}>
+		<form onSubmit={handleSubmit(console.log)} id={`expense-create-form`}>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>
