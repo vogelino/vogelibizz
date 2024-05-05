@@ -21,9 +21,19 @@ export async function getClient(id: number | undefined) {
   const response = await fetch(
     `${env.client.NEXT_PUBLIC_BASE_URL}/api/clients/${id}`
   );
-  const json = await response.json();
 
-  return json as ClientType;
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch client ${id}: ${response.status} -> ${response.statusText}`
+    );
+  }
+
+  try {
+    const json = await response.json();
+    return json as ClientType;
+  } catch (err) {
+    throw new Error(`Failed to parse client ${id}'s json response: ${err}`);
+  }
 }
 
 export default useClient;
