@@ -34,9 +34,6 @@ const ServerEnvSchema = PublicEnvSchema.merge(
     POSTGRES_DATABASE: z.string(),
     POSTGRES_MIGRATING: stringBoolean,
     POSTGRES_SEEDING: stringBoolean,
-    POSTGRES_URL_NON_POOLING: z.string(),
-    POSTGRES_URL_NO_SSL: z.string(),
-    POSTGRES_PRISMA_URL: z.string(),
   })
 );
 
