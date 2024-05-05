@@ -1,12 +1,12 @@
-import { getProjects } from "@/utility/data/useProjects";
+import db from "@/db";
 import { QueryClient } from "@tanstack/react-query";
 import ProjectsList from "./page.client";
 
-export default function ClientsPageServer() {
+export default function ProjectsPageServer() {
 	const queryClient = new QueryClient();
 	queryClient.prefetchQuery({
 		queryKey: ["projects"],
-		queryFn: () => getProjects(),
+		queryFn: () => db.query.projects.findMany(),
 	});
 	return <ProjectsList />;
 }

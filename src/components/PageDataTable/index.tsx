@@ -2,8 +2,7 @@
 
 import { DataTable } from "@/components/DataTable";
 import TablePagination from "@/components/DataTable/table-pagination";
-import type { ResourceType } from "@/db/schema";
-import type { ProjectType } from "@/utility/data/useProjects";
+import type { ProjectType, ResourceType } from "@/db/schema";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {

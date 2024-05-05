@@ -4,25 +4,24 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
-import { useState } from "react";
+import { useRef } from "react";
 import { Toaster } from "sonner";
 
 function Providers({ children }: { children: React.ReactNode }) {
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: {
-						// Stale time one hour
-						staleTime: 1000 * 60 * 60,
-					},
+	const queryClient = useRef(
+		new QueryClient({
+			defaultOptions: {
+				queries: {
+					// Stale time one hour
+					staleTime: 1000 * 60 * 60,
 				},
-			}),
+			},
+		}),
 	);
 
 	return (
 		<>
-			<QueryClientProvider client={queryClient}>
+			<QueryClientProvider client={queryClient.current}>
 				<ThemeProvider defaultTheme="system" enableSystem>
 					<TooltipProvider>
 						<ReactQueryStreamedHydration>

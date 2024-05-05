@@ -6,9 +6,9 @@ import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
 	type ExpenseType,
-	expenseCategory,
-	expenseRate,
-	expenseType,
+	expenseCategoryEnum,
+	expenseRateEnum,
+	expenseTypeEnum,
 } from "@/db/schema";
 import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
 import type { FormErrorsType } from "@/utility/formUtil";
@@ -64,14 +64,14 @@ export default function ExpenseEdit({
 	});
 
 	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
-		expenseCategory.enumValues,
+		expenseCategoryEnum.enumValues,
 		(cat) => (
 			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
 		),
 	);
 
 	const typeOptions = useComboboxOptions<ExpenseType["type"]>(
-		expenseType.enumValues,
+		expenseTypeEnum.enumValues,
 		(type) => (
 			<>
 				{mapTypeToIcon(type, 24)}
@@ -81,7 +81,7 @@ export default function ExpenseEdit({
 	);
 
 	const rateOptions = useComboboxOptions<ExpenseType["rate"]>(
-		expenseRate.enumValues,
+		expenseRateEnum.enumValues,
 	);
 	const allErrors = errors as FormErrorsType<typeof values>;
 

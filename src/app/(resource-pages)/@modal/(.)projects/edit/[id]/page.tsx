@@ -1,7 +1,8 @@
 import EditResourceModal from "@/components/EditResourceModal";
 import ProjectEdit from "@/components/ProjectEdit";
-import type { ProjectType } from "@/db/schema";
-import { supabaseClient } from "@/utility/supabase-client";
+import db from "@/db";
+import { type ProjectType, projects } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 type ResourceType = ProjectType;
 const resource = "project";
@@ -13,21 +14,19 @@ export default async function ProjectEditModalRoute({
 	params: { id: string };
 }) {
 	const formId = `${resource}-${action}-form-${id}`;
-	const record = await supabaseClient
-		.from(`${resource}s`)
-		.select("*")
-		.eq("id", id)
-		.single();
-	const data = record.data as ResourceType;
+	const record = await db.query.projects.findFirst({
+		where: eq(projects.id, +id),
+	});
+	if (!record) return null;
 	return (
 		<EditResourceModal
 			id={`${id}`}
-			title={data.name}
+			title={record.name}
 			formId={formId}
 			resourceSingularName={resource}
 			crudAction="edit"
 		>
-			<ProjectEdit id={`${id}`} formId={formId} initialData={data} />
+			<ProjectEdit id={`${id}`} formId={formId} initialData={record} />
 		</EditResourceModal>
 	);
 }

@@ -1,7 +1,7 @@
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ExpenseType } from "@/utility/data/useExpenses";
+import type { ExpenseType } from "@/db/schema";
 import {
 	getValueInCLPPerMonth,
 	mapTypeToIcon,

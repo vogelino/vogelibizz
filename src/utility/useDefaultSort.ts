@@ -1,4 +1,4 @@
-import type { useTable } from "@refinedev/react-table";
+import type { useReactTable } from "@tanstack/react-table";
 import { useEffect } from "react";
 
 export function useDefaultSort({
@@ -6,7 +6,7 @@ export function useDefaultSort({
 	defaultColumnId,
 	desc = true,
 }: {
-	setSorting: ReturnType<typeof useTable>["setSorting"];
+	setSorting: ReturnType<typeof useReactTable>["setSorting"];
 	defaultColumnId: string;
 	desc?: boolean;
 }): void {
