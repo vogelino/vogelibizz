@@ -1,13 +1,11 @@
 import db from "@/db";
 import { expenses } from "@/db/schema";
+import { getRouteWithId } from "@/utility/apiUtil";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const GET = async ({ params }: { params: { id: string } }) => {
-  return NextResponse.json(
-    await db.query.expenses.findFirst({
-      where: eq(expenses.id, +params.id),
-    })
-  );
-};
+export const GET = getRouteWithId(
+  async (id) =>
+    await db.query.expenses.findFirst({ where: eq(expenses.id, id) }),
+  (id) => `Project with id '${id}' does not exist`
+);

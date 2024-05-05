@@ -2,9 +2,10 @@
 import useClient from "@/utility/data/useClient";
 
 function ClientDisplay({ id }: { id: string }) {
-	const { data, isPending } = useClient(+id);
+	const { data, error, isPending } = useClient(+id);
 
 	if (isPending) return <div>Loading...</div>;
+	if (error) return <div>{error.message}</div>;
 	if (!data) return <div>No project found</div>;
 
 	const { name } = data;
