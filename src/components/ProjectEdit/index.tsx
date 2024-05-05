@@ -3,9 +3,12 @@
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import type { ProjectType } from "@/db/schema";
+import env from "@/env";
+import useProjectEdit from "@/utility/data/useProjectEdit";
 import type { FormErrorsType } from "@/utility/formUtil";
 import { statusList } from "@/utility/statusUtil";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { forwardRef, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { SimpleMDEReactProps } from "react-simplemde-editor";
@@ -28,6 +31,8 @@ export default function ProjectEdit({
 	formId: string;
 	initialData?: ProjectType;
 }) {
+	const router = useRouter()
+	const editMutation = useProjectEdit();
 	const [status, setStatus] = useState(initialData?.status || "todo");
 	const [name, setName] = useState(initialData?.name || "");
 	const [description, setDescription] = useState(
@@ -56,7 +61,15 @@ export default function ProjectEdit({
 	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
-		<form onSubmit={handleSubmit(console.log)} id={formId}>
+		<form onSubmit={handleSubmit((project) => {
+			if (!id) return
+			editMutation.mutate({
+				id: +id,
+				...values,
+				created_at: initialData?.created_at ?? new Date().toISOString(),
+			})
+			router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`)
+		})} id={formId}>
 			<div className="flex flex-col gap-4">
 				<FormInputWrapper label="Name" error={allErrors?.name?.message}>
 					<input

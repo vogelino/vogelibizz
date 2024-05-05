@@ -3,7 +3,7 @@ import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 function useClient(id: number | undefined) {
-  const queryKey = ["client", id];
+  const queryKey = ["clients", id];
   const { data, isPending, error } = useSuspenseQuery({
     queryKey,
     queryFn: () => getClient(id),

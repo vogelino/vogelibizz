@@ -1,10 +1,15 @@
 "use client";
 
+import env from "@/env";
 import useClient from "@/utility/data/useClient";
+import useClientEdit from "@/utility/data/useClientEdit";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export default function ClientEdit({ id }: { id: string }) {
+	const router = useRouter();
 	const { data } = useClient(+id);
+	const editMutation = useClientEdit();
 	const {
 		register,
 		handleSubmit,
@@ -17,7 +22,18 @@ export default function ClientEdit({ id }: { id: string }) {
 	});
 
 	return (
-		<form onSubmit={handleSubmit(console.log)} id={`client-edit-form-${id}`}>
+		<form
+			onSubmit={handleSubmit((client) => {
+				editMutation.mutate({
+					id: +id,
+					name: client.name ?? "",
+					last_modified: new Date().toISOString(),
+					created_at: data?.created_at ?? new Date().toISOString(),
+				});
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
+			})}
+			id={`client-edit-form-${id}`}
+		>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>
@@ -27,13 +43,6 @@ export default function ClientEdit({ id }: { id: string }) {
 							required: "This field is required",
 						})}
 					/>
-					<input
-						type="hidden"
-						{...register("last_modified", {
-							required: "This field is required",
-						})}
-					/>
-
 					{errors?.name?.message}
 				</label>
 			</div>

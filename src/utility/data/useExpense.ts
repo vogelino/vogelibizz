@@ -3,7 +3,7 @@ import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 function useExpense(id: number | undefined) {
-  const queryKey = ["expense", id];
+  const queryKey = ["expenses", id];
   const { data, isPending, error } = useSuspenseQuery({
     queryKey,
     queryFn: () => getExpense(id),

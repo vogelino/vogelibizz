@@ -71,7 +71,7 @@ export default function ExpensesPage({
 			sorting: [
 				{
 					id: "last_modified",
-					desc: true,
+					desc: false,
 				},
 			],
 		},

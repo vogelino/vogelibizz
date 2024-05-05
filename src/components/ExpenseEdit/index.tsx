@@ -10,9 +10,12 @@ import {
 	expenseTypeEnum,
 	type ExpenseType,
 } from "@/db/schema";
+import env from "@/env";
+import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
 import type { FormErrorsType } from "@/utility/formUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -25,6 +28,8 @@ export default function ExpenseEdit({
 	id?: undefined | string;
 	initialData?: ExpenseType;
 }) {
+	const editMutation = useExpenseEdit()
+	const router = useRouter()
 	const [category, setCategory] = useState<ExpenseType["category"]>(
 		initialData?.category || "Home",
 	);
@@ -85,7 +90,15 @@ export default function ExpenseEdit({
 
 	return (
 		<form
-			onSubmit={handleSubmit(console.log)}
+			onSubmit={handleSubmit(() => {
+				if (!id) return
+				editMutation.mutate({
+					id: +id,
+					created_at: initialData?.created_at || new Date().toISOString(),
+					...values
+				});
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
+			})}
 			id={formId}
 			className="@container"
 		>
