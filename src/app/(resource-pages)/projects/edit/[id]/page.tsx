@@ -14,11 +14,12 @@ export default function ProjectEditPageRoute({
 	params: { id: string };
 }) {
 	serverQueryClient.prefetchQuery({
-		queryKey: ['project', id],
-		queryFn: () => db.query.projects.findFirst({
-			where: eq(projects.id, +id),
-		})
-	})
+		queryKey: ["project", id],
+		queryFn: () =>
+			db.query.projects.findFirst({
+				where: eq(projects.id, +id),
+			}),
+	});
 	return (
 		<FormPageLayout
 			id={id}

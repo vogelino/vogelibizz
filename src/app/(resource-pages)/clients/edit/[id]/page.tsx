@@ -14,11 +14,12 @@ export default function ClientEditPageRoute({
 	params: { id: string };
 }) {
 	serverQueryClient.prefetchQuery({
-		queryKey: ['client', id],
-		queryFn: () => db.query.clients.findFirst({
-			where: eq(clients.id, +id),
-		})
-	})
+		queryKey: ["client", id],
+		queryFn: () =>
+			db.query.clients.findFirst({
+				where: eq(clients.id, +id),
+			}),
+	});
 	return (
 		<FormPageLayout
 			id={id}
