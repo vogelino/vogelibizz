@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export default function ClientCreate() {
-	const router = useRouter()
-	const createMutation = useClientCreate()
+	const router = useRouter();
+	const createMutation = useClientCreate();
 	const {
 		register,
 		handleSubmit,
@@ -15,10 +15,16 @@ export default function ClientCreate() {
 	} = useForm({});
 
 	return (
-		<form onSubmit={handleSubmit(({ name }) => {
-			createMutation.mutate({ name, last_modified: new Date().toISOString() });
-			router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
-		})} id={`client-create-form`}>
+		<form
+			onSubmit={handleSubmit(({ name }) => {
+				createMutation.mutate({
+					name,
+					last_modified: new Date().toISOString(),
+				});
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
+			})}
+			id={`client-create-form`}
+		>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>

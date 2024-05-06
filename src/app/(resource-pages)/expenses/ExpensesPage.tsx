@@ -6,30 +6,30 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
+	type ExpenseType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
-	type ExpenseType,
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
 import {
+	type RatesTypes,
 	categoryToOptionClass,
 	getValueInCLPPerMonth,
 	mapTypeToIcon,
-	type RatesTypes,
 } from "@/utility/expensesUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { getExpensesTableColumns } from "./columns";

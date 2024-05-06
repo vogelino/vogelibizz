@@ -5,10 +5,10 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
+	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
-	type ExpenseType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
@@ -29,9 +29,9 @@ export default function ExpenseEdit({
 	id?: undefined | string;
 	initialData?: ExpenseType;
 }) {
-	const editMutation = useExpenseEdit()
-	const createMutation = useExpenseCreate()
-	const router = useRouter()
+	const editMutation = useExpenseEdit();
+	const createMutation = useExpenseCreate();
+	const router = useRouter();
 	const [category, setCategory] = useState<ExpenseType["category"]>(
 		initialData?.category || "Home",
 	);
@@ -97,13 +97,13 @@ export default function ExpenseEdit({
 					editMutation.mutate({
 						id: +id,
 						created_at: initialData?.created_at || new Date().toISOString(),
-						...values
+						...values,
 					});
 				} else {
 					createMutation.mutate({
 						created_at: new Date().toISOString(),
-						...values
-					})
+						...values,
+					});
 				}
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 			})}

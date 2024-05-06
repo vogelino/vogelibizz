@@ -18,9 +18,9 @@ export default async function ExpenseEditPageRoute({
 	});
 	if (!record) return null;
 	serverQueryClient.prefetchQuery({
-		queryKey: ['expense', id],
-		queryFn: () => record
-	})
+		queryKey: ["expense", id],
+		queryFn: () => record,
+	});
 	return (
 		<FormPageLayout
 			id={id}

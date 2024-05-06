@@ -6,12 +6,12 @@ import type { ProjectType, ResourceType } from "@/db/schema";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {
+	type ColumnDef,
+	type SortingState,
 	getCoreRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnDef,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 
