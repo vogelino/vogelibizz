@@ -52,13 +52,35 @@ export function getMutationRouteWithId<T>(
   });
 }
 
+export function getCreationRoute<T extends z.ZodSchema>(
+  mutateData: (body: z.infer<T>) => Promise<unknown>,
+  bodySchema: T
+) {
+  return auth(async (req) => {
+    const bodyJson = await req.json();
+    const validation = await validateParams(bodyJson, bodySchema);
+    if (validation.error)
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    try {
+      await mutateData(validation);
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (err) {
+      return NextResponse.json({ error: err }, { status: 500 });
+    }
+  });
+}
+
 export function getQueryRouteWithId(
   getData: (id: number) => Promise<unknown>,
   getNotFoundMessage = (id: number) => `Resource with id '${id}' does not exist`
 ) {
   return auth(async (_req, { params }) => {
-    const { id, error } = await validateParams(params, RouteWithIdSchema);
-    if (error) return NextResponse.json({ error }, { status: 400 });
-    return handleNotFoundDbQuery(await getData(id), getNotFoundMessage(id));
+    const validation = await validateParams(params, RouteWithIdSchema);
+    if (validation.error)
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    return handleNotFoundDbQuery(
+      await getData(validation.id),
+      getNotFoundMessage(validation.id)
+    );
   });
 }

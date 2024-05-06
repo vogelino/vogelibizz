@@ -9,7 +9,7 @@ import { expensesQueryKey } from "./useExpenses";
 function useExpenseEdit() {
   const queryExpense = useQueryClient();
   const deleteMutation = useMutation({
-    mutationKey: ["expense-delete"],
+    mutationKey: ["expense-edit"],
     mutationFn: editExpense,
     onMutate: (expense: ExpenseType) => {
       queryExpense.cancelQueries({ queryKey: expensesQueryKey });

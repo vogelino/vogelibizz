@@ -1,8 +1,13 @@
 "use client";
 
+import env from "@/env";
+import useClientCreate from "@/utility/data/useClientCreate";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export default function ClientCreate() {
+	const router = useRouter()
+	const createMutation = useClientCreate()
 	const {
 		register,
 		handleSubmit,
@@ -10,7 +15,10 @@ export default function ClientCreate() {
 	} = useForm({});
 
 	return (
-		<form onSubmit={handleSubmit(console.log)} id={`client-create-form`}>
+		<form onSubmit={handleSubmit(({ name }) => {
+			createMutation.mutate({ name, last_modified: new Date().toISOString() });
+			router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
+		})} id={`client-create-form`}>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">
 					<span className="text-grayDark">Name</span>
@@ -18,13 +26,6 @@ export default function ClientCreate() {
 						type="text"
 						{...register("name", {
 							required: "This field is required",
-						})}
-					/>
-					<input
-						type="hidden"
-						{...register("last_modified", {
-							required: "This field is required",
-							setValueAs: () => new Date().toISOString(),
 						})}
 					/>
 					<span style={{ color: "red" }}>

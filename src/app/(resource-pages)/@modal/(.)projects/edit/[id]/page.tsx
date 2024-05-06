@@ -1,10 +1,9 @@
 import EditResourceModal from "@/components/EditResourceModal";
 import ProjectEdit from "@/components/ProjectEdit";
 import db from "@/db";
-import { type ProjectType, projects } from "@/db/schema";
+import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-type ResourceType = ProjectType;
 const resource = "project";
 const action = "edit";
 

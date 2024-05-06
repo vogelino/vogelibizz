@@ -11,6 +11,7 @@ import {
 	type ExpenseType,
 } from "@/db/schema";
 import env from "@/env";
+import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
 import type { FormErrorsType } from "@/utility/formUtil";
@@ -29,6 +30,7 @@ export default function ExpenseEdit({
 	initialData?: ExpenseType;
 }) {
 	const editMutation = useExpenseEdit()
+	const createMutation = useExpenseCreate()
 	const router = useRouter()
 	const [category, setCategory] = useState<ExpenseType["category"]>(
 		initialData?.category || "Home",
@@ -91,12 +93,18 @@ export default function ExpenseEdit({
 	return (
 		<form
 			onSubmit={handleSubmit(() => {
-				if (!id) return
-				editMutation.mutate({
-					id: +id,
-					created_at: initialData?.created_at || new Date().toISOString(),
-					...values
-				});
+				if (id) {
+					editMutation.mutate({
+						id: +id,
+						created_at: initialData?.created_at || new Date().toISOString(),
+						...values
+					});
+				} else {
+					createMutation.mutate({
+						created_at: new Date().toISOString(),
+						...values
+					})
+				}
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 			})}
 			id={formId}
