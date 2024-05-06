@@ -4,6 +4,7 @@ import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import type { ProjectType } from "@/db/schema";
 import env from "@/env";
+import useProjectCreate from "@/utility/data/useProjectCreate";
 import useProjectEdit from "@/utility/data/useProjectEdit";
 import type { FormErrorsType } from "@/utility/formUtil";
 import { statusList } from "@/utility/statusUtil";
@@ -31,8 +32,9 @@ export default function ProjectEdit({
 	formId: string;
 	initialData?: ProjectType;
 }) {
-	const router = useRouter()
+	const router = useRouter();
 	const editMutation = useProjectEdit();
+	const createMutation = useProjectCreate();
 	const [status, setStatus] = useState(initialData?.status || "todo");
 	const [name, setName] = useState(initialData?.name || "");
 	const [description, setDescription] = useState(
@@ -61,15 +63,21 @@ export default function ProjectEdit({
 	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
-		<form onSubmit={handleSubmit((project) => {
-			if (!id) return
-			editMutation.mutate({
-				id: +id,
-				...values,
-				created_at: initialData?.created_at ?? new Date().toISOString(),
-			})
-			router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`)
-		})} id={formId}>
+		<form
+			onSubmit={handleSubmit((project) => {
+				if (id) {
+					editMutation.mutate({
+						id: +id,
+						...values,
+						created_at: initialData?.created_at ?? new Date().toISOString(),
+					});
+				} else {
+					createMutation.mutate(values);
+				}
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
+			})}
+			id={formId}
+		>
 			<div className="flex flex-col gap-4">
 				<FormInputWrapper label="Name" error={allErrors?.name?.message}>
 					<input

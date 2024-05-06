@@ -9,7 +9,7 @@ import { projectsQueryKey } from "./useProjects";
 function useProjectEdit() {
   const queryProject = useQueryClient();
   const deleteMutation = useMutation({
-    mutationKey: ["project-delete"],
+    mutationKey: ["project-edit"],
     mutationFn: editProject,
     onMutate: (project: ProjectType) => {
       queryProject.cancelQueries({ queryKey: projectsQueryKey });

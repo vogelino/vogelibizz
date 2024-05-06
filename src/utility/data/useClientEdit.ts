@@ -9,7 +9,7 @@ import { clientsQueryKey } from "./useClients";
 function useClientEdit() {
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationKey: ["client-delete"],
+    mutationKey: ["client-edit"],
     mutationFn: editClient,
     onMutate: (client: ClientType) => {
       queryClient.cancelQueries({ queryKey: clientsQueryKey });

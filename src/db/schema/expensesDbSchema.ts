@@ -109,4 +109,4 @@ export type ExpenseType = typeof expenses.$inferSelect;
 export type ExpenseInsertType = typeof expenses.$inferInsert;
 
 export const expenseSelectSchema = createSelectSchema(expenses);
-export const expenseSnsertSchema = createInsertSchema(expenses);
+export const expenseInsertSchema = createInsertSchema(expenses);

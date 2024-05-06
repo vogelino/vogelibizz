@@ -1,6 +1,6 @@
 "use client";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
-import ProjectCreate from "@/components/ProjectCreate";
+import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import { SaveIcon } from "lucide-react";
@@ -27,7 +27,7 @@ export default function ProjectCreateModalRoute() {
 				</>
 			}
 		>
-			<ProjectCreate />
+			<ProjectEdit formId={`project-create-form`} />
 		</ResponsiveModal>
 	);
 }
