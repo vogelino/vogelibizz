@@ -2,7 +2,7 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utility/classNames";
 import { ListIcon } from "lucide-react";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import type React from "react";
 import type { PropsWithChildren } from "react";
 

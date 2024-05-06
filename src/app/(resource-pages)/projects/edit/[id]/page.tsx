@@ -6,7 +6,7 @@ import { projects } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export default function ProjectEditPageRoute({

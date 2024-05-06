@@ -2,7 +2,7 @@ import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/utility/classNames";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import HeaderMenuLink from "./HeaderMenuLink";
 
 export const Menu = ({
