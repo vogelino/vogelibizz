@@ -1,5 +1,6 @@
 "use client";
 
+import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -10,7 +11,6 @@ import {
 import { cn } from "@/utility/classNames";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import LogoutButton from "../LogoutButton";
 
 export default function MenuUser() {
 	const session = useSession();
