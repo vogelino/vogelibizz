@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import useClient from "@/utility/data/useClient";
 import { SaveIcon } from "lucide-react";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 export const dynamic = "force-dynamic";

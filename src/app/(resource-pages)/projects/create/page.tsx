@@ -2,7 +2,7 @@ import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export default function ProjectCreatePageRoute() {
