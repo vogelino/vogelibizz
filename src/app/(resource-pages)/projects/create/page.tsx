@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 
+export const dynamic = "force-dynamic";
 export default function ProjectCreatePageRoute() {
 	return (
 		<FormPageLayout
