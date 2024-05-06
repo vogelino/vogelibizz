@@ -4,6 +4,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
+import { SessionProvider } from "next-auth/react";
 import { useRef } from "react";
 import { Toaster } from "sonner";
 
@@ -21,16 +22,18 @@ function Providers({ children }: { children: React.ReactNode }) {
 
 	return (
 		<>
-			<QueryClientProvider client={queryClient.current}>
-				<ThemeProvider defaultTheme="system" enableSystem>
-					<TooltipProvider>
-						<ReactQueryStreamedHydration>
-							{children}
-						</ReactQueryStreamedHydration>
-						<ReactQueryDevtools initialIsOpen={false} />
-					</TooltipProvider>
-				</ThemeProvider>
-			</QueryClientProvider>
+			<SessionProvider>
+				<QueryClientProvider client={queryClient.current}>
+					<ThemeProvider defaultTheme="system" enableSystem>
+						<TooltipProvider>
+							<ReactQueryStreamedHydration>
+								{children}
+							</ReactQueryStreamedHydration>
+							<ReactQueryDevtools initialIsOpen={false} />
+						</TooltipProvider>
+					</ThemeProvider>
+				</QueryClientProvider>
+			</SessionProvider>
 			<Toaster />
 		</>
 	);

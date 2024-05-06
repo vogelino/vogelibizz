@@ -13,9 +13,9 @@ import { cn } from "@/utility/classNames";
 import {
 	Check,
 	Laptop,
-	type LucideIcon,
 	MoonIcon,
 	SunIcon,
+	type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
