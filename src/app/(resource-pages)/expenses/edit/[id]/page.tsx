@@ -1,11 +1,9 @@
+import { getExpense } from "@/app/api/expenses/[id]/route";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import db from "@/db";
-import { expenses } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -15,9 +13,7 @@ export default async function ExpenseEditPageRoute({
 }: {
 	params: { id: string };
 }) {
-	const record = await db.query.expenses.findFirst({
-		where: eq(expenses.id, +id),
-	});
+	const record = await getExpense(+id);
 	if (!record) return null;
 	serverQueryClient.prefetchQuery({
 		queryKey: ["expense", id],

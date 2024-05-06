@@ -1,6 +1,7 @@
-import type { ExpenseType } from "@/db/schema";
+import { expenseSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { handleFetchResponse } from "../dataHookUtil";
 
 function useExpense(id: number | undefined) {
 	const queryKey = ["expenses", id];
@@ -21,9 +22,13 @@ export async function getExpense(id: number | undefined) {
 	const response = await fetch(
 		`${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses/${id}`,
 	);
-	const json = await response.json();
 
-	return json as ExpenseType;
+	return handleFetchResponse({
+		response,
+		crudAction: "query",
+		resourceName: "clients",
+		zodSchema: expenseSelectSchema,
+	});
 }
 
 export default useExpense;

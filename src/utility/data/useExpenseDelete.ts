@@ -3,13 +3,14 @@
 import type { ExpenseType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { handleFetchResponse } from "../dataHookUtil";
 import { expensesQueryKey } from "./useExpenses";
 
 function useExpenseDelete() {
 	const queryClient = useQueryClient();
 	const deleteMutation = useMutation({
 		mutationKey: ["expense-delete"],
-		mutationFn: deleteClientApi,
+		mutationFn: deleteExpense,
 		onMutate: (id: number) => {
 			queryClient.cancelQueries({ queryKey: expensesQueryKey });
 			const previousData =
@@ -33,14 +34,18 @@ function useExpenseDelete() {
 	return deleteMutation;
 }
 
-export async function deleteClientApi(id: number) {
+export async function deleteExpense(id: number) {
 	const response = await fetch(
 		`${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses/${id}`,
 		{ method: "DELETE" },
 	);
-	const json = await response.json();
 
-	return json;
+	return handleFetchResponse({
+		response,
+		data: id,
+		crudAction: "delete",
+		resourceName: "expenses",
+	});
 }
 
 export default useExpenseDelete;

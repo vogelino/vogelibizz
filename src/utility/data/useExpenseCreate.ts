@@ -4,6 +4,7 @@ import type { ExpenseInsertType, ExpenseType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { handleFetchResponse } from "../dataHookUtil";
 import { expensesQueryKey } from "./useExpenses";
 
 function useExpenseCreate() {
@@ -25,8 +26,8 @@ function useExpenseCreate() {
 					type: expense.type ?? "Freelance",
 					rate: expense.rate ?? "Monthly",
 					name: expense.name ?? "Expense",
-					price: expense.price ?? 0,
-					original_currency: expense.original_currency ?? "USD",
+					originalPrice: expense.originalPrice ?? 0,
+					originalCurrency: expense.originalCurrency ?? "USD",
 				},
 			]);
 			toast.info(`Successfully created expense '${expense.name}'`);
@@ -51,21 +52,11 @@ export async function createExpense(expense: ExpenseInsertType) {
 		{ method: "POST", body: JSON.stringify([expense]) },
 	);
 
-	const expenseLogDescription = `expense '${expense.name}'`;
-	if (!response.ok) {
-		throw new Error(
-			`Failed to create expense '${expenseLogDescription}: ${response.status} -> ${response.statusText}`,
-		);
-	}
-
-	try {
-		const json = await response.json();
-		return json as { success: true };
-	} catch (err) {
-		throw new Error(
-			`Failed to parse ${expenseLogDescription}'s json response: ${err}`,
-		);
-	}
+	return handleFetchResponse({
+		response,
+		crudAction: "create",
+		resourceName: "clients",
+	});
 }
 
 export default useExpenseCreate;

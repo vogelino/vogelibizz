@@ -5,15 +5,19 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
+	type ExpenseType,
+	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
-import { categoryToOptionClass, mapTypeToIcon } from "@/utility/expensesUtil";
+import {
+	categoryToOptionClass,
+	mapTypeToIcon,
+} from "@/utility/expensesIconUtil";
 import type { FormErrorsType } from "@/utility/formUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import { useRouter } from "next/navigation";
@@ -27,7 +31,7 @@ export default function ExpenseEdit({
 }: {
 	formId: string;
 	id?: undefined | string;
-	initialData?: ExpenseType;
+	initialData?: ExpenseWithMonthlyCLPPriceType;
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
@@ -41,12 +45,12 @@ export default function ExpenseEdit({
 	const [name, setName] = useState<ExpenseType["name"]>(
 		initialData?.name || "",
 	);
-	const [price, setPrice] = useState<ExpenseType["price"]>(
-		initialData?.price || 0,
-	);
-	const [currency, setCurrency] = useState<ExpenseType["original_currency"]>(
-		initialData?.original_currency || "USD",
-	);
+	const [originalPrice, setOriginalPrice] = useState<
+		ExpenseType["originalPrice"]
+	>(initialData?.originalPrice || 0);
+	const [originalCurrency, setOriginalCurrency] = useState<
+		ExpenseType["originalCurrency"]
+	>(initialData?.originalCurrency || "USD");
 	const [rate, setRate] = useState<ExpenseType["rate"]>(
 		initialData?.rate || "Monthly",
 	);
@@ -56,8 +60,8 @@ export default function ExpenseEdit({
 		last_modified: last_modified.current,
 		category,
 		type,
-		price: price ?? 0,
-		original_currency: currency,
+		originalPrice: originalPrice ?? 0,
+		originalCurrency: originalCurrency,
 		rate,
 	};
 	const {
@@ -145,12 +149,12 @@ export default function ExpenseEdit({
 					/>
 					<CurrencyInput
 						label="Original price"
-						inputProps={register("price")}
-						currencyProps={register("original_currency")}
-						onCurrencyChange={setCurrency}
-						onValueChange={setPrice}
-						currency={currency}
-						value={price}
+						inputProps={register("originalPrice")}
+						currencyProps={register("originalCurrency")}
+						onCurrencyChange={setOriginalCurrency}
+						onValueChange={setOriginalPrice}
+						currency={originalCurrency}
+						value={originalPrice}
 					/>
 					<FormInputCombobox<ExpenseType["rate"]>
 						options={rateOptions}

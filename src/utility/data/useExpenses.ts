@@ -1,9 +1,9 @@
 "use client";
 
-import type { ExpenseType } from "@/db/schema";
+import { expenseWithMonthlyCLPPriceSchema } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
+import { handleFetchResponse } from "../dataHookUtil";
 
 export const expensesQueryKey = ["expenses"];
 function useExpenses() {
@@ -23,13 +23,12 @@ export async function getExpenses() {
   const response = await fetch(
     `${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses`
   );
-  const json = await response.json();
-
-  if (json.error === "Unauthorized")
-    return redirect(`${env.server.NEXT_PUBLIC_BASE_URL}/login`);
-  if (json.error) throw new Error(json.error);
-
-  return json as ExpenseType[];
+  return handleFetchResponse({
+    response,
+    crudAction: "query",
+    resourceName: "expenses",
+    zodSchema: expenseWithMonthlyCLPPriceSchema.array(),
+  });
 }
 
 export default useExpenses;

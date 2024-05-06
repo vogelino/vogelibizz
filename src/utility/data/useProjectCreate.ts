@@ -4,6 +4,7 @@ import type { ProjectInsertType, ProjectType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { handleFetchResponse } from "../dataHookUtil";
 import { projectsQueryKey } from "./useProjects";
 
 function useProjectCreate() {
@@ -49,21 +50,12 @@ export async function createProject(project: ProjectInsertType) {
 		{ method: "POST", body: JSON.stringify([project]) },
 	);
 
-	const projectLogDescription = `project '${project.name}'`;
-	if (!response.ok) {
-		throw new Error(
-			`Failed to create project '${projectLogDescription}: ${response.status} -> ${response.statusText}`,
-		);
-	}
-
-	try {
-		const json = await response.json();
-		return json as { success: true };
-	} catch (err) {
-		throw new Error(
-			`Failed to parse ${projectLogDescription}'s json response: ${err}`,
-		);
-	}
+	return handleFetchResponse({
+		response,
+		data: project,
+		crudAction: "create",
+		resourceName: "projects",
+	});
 }
 
 export default useProjectCreate;

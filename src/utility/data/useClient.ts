@@ -1,6 +1,7 @@
-import type { ClientType } from "@/db/schema";
+import { clientSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { handleFetchResponse } from "../dataHookUtil";
 
 function useClient(id: number | undefined) {
 	const queryKey = ["clients", id];
@@ -21,19 +22,13 @@ export async function getClient(id: number | undefined) {
 	const response = await fetch(
 		`${env.client.NEXT_PUBLIC_BASE_URL}/api/clients/${id}`,
 	);
-
-	if (!response.ok) {
-		throw new Error(
-			`Failed to fetch client ${id}: ${response.status} -> ${response.statusText}`,
-		);
-	}
-
-	try {
-		const json = await response.json();
-		return json as ClientType;
-	} catch (err) {
-		throw new Error(`Failed to parse client ${id}'s json response: ${err}`);
-	}
+	return handleFetchResponse({
+		response,
+		data: id,
+		crudAction: "query",
+		resourceName: "clients",
+		zodSchema: clientSelectSchema,
+	});
 }
 
 export default useClient;

@@ -4,7 +4,7 @@ import { cn } from "@/utility/classNames";
 import {
 	categoryToColorClass,
 	categoryToOptionClass,
-} from "@/utility/expensesUtil";
+} from "@/utility/expensesIconUtil";
 
 function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 	value,

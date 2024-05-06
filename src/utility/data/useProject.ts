@@ -1,6 +1,7 @@
-import type { ProjectType } from "@/db/schema";
+import { projectSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { handleFetchResponse } from "../dataHookUtil";
 
 function useProject(id: number | undefined) {
 	const queryKey = ["projects", id];
@@ -21,9 +22,12 @@ export async function getProject(id: number | undefined) {
 	const response = await fetch(
 		`${env.client.NEXT_PUBLIC_BASE_URL}/api/projecs/${id}`,
 	);
-	const json = await response.json();
-
-	return json as ProjectType;
+	return handleFetchResponse({
+		response,
+		crudAction: "query",
+		resourceName: "projects",
+		zodSchema: projectSelectSchema,
+	});
 }
 
 export default useProject;
