@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 
+export const dynamic = "force-dynamic";
 export default async function ExpenseEditPageRoute({
 	params: { id },
 }: {

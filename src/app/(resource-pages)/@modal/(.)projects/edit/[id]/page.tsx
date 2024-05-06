@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 const resource = "project";
 const action = "edit";
 
+export const dynamic = "force-dynamic";
 export default async function ProjectEditModalRoute({
 	params: { id },
 }: {
