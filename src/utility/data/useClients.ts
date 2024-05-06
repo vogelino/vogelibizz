@@ -1,33 +1,33 @@
-import type { ClientType } from "@/db/schema";
+import { clientSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
+import { handleFetchResponse } from "../dataHookUtil";
 
 export const clientsQueryKey = ["clients"];
 function useClients() {
-  const { data, isPending, error } = useSuspenseQuery({
-    queryKey: clientsQueryKey,
-    queryFn: getClients,
-  });
+	const { data, isPending, error } = useSuspenseQuery({
+		queryKey: clientsQueryKey,
+		queryFn: getClients,
+	});
 
-  return {
-    data,
-    isPending,
-    error,
-  };
+	return {
+		data,
+		isPending,
+		error,
+	};
 }
 
 export async function getClients() {
-  const response = await fetch(
-    `${env.client.NEXT_PUBLIC_BASE_URL}/api/clients`
-  );
-  const json = await response.json();
+	const response = await fetch(
+		`${env.client.NEXT_PUBLIC_BASE_URL}/api/clients`,
+	);
 
-  if (json.error === "Unauthorized")
-    return redirect(`${env.server.NEXT_PUBLIC_BASE_URL}/login`);
-  if (json.error) throw new Error(json.error);
-
-  return json as ClientType[];
+	return handleFetchResponse({
+		response,
+		crudAction: "query",
+		resourceName: "clients",
+		zodSchema: clientSelectSchema.array(),
+	});
 }
 
 export default useClients;

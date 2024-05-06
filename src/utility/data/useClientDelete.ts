@@ -3,6 +3,7 @@
 import type { ClientType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { handleFetchResponse } from "../dataHookUtil";
 import { clientsQueryKey } from "./useClients";
 
 function useClientDelete() {
@@ -38,9 +39,13 @@ export async function deleteClientApi(id: number) {
 		`${env.client.NEXT_PUBLIC_BASE_URL}/api/clients/${id}`,
 		{ method: "DELETE" },
 	);
-	const json = await response.json();
 
-	return json;
+	return handleFetchResponse({
+		response,
+		data: id,
+		crudAction: "delete",
+		resourceName: "clients",
+	});
 }
 
 export default useClientDelete;

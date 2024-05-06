@@ -1,0 +1,586 @@
+{
+	"id": "56a9ca58-c1e5-496d-8416-dc048e7ca2ae",
+	"prevId": "cc8072b9-6fa0-47d1-b6bd-ecca2edc8329",
+	"version": "5",
+	"dialect": "pg",
+	"tables": {
+		"clients": {
+			"name": "clients",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"clients_name_unique": {
+					"name": "clients_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			}
+		},
+		"currencies": {
+			"name": "currencies",
+			"schema": "",
+			"columns": {
+				"original_currency": {
+					"name": "original_currency",
+					"type": "currency",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"usdRate": {
+					"name": "usdRate",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"currencies_original_currency_unique": {
+					"name": "currencies_original_currency_unique",
+					"nullsNotDistinct": false,
+					"columns": ["original_currency"]
+				}
+			}
+		},
+		"expenses": {
+			"name": "expenses",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"category": {
+					"name": "category",
+					"type": "expense_category",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'Software'"
+				},
+				"type": {
+					"name": "type",
+					"type": "expense_type",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'Personal'"
+				},
+				"rate": {
+					"name": "rate",
+					"type": "expense_rate",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'Monthly'"
+				},
+				"original_price": {
+					"name": "original_price",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"original_currency": {
+					"name": "original_currency",
+					"type": "currency",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"expenses_original_currency_currencies_original_currency_fk": {
+					"name": "expenses_original_currency_currencies_original_currency_fk",
+					"tableFrom": "expenses",
+					"tableTo": "currencies",
+					"columnsFrom": ["original_currency"],
+					"columnsTo": ["original_currency"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"expenses_name_unique": {
+					"name": "expenses_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			}
+		},
+		"invoices": {
+			"name": "invoices",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"date": {
+					"name": "date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"invoices_name_unique": {
+					"name": "invoices_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			}
+		},
+		"projects": {
+			"name": "projects",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "project_status",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'todo'"
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "''"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"projects_name_unique": {
+					"name": "projects_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			}
+		},
+		"projects_to_clients": {
+			"name": "projects_to_clients",
+			"schema": "",
+			"columns": {
+				"project_id": {
+					"name": "project_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"client_id": {
+					"name": "client_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"projects_to_clients_project_id_projects_id_fk": {
+					"name": "projects_to_clients_project_id_projects_id_fk",
+					"tableFrom": "projects_to_clients",
+					"tableTo": "projects",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"projects_to_clients_client_id_clients_id_fk": {
+					"name": "projects_to_clients_client_id_clients_id_fk",
+					"tableFrom": "projects_to_clients",
+					"tableTo": "clients",
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"projects_to_clients_project_id_client_id_pk": {
+					"name": "projects_to_clients_project_id_client_id_pk",
+					"columns": ["project_id", "client_id"]
+				}
+			},
+			"uniqueConstraints": {}
+		},
+		"projects_to_invoices": {
+			"name": "projects_to_invoices",
+			"schema": "",
+			"columns": {
+				"project_id": {
+					"name": "project_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"invoice_id": {
+					"name": "invoice_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"projects_to_invoices_project_id_projects_id_fk": {
+					"name": "projects_to_invoices_project_id_projects_id_fk",
+					"tableFrom": "projects_to_invoices",
+					"tableTo": "projects",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"projects_to_invoices_invoice_id_invoices_id_fk": {
+					"name": "projects_to_invoices_invoice_id_invoices_id_fk",
+					"tableFrom": "projects_to_invoices",
+					"tableTo": "invoices",
+					"columnsFrom": ["invoice_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"projects_to_invoices_project_id_invoice_id_pk": {
+					"name": "projects_to_invoices_project_id_invoice_id_pk",
+					"columns": ["project_id", "invoice_id"]
+				}
+			},
+			"uniqueConstraints": {}
+		},
+		"projects_to_quotes": {
+			"name": "projects_to_quotes",
+			"schema": "",
+			"columns": {
+				"project_id": {
+					"name": "project_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"quote_id": {
+					"name": "quote_id",
+					"type": "serial",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"projects_to_quotes_project_id_projects_id_fk": {
+					"name": "projects_to_quotes_project_id_projects_id_fk",
+					"tableFrom": "projects_to_quotes",
+					"tableTo": "projects",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"projects_to_quotes_quote_id_quotes_id_fk": {
+					"name": "projects_to_quotes_quote_id_quotes_id_fk",
+					"tableFrom": "projects_to_quotes",
+					"tableTo": "quotes",
+					"columnsFrom": ["quote_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"projects_to_quotes_project_id_quote_id_pk": {
+					"name": "projects_to_quotes_project_id_quote_id_pk",
+					"columns": ["project_id", "quote_id"]
+				}
+			},
+			"uniqueConstraints": {}
+		},
+		"quotes": {
+			"name": "quotes",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"last_modified": {
+					"name": "last_modified",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"date": {
+					"name": "date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"quotes_name_unique": {
+					"name": "quotes_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			}
+		}
+	},
+	"enums": {
+		"currency": {
+			"name": "currency",
+			"values": {
+				"CLF": "CLF",
+				"CLP": "CLP",
+				"EUR": "EUR",
+				"CHF": "CHF",
+				"USD": "USD",
+				"JPY": "JPY",
+				"GBP": "GBP",
+				"CNY": "CNY",
+				"AUD": "AUD",
+				"CAD": "CAD",
+				"HKD": "HKD",
+				"SGD": "SGD",
+				"SEK": "SEK",
+				"KRW": "KRW",
+				"NOK": "NOK",
+				"NZD": "NZD",
+				"INR": "INR",
+				"MXN": "MXN",
+				"TWD": "TWD",
+				"ZAR": "ZAR",
+				"BRL": "BRL",
+				"DKK": "DKK",
+				"PLN": "PLN",
+				"THB": "THB",
+				"ILS": "ILS",
+				"IDR": "IDR",
+				"CZK": "CZK",
+				"AED": "AED",
+				"TRY": "TRY",
+				"HUF": "HUF",
+				"SAR": "SAR",
+				"PHP": "PHP",
+				"MYR": "MYR",
+				"COP": "COP",
+				"RUB": "RUB",
+				"RON": "RON",
+				"PEN": "PEN",
+				"BHD": "BHD",
+				"BGN": "BGN",
+				"ARS": "ARS"
+			}
+		},
+		"expense_category": {
+			"name": "expense_category",
+			"values": {
+				"Essentials": "Essentials",
+				"Home": "Home",
+				"Domain": "Domain",
+				"Health & Wellbeing": "Health & Wellbeing",
+				"Entertainment": "Entertainment",
+				"Charity": "Charity",
+				"Present": "Present",
+				"Services": "Services",
+				"Hardware": "Hardware",
+				"Software": "Software",
+				"Hobby": "Hobby",
+				"Savings": "Savings",
+				"Transport": "Transport",
+				"Travel": "Travel",
+				"Administrative": "Administrative"
+			}
+		},
+		"expense_rate": {
+			"name": "expense_rate",
+			"values": {
+				"Monthly": "Monthly",
+				"Daily": "Daily",
+				"Hourly": "Hourly",
+				"Weekly": "Weekly",
+				"Yearly": "Yearly",
+				"Quarterly": "Quarterly",
+				"Semester": "Semester",
+				"Bi-Weekly": "Bi-Weekly",
+				"Bi-Monthly": "Bi-Monthly",
+				"Bi-Yearly": "Bi-Yearly",
+				"Tri-Yearly": "Tri-Yearly",
+				"One-time": "One-time"
+			}
+		},
+		"expense_type": {
+			"name": "expense_type",
+			"values": {
+				"Personal": "Personal",
+				"Freelance": "Freelance"
+			}
+		},
+		"project_status": {
+			"name": "project_status",
+			"values": {
+				"todo": "todo",
+				"active": "active",
+				"paused": "paused",
+				"done": "done",
+				"cancelled": "cancelled",
+				"negotiating": "negotiating",
+				"waiting_for_feedback": "waiting_for_feedback"
+			}
+		}
+	},
+	"schemas": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}

@@ -1,21 +1,14 @@
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ExpenseType } from "@/db/schema";
-import {
-	getValueInCLPPerMonth,
-	mapTypeToIcon,
-	typeToColorClass,
-} from "@/utility/expensesUtil";
+import type { ExpenseWithMonthlyCLPPriceType } from "@/db/schema";
+import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 
-const columnHelper = createColumnHelper<ExpenseType>();
+const columnHelper = createColumnHelper<ExpenseWithMonthlyCLPPriceType>();
 
-export const getExpensesTableColumns = (
-	rates: null | Record<ExpenseType["original_currency"], number>,
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): ColumnDef<ExpenseType, any>[] => [
+export const expensesTableColumns = [
 	columnHelper.accessor("name", {
 		id: "name",
 		size: 1000,
@@ -26,51 +19,25 @@ export const getExpensesTableColumns = (
 			return <InternalLink href={`/expenses/edit/${id}`}>{value}</InternalLink>;
 		},
 	}),
-	columnHelper.accessor(
-		(row) =>
-			getValueInCLPPerMonth({
-				value: row.price,
-				currency: row.original_currency,
-				rates,
-				billingRate: row.rate,
-			}) ?? 0,
-		{
-			id: "monthly_price_clp",
-			size: 100,
-			header: "CLP/Month",
-			cell: function render({ getValue, row }) {
-				const value = getValue<ExpenseType["price"]>();
-				return (
-					<span className="font-mono">{value && formatCurrency(value)}</span>
-				);
-			},
-			sortingFn: (rowA, rowB) => {
-				const valueAInCLPPerMonth =
-					getValueInCLPPerMonth({
-						value: rowA.original.price,
-						currency: rowA.original.original_currency,
-						rates,
-						billingRate: rowA.original.rate,
-					}) || 0;
-				const valueBInCLPPerMonth =
-					getValueInCLPPerMonth({
-						value: rowB.original.price,
-						currency: rowB.original.original_currency,
-						rates,
-						billingRate: rowB.original.rate,
-					}) || 0;
-
-				return valueAInCLPPerMonth - valueBInCLPPerMonth;
-			},
+	columnHelper.accessor("clpMonthlyPrice", {
+		id: "clpMonthlyPrice",
+		size: 100,
+		header: "CLP/Month",
+		cell: function render({ getValue, row }) {
+			const value =
+				getValue<ExpenseWithMonthlyCLPPriceType["clpMonthlyPrice"]>();
+			return (
+				<span className="font-mono">{value && formatCurrency(value)}</span>
+			);
 		},
-	),
-	columnHelper.accessor("price", {
-		id: "price",
+	}),
+	columnHelper.accessor("originalPrice", {
+		id: "originalPrice",
 		size: 100,
 		header: "Original price",
 		cell: function render({ getValue, row }) {
-			const currency = row.original.original_currency;
-			const value = getValue<ExpenseType["price"]>();
+			const currency = row.original.originalCurrency;
+			const value = getValue<ExpenseWithMonthlyCLPPriceType["originalPrice"]>();
 			return (
 				<span className="font-mono">
 					{value && formatCurrency(value, currency)}
@@ -88,11 +55,12 @@ export const getExpensesTableColumns = (
 		size: 200,
 		header: "Category",
 		cell: function render({ getValue }) {
-			const value = getValue<ExpenseType["category"]>();
+			const value = getValue<ExpenseWithMonthlyCLPPriceType["category"]>();
 			return <ExpenseCategoryBadge value={value} />;
 		},
 		filterFn: (row, columnId, filterValue) => {
-			const filterValues = filterValue as ExpenseType["category"][];
+			const filterValues =
+				filterValue as ExpenseWithMonthlyCLPPriceType["category"][];
 			return filterValues.includes(row.getValue(columnId));
 		},
 	}),
@@ -101,7 +69,7 @@ export const getExpensesTableColumns = (
 		size: 100,
 		header: "Type",
 		cell: function render({ getValue }) {
-			const value = getValue<ExpenseType["type"]>();
+			const value = getValue<ExpenseWithMonthlyCLPPriceType["type"]>();
 			return (
 				<IconBadge
 					icon={mapTypeToIcon(value)}

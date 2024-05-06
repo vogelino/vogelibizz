@@ -6,43 +6,37 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
+	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
 import {
-	type RatesTypes,
 	categoryToOptionClass,
-	getValueInCLPPerMonth,
 	mapTypeToIcon,
-} from "@/utility/expensesUtil";
+} from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { useActionsColumn } from "@/utility/useActionsColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
-import { getExpensesTableColumns } from "./columns";
+import { expensesTableColumns } from "./columns";
 
-type TypeFilterType = ExpenseType["type"] | "All types";
+type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
 
-export default function ExpensesPage({
-	rates,
-}: {
-	rates: RatesTypes;
-}) {
+export default function ExpensesPage() {
 	const deleteMutation = useExpenseDelete();
-	const actions = useActionsColumn<ExpenseType>((id) =>
+	const actions = useActionsColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
 		deleteMutation.mutate(id),
 	);
 	const [sorting, setSorting] = useState<SortingState>([]);
@@ -51,7 +45,7 @@ export default function ExpensesPage({
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const columns = useMemo(
-		() => [...getExpensesTableColumns(rates), actions],
+		() => [...expensesTableColumns, actions],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	);
@@ -77,17 +71,13 @@ export default function ExpensesPage({
 		},
 	});
 
-	const totalPerMonth = useMemo(
-		() => getTotalPerMonth(data, rates),
-		[data, rates],
-	);
+	const totalPerMonth = useMemo(() => getTotalPerMonth(data), [data]);
 
-	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
-		expenseCategoryEnum.enumValues,
-		(cat) => (
-			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-		),
-	);
+	const categoryOptions = useComboboxOptions<
+		ExpenseWithMonthlyCLPPriceType["category"]
+	>(expenseCategoryEnum.enumValues, (cat) => (
+		<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
+	));
 
 	const typeOptions = useComboboxOptions<TypeFilterType>(
 		["All types", ...expenseTypeEnum.enumValues],
@@ -102,7 +92,9 @@ export default function ExpensesPage({
 	const typeFilter = useMemo(() => {
 		const typeFilterValue = columnFilters.find((f) => f.id === "type");
 		return typeFilterValue as
-			| (Omit<ColumnFilter, "value"> & { value: ExpenseType["type"] })
+			| (Omit<ColumnFilter, "value"> & {
+					value: ExpenseWithMonthlyCLPPriceType["type"];
+			  })
 			| undefined;
 	}, [columnFilters]);
 
@@ -120,7 +112,7 @@ export default function ExpensesPage({
 	);
 
 	const setCategoryFilter = useCallback(
-		(categories: ExpenseType["category"][]) => {
+		(categories: ExpenseWithMonthlyCLPPriceType["category"][]) => {
 			setFilters((prev) => {
 				const otherFilters = prev.filter((f) => f.id !== "category");
 				if (categories.length === 0) return otherFilters;
@@ -130,7 +122,8 @@ export default function ExpensesPage({
 		[],
 	);
 
-	const categoryValues = categoryFilter[0]?.value as ExpenseType["category"][];
+	const categoryValues = categoryFilter[0]
+		?.value as ExpenseWithMonthlyCLPPriceType["category"][];
 	return (
 		<>
 			<div className="flex gap-6 justify-between items-center py-4 border-y border-grayLight my-4">
@@ -139,7 +132,7 @@ export default function ExpensesPage({
 					<span className="font-mono">{totalPerMonth}</span>
 				</div>
 				<div className="flex items-center gap-4">
-					<MultiValueInput<ExpenseType["category"]>
+					<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
 						options={categoryOptions}
 						values={categoryValues}
 						placeholder="Filter by category"
@@ -161,14 +154,9 @@ export default function ExpensesPage({
 	);
 }
 
-function getTotalPerMonth(data: ExpenseType[], rates: RatesTypes) {
+function getTotalPerMonth(data: ExpenseWithMonthlyCLPPriceType[]) {
 	const total = data?.reduce((a, b) => {
-		const monthlyPrice = getValueInCLPPerMonth({
-			value: b.price,
-			currency: b.original_currency,
-			rates,
-			billingRate: b.rate,
-		});
+		const monthlyPrice = b.clpMonthlyPrice;
 		return a + (monthlyPrice ?? 0);
 	}, 0);
 	return total ? formatCurrency(total) : "–";

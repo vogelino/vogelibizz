@@ -4,6 +4,7 @@ import type { ClientType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { handleFetchResponse } from "../dataHookUtil";
 import { clientsQueryKey } from "./useClients";
 
 function useClientEdit() {
@@ -47,21 +48,12 @@ export async function editClient(client: ClientType) {
 		{ method: "PATCH", body: JSON.stringify(client) },
 	);
 
-	const clientLogDescription = `client '${client.name}' (ID: ${client.id})`;
-	if (!response.ok) {
-		throw new Error(
-			`Failed to edit client '${clientLogDescription}: ${response.status} -> ${response.statusText}`,
-		);
-	}
-
-	try {
-		const json = await response.json();
-		return json as { success: true };
-	} catch (err) {
-		throw new Error(
-			`Failed to parse ${clientLogDescription}'s json response: ${err}`,
-		);
-	}
+	return handleFetchResponse({
+		response,
+		data: client,
+		crudAction: "edit",
+		resourceName: "clients",
+	});
 }
 
 export default useClientEdit;

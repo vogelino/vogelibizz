@@ -4,19 +4,7 @@ import {
 	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
-
-function randomItemFromArray<T>(arr: T[]): T {
-	return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randomToMax(max: number) {
-	const min = 0;
-	const floatRandom = Math.random();
-	const difference = max - min;
-	const random = Math.round(difference * floatRandom);
-	const randomWithinRange = random + min;
-	return randomWithinRange;
-}
+import { randomItemFromArray, randomToMax } from "@/utility/randomUti";
 
 const expensesSeedData = Array(randomToMax(100))
 	.fill(null)
@@ -25,8 +13,8 @@ const expensesSeedData = Array(randomToMax(100))
 		category: randomItemFromArray(expenseCategoryEnum.enumValues),
 		type: randomItemFromArray(expenseTypeEnum.enumValues),
 		rate: randomItemFromArray(expenseRateEnum.enumValues),
-		price: randomToMax(100000),
-		original_currency: randomItemFromArray(currencyEnum.enumValues),
+		originalPrice: randomToMax(100000),
+		originalCurrency: randomItemFromArray(currencyEnum.enumValues),
 	}));
 
 export default expensesSeedData;

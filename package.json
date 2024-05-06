@@ -30,6 +30,7 @@
     "@types/bun": "1.1.1",
     "class-variance-authority": "0.7.0",
     "cmdk": "0.2.1",
+    "date-fns": "^3.6.0",
     "drizzle-orm": "0.29.4",
     "drizzle-zod": "0.5.1",
     "easymde": "2.18.0",

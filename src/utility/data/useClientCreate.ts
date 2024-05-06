@@ -4,6 +4,7 @@ import type { ClientInsertType, ClientType } from "@/db/schema";
 import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { handleFetchResponse } from "../dataHookUtil";
 import { clientsQueryKey } from "./useClients";
 
 function useClientCreate() {
@@ -46,21 +47,12 @@ export async function createClient(client: ClientInsertType) {
 		{ method: "POST", body: JSON.stringify([client]) },
 	);
 
-	const clientLogDescription = `client '${client.name}'`;
-	if (!response.ok) {
-		throw new Error(
-			`Failed to create client '${clientLogDescription}: ${response.status} -> ${response.statusText}`,
-		);
-	}
-
-	try {
-		const json = await response.json();
-		return json as { success: true };
-	} catch (err) {
-		throw new Error(
-			`Failed to parse ${clientLogDescription}'s json response: ${err}`,
-		);
-	}
+	return handleFetchResponse({
+		response,
+		data: client,
+		crudAction: "create",
+		resourceName: "clients",
+	});
 }
 
 export default useClientCreate;

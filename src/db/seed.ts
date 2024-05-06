@@ -1,8 +1,7 @@
 import { connection, db } from "@/db";
 import * as schema from "@/db/schema";
 import env from "@/env";
-import { type Table, getTableName, sql } from "drizzle-orm";
-import type { PgEnum } from "drizzle-orm/pg-core";
+import { type Table, getTableName } from "drizzle-orm";
 import * as seeds from "./seeds";
 
 if (!env.server.POSTGRES_SEEDING) {
@@ -18,6 +17,7 @@ for (const table of [
 	schema.invoices,
 	schema.quotes,
 	schema.projects,
+	schema.currencies,
 ]) {
 	await resetTable(db, table);
 }
@@ -27,12 +27,14 @@ console.log(`- expenses`);
 console.log(`- clients`);
 console.log(`- invoices`);
 console.log(`- quotes`);
+console.log(`- currencies`);
 
 await Promise.all([
 	seeds.seedExpenses(db),
 	seeds.seedClients(db),
 	seeds.seedInvoices(db),
 	seeds.seedQuotes(db),
+	seeds.seedCurrencies(db),
 ]);
 
 console.log(`Seeding tables with relations:`);
@@ -52,17 +54,5 @@ async function resetTable(db: db, table: Table) {
 		throw error;
 	} finally {
 		console.log(`Table "${getTableName(table)}" was reset`);
-	}
-}
-
-async function resetEnum(db: db, enumerable: PgEnum<[string, ...string[]]>) {
-	console.log(`Reseting enum "${enumerable.enumName}"`);
-	try {
-		return db.execute(sql.raw(`DROP TYPE IF EXISTS ${enumerable.enumName}`));
-	} catch (error) {
-		console.error(`Failed to reset enum "${enumerable.enumName}"`);
-		throw error;
-	} finally {
-		console.log(`Table "${enumerable.enumName}" was reset`);
 	}
 }
