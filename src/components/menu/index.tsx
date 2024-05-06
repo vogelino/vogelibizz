@@ -1,5 +1,5 @@
 import BizzLogo from "@/components/BizzLogo";
-import LogoutButton from "@/components/LogoutButton";
+import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/utility/classNames";
 import { Link } from "next-view-transitions";
@@ -73,7 +73,7 @@ export const Menu = ({
 					`fixed top-[101px] left-0 w-screen h-[calc(100svh-69px)] bg-bg md:bg-transparent`,
 					`opacity-0 pointer-events-none md:opacity-100 md:static md:pointer-events-auto`,
 					`md:w-auto md:h-auto md:bg-none transition-opacity`,
-					`motion-reduce:transition-none`,
+					`motion-reduce:transition-none flex gap-6 flex-wrap items-center`,
 				)}
 			>
 				<ul
@@ -88,9 +88,16 @@ export const Menu = ({
 							active={currentPage.split("/")[0] === item.key}
 						/>
 					))}
-					<LogoutButton />
+				</ul>
+				<ul
+					className={cn(
+						`flex flex-col md:flex-row md:gap-4 items-center`,
+						`pl-6 border-l border-grayLight`,
+					)}
+					aria-label="Secondary menu items"
+				>
 					<li
-						aria-label="Main menu link: Other actions"
+						aria-label="Secondary menu link: Theme toggle"
 						className={cn(
 							`w-full md:w-auto py-5 md:p-0 text-grayDark`,
 							`flex justify-between items-center pr-5 md:pr-0`,
@@ -99,6 +106,15 @@ export const Menu = ({
 						<div className="text-fg inline-flex items-center">
 							<ThemeToggle />
 						</div>
+					</li>
+					<li
+						aria-label="Secondary menu link: User profile"
+						className={cn(
+							`w-full md:w-auto py-5 md:p-0 text-grayDark`,
+							`flex justify-between items-center pr-5 md:pr-0`,
+						)}
+					>
+						<MenuUser />
 					</li>
 				</ul>
 			</nav>

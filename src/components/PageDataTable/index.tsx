@@ -66,7 +66,7 @@ export default function PageDataTable<
 			<div className="w-full mb-6">
 				{data?.length > 0 && <DataTable table={table} />}
 			</div>
-			<TablePagination {...table} />
+			{table.getPageCount() > 1 && <TablePagination {...table} />}
 		</>
 	);
 }
