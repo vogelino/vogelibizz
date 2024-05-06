@@ -43,7 +43,7 @@ export default function ClientEdit({ id }: { id: string }) {
 							required: "This field is required",
 						})}
 					/>
-					{errors?.name?.message}
+					{typeof errors.name?.message === "string" && errors.name.message}
 				</label>
 			</div>
 		</form>

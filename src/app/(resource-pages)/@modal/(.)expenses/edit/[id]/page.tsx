@@ -1,8 +1,6 @@
+import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import EditResourceModal from "@/components/EditResourceModal";
 import ExpenseEdit from "@/components/ExpenseEdit";
-import db from "@/db";
-import { expenses } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 export default async function ExpenseEditModalRoute({
@@ -10,9 +8,7 @@ export default async function ExpenseEditModalRoute({
 }: {
 	params: { id: string };
 }) {
-	const record = await db.query.expenses.findFirst({
-		where: eq(expenses.id, +id),
-	});
+	const record = await getExpense(+id);
 	if (!record) return null;
 	return (
 		<EditResourceModal

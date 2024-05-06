@@ -23,9 +23,9 @@ function CurrencyInput({
 }: PropsWithChildren<{
 	inputProps: CurrencyInputProps;
 	currencyProps: HTMLProps<HTMLInputElement>;
-	onCurrencyChange: (currency: ExpenseType["original_currency"]) => void;
+	onCurrencyChange: (currency: ExpenseType["originalCurrency"]) => void;
 	onValueChange: (value: number) => void;
-	currency: ExpenseType["original_currency"];
+	currency: ExpenseType["originalCurrency"];
 	value: number | undefined;
 	label?: string;
 	className?: string;
@@ -74,7 +74,7 @@ function CurrencyInput({
 					/>
 				</div>
 				<input type="hidden" {...currencyProps} value={currency} />
-				<Combobox<ExpenseType["original_currency"]>
+				<Combobox<ExpenseType["originalCurrency"]>
 					className={cn("h-auto py-1 border-grayMed", className)}
 					options={options}
 					value={currency}
@@ -88,7 +88,7 @@ function CurrencyInput({
 	);
 }
 
-function getCurrencySymbol(currency: ExpenseType["original_currency"]) {
+function getCurrencySymbol(currency: ExpenseType["originalCurrency"]) {
 	return (0)
 		.toLocaleString("en-GB", {
 			style: "currency",

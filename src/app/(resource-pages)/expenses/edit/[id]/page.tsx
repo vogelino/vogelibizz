@@ -1,4 +1,4 @@
-import { getExpense } from "@/app/api/expenses/[id]/route";
+import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
