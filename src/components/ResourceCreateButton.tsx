@@ -1,7 +1,7 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import type { ResourceType } from "@/db/schema";
 import { Link } from "next-view-transitions";
-import { Button } from "../ui/button";
 
 function ResourceCreateButton({
 	resource,
