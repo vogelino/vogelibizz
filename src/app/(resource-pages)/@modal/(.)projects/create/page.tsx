@@ -7,6 +7,7 @@ import { SaveIcon } from "lucide-react";
 import { Link } from "next-view-transitions";
 import { usePathname, useRouter } from "next/navigation";
 
+export const dynamic = "force-dynamic";
 export default function ProjectCreateModalRoute() {
 	const router = useRouter();
 	const pathname = usePathname();
