@@ -1,4 +1,4 @@
-import { getExpenses } from "@/app/api/expenses/route";
+import { getExpenses } from "@/app/api/expenses/getExpenses";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import ExpensesPage from "./ExpensesPage";

@@ -1,15 +1,15 @@
 import db from "@/db";
 import {
-	currencies,
-	currencyEnum,
 	type CurrencyIdType,
 	type CurrencyType,
 	type ExpenseType,
 	type ExpenseWithMonthlyCLPPriceType,
+	currencies,
+	currencyEnum,
 } from "@/db/schema";
 import env from "@/env";
 import { isToday } from "date-fns";
-import { inArray, sql, type SQL } from "drizzle-orm";
+import { type SQL, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const OpenExchangeRatesJsonSchema = z.object({

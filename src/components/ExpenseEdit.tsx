@@ -5,11 +5,11 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
+	type ExpenseType,
+	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
-	type ExpenseType,
-	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
