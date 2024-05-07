@@ -5,18 +5,20 @@ import type { ZodSchema, z } from "zod";
 import { handleFetchResponse } from "../dataHookUtil";
 
 const apiBaseUrl = env.client.NEXT_PUBLIC_BASE_URL;
-export function createResourceQueryHook({
+export function createResourceQueryHook<T extends ZodSchema>({
   resourceName,
   responseZodSchema,
-  single = false,
+  single,
 }: {
   resourceName: ResourceType;
-  responseZodSchema: ZodSchema;
-  single?: boolean;
+  responseZodSchema: T;
+  single?: true | undefined;
 }) {
-  async function queryFn(
-    id?: number | string
-  ): Promise<z.infer<typeof responseZodSchema>> {
+  type SchemaType = typeof responseZodSchema;
+  type ReturnType = SchemaType extends ZodSchema
+    ? z.infer<SchemaType>
+    : undefined;
+  async function queryFn(id?: number | string): Promise<ReturnType> {
     const apiUrl = [apiBaseUrl, "api", resourceName, id]
       .filter(Boolean)
       .join("/");
@@ -24,18 +26,18 @@ export function createResourceQueryHook({
       response: await fetch(apiUrl),
       crudAction: "query",
       resourceName,
-      zodSchema: id ? responseZodSchema : responseZodSchema.array(),
+      zodSchema: responseZodSchema,
       data: id,
     });
   }
 
-  return function hook(
-    id: typeof single extends true ? number | string : undefined
-  ): {
-    data: z.infer<typeof responseZodSchema> | undefined;
+  type HookArgsType<T> = T extends undefined ? [] : [id: number | string];
+  return function hook(...args: HookArgsType<typeof single>): {
+    data: ReturnType;
     isPending: boolean;
     error: Error | null;
   } {
+    const id = single ? args[0] : undefined;
     const queryKey = [resourceName, id].filter(Boolean);
     return useSuspenseQuery({ queryKey, queryFn: () => queryFn(id) });
   };
