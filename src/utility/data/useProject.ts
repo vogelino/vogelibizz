@@ -3,9 +3,9 @@ import { createResourceQueryHook } from "./createDataHook";
 
 export const projectsQueryKey = ["projects"];
 const useProject = createResourceQueryHook({
-  resourceName: "projects",
-  responseZodSchema: projectSelectSchema,
-  single: true,
+	resourceName: "projects",
+	responseZodSchema: projectSelectSchema,
+	single: true,
 });
 
 export default useProject;
