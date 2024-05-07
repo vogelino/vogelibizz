@@ -1,11 +1,11 @@
 "use client";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { SessionProvider } from "next-auth/react";
 import { useRef } from "react";
-import { Toaster } from "sonner";
 
 function makeQueryClient() {
 	return new QueryClient({
