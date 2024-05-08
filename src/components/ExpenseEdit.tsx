@@ -6,70 +6,60 @@ import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
 	type ExpenseType,
-	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
 import env from "@/env";
+import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import {
 	categoryToOptionClass,
 	mapTypeToIcon,
 } from "@/utility/expensesIconUtil";
-import type { FormErrorsType } from "@/utility/formUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function ExpenseEdit({
 	id,
 	formId,
-	initialData,
 }: {
 	formId: string;
-	id?: undefined | string;
-	initialData?: ExpenseWithMonthlyCLPPriceType;
+	id?: string;
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
+	const { data: expense } = useExpense(id ? +id : undefined);
 	const router = useRouter();
-	const [category, setCategory] = useState<ExpenseType["category"]>(
-		initialData?.category || "Home",
+	const [type, setType] = useState(expense?.type ?? "Freelance");
+	const [category, setCategory] = useState(
+		expense?.category ?? "Administrative",
 	);
-	const [type, setType] = useState<ExpenseType["type"]>(
-		initialData?.type || "Personal",
+	const [rate, setRate] = useState(expense?.rate ?? "Monthly");
+	const [originalPrice, setOriginalPrice] = useState(
+		expense?.originalPrice ?? 0,
 	);
-	const [name, setName] = useState<ExpenseType["name"]>(
-		initialData?.name || "",
+	const [originalCurrency, setOriginalCurrency] = useState(
+		expense?.originalCurrency ?? "USD",
 	);
-	const [originalPrice, setOriginalPrice] = useState<
-		ExpenseType["originalPrice"]
-	>(initialData?.originalPrice || 0);
-	const [originalCurrency, setOriginalCurrency] = useState<
-		ExpenseType["originalCurrency"]
-	>(initialData?.originalCurrency || "USD");
-	const [rate, setRate] = useState<ExpenseType["rate"]>(
-		initialData?.rate || "Monthly",
-	);
-	const last_modified = useRef(new Date().toISOString());
-	const values = {
-		name,
-		last_modified: last_modified.current,
-		category,
-		type,
-		originalPrice: originalPrice ?? 0,
-		originalCurrency: originalCurrency,
-		rate,
-	};
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({
-		values,
+		defaultValues: {
+			name: expense?.name ?? "",
+			last_modified: new Date().toISOString(),
+			category,
+			type,
+			originalPrice,
+			originalCurrency,
+			rate,
+		},
 	});
 
 	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
@@ -92,22 +82,22 @@ export default function ExpenseEdit({
 	const rateOptions = useComboboxOptions<ExpenseType["rate"]>(
 		expenseRateEnum.enumValues,
 	);
-	const allErrors = errors as FormErrorsType<typeof values>;
 
 	return (
 		<form
-			onSubmit={handleSubmit(() => {
+			onSubmit={handleSubmit((values) => {
 				if (id) {
 					editMutation.mutate({
 						id: +id,
-						created_at: initialData?.created_at || new Date().toISOString(),
 						...values,
+						type,
+						category,
+						rate,
+						originalPrice,
+						originalCurrency,
 					});
 				} else {
-					createMutation.mutate({
-						created_at: new Date().toISOString(),
-						...values,
-					});
+					createMutation.mutate([values]);
 				}
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 			})}
@@ -115,17 +105,12 @@ export default function ExpenseEdit({
 			className="@container"
 		>
 			<div className="flex flex-col gap-6">
-				<FormInputWrapper
-					label="Name"
-					error={allErrors?.name?.message as string}
-				>
+				<FormInputWrapper label="Name" error={errors?.name?.message as string}>
 					<input
 						className="form-input dark:bg-grayUltraLight"
 						placeholder="Expense name"
 						type="text"
 						{...register("name", { required: true })}
-						value={name}
-						onChange={(evt) => setName(evt.target.value)}
 					/>
 				</FormInputWrapper>
 				<div className="grid @md:grid-cols-2 gap-6">
@@ -135,7 +120,7 @@ export default function ExpenseEdit({
 						label="Category"
 						value={category}
 						onChange={setCategory}
-						error={allErrors?.category?.message as string}
+						error={errors?.category?.message as string}
 						className="w-full"
 					/>
 					<FormInputCombobox<ExpenseType["type"]>
@@ -145,7 +130,7 @@ export default function ExpenseEdit({
 						value={type}
 						onChange={setType}
 						className="w-full"
-						error={allErrors?.type?.message as string}
+						error={errors?.type?.message as string}
 					/>
 					<CurrencyInput
 						label="Original price"
@@ -163,7 +148,7 @@ export default function ExpenseEdit({
 						value={rate}
 						onChange={setRate}
 						className="w-full"
-						error={allErrors?.rate?.message as string}
+						error={errors?.rate?.message as string}
 					/>
 				</div>
 			</div>

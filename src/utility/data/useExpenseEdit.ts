@@ -1,58 +1,37 @@
 "use client";
 
-import type { ExpenseType } from "@/db/schema";
-import env from "@/env";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { handleFetchResponse } from "../dataHookUtil";
+import {
+	type ExpenseType,
+	type ExpenseWithMonthlyCLPPriceType,
+	type ResourceType,
+	expenseInsertSchema,
+} from "@/db/schema";
+import createMutationHook from "./createMutationHook";
+import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
-const expensesQueryKey = ["expenses"];
-function useExpenseEdit() {
-	const queryExpense = useQueryClient();
-	const deleteMutation = useMutation({
-		mutationKey: ["expense-edit"],
-		mutationFn: editExpense,
-		onMutate: (expense: ExpenseType) => {
-			queryExpense.cancelQueries({ queryKey: expensesQueryKey });
-			const previousData =
-				queryExpense.getQueryData<ExpenseType[]>(expensesQueryKey);
-			queryExpense.setQueryData<ExpenseType[]>(expensesQueryKey, (old) =>
-				old?.map((c) => {
-					if (c.id === expense.id) return expense;
-					return c;
-				}),
-			);
-			toast.info(
-				`Successfully edited expense '${expense.name}' (ID: ${expense.id})`,
-			);
-			return { previousData };
-		},
-		onError: (err, { id }, context) => {
-			queryExpense.setQueryData<ExpenseType[]>(
-				expensesQueryKey,
-				context?.previousData,
-			);
-			console.error(`Failed to edit expense with id ${id}`, err);
-			toast.error(`Failed to edit expense with id ${id}`);
-		},
-		onSettled: () =>
-			queryExpense.invalidateQueries({ queryKey: expensesQueryKey }),
-	});
+const resourceName: ResourceType = "expenses";
+const action: ActionType = "edit";
+const inputZodSchema = expenseInsertSchema;
 
-	return deleteMutation;
-}
+const useClientEdit = createMutationHook<ExpenseWithMonthlyCLPPriceType[]>({
+	resourceName,
+	action,
+	inputZodSchema,
+	mutationFn: createQueryFunction<void>({
+		resourceName,
+		action,
+		inputZodSchema,
+	}),
+	createOptimisticDataEntry,
+});
 
-export async function editExpense(expense: ExpenseType) {
-	const response = await fetch(
-		`${env.client.NEXT_PUBLIC_BASE_URL}/api/expenses/${expense.id}`,
-		{ method: "PATCH", body: JSON.stringify(expense) },
+export default useClientEdit;
+
+function createOptimisticDataEntry(
+	oldData: ExpenseWithMonthlyCLPPriceType[] | undefined,
+	editedData: ExpenseType,
+) {
+	return (oldData || []).filter((c) =>
+		c.id === editedData.id ? { ...c, ...editedData } : c,
 	);
-
-	return handleFetchResponse({
-		response,
-		crudAction: "delete",
-		resourceName: "expenses",
-	});
 }
-
-export default useExpenseEdit;

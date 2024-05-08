@@ -10,23 +10,23 @@ import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-export default function ClientEditPageRoute({
+export default async function ClientEditPageRoute({
 	params: { id },
 }: {
 	params: { id: string };
 }) {
+	const record = await db.query.clients.findFirst({
+		where: eq(clients.id, +id),
+	});
 	serverQueryClient.prefetchQuery({
-		queryKey: ["client", id],
-		queryFn: () =>
-			db.query.clients.findFirst({
-				where: eq(clients.id, +id),
-			}),
+		queryKey: ["clients", `${id}`],
+		queryFn: () => record,
 	});
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>
 			<FormPageLayout
 				id={id}
-				title="Edit Client"
+				title={record?.name || "Edit client"}
 				allLink="/clients"
 				footerButtons={
 					<>
@@ -42,7 +42,7 @@ export default function ClientEditPageRoute({
 					</>
 				}
 			>
-				<ClientEdit id={id} />
+				<ClientEdit id={id} formId={`client-edit-form-${id}`} />
 			</FormPageLayout>
 		</HydrationBoundary>
 	);

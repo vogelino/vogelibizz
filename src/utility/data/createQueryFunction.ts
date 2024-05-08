@@ -3,7 +3,12 @@ import env from "@/env";
 import { type ZodSchema, z } from "zod";
 import { handleFetchResponse } from "../dataHookUtil";
 
-type ActionType = "querySingle" | "queryAll" | "create" | "edit" | "delete";
+export type ActionType =
+	| "querySingle"
+	| "queryAll"
+	| "create"
+	| "edit"
+	| "delete";
 type CommonArgs<A extends ActionType> = {
 	resourceName: ResourceType;
 	action: A;
@@ -15,7 +20,6 @@ type QuerySingleArgs = CommonArgs<"querySingle"> & {
 };
 type CreateArgs = CommonArgs<"create"> & {
 	inputZodSchema: ZodSchema;
-	outputZodSchema: ZodSchema;
 };
 type DeleteArgs = CommonArgs<"delete">;
 type EditArgs = CommonArgs<"edit"> & { inputZodSchema: ZodSchema };
@@ -29,14 +33,15 @@ type CreateQueryFnArgs =
 
 const apiBaseUrl = env.client.NEXT_PUBLIC_BASE_URL;
 
-export function createQueryFunction<OutputType>(
+export default function createQueryFunction<OutputType>(
 	args: CreateQueryFnArgs,
-): (...args: unknown[]) => Promise<OutputType> {
-	if (args.action === "queryAll") return createQueryAllFn(args);
-	if (args.action === "querySingle") return createQuerySingleFn(args);
-	if (args.action === "create") return createCreateFn(args);
-	if (args.action === "edit") return createEditFn(args);
-	if (args.action === "delete") return createDeleteFn(args);
+) {
+	if (args.action === "queryAll") return createQueryAllFn<OutputType>(args);
+	if (args.action === "querySingle")
+		return createQuerySingleFn<OutputType>(args);
+	if (args.action === "create") return createCreateFn<OutputType>(args);
+	if (args.action === "edit") return createEditFn<OutputType>(args);
+	if (args.action === "delete") return createDeleteFn<OutputType>(args);
 	throw new Error("Unknown action");
 }
 
@@ -75,10 +80,10 @@ function createQuerySingleFn<OutputType>(
 function createCreateFn<OutputType>(
 	args: CreateArgs,
 ): (data: unknown) => Promise<OutputType> {
-	const { resourceName, inputZodSchema, outputZodSchema } = args;
+	const { resourceName, inputZodSchema } = args;
 	return async function queryFn(data: unknown): Promise<OutputType> {
 		const input = inputZodSchema.parse(data);
-		const apiUrl = `${apiBaseUrl}/api/${resourceName}/${input.id}`;
+		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
 		return handleFetchResponse({
 			response: await fetch(apiUrl, {
 				method: "POST",
@@ -86,7 +91,6 @@ function createCreateFn<OutputType>(
 			}),
 			crudAction: "create",
 			resourceName,
-			zodSchema: outputZodSchema,
 			data: input,
 		});
 	};

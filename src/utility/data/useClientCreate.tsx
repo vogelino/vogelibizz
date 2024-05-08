@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	type ClientInsertType,
 	type ClientType,
 	type ResourceType,
 	clientInsertSchema,
@@ -9,10 +10,10 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "clients";
-const action: ActionType = "edit";
-const inputZodSchema = clientInsertSchema;
+const action: ActionType = "create";
+const inputZodSchema = clientInsertSchema.array();
 
-const useClientEdit = createMutationHook<ClientType[]>({
+const useClientCreate = createMutationHook<ClientType[]>({
 	resourceName,
 	action,
 	inputZodSchema,
@@ -24,13 +25,19 @@ const useClientEdit = createMutationHook<ClientType[]>({
 	createOptimisticDataEntry,
 });
 
-export default useClientEdit;
+export default useClientCreate;
 
 function createOptimisticDataEntry(
 	oldData: ClientType[] | undefined,
-	editedData: ClientType,
+	newData: ClientInsertType[],
 ) {
-	return (oldData || []).filter((c) =>
-		c.id === editedData.id ? { ...c, ...editedData } : c,
-	);
+	return [
+		...(oldData || []),
+		...newData.map((client) => ({
+			...client,
+			id: (oldData?.at(-1)?.id ?? 99998) + 1,
+			created_at: client.created_at || new Date().toISOString(),
+			last_modified: new Date().toISOString(),
+		})),
+	];
 }

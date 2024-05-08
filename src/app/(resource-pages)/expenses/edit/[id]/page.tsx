@@ -16,7 +16,7 @@ export default async function ExpenseEditPageRoute({
 	const record = await getExpense(+id);
 	if (!record) return null;
 	serverQueryClient.prefetchQuery({
-		queryKey: ["expense", id],
+		queryKey: ["expenses", `${id}`],
 		queryFn: () => record,
 	});
 	return (
@@ -39,11 +39,7 @@ export default async function ExpenseEditPageRoute({
 					</>
 				}
 			>
-				<ExpenseEdit
-					id={id}
-					formId={`expense-edit-form-${id}`}
-					initialData={record}
-				/>
+				<ExpenseEdit id={id} formId={`expense-edit-form-${id}`} />
 			</FormPageLayout>
 		</HydrationBoundary>
 	);
