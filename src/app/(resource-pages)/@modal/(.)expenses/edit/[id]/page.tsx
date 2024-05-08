@@ -10,11 +10,11 @@ export default async function ExpenseEditModalRoute({
 	params: { id: string };
 }) {
 	const record = await getExpense(+id);
+	if (!record) return null;
 	serverQueryClient.prefetchQuery({
-		queryKey: ["project", id],
+		queryKey: ["project", `${id}`],
 		queryFn: () => record,
 	});
-	if (!record) return null;
 	return (
 		<EditResourceModal
 			id={`${id}`}
