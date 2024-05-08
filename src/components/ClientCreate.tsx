@@ -17,10 +17,12 @@ export default function ClientCreate() {
 	return (
 		<form
 			onSubmit={handleSubmit(({ name }) => {
-				createMutation.mutate({
-					name,
-					last_modified: new Date().toISOString(),
-				});
+				createMutation.mutate([
+					{
+						name,
+						last_modified: new Date().toISOString(),
+					},
+				]);
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
 			})}
 			id={`client-create-form`}

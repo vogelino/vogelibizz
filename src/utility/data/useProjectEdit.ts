@@ -1,59 +1,37 @@
 "use client";
 
-import type { ProjectType } from "@/db/schema";
-import env from "@/env";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { handleFetchResponse } from "../dataHookUtil";
+import {
+	type ExpenseType,
+	type ExpenseWithMonthlyCLPPriceType,
+	type ResourceType,
+	projectInsertSchema,
+} from "@/db/schema";
+import createMutationHook from "./createMutationHook";
+import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
-const projectsQueryKey = ["projects"];
-function useProjectEdit() {
-	const queryProject = useQueryClient();
-	const deleteMutation = useMutation({
-		mutationKey: ["project-edit"],
-		mutationFn: editProject,
-		onMutate: (project: ProjectType) => {
-			queryProject.cancelQueries({ queryKey: projectsQueryKey });
-			const previousData =
-				queryProject.getQueryData<ProjectType[]>(projectsQueryKey);
-			queryProject.setQueryData<ProjectType[]>(projectsQueryKey, (old) =>
-				old?.map((c) => {
-					if (c.id === project.id) return project;
-					return c;
-				}),
-			);
-			toast.info(
-				`Successfully edited project '${project.name}' (ID: ${project.id})`,
-			);
-			return { previousData };
-		},
-		onError: (err, { id }, context) => {
-			queryProject.setQueryData<ProjectType[]>(
-				projectsQueryKey,
-				context?.previousData,
-			);
-			console.error(`Failed to edit project with id ${id}`, err);
-			toast.error(`Failed to edit project with id ${id}`);
-		},
-		onSettled: () =>
-			queryProject.invalidateQueries({ queryKey: projectsQueryKey }),
-	});
+const resourceName: ResourceType = "projects";
+const action: ActionType = "edit";
+const inputZodSchema = projectInsertSchema;
 
-	return deleteMutation;
-}
-
-export async function editProject(project: ProjectType) {
-	const response = await fetch(
-		`${env.client.NEXT_PUBLIC_BASE_URL}/api/projects/${project.id}`,
-		{ method: "PATCH", body: JSON.stringify(project) },
-	);
-
-	return handleFetchResponse({
-		response,
-		data: project,
-		crudAction: "edit",
-		resourceName: "projects",
-	});
-}
+const useProjectEdit = createMutationHook<ExpenseWithMonthlyCLPPriceType[]>({
+	resourceName,
+	action,
+	inputZodSchema,
+	mutationFn: createQueryFunction<void>({
+		resourceName,
+		action,
+		inputZodSchema,
+	}),
+	createOptimisticDataEntry,
+});
 
 export default useProjectEdit;
+
+function createOptimisticDataEntry(
+	oldData: ExpenseWithMonthlyCLPPriceType[] | undefined,
+	editedData: ExpenseType,
+) {
+	return (oldData || []).filter((c) =>
+		c.id === editedData.id ? { ...c, ...editedData } : c,
+	);
+}

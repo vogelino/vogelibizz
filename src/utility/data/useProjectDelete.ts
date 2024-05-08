@@ -1,56 +1,30 @@
 "use client";
 
-import type { ProjectType } from "@/db/schema";
-import env from "@/env";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { handleFetchResponse } from "../dataHookUtil";
+import type { ProjectType, ResourceType } from "@/db/schema";
+import { z } from "zod";
+import createMutationHook from "./createMutationHook";
+import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
-const projectsQueryKey = ["projects"];
-function useProjectDelete() {
-	const queryClient = useQueryClient();
-	const deleteMutation = useMutation({
-		mutationKey: ["project-delete"],
-		mutationFn: deleteClientApi,
-		onMutate: (id: number) => {
-			queryClient.cancelQueries({ queryKey: projectsQueryKey });
-			const previousData =
-				queryClient.getQueryData<ProjectType[]>(projectsQueryKey);
-			queryClient.setQueryData<ProjectType[]>(projectsQueryKey, (old) =>
-				old?.filter((c) => c.id !== id),
-			);
-			return { previousData };
-		},
-		onSuccess: (_data, id) => {
-			toast.info(`Successfully deleted project with "${id}"`);
-		},
-		onError: (err, id, context) => {
-			queryClient.setQueryData<ProjectType[]>(
-				projectsQueryKey,
-				context?.previousData,
-			);
-			console.error(`Failed to delete project with id ${id}`, err);
-			toast.error(`Failed to delete project with id ${id}: ${err}`);
-		},
-		onSettled: () =>
-			queryClient.invalidateQueries({ queryKey: projectsQueryKey }),
-	});
+const resourceName: ResourceType = "projects";
+const action: ActionType = "delete";
+const inputZodSchema = z.union([z.string(), z.number()]);
 
-	return deleteMutation;
-}
-
-export async function deleteClientApi(id: number) {
-	const response = await fetch(
-		`${env.client.NEXT_PUBLIC_BASE_URL}/api/projects/${id}`,
-		{ method: "DELETE" },
-	);
-
-	return handleFetchResponse({
-		response,
-		data: id,
-		crudAction: "delete",
-		resourceName: "projects",
-	});
-}
+const useProjectDelete = createMutationHook<ProjectType[]>({
+	resourceName,
+	action,
+	inputZodSchema,
+	mutationFn: createQueryFunction<void>({
+		resourceName,
+		action,
+	}),
+	createOptimisticDataEntry,
+});
 
 export default useProjectDelete;
+
+function createOptimisticDataEntry(
+	oldData: ProjectType[] | undefined,
+	deletedId: ProjectType["id"],
+) {
+	return (oldData || []).filter((c) => c.id !== deletedId);
+}

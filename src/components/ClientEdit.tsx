@@ -6,7 +6,10 @@ import useClientEdit from "@/utility/data/useClientEdit";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-export default function ClientEdit({ id }: { id: string }) {
+export default function ClientEdit({
+	id,
+	formId,
+}: { id: string; formId: string }) {
 	const router = useRouter();
 	const { data } = useClient(+id);
 	const editMutation = useClientEdit();
@@ -32,7 +35,7 @@ export default function ClientEdit({ id }: { id: string }) {
 				});
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
 			})}
-			id={`client-edit-form-${id}`}
+			id={formId}
 		>
 			<div className="flex flex-col gap-4">
 				<label className="flex flex-col gap-2">

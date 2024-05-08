@@ -1,14 +1,20 @@
 import { type ClientType, clientSelectSchema } from "@/db/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createQueryFunction } from "./createDataHook";
+import createQueryFunction from "./createQueryFunction";
 
 type DataType = ClientType;
 const resourceName = "clients";
 const action = "querySingle";
 const outputZodSchema = clientSelectSchema;
 
-function useClient(id: DataType["id"]) {
-	const queryKey = [resourceName, id];
+function useClient(id?: DataType["id"]) {
+	if (!id)
+		return {
+			data: null,
+			isPending: false,
+			error: null,
+		};
+	const queryKey = [resourceName, `${id}`];
 	return useSuspenseQuery<DataType>({
 		queryKey,
 		queryFn: createQueryFunction<DataType>({

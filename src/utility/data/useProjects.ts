@@ -1,6 +1,6 @@
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createQueryFunction } from "./createDataHook";
+import createQueryFunction from "./createQueryFunction";
 
 type DataType = ProjectType[];
 const resourceName = "projects";

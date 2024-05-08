@@ -2,6 +2,7 @@ import EditResourceModal from "@/components/EditResourceModal";
 import ProjectEdit from "@/components/ProjectEdit";
 import db from "@/db";
 import { projects } from "@/db/schema";
+import serverQueryClient from "@/utility/data/serverQueryClient";
 import { eq } from "drizzle-orm";
 
 const resource = "project";
@@ -17,6 +18,10 @@ export default async function ProjectEditModalRoute({
 	const record = await db.query.projects.findFirst({
 		where: eq(projects.id, +id),
 	});
+	serverQueryClient.prefetchQuery({
+		queryKey: ["project", id],
+		queryFn: () => record,
+	});
 	if (!record) return null;
 	return (
 		<EditResourceModal
@@ -26,7 +31,7 @@ export default async function ProjectEditModalRoute({
 			resourceSingularName={resource}
 			crudAction="edit"
 		>
-			<ProjectEdit id={`${id}`} formId={formId} initialData={record} />
+			<ProjectEdit id={`${id}`} formId={formId} />
 		</EditResourceModal>
 	);
 }
