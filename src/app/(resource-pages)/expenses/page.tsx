@@ -5,7 +5,7 @@ import ExpensesPage from "./ExpensesPage";
 
 export const dynamic = "force-dynamic";
 export default async function ExpensesPageServer() {
-	serverQueryClient.prefetchQuery({
+	await serverQueryClient.prefetchQuery({
 		queryKey: ["clients"],
 		queryFn: getExpenses,
 	});

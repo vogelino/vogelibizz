@@ -15,7 +15,7 @@ export default async function ExpenseEditPageRoute({
 }) {
 	const record = await getExpense(+id);
 	if (!record) return null;
-	serverQueryClient.prefetchQuery({
+	await serverQueryClient.prefetchQuery({
 		queryKey: ["expenses", `${id}`],
 		queryFn: () => record,
 	});

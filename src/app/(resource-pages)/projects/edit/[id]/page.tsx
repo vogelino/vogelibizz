@@ -9,12 +9,12 @@ import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-export default function ProjectEditPageRoute({
+export default async function ProjectEditPageRoute({
 	params: { id },
 }: {
 	params: { id: string };
 }) {
-	serverQueryClient.prefetchQuery({
+	await serverQueryClient.prefetchQuery({
 		queryKey: ["projects", `${id}`],
 		queryFn: () =>
 			db.query.projects.findFirst({
