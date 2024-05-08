@@ -18,7 +18,7 @@ export default async function ClientEditPageRoute({
 	const record = await db.query.clients.findFirst({
 		where: eq(clients.id, +id),
 	});
-	serverQueryClient.prefetchQuery({
+	await serverQueryClient.prefetchQuery({
 		queryKey: ["clients", `${id}`],
 		queryFn: () => record,
 	});

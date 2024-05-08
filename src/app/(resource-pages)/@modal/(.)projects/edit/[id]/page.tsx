@@ -18,7 +18,7 @@ export default async function ProjectEditModalRoute({
 	const record = await db.query.projects.findFirst({
 		where: eq(projects.id, +id),
 	});
-	serverQueryClient.prefetchQuery({
+	await serverQueryClient.prefetchQuery({
 		queryKey: ["project", id],
 		queryFn: () => record,
 	});

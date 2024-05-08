@@ -5,10 +5,10 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
+	type ExpenseType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpense from "@/utility/data/useExpense";
@@ -88,7 +88,7 @@ export default function ExpenseEdit({
 			onSubmit={handleSubmit((values) => {
 				if (id) {
 					editMutation.mutate({
-						id: +id,
+						id,
 						...values,
 						type,
 						category,
