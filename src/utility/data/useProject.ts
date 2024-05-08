@@ -1,11 +1,23 @@
-import { projectSelectSchema } from "@/db/schema";
-import { createResourceQueryHook } from "./createDataHook";
+import { type ProjectType, projectSelectSchema } from "@/db/schema";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createQueryFunction } from "./createDataHook";
 
-export const projectsQueryKey = ["projects"];
-const useProject = createResourceQueryHook({
-	resourceName: "projects",
-	responseZodSchema: projectSelectSchema,
-	single: true,
-});
+type DataType = ProjectType;
+const resourceName = "projects";
+const action = "querySingle";
+const outputZodSchema = projectSelectSchema;
+
+function useProject(id: DataType["id"]) {
+	const queryKey = [resourceName, id];
+	return useSuspenseQuery<DataType>({
+		queryKey,
+		queryFn: createQueryFunction<DataType>({
+			resourceName,
+			action,
+			outputZodSchema,
+			id,
+		}),
+	});
+}
 
 export default useProject;

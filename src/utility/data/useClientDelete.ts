@@ -5,8 +5,8 @@ import env from "@/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { handleFetchResponse } from "../dataHookUtil";
-import { clientsQueryKey } from "./useClients";
 
+const clientsQueryKey = ["clients"];
 function useClientDelete() {
 	const queryClient = useQueryClient();
 	const deleteMutation = useMutation({
