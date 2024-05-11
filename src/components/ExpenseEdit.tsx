@@ -5,10 +5,10 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
-	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
+	type ExpenseType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpense from "@/utility/data/useExpense";
@@ -85,6 +85,7 @@ export default function ExpenseEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 				const expense = {
 					...values,
 					type,
@@ -95,7 +96,6 @@ export default function ExpenseEdit({
 				};
 				if (id) editMutation.mutate({ ...expense, id });
 				else createMutation.mutate([expense]);
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 			})}
 			id={formId}
 			className="@container"
