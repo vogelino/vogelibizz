@@ -9,7 +9,7 @@ const resourceName = "clients";
 const action = "querySingle";
 const outputZodSchema = clientSelectSchema;
 
-function useClient(id?: DataType["id"]) {
+function useClient(id?: string | number) {
   if (!id)
     return {
       data: null,

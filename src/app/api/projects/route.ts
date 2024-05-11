@@ -3,13 +3,13 @@ import db from "@/db";
 import { projectInsertSchema, projects } from "@/db/schema";
 import { getCreationRoute } from "@/utility/apiUtil";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 export const GET = auth(async () => {
-	return NextResponse.json(await db.query.projects.findMany());
+  return NextResponse.json(await db.query.projects.findMany());
 });
 
 export const POST = getCreationRoute(async (body) => {
-	return NextResponse.json(await db.insert(projects).values(body));
-}, z.array(projectInsertSchema));
+  const parsedBody = projectInsertSchema.array().parse(body);
+  return NextResponse.json(await db.insert(projects).values(parsedBody));
+});

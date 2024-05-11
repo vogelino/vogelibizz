@@ -9,9 +9,9 @@ import { useForm } from "react-hook-form";
 export default function ClientEdit({
 	id,
 	formId,
-}: { id: string; formId: string }) {
+}: { id: number; formId: string }) {
 	const router = useRouter();
-	const { data } = useClient(+id);
+	const { data } = useClient(id);
 	const editMutation = useClientEdit();
 	const {
 		register,
@@ -20,7 +20,6 @@ export default function ClientEdit({
 	} = useForm({
 		defaultValues: {
 			name: data?.name,
-			last_modified: new Date().toISOString(),
 		},
 	});
 
@@ -28,10 +27,8 @@ export default function ClientEdit({
 		<form
 			onSubmit={handleSubmit((client) => {
 				editMutation.mutate({
-					id: +id,
+					id,
 					name: client.name ?? "",
-					last_modified: new Date().toISOString(),
-					created_at: data?.created_at ?? new Date().toISOString(),
 				});
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
 			})}
@@ -45,6 +42,7 @@ export default function ClientEdit({
 						{...register("name", {
 							required: "This field is required",
 						})}
+						defaultValue={data?.name}
 					/>
 					{typeof errors.name?.message === "string" && errors.name.message}
 				</label>

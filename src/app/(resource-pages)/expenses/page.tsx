@@ -5,10 +5,8 @@ import ExpensesPage from "./ExpensesPage";
 
 export const dynamic = "force-dynamic";
 export default async function ExpensesPageServer() {
-	await serverQueryClient.prefetchQuery({
-		queryKey: ["clients"],
-		queryFn: getExpenses,
-	});
+	const expenses = await getExpenses();
+	serverQueryClient.setQueryData(["expenses"], expenses);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>
 			<ExpensesPage />

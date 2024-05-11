@@ -13,7 +13,7 @@ function FormPageLayout({
 	footerButtons,
 	children,
 }: PropsWithChildren<{
-	id?: string;
+	id?: string | number;
 	title: string;
 	allLink: string;
 	footerButtons?: React.ReactNode;

@@ -27,15 +27,15 @@ export default function ProjectEdit({
 	id,
 	formId,
 }: {
-	id?: string;
+	id?: string | number;
 	formId: string;
 }) {
 	const router = useRouter();
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
-	const { data: project } = useProject(id ? +id : undefined);
+	const { data: project } = useProject(id);
 	const [status, setStatus] = useState(project?.status ?? "active");
-	const [description, setDescription] = useState(project?.description ?? "");
+	const [content, setContent] = useState(project?.content ?? "");
 
 	const {
 		register,
@@ -44,10 +44,9 @@ export default function ProjectEdit({
 	} = useForm({
 		defaultValues: {
 			name: project?.name ?? "",
-			last_modified: new Date().toISOString(),
-			description,
+			content,
 			status,
-			content: project?.content ?? "",
+			description: project?.description ?? "",
 		},
 	});
 	const statusProps = register("status", {
@@ -61,11 +60,11 @@ export default function ProjectEdit({
 					editMutation.mutate({
 						id: +id,
 						...project,
-						description,
+						content,
 						status,
 					});
 				} else {
-					createMutation.mutate(project);
+					createMutation.mutate([project]);
 				}
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
 			})}
@@ -79,6 +78,7 @@ export default function ProjectEdit({
 							required: "This field is required",
 						})}
 						className="form-input"
+						defaultValue={project?.name || ""}
 					/>
 				</FormInputWrapper>
 				<FormInputWrapper
@@ -91,10 +91,11 @@ export default function ProjectEdit({
 							required: "This field is required",
 						})}
 						className="form-input"
+						defaultValue={project?.description || ""}
 					/>
 				</FormInputWrapper>
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
-					<ForwardedEditor value={description} onChange={setDescription} />
+					<ForwardedEditor value={content} onChange={setContent} />
 				</FormInputWrapper>
 				<FormInputCombobox<ProjectType["status"]>
 					onChange={setStatus}

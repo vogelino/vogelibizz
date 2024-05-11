@@ -6,7 +6,7 @@ function PageHeaderTitle({
 	id,
 }: {
 	name?: string;
-	id?: string;
+	id?: string | number;
 }) {
 	return (
 		<div

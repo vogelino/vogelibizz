@@ -18,10 +18,7 @@ export default async function ClientEditPageRoute({
 	const record = await db.query.clients.findFirst({
 		where: eq(clients.id, +id),
 	});
-	await serverQueryClient.prefetchQuery({
-		queryKey: ["clients", `${id}`],
-		queryFn: () => record,
-	});
+	serverQueryClient.setQueryData(["clients", `${id}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>
 			<FormPageLayout

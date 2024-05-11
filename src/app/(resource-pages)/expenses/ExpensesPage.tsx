@@ -6,9 +6,9 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
-	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
+	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
@@ -17,17 +17,17 @@ import {
 	mapTypeToIcon,
 } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { useActionsColumn } from "@/utility/useActionsColumn";
+import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { expensesTableColumns } from "./columns";
@@ -36,7 +36,7 @@ type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
 
 export default function ExpensesPage() {
 	const deleteMutation = useExpenseDelete();
-	const actions = useActionsColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
+	const deleteColumn = getDeleteColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
 		deleteMutation.mutate(id),
 	);
 	const [sorting, setSorting] = useState<SortingState>([]);
@@ -45,7 +45,7 @@ export default function ExpensesPage() {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const columns = useMemo(
-		() => [...expensesTableColumns, actions],
+		() => [...expensesTableColumns, deleteColumn],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	);

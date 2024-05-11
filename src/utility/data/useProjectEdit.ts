@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  projectInsertSchema,
-  type ExpenseType,
+  projectEditSchema,
+  type ExpenseEditType,
   type ExpenseWithMonthlyCLPPriceType,
   type ResourceType,
 } from "@/db/schema";
@@ -11,7 +11,7 @@ import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "projects";
 const action: ActionType = "edit";
-const inputZodSchema = projectInsertSchema;
+const inputZodSchema = projectEditSchema;
 
 const useProjectEdit = createMutationHook<ExpenseWithMonthlyCLPPriceType[]>({
   resourceName,
@@ -29,7 +29,7 @@ export default useProjectEdit;
 
 function createOptimisticDataEntry(
   oldData: ExpenseWithMonthlyCLPPriceType[] | undefined,
-  editedData: ExpenseType
+  editedData: ExpenseEditType
 ) {
   return (oldData || []).map((c) =>
     c.id === editedData.id ? { ...c, ...editedData } : c
