@@ -1,7 +1,7 @@
 "use client";
 import {
-  expenseSelectSchema,
-  type ExpenseWithMonthlyCLPPriceType,
+	type ExpenseWithMonthlyCLPPriceType,
+	expenseSelectSchema,
 } from "@/db/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import createQueryFunction from "./createQueryFunction";
@@ -12,22 +12,22 @@ const action = "querySingle";
 const outputZodSchema = expenseSelectSchema;
 
 function useExpense(id?: DataType["id"]) {
-  if (!id)
-    return {
-      data: null,
-      isPending: false,
-      error: null,
-    };
-  const queryKey = [resourceName, `${id}`];
-  return useSuspenseQuery<DataType>({
-    queryKey,
-    queryFn: createQueryFunction<DataType>({
-      resourceName,
-      action,
-      outputZodSchema,
-      id,
-    }),
-  });
+	if (!id)
+		return {
+			data: null,
+			isPending: false,
+			error: null,
+		};
+	const queryKey = [resourceName, `${id}`];
+	return useSuspenseQuery<DataType>({
+		queryKey,
+		queryFn: createQueryFunction<DataType>({
+			resourceName,
+			action,
+			outputZodSchema,
+			id,
+		}),
+	});
 }
 
 export default useExpense;

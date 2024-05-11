@@ -1,4 +1,3 @@
-
 function DefaultModal() {
 	return null;
 }

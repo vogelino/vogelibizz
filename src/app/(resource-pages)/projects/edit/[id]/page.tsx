@@ -2,7 +2,7 @@ import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import db from "@/db";
-import { ProjectType, projects } from "@/db/schema";
+import { type ProjectType, projects } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { eq } from "drizzle-orm";
@@ -17,7 +17,7 @@ export default async function ProjectEditPageRoute({
 }) {
 	const record = await db.query.projects.findFirst({
 		where: eq(projects.id, +id),
-	})
+	});
 	serverQueryClient.setQueryData<ProjectType>(["projects", `${id}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

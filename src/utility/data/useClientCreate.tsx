@@ -1,10 +1,10 @@
 "use client";
 
 import {
-	clientInsertSchema,
 	type ClientInsertType,
 	type ClientType,
 	type ResourceType,
+	clientInsertSchema,
 } from "@/db/schema";
 import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
