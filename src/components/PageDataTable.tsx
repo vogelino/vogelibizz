@@ -9,12 +9,12 @@ import useProjectDelete from "@/utility/data/useProjectDelete";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import {
+	type ColumnDef,
+	type SortingState,
 	getCoreRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnDef,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useState } from "react";
 

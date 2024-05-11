@@ -1,7 +1,7 @@
 import ClientEdit from "@/components/ClientEdit";
 import EditResourceModal from "@/components/EditResourceModal";
 import db from "@/db";
-import { clients, type ClientType } from "@/db/schema";
+import { type ClientType, clients } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
