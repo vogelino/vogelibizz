@@ -1,29 +1,36 @@
-import ClientCreate from "@/components/ClientCreate";
+import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
+import { singularizeResourceName } from "@/utility/resourceUtil";
 import { SaveIcon } from "lucide-react";
 import Link from "next/link";
+
+const resource = "clients";
+const resourceSingular = singularizeResourceName(resource);
+const action = "create";
+const capitalizedAction = action.charAt(0).toUpperCase() + action.slice(1);
+const formId = `${resource}-${action}-form`;
 
 export default function ClientCreatePageRoute() {
 	return (
 		<FormPageLayout
-			title="Create Client"
-			allLink="/clients"
+			title={`${capitalizedAction} ${resourceSingular}`}
+			allLink={`/${resource}`}
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/clients`}>
+						<Link href={`/${resource}`}>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>
-					<Button type="submit" form={`client-create-form`}>
+					<Button type="submit" form={formId}>
 						<SaveIcon />
-						{"Create client"}
+						{`${capitalizedAction} ${resourceSingular}`}
 					</Button>
 				</>
 			}
 		>
-			<ClientCreate />
+			<ClientEdit formId={formId} />
 		</FormPageLayout>
 	);
 }

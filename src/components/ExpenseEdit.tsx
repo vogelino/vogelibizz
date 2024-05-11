@@ -85,19 +85,16 @@ export default function ExpenseEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
-				if (id) {
-					editMutation.mutate({
-						id: id,
-						...values,
-						type,
-						category,
-						rate,
-						originalPrice,
-						originalCurrency,
-					});
-				} else {
-					createMutation.mutate([values]);
-				}
+				const expense = {
+					...values,
+					type,
+					category,
+					rate,
+					originalPrice,
+					originalCurrency,
+				};
+				if (id) editMutation.mutate({ ...expense, id });
+				else createMutation.mutate([expense]);
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
 			})}
 			id={formId}
