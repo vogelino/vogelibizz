@@ -17,7 +17,7 @@ export default function EditResourceModal({
 }: PropsWithChildren<{
 	resourceSingularName: string;
 	crudAction: "create" | "edit";
-	id?: string;
+	id?: string | number;
 	formId?: string;
 	title?: string;
 }>) {

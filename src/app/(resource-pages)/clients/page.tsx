@@ -5,10 +5,8 @@ import ClientList from "./page.client";
 
 export const dynamic = "force-dynamic";
 export default async function ClientsPageServer() {
-	await serverQueryClient.prefetchQuery({
-		queryKey: ["clients"],
-		queryFn: () => db.query.clients.findMany(),
-	});
+	const clients = await db.query.clients.findMany();
+	serverQueryClient.setQueryData(["clients"], clients);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>
 			<ClientList />

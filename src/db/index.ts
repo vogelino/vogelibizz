@@ -4,16 +4,16 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 export const connection = postgres(env.server.POSTGRES_URL, {
-	max:
-		env.server.POSTGRES_MIGRATING || env.server.POSTGRES_SEEDING
-			? 1
-			: undefined,
-	onnotice: env.server.POSTGRES_SEEDING ? () => {} : undefined,
+  max:
+    env.server.POSTGRES_MIGRATING || env.server.POSTGRES_SEEDING
+      ? 1
+      : undefined,
+  onnotice: env.server.POSTGRES_SEEDING ? () => {} : undefined,
 });
 
 export const db = drizzle(connection, {
-	schema,
-	logger: true,
+  schema,
+  logger: false,
 });
 
 export type db = typeof db;

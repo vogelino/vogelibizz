@@ -1,7 +1,8 @@
 "use client";
 
 import {
-  clientInsertSchema,
+  clientEditSchema,
+  type ClientEditType,
   type ClientType,
   type ResourceType,
 } from "@/db/schema";
@@ -10,7 +11,7 @@ import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "clients";
 const action: ActionType = "edit";
-const inputZodSchema = clientInsertSchema;
+const inputZodSchema = clientEditSchema;
 
 const useClientEdit = createMutationHook<ClientType[]>({
   resourceName,
@@ -28,7 +29,7 @@ export default useClientEdit;
 
 function createOptimisticDataEntry(
   oldData: ClientType[] | undefined,
-  editedData: ClientType
+  editedData: ClientEditType
 ) {
   return (oldData || []).map((c) =>
     c.id === editedData.id ? { ...c, ...editedData } : c

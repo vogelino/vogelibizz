@@ -27,12 +27,12 @@ export default function ExpenseEdit({
 	id,
 	formId,
 }: {
+	id?: number;
 	formId: string;
-	id?: string;
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
-	const { data: expense } = useExpense(id ? +id : undefined);
+	const { data: expense } = useExpense(id);
 	const router = useRouter();
 	const [type, setType] = useState(expense?.type ?? "Freelance");
 	const [category, setCategory] = useState(
@@ -53,7 +53,6 @@ export default function ExpenseEdit({
 	} = useForm({
 		defaultValues: {
 			name: expense?.name ?? "",
-			last_modified: new Date().toISOString(),
 			category,
 			type,
 			originalPrice,
@@ -88,7 +87,7 @@ export default function ExpenseEdit({
 			onSubmit={handleSubmit((values) => {
 				if (id) {
 					editMutation.mutate({
-						id,
+						id: id,
 						...values,
 						type,
 						category,
@@ -111,6 +110,7 @@ export default function ExpenseEdit({
 						placeholder="Expense name"
 						type="text"
 						{...register("name", { required: true })}
+						defaultValue={expense?.name}
 					/>
 				</FormInputWrapper>
 				<div className="grid @md:grid-cols-2 gap-6">

@@ -1,12 +1,16 @@
 import EditResourceModal from "@/components/EditResourceModal";
 import ProjectEdit from "@/components/ProjectEdit";
 import db from "@/db";
-import { projects } from "@/db/schema";
+import { projects, type ProjectType } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
+import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { eq } from "drizzle-orm";
 
-const resource = "project";
+const resource = "projects";
+const resourceSingularName = singularizeResourceName(resource);
 const action = "edit";
+const capitalizedAction = action.charAt(0).toUpperCase() + action.slice(1);
 
 export const dynamic = "force-dynamic";
 export default async function ProjectEditModalRoute({
@@ -14,24 +18,26 @@ export default async function ProjectEditModalRoute({
 }: {
 	params: { id: string };
 }) {
-	const formId = `${resource}-${action}-form-${id}`;
+	const parsedId = parseId(id);
+	const formId = `${resource}-${action}-form-${parsedId}`;
 	const record = await db.query.projects.findFirst({
-		where: eq(projects.id, +id),
+		where: eq(projects.id, parsedId),
 	});
-	await serverQueryClient.prefetchQuery({
-		queryKey: ["project", id],
-		queryFn: () => record,
-	});
-	if (!record) return null;
+	serverQueryClient.setQueryData<ProjectType>(
+		[resource, `${parsedId}`],
+		record,
+	);
 	return (
-		<EditResourceModal
-			id={`${id}`}
-			title={record.name}
-			formId={formId}
-			resourceSingularName={resource}
-			crudAction="edit"
-		>
-			<ProjectEdit id={`${id}`} formId={formId} />
-		</EditResourceModal>
+		<HydrationBoundary state={dehydrate(serverQueryClient)}>
+			<EditResourceModal
+				id={parsedId}
+				title={record?.name || `${capitalizedAction} ${resourceSingularName}`}
+				formId={formId}
+				resourceSingularName={resourceSingularName}
+				crudAction={action}
+			>
+				<ProjectEdit id={parsedId} formId={formId} />
+			</EditResourceModal>
+		</HydrationBoundary>
 	);
 }
