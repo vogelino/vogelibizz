@@ -28,11 +28,10 @@ export default function ClientEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
 				const client = { ...values, name: values.name ?? "" };
 				if (id) editMutation.mutate({ ...client, id });
 				else createMutation.mutate([client]);
-
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
 			})}
 			id={formId}
 		>

@@ -56,10 +56,10 @@ export default function ProjectEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
+				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
 				const project = { ...values, content, status };
 				if (id) editMutation.mutate({ ...project, id });
 				else createMutation.mutate([project]);
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
 			})}
 			id={formId}
 		>
