@@ -5,10 +5,10 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import {
+	type ExpenseType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
-	type ExpenseType,
 } from "@/db/schema";
 import env from "@/env";
 import useExpense from "@/utility/data/useExpense";
@@ -61,26 +61,27 @@ export default function ExpenseEdit({
 		},
 	});
 
-	const categoryOptions = useComboboxOptions<ExpenseType["category"]>(
-		expenseCategoryEnum.enumValues,
-		(cat) => (
+	const categoryOptions = useComboboxOptions({
+		optionValues: expenseCategoryEnum.enumValues,
+		renderer: (cat) => (
 			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
 		),
-	);
+		accessorFn: (cat) => cat,
+	});
 
-	const typeOptions = useComboboxOptions<ExpenseType["type"]>(
-		expenseTypeEnum.enumValues,
-		(type) => (
+	const typeOptions = useComboboxOptions<ExpenseType["type"]>({
+		optionValues: expenseTypeEnum.enumValues,
+		renderer: (type) => (
 			<>
 				{mapTypeToIcon(type, 24)}
 				<span className="pt-1">{type}</span>
 			</>
 		),
-	);
+	});
 
-	const rateOptions = useComboboxOptions<ExpenseType["rate"]>(
-		expenseRateEnum.enumValues,
-	);
+	const rateOptions = useComboboxOptions<ExpenseType["rate"]>({
+		optionValues: expenseRateEnum.enumValues,
+	});
 
 	return (
 		<form
@@ -111,21 +112,21 @@ export default function ExpenseEdit({
 					/>
 				</FormInputWrapper>
 				<div className="grid @md:grid-cols-2 gap-6">
-					<FormInputCombobox<ExpenseType["category"]>
+					<FormInputCombobox
 						options={categoryOptions}
 						inputProps={register("category")}
 						label="Category"
 						value={category}
-						onChange={setCategory}
+						onChange={(val) => setCategory(val as ExpenseType["category"])}
 						error={errors?.category?.message as string}
 						className="w-full"
 					/>
-					<FormInputCombobox<ExpenseType["type"]>
+					<FormInputCombobox
 						options={typeOptions}
 						inputProps={register("type")}
 						label="Type"
 						value={type}
-						onChange={setType}
+						onChange={(val) => setType(val as ExpenseType["type"])}
 						className="w-full"
 						error={errors?.type?.message as string}
 					/>
@@ -138,12 +139,12 @@ export default function ExpenseEdit({
 						currency={originalCurrency}
 						value={originalPrice}
 					/>
-					<FormInputCombobox<ExpenseType["rate"]>
+					<FormInputCombobox
 						options={rateOptions}
 						inputProps={register("rate")}
 						label="Billing Rate"
 						value={rate}
-						onChange={setRate}
+						onChange={(val) => setRate(val as ExpenseType["rate"])}
 						className="w-full"
 						error={errors?.rate?.message as string}
 					/>

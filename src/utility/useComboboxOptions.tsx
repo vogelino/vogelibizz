@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
 export type OptionType = {
 	label: ReactNode;
@@ -6,10 +6,10 @@ export type OptionType = {
 };
 
 type UseComboboxOptionsParams<OptionValueType> = {
-		optionValues: OptionValueType[];
-		renderer?: (value: OptionValueType) => ReactNode;
-		accessorFn?: (value: OptionValueType) => string | number;
-	}
+	optionValues: OptionValueType[];
+	renderer?: (value: OptionValueType) => ReactNode;
+	accessorFn?: (value: OptionValueType) => string | number;
+};
 
 function useComboboxOptions<OptionValueType = string | number>({
 	optionValues = [],
@@ -19,7 +19,7 @@ function useComboboxOptions<OptionValueType = string | number>({
 	return useRef(
 		optionValues.map((value) => ({
 			label: renderer(value),
-			value: accessorFn(value)
+			value: accessorFn(value),
 		})),
 	).current;
 }

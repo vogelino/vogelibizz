@@ -6,9 +6,9 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
+	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
-	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
@@ -20,14 +20,14 @@ import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { expensesTableColumns } from "./columns";
@@ -112,16 +112,13 @@ export default function ExpensesPage() {
 		[columnFilters],
 	);
 
-	const setCategoryFilter = useCallback(
-		(categories: string[]) => {
-			setFilters((prev) => {
-				const otherFilters = prev.filter((f) => f.id !== "category");
-				if (categories.length === 0) return otherFilters;
-				return [...otherFilters, { id: "category", value: categories }];
-			});
-		},
-		[],
-	);
+	const setCategoryFilter = useCallback((categories: string[]) => {
+		setFilters((prev) => {
+			const otherFilters = prev.filter((f) => f.id !== "category");
+			if (categories.length === 0) return otherFilters;
+			return [...otherFilters, { id: "category", value: categories }];
+		});
+	}, []);
 
 	const categoryValues = categoryFilter[0]
 		?.value as ExpenseWithMonthlyCLPPriceType["category"][];
@@ -138,11 +135,13 @@ export default function ExpensesPage() {
 						values={categoryValues}
 						placeholder="Filter by category"
 						selectedValueFormater={(value) => (
-							<ExpenseCategoryBadge value={value as ExpenseWithMonthlyCLPPriceType["category"]} />
+							<ExpenseCategoryBadge
+								value={value as ExpenseWithMonthlyCLPPriceType["category"]}
+							/>
 						)}
 						onChange={(cat) => setCategoryFilter(cat.map((c) => `${c.value}`))}
 					/>
-					<Combobox<TypeFilterType>
+					<Combobox
 						className={"h-auto py-1 border-grayMed"}
 						options={typeOptions}
 						value={typeFilter?.value}

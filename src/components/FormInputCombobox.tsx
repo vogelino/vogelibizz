@@ -1,9 +1,10 @@
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/utility/classNames";
+import type { OptionType } from "@/utility/useComboboxOptions";
 import type { HTMLProps, ReactNode } from "react";
 
-function FormInputCombobox<OptionValueType extends string>({
+function FormInputCombobox({
 	options,
 	value,
 	onChange,
@@ -14,11 +15,8 @@ function FormInputCombobox<OptionValueType extends string>({
 }: {
 	error?: string;
 	inputProps: HTMLProps<HTMLInputElement>;
-	options: {
-		label: ReactNode;
-		value: OptionValueType;
-	}[];
-	onChange: (value: OptionValueType) => void;
+	options: OptionType[];
+	onChange: (value: string | number) => void;
 	label: ReactNode;
 	value: string;
 	className?: string;
@@ -26,11 +24,11 @@ function FormInputCombobox<OptionValueType extends string>({
 	return (
 		<FormInputWrapper label={label} error={error}>
 			<input type="hidden" {...inputProps} />
-			<Combobox<OptionValueType>
+			<Combobox
 				className={cn("h-auto py-1 border-grayMed", className)}
 				options={options}
 				value={value}
-				onChange={onChange}
+				onChange={(val) => onChange(val)}
 			/>
 		</FormInputWrapper>
 	);
