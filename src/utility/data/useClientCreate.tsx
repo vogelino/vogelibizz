@@ -1,10 +1,10 @@
 "use client";
 
 import {
+	clientInsertSchema,
 	type ClientInsertType,
 	type ClientType,
 	type ResourceType,
-	clientInsertSchema,
 } from "@/db/schema";
 import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
@@ -30,7 +30,7 @@ export default useClientCreate;
 function createOptimisticDataEntry(
 	oldData: ClientType[] | undefined,
 	newData: ClientInsertType[],
-) {
+): ClientType[] {
 	return [
 		...(oldData || []),
 		...newData.map((client) => ({
@@ -38,6 +38,7 @@ function createOptimisticDataEntry(
 			id: (oldData?.at(-1)?.id ?? 99998) + 1,
 			created_at: client.created_at || new Date().toISOString(),
 			last_modified: new Date().toISOString(),
+			projects: client.projects || [],
 		})),
 	];
 }

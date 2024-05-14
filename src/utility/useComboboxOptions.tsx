@@ -1,20 +1,25 @@
-import { type ReactNode, useRef } from "react";
+import { useRef, type ReactNode } from "react";
 
-export type OptionType<T extends string> = {
+export type OptionType = {
 	label: ReactNode;
-	value: T;
+	value: string | number;
 };
 
-function useComboboxOptions<OptionValueType extends string = string>(
-	optionValues: OptionValueType[],
-	renderer: (value: OptionValueType) => ReactNode = (value) => (
-		<span className="pt-1">{value}</span>
-	),
-) {
+type UseComboboxOptionsParams<OptionValueType> = {
+		optionValues: OptionValueType[];
+		renderer?: (value: OptionValueType) => ReactNode;
+		accessorFn?: (value: OptionValueType) => string | number;
+	}
+
+function useComboboxOptions<OptionValueType = string | number>({
+	optionValues = [],
+	renderer = (value) => <span className="pt-1">{String(value)}</span>,
+	accessorFn = (value) => String(value),
+}: UseComboboxOptionsParams<OptionValueType>) {
 	return useRef(
 		optionValues.map((value) => ({
 			label: renderer(value),
-			value,
+			value: accessorFn(value)
 		})),
 	).current;
 }

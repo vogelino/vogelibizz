@@ -10,21 +10,21 @@ const action: ActionType = "delete";
 const inputZodSchema = z.number();
 
 const useExpenseDelete = createMutationHook<ExpenseType[]>({
-	resourceName,
-	action,
-	inputZodSchema,
-	mutationFn: createQueryFunction<void>({
-		resourceName,
-		action,
-	}),
-	createOptimisticDataEntry,
+  resourceName,
+  action,
+  inputZodSchema,
+  mutationFn: createQueryFunction<void>({
+    resourceName,
+    action,
+  }),
+  createOptimisticDataEntry,
 });
 
 export default useExpenseDelete;
 
 function createOptimisticDataEntry(
-	oldData: ExpenseType[] | undefined,
-	deletedId: ExpenseType["id"],
-) {
-	return (oldData || []).filter((c) => c.id !== deletedId);
+  oldData: ExpenseType[] | undefined,
+  deletedId: ExpenseType["id"]
+): ExpenseType[] {
+  return (oldData || []).filter((c) => c.id !== deletedId);
 }

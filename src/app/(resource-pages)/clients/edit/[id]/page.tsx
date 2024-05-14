@@ -1,12 +1,10 @@
+import { getClient } from "@/app/api/clients/[id]/getClient";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import db from "@/db";
-import { clients } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -23,9 +21,7 @@ export default async function ClientEditPageRoute({
 }) {
 	const parsedId = parseId(id);
 	const formId = `${resource}-${action}-form-${parsedId}`;
-	const record = await db.query.clients.findFirst({
-		where: eq(clients.id, parsedId),
-	});
+	const record = await getClient(parsedId);
 	serverQueryClient.setQueryData([resource, `${parseId}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

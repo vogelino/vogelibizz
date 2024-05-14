@@ -1,10 +1,11 @@
+import TableRelationsList from "@/components/TableRelationsList";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ProjectType } from "@/db/schema";
+import type { ClientType, ProjectType } from "@/db/schema";
 import {
-	type StatusType,
 	mapStatusToIcon,
 	mapStatusToLabel,
+	type StatusType,
 } from "@/utility/statusUtil";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -46,6 +47,22 @@ export const projectTableColumns = [
 				<IconBadge
 					icon={mapStatusToIcon(value)}
 					label={mapStatusToLabel(value)}
+				/>
+			);
+		},
+	}),
+	columnHelper.accessor("clients", {
+		size: 300,
+		header: "Clients",
+		cell: function render({ row, getValue }) {
+			const id = row.original.id;
+			const items = getValue<ClientType[]>();
+			return (
+				<TableRelationsList
+					originalId={id}
+					items={items}
+					relationResource="clients"
+					originalResource="projects"
 				/>
 			);
 		},

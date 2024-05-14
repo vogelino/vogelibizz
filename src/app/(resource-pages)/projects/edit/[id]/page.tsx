@@ -1,11 +1,11 @@
+import { getProject } from "@/app/api/projects/[id]/getProject";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
-import db from "@/db";
-import { type ProjectType, projects } from "@/db/schema";
+import type { ProjectType } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
+import { parseId } from "@/utility/resourceUtil";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { eq } from "drizzle-orm";
 import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -15,9 +15,7 @@ export default async function ProjectEditPageRoute({
 }: {
 	params: { id: string };
 }) {
-	const record = await db.query.projects.findFirst({
-		where: eq(projects.id, +id),
-	});
+	const record = await getProject(parseId(id));
 	serverQueryClient.setQueryData<ProjectType>(["projects", `${id}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

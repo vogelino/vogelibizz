@@ -6,9 +6,9 @@ import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
-	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseTypeEnum,
+	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
@@ -20,14 +20,14 @@ import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
+	type ColumnFilter,
+	type ColumnFiltersState,
+	type SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { expensesTableColumns } from "./columns";
@@ -73,21 +73,22 @@ export default function ExpensesPage() {
 
 	const totalPerMonth = useMemo(() => getTotalPerMonth(data), [data]);
 
-	const categoryOptions = useComboboxOptions<
-		ExpenseWithMonthlyCLPPriceType["category"]
-	>(expenseCategoryEnum.enumValues, (cat) => (
-		<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-	));
+	const categoryOptions = useComboboxOptions({
+		optionValues: expenseCategoryEnum.enumValues,
+		renderer: (cat) => (
+			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
+		),
+	});
 
-	const typeOptions = useComboboxOptions<TypeFilterType>(
-		["All types", ...expenseTypeEnum.enumValues],
-		(type) => (
+	const typeOptions = useComboboxOptions({
+		optionValues: ["All types", ...expenseTypeEnum.enumValues],
+		renderer: (type) => (
 			<>
-				{mapTypeToIcon(type, 24)}
+				{mapTypeToIcon(type as TypeFilterType, 24)}
 				<span className="pt-1">{type}</span>
 			</>
 		),
-	);
+	});
 
 	const typeFilter = useMemo(() => {
 		const typeFilterValue = columnFilters.find((f) => f.id === "type");
@@ -98,11 +99,11 @@ export default function ExpensesPage() {
 			| undefined;
 	}, [columnFilters]);
 
-	const setType = useCallback((type: TypeFilterType) => {
+	const setType = useCallback((type: string | number) => {
 		setFilters((prev) => {
 			const otherFilters = prev.filter((f) => f.id !== "type");
-			if (type === "All types") return otherFilters;
-			return [...otherFilters, { id: "type", value: type }];
+			if (`${type}` === "All types") return otherFilters;
+			return [...otherFilters, { id: "type", value: `${type}` }];
 		});
 	}, []);
 
@@ -112,7 +113,7 @@ export default function ExpensesPage() {
 	);
 
 	const setCategoryFilter = useCallback(
-		(categories: ExpenseWithMonthlyCLPPriceType["category"][]) => {
+		(categories: string[]) => {
 			setFilters((prev) => {
 				const otherFilters = prev.filter((f) => f.id !== "category");
 				if (categories.length === 0) return otherFilters;
@@ -137,9 +138,9 @@ export default function ExpensesPage() {
 						values={categoryValues}
 						placeholder="Filter by category"
 						selectedValueFormater={(value) => (
-							<ExpenseCategoryBadge value={value} />
+							<ExpenseCategoryBadge value={value as ExpenseWithMonthlyCLPPriceType["category"]} />
 						)}
-						onChange={(cat) => setCategoryFilter(cat.map((c) => c.value))}
+						onChange={(cat) => setCategoryFilter(cat.map((c) => `${c.value}`))}
 					/>
 					<Combobox<TypeFilterType>
 						className={"h-auto py-1 border-grayMed"}

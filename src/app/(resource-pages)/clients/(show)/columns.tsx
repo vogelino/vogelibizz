@@ -1,6 +1,7 @@
+import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
-import type { ClientType } from "@/db/schema";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import type { ClientType, ProjectType } from "@/db/schema";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -31,6 +32,22 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 			const id = row.original.id;
 			const value = getValue<string>();
 			return <InternalLink href={`/clients/edit/${id}`}>{value}</InternalLink>;
+		},
+	}),
+	columnHelper.accessor("projects", {
+		size: 300,
+		header: "Projects",
+		cell: function render({ row, getValue }) {
+			const id = row.original.id;
+			const items = getValue<ProjectType[]>();
+			return (
+				<TableRelationsList
+					originalId={id}
+					items={items}
+					relationResource="projects"
+					originalResource="clients"
+				/>
+			);
 		},
 	}),
 ];
