@@ -129,7 +129,9 @@ export default function ProjectEdit({
 					/>
 				</FormInputWrapper>
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
-					<ForwardedEditor value={content} onChange={setContent} />
+					<div className="bg-bg dark:bg-grayUltraLight border border-grayMed min-h-[356px]">
+						<ForwardedEditor value={content} onChange={setContent} />
+					</div>
 				</FormInputWrapper>
 				<FormInputCombobox
 					onChange={(val) => setStatus(val as ProjectType["status"])}

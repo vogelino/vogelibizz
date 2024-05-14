@@ -163,7 +163,11 @@
 
 html div.CodeMirror,
 html .EasyMDEContainer .CodeMirror {
-  @apply text-inherit bg-bg border-grayMed;
+  @apply text-inherit bg-bg border-none;
+}
+html[data-theme="dark"] div.CodeMirror,
+html[data-theme="dark"] .EasyMDEContainer .CodeMirror {
+  @apply bg-grayUltraLight;
 }
 html div.CodeMirror .cm-link,
 html div.CodeMirror .cm-url {
