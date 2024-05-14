@@ -16,7 +16,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
-import { useCallback, useState, type ReactNode } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { IconBadge } from "./icon-badge";
 
 type OptionType = {

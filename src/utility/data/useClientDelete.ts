@@ -10,21 +10,21 @@ const action: ActionType = "delete";
 const inputZodSchema = z.number();
 
 const useClientDelete = createMutationHook<ClientType[]>({
-  resourceName,
-  action,
-  inputZodSchema,
-  mutationFn: createQueryFunction<void>({
-    resourceName,
-    action,
-  }),
-  createOptimisticDataEntry,
+	resourceName,
+	action,
+	inputZodSchema,
+	mutationFn: createQueryFunction<void>({
+		resourceName,
+		action,
+	}),
+	createOptimisticDataEntry,
 });
 
 export default useClientDelete;
 
 function createOptimisticDataEntry(
-  oldData: ClientType[] | undefined,
-  deletedId: ClientType["id"]
+	oldData: ClientType[] | undefined,
+	deletedId: ClientType["id"],
 ): ClientType[] {
-  return (oldData || []).filter((c) => c.id !== deletedId);
+	return (oldData || []).filter((c) => c.id !== deletedId);
 }

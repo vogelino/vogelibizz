@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
 import type { PopoverContentProps } from "@radix-ui/react-popover";
-import { useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 
 export type ComboboxProps = {
 	options: {
@@ -30,7 +30,7 @@ export type ComboboxProps = {
 	selectedValueFormater?: (value: string | number) => ReactNode;
 	align?: PopoverContentProps["align"];
 };
-export function Combobox<OptionValueType extends string = string>({
+export function Combobox({
 	options,
 	onChange = () => undefined,
 	value: initialValue,

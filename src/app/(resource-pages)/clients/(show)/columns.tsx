@@ -1,7 +1,7 @@
 import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
 import type { ClientType, ProjectType } from "@/db/schema";
-import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>

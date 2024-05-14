@@ -82,7 +82,7 @@ export default function ProjectEdit({
 				newValues.reduce(
 					(acc, option) => {
 						const client = clientsQuery.data?.find(
-							(client) => String(client.id) === option.value,
+							(client) => String(client.id) === String(option.value),
 						);
 						if (client) acc.push(client);
 						return acc;
@@ -98,7 +98,7 @@ export default function ProjectEdit({
 		<form
 			onSubmit={handleSubmit((values) => {
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
-				const project = { ...values, content, status };
+				const project = { ...values, content, status, clients: projectClients };
 				if (id) editMutation.mutate({ ...project, id });
 				else createMutation.mutate([project]);
 			})}
@@ -131,8 +131,8 @@ export default function ProjectEdit({
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
 					<ForwardedEditor value={content} onChange={setContent} />
 				</FormInputWrapper>
-				<FormInputCombobox<ProjectType["status"]>
-					onChange={setStatus}
+				<FormInputCombobox
+					onChange={(val) => setStatus(val as ProjectType["status"])}
 					value={status}
 					options={statusList}
 					inputProps={statusProps}
