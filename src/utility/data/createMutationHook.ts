@@ -45,7 +45,10 @@ function createMutationHook<DataType>({
         const capitalizedPrinciple =
           pastPrincipe.charAt(0).toUpperCase() + pastPrincipe.slice(1);
         const singularAcrtion = singularizeResourceName(resourceName);
-        const nameSuffix = "name" in input ? ` "${input.name}"` : "";
+        const nameSuffix =
+          typeof input === "object" && "name" in input
+            ? ` "${input.name}"`
+            : "";
         toastId.current = toast.loading(
           `${capitalizedPrinciple} ${singularAcrtion}${nameSuffix}...`
         );

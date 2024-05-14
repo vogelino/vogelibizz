@@ -17,17 +17,17 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
 import type { PopoverContentProps } from "@radix-ui/react-popover";
-import { type ReactNode, useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
-export type ComboboxProps<OptionValueType extends string = string> = {
+export type ComboboxProps = {
 	options: {
 		label: ReactNode;
-		value: OptionValueType;
+		value: string | number;
 	}[];
-	onChange?: (value: OptionValueType) => void;
+	onChange?: (value: string | number) => void;
 	value?: string;
 	className?: string;
-	selectedValueFormater?: (value: OptionValueType) => ReactNode;
+	selectedValueFormater?: (value: string | number) => ReactNode;
 	align?: PopoverContentProps["align"];
 };
 export function Combobox<OptionValueType extends string = string>({
@@ -40,7 +40,7 @@ export function Combobox<OptionValueType extends string = string>({
 			? options.find((option) => option.value === value)?.label
 			: "Select value...",
 	align = "end",
-}: ComboboxProps<OptionValueType>) {
+}: ComboboxProps) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(initialValue || options[0]?.value);
 
@@ -81,12 +81,12 @@ export function Combobox<OptionValueType extends string = string>({
 						{options.map((option) => (
 							<CommandItem
 								key={option.value}
-								value={option.value}
+								value={`${option.value}`}
 								onSelect={(currentValue) => {
 									const newValue = currentValue === value ? "" : currentValue;
 									const item = options.find(
 										(item) =>
-											item.value.toLocaleLowerCase() ===
+											`${item.value}`.toLocaleLowerCase() ===
 											newValue.toLocaleLowerCase(),
 									);
 									if (!item) return;

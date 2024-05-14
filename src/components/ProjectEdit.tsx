@@ -2,17 +2,22 @@
 
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
-import type { ProjectType } from "@/db/schema";
+import type { ClientType, ProjectType } from "@/db/schema";
 import env from "@/env";
+import useClients from "@/utility/data/useClients";
 import useProject from "@/utility/data/useProject";
 import useProjectCreate from "@/utility/data/useProjectCreate";
 import useProjectEdit from "@/utility/data/useProjectEdit";
 import { statusList } from "@/utility/statusUtil";
+import useComboboxOptions, {
+	type OptionType,
+} from "@/utility/useComboboxOptions";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { forwardRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { SimpleMDEReactProps } from "react-simplemde-editor";
+import { MultiValueInput } from "./ui/multi-value-input";
 
 const DynamicEditor = dynamic(
 	async () => (await import("@/components/ui/text-editor")).TextareaEditor,
@@ -31,11 +36,19 @@ export default function ProjectEdit({
 	formId: string;
 }) {
 	const router = useRouter();
+	const clientsQuery = useClients();
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
-	const { data: project } = useProject(id);
+	const projectQuery = useProject(id);
+	const { data: project } = projectQuery;
 	const [status, setStatus] = useState(project?.status ?? "active");
 	const [content, setContent] = useState(project?.content ?? "");
+	const [projectClients, setProjectClients] = useState<
+		{
+			id: number;
+			name: string;
+		}[]
+	>(project?.clients || []);
 
 	const {
 		register,
@@ -52,6 +65,34 @@ export default function ProjectEdit({
 	const statusProps = register("status", {
 		required: "This field is required",
 	});
+
+	useEffect(() => {
+		setProjectClients(project?.clients || []);
+	}, [project?.clients]);
+
+	const clientsOptions = useComboboxOptions<ClientType>({
+		optionValues: clientsQuery.data,
+		renderer: (client) => client?.name || "",
+		accessorFn: ({ id }) => String(id),
+	});
+
+	const onProjectsChange = useCallback(
+		(newValues: OptionType[]) => {
+			setProjectClients(
+				newValues.reduce(
+					(acc, option) => {
+						const client = clientsQuery.data?.find(
+							(client) => String(client.id) === option.value,
+						);
+						if (client) acc.push(client);
+						return acc;
+					},
+					[] as { id: number; name: string }[],
+				),
+			);
+		},
+		[clientsQuery.data],
+	);
 
 	return (
 		<form
@@ -99,6 +140,18 @@ export default function ProjectEdit({
 					error={errors?.status?.message}
 					className="w-full"
 				/>
+				{!projectQuery.error && !projectQuery.isPending && (
+					<label className="flex flex-col gap-1">
+						<span className="text-grayDark">Clients</span>
+						<MultiValueInput
+							options={clientsOptions}
+							values={projectClients.map((client) => String(client.id)) || []}
+							placeholder="Select the projects' clients"
+							className="w-full"
+							onChange={onProjectsChange}
+						/>
+					</label>
+				)}
 			</div>
 		</form>
 	);

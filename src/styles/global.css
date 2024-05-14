@@ -62,6 +62,14 @@
   html .form-radio {
     @apply border-grayMed bg-bg focusable focus-visible:border-grayMed;
   }
+  html[data-theme="dark"] .form-input,
+  html[data-theme="dark"] .form-textarea,
+  html[data-theme="dark"] .form-select,
+  html[data-theme="dark"] .form-multiselect,
+  html[data-theme="dark"] .form-checkbox,
+  html[data-theme="dark"] .form-radio {
+    @apply bg-grayUltraLight;
+  }
   html .form-input::-webkit-outer-spin-button,
   html .form-input::-webkit-inner-spin-button,
   html .form-number::-webkit-outer-spin-button,

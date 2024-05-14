@@ -1,11 +1,10 @@
+import { getClient } from "@/app/api/clients/[id]/getClient";
 import ClientEdit from "@/components/ClientEdit";
 import EditResourceModal from "@/components/EditResourceModal";
-import db from "@/db";
-import { type ClientType, clients } from "@/db/schema";
+import type { ClientType } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { eq } from "drizzle-orm";
 
 const resource = "clients";
 const resourceSingularName = singularizeResourceName(resource);
@@ -20,9 +19,7 @@ export default async function ClientEditModalRoute({
 }) {
 	const parsedId = parseId(id);
 	const formId = `${resource}-${action}-form-${parsedId}`;
-	const record = await db.query.clients.findFirst({
-		where: eq(clients.id, parsedId),
-	});
+	const record = await getClient(parsedId);
 	serverQueryClient.setQueryData<ClientType>([resource, `${parsedId}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>
