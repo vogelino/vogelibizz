@@ -11,8 +11,12 @@ export const COLORS = {
 
 export const CONFIG = {
   pageInlinePadding: 50,
-  pageBlockPadding: 60,
+  pageBlockPadding: 50,
   contentLeftOffset: 32,
+
+  lang: "de-DE" as keyof typeof LABELS,
+  currency: "EUR",
+  hourlyRate: 50,
 };
 
 export const CONTENT = {
@@ -45,6 +49,67 @@ export const CONTENT = {
   bankAccountNumber: "5104616960",
   bankAddress: "Bandera 140, Santiago Chile",
   bankSwift: "BSCHCLRM",
+};
+
+export const LABELS = {
+  "en-US": {
+    hourlyRateNoticeLabel: "Underlying hourly rate for price calculation",
+    taxId: "Tax ID",
+    clientNr: "Client Nr.",
+    invoiceNr: "Invoice Nr.",
+    tableHeaderDescription: "Description",
+    tableHeaderHours: "Hours",
+    tableHeaderPrice: "Price",
+    tableTotal: "Total",
+    reverseChargeNotice:
+      "Tax liability of the service recipient (reverse charge).",
+    notice: "Notice",
+    originalInvoiceLanguageSpanish:
+      "The original invoice in Spanish, issued by the Chilean Tax Authority (SII), is attached",
+  },
+  "es-CL": {
+    hourlyRateNoticeLabel: "Tasa horaria subyacente para la cálculo de precios",
+    taxId: "RUT",
+    clientNr: "n.º cliente",
+    invoiceNr: "n.º factura",
+    tableHeaderDescription: "Descripción",
+    tableHeaderHours: "Horas",
+    tableHeaderPrice: "Precio",
+    tableTotal: "Total",
+    reverseChargeNotice:
+      "Responsabilidad tributaria del destinatario del servicio (reversión de cargo).",
+    notice: "Aviso",
+    originalInvoiceLanguageSpanish: "",
+  },
+  "fr-CH": {
+    hourlyRateNoticeLabel: "Taux horaire sous-jacent pour le calcul des prix",
+    taxId: "TVA",
+    clientNr: "n° client",
+    invoiceNr: "n° de facture",
+    tableHeaderDescription: "Description",
+    tableHeaderHours: "Heures",
+    tableHeaderPrice: "Prix",
+    tableTotal: "Total",
+    reverseChargeNotice:
+      "Responsabilité fiscale du destinataire du service (remboursement de charges).",
+    notice: "Avis",
+    originalInvoiceLanguageSpanish:
+      "La facture originale en espagnol, émise par l'autorité fiscale chilienne (SII), est jointe",
+  },
+  "de-DE": {
+    hourlyRateNoticeLabel: "Unterlagere Stundensatz für die Preisberechnung",
+    taxId: "Steuernummer",
+    clientNr: "Kundennummer",
+    invoiceNr: "Rechnungsnummer",
+    tableHeaderDescription: "Beschreibung",
+    tableHeaderHours: "Stunden",
+    tableHeaderPrice: "Preis",
+    tableTotal: "Gesamt",
+    reverseChargeNotice: "Steueranspruch des Dienstempfangers (Gutschrift).",
+    notice: "Hinweis",
+    originalInvoiceLanguageSpanish:
+      "Die ursprüngliche Rechnung in Spanisch, ausgestellt von der chilenischen Steuerbehörde (SII), ist angehängt",
+  },
 };
 
 export const SVGS = {

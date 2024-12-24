@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
-import { COLORS, CONFIG } from "../variables";
+import { COLORS, CONFIG, LABELS } from "../variables";
 
 export const Table = ({
 	currency = "EUR",
@@ -10,7 +10,7 @@ export const Table = ({
 }: {
 	currency?: string;
 	hourlyRate: number;
-	lang?: string;
+	lang?: keyof typeof LABELS;
 	hasFootNote?: boolean;
 	rows: {
 		description: string;
@@ -26,10 +26,14 @@ export const Table = ({
 			<View style={styles.wrapper}>
 				<View style={[styles.row, styles.headerRow]}>
 					<Text style={styles.rowNumber}>#</Text>
-					<Text style={styles.rowDescription}>Description</Text>
-					<Text style={[styles.rowHours, styles.headerRowLabel]}>Hours</Text>
+					<Text style={styles.rowDescription}>
+						{LABELS[lang].tableHeaderDescription}
+					</Text>
+					<Text style={[styles.rowHours, styles.headerRowLabel]}>
+						{LABELS[lang].tableHeaderHours}
+					</Text>
 					<Text style={[styles.rowPrice, styles.headerRowLabel]}>
-						Price (€)
+						{`${LABELS[lang].tableHeaderPrice} (${currency})`}
 					</Text>
 				</View>
 				{rows.map(({ description, hoursCount }, idx) => (
@@ -49,7 +53,7 @@ export const Table = ({
 				<View style={[styles.row, styles.totalRow]}>
 					<Text style={styles.rowNumber} />
 					<Text style={[styles.rowDescription, styles.totalRowTotal]}>
-						Total:
+						{LABELS[lang].tableTotal}:
 					</Text>
 					<Text style={[styles.rowHours, styles.totalRowLabel]}>
 						{rows
@@ -98,12 +102,12 @@ const styles = StyleSheet.create({
 		width: "60%",
 	},
 	rowHours: {
-		width: "10%",
+		width: "15%",
 		paddingLeft: "5%",
 		fontFamily: "IBM Plex Mono",
 	},
 	rowPrice: {
-		width: "20%",
+		width: "25%",
 		paddingLeft: "5%",
 		fontFamily: "IBM Plex Mono",
 		flexDirection: "row",
