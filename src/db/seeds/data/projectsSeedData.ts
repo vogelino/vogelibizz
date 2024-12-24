@@ -1,4 +1,5 @@
 import { projectStatusEnum } from "@/db/schema";
+import clientSeeds from "./clientsSeedData";
 
 function randomItemFromArray<T>(arr: T[]): T {
 	return arr[Math.floor(Math.random() * arr.length)];
@@ -10,7 +11,7 @@ const projectsSeedData = [
 		description: "Project 1 description",
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 1 content",
-		clients: [{ name: "Client 1" }, { name: "Client 2" }],
+		clients: [clientSeeds[0], clientSeeds[1]],
 		invoices: [
 			{ name: "Invoice 1", date: "2022-01-01" },
 			{ name: "Invoice 2", date: "2022-02-01" },
@@ -22,7 +23,7 @@ const projectsSeedData = [
 		description: "Project 2 description",
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 2 content",
-		clients: [{ name: "Client 2" }],
+		clients: [clientSeeds[2]],
 		invoices: [{ name: "Invoice 3", date: "2022-03-01" }],
 		quotes: [
 			{ name: "Quote 2", date: "2022-02-01" },
@@ -34,7 +35,7 @@ const projectsSeedData = [
 		description: "Project 3 description",
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 3 content",
-		clients: [{ name: "Client 4" }, { name: "Client 5" }],
+		clients: [clientSeeds[0], clientSeeds[2]],
 		invoices: [
 			{ name: "Invoice 4", date: "2022-01-01" },
 			{ name: "Invoice 5", date: "2022-02-01" },
