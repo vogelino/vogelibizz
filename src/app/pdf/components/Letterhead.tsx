@@ -1,9 +1,10 @@
 import { Link, StyleSheet, Text, View } from "@react-pdf/renderer";
 import Html from "react-pdf-html";
-import { COLORS, SVGS } from "../variables";
+import { COLORS, LABELS, SVGS } from "../variables";
 import { CompanyAddress } from "./CompanyAddress";
 
 export const Letterhead = ({
+	lang = "en-US",
 	companyName,
 	firstName,
 	fatherLastName,
@@ -28,6 +29,7 @@ export const Letterhead = ({
 	invoiceLocation,
 	invoiceDate,
 }: {
+	lang?: keyof typeof LABELS;
 	companyName: string;
 	firstName: string;
 	fatherLastName: string;
@@ -82,7 +84,9 @@ export const Letterhead = ({
 						companyAddressCity={companyAddressCity}
 						companyAddressCountry={companyAddressCountry}
 					/>
-					<Text>Tax ID: {companyTaxNumber}</Text>
+					<Text>
+						{LABELS[lang].taxId}: {companyTaxNumber}
+					</Text>
 				</View>
 			</View>
 			<View style={styles.letterheadColumn}>
@@ -91,7 +95,9 @@ export const Letterhead = ({
 					<Text>{clientAddressLine1}</Text>
 					<Text>{clientAddressLine2}</Text>
 					<Text>{clientAddressLine3}</Text>
-					<Text>Tax ID: {clientTaxNumber}</Text>
+					<Text>
+						{LABELS[lang].taxId}: {clientTaxNumber}
+					</Text>
 				</View>
 			</View>
 		</View>
@@ -121,18 +127,18 @@ export const Letterhead = ({
 			<View style={styles.letterheadColumn}>
 				<View style={styles.receiverInfo}>
 					<View style={styles.receiverInfoLabels}>
-						<Text style={styles.bold}>Client Nr.</Text>
-						<Text style={styles.bold}>Invoice Nr.</Text>
+						<Text style={styles.bold}>{LABELS[lang].clientNr}</Text>
+						<Text style={styles.bold}>{LABELS[lang].invoiceNr}</Text>
 					</View>
 					<View style={styles.receiverInfoValues}>
 						<Text>{clientNumber}</Text>
-						<Text>{invoiceNumber}</Text>
+						<Text>{invoiceNumber.toLocaleString(lang)}</Text>
 					</View>
 				</View>
 				<View style={styles.invoiceLocationAndTime}>
 					<Text>
 						{invoiceLocation},{" "}
-						{new Intl.DateTimeFormat("en").format(invoiceDate)}
+						{new Intl.DateTimeFormat(lang).format(invoiceDate)}
 					</Text>
 				</View>
 			</View>
