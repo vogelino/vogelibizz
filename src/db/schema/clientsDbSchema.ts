@@ -7,6 +7,12 @@ import { projectsToClients } from "./projectsToClientsDbSchema";
 export const clients = pgTable("clients", {
 	id: serial("id").primaryKey(),
 	name: text("name").notNull().unique(),
+	legalName: text("legal_name"),
+	addressLine1: text("address_line_1"),
+	addressLine2: text("address_line_2"),
+	addressLine3: text("address_line_3"),
+	taxId: text("tax_id"),
+	svgLogoString: text("svg_logo_string"),
 	created_at: timestamp("created_at", { mode: "string" })
 		.defaultNow()
 		.notNull(),
