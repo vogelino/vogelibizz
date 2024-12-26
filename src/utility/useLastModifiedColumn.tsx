@@ -1,14 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
-
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  year: "numeric",
-  month: "numeric",
-  day: "numeric",
-  hour: "numeric",
-  minute: "numeric",
-  timeZone: "UTC",
-  timeZoneName: "short",
-});
+import { format, formatRelative, parseISO } from "date-fns";
+import { getNowInUTC } from "./timeUtil";
 
 export function useLastModifiedColumn<
   ColumnType,
@@ -21,14 +13,20 @@ export function useLastModifiedColumn<
     header: "Last modified",
     sortingFn: "datetime",
     cell: function render({ getValue }) {
-      const formattedDateWithTime = dateFormatter.format(
-        new Date(getValue<string>()),
+      const value = getValue<string>();
+      const formattedDateWithTime = formatRelative(
+        parseISO(value),
+        getNowInUTC(),
       );
       return (
         <span className="text-xs font-mono text-grayDark">
-          {formattedDateWithTime}
+          {ucFirst(formattedDateWithTime)}
         </span>
       );
     },
   };
+}
+
+function ucFirst(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
