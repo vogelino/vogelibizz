@@ -75,7 +75,7 @@ export default function ExpenseEdit({
 		renderer: (type) => (
 			<>
 				{mapTypeToIcon(type, 24)}
-				<span className="pt-1">{type}</span>
+				<span>{type}</span>
 			</>
 		),
 	});

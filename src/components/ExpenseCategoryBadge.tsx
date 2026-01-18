@@ -12,14 +12,14 @@ function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 	value: ValueType;
 }) {
 	return (
-		<div className="rounded-full bg-background w-fit">
+		<div className="bg-background w-fit">
 			<IconBadge
 				icon={null}
 				label={
 					<span className="flex gap-2 items-center">
 						<span
 							className={cn(
-								"size-2 rounded-full inline-block -mt-0.5",
+								"size-2 inline-block",
 								categoryToOptionClass(value),
 							)}
 						/>

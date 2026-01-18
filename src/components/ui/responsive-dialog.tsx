@@ -44,7 +44,7 @@ export function ResponsiveModal({
 				)}
 			>
 				{isDesktop ? null : (
-					<div className="mx-auto mt-4 h-2 w-25 rounded-full bg-border" />
+					<div className="mx-auto mt-4 h-2 w-25 bg-border" />
 				)}
 				{(title || description) && (
 					<DrawerHeader className="text-left">

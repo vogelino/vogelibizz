@@ -18,7 +18,7 @@ export function IconBadge({
 			variant="outline"
 			{...badgeProps}
 			className={cn(
-				"w-fit pt-0.5 text-foreground border-border flex gap-1.5",
+				"w-fit py-1 text-foreground border-border flex gap-1.5",
 				" max-w-40",
 				icon && `pl-1.5`,
 				badgeProps.className,
@@ -26,7 +26,7 @@ export function IconBadge({
 			)}
 		>
 			{icon}
-			{label && <span className="mt-0.5 max-w-full truncate">{label}</span>}
+			{label && <span className="max-w-full h-fit truncate [text-box-trim:trim-both]">{label}</span>}
 		</Badge>
 	);
 }

@@ -6,12 +6,12 @@
 
 @theme {
 	--font-special:
-		var(--font-lobular), ui-sans-serif, system-ui, -apple-system,
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system,
 		BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
 		"Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
 		"Segoe UI Symbol", "Noto Color Emoji";
 	--font-sans:
-		var(--font-fungis), ui-sans-serif, system-ui, -apple-system,
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system,
 		BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
 		"Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
 		"Segoe UI Symbol", "Noto Color Emoji";
@@ -51,6 +51,16 @@
 	--color-sidebar-ring: hsl(var(--sidebar-ring));
 	--height-screen: 100lvh;
 	--width-screen: 100lvw;
+
+	--text-xs: 0.64rem;
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.56rem;
+  --text-2xl: 1.95rem;
+  --text-3xl: 2.44rem;
+  --text-4xl: 3.05rem;
+  --text-5xl: 3.81rem;
 }
 
 @utility text-balance {
@@ -250,25 +260,7 @@
 		@apply w-full border border-border bg-background px-3 py-2 text-foreground;
 		@apply focusable focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30;
 		@apply placeholder:text-muted-foreground/70;
-		@apply transition-colors duration-200;
-	}
-	@supports (-webkit-touch-callout: none) {
-		html .form-input,
-		html .form-textarea,
-		html .form-select,
-		html .form-multiselect,
-		html .form-number {
-			@apply text-[16px];
-		}
-	}
-	@supports not (-webkit-touch-callout: none) {
-		html .form-input,
-		html .form-textarea,
-		html .form-select,
-		html .form-multiselect,
-		html .form-number {
-			@apply text-sm;
-		}
+		@apply transition-colors duration-200 text-base;
 	}
 
 	html .form-textarea {
@@ -333,6 +325,7 @@
 	html,
 	body {
 		scroll-behavior: smooth;
+		line-height: 1.2em;
 		@apply text-foreground bg-background;
 	}
 }

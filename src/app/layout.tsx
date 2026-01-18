@@ -3,9 +3,15 @@ import type React from "react";
 
 import Providers from "@/providers";
 import "@/styles/global.css";
+import { Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { cn } from "@/utility/classNames";
-import { fungis, lobular } from "@/utility/fonts";
+
+const inter = Inter({
+	subsets: ["latin"],
+	variable: "--font-inter",
+	display: "swap",
+});
 
 export const metadata: Metadata = {
 	title: "Vogelibizz",
@@ -23,7 +29,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={cn(lobular.variable, fungis.variable, "font-sans")}
+			className={cn(inter.variable, "font-sans")}
 			suppressHydrationWarning
 		>
 			<head />

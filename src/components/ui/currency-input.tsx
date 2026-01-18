@@ -75,15 +75,13 @@ function CurrencyInput({
 				</div>
 				<input type="hidden" {...currencyProps} value={currency} />
 				<Combobox
-					className={cn("h-auto py-1 border-border", className)}
+					className={className}
 					options={options}
 					value={currency}
 					onChange={(currency) =>
 						onCurrencyChange(currency as ExpenseType["originalCurrency"])
 					}
-					selectedValueFormater={() => (
-						<span className="translate-y-[3px]">{currency}</span>
-					)}
+					selectedValueFormater={() => <span>{currency}</span>}
 				/>
 			</div>
 		</FormInputWrapper>

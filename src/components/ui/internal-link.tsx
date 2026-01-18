@@ -10,9 +10,8 @@ function InternalLink(
 		<Link
 			{...props}
 			className={cn(
-				`underline underline-offset-4 decoration-wavy`,
-				`box-decoration-clone leading-relaxed hyphen-auto dark:decoration-from-font`,
-				`outline-none focusable rounded-full -ml-3 px-3 pt-2 pb-1.5`,
+				`hyphen-auto`,
+				`outline-none focusable px-3 py-2`,
 				`bg-secondary/30 [text-decoration-skip-ink:none]`,
 				`hover:bg-secondary`,
 				`decoration-secondary`,

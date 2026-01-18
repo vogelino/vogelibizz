@@ -59,9 +59,10 @@ export function Combobox({
 					role="combobox"
 					aria-expanded={open}
 					className={cn(
-						"w-fit justify-between rounded-none h-[38px]",
+						"w-fit justify-between rounded-none",
 						"hover:bg-accent hover:text-accent-foreground border-border",
 						"text-base bg-background dark:bg-card",
+						"h-auto min-h-9.5 py-1 border-border",
 						className,
 					)}
 				>
@@ -70,10 +71,7 @@ export function Combobox({
 							? selectedValueFormater(selectedOption.value)
 							: "Select value..."}
 					</div>
-					<ChevronsUpDown
-						size={16}
-						className="translate-y-[3px] ml-2 shrink-0 opacity-50"
-					/>
+					<ChevronsUpDown size={16} className="ml-2 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-fit p-0" align={align}>
