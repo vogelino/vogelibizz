@@ -10,6 +10,7 @@ import {
 	CommandGroup,
 	CommandInput,
 	CommandItem,
+	CommandList,
 } from "@/components/ui/command";
 import {
 	Popover,
@@ -24,7 +25,7 @@ export type ComboboxProps = {
 		value: string | number;
 	}[];
 	onChange?: (value: string | number) => void;
-	value?: string;
+	value?: string | number;
 	className?: string;
 	selectedValueFormater?: (value: string | number) => ReactNode;
 	align?: PopoverContentProps["align"];
@@ -41,11 +42,14 @@ export function Combobox({
 	align = "end",
 }: ComboboxProps) {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(initialValue || options[0]?.value);
+	const [value, setValue] = useState<string | number | undefined>(
+		initialValue ?? options[0]?.value,
+	);
 
+	const normalizedValue = value === undefined ? "" : String(value);
 	const selectedOption = useMemo(
-		() => options.find((option) => option.value === value),
-		[options, value],
+		() => options.find((option) => String(option.value) === normalizedValue),
+		[options, normalizedValue],
 	);
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -75,37 +79,41 @@ export function Combobox({
 			<PopoverContent className="w-fit p-0" align={align}>
 				<Command>
 					<CommandInput placeholder="Search..." />
-					<CommandEmpty>Nothing found.</CommandEmpty>
-					<CommandGroup>
-						{options.map((option) => (
-							<CommandItem
-								key={option.value}
-								value={`${option.value}`}
-								onSelect={(currentValue) => {
-									const newValue = currentValue === value ? "" : currentValue;
-									const item = options.find(
-										(item) =>
-											`${item.value}`.toLocaleLowerCase() ===
-											newValue.toLocaleLowerCase(),
-									);
-									if (!item) return;
-									setValue(item.value);
-									onChange(item.value);
-									setOpen(false);
-								}}
-							>
-								<Check
-									className={cn(
-										"mr-2 h-4 w-4",
-										value === option.value ? "opacity-100" : "opacity-0",
-									)}
-								/>
-								<div className="w-full flex gap-3 items-center">
-									{option.label}
-								</div>
-							</CommandItem>
-						))}
-					</CommandGroup>
+					<CommandList>
+						<CommandEmpty>Nothing found.</CommandEmpty>
+						<CommandGroup>
+							{options.map((option) => {
+								const optionValue = String(option.value);
+								return (
+									<CommandItem
+										key={optionValue}
+										value={optionValue}
+										onSelect={() => {
+											const item = options.find(
+												(item) => String(item.value) === optionValue,
+											);
+											if (!item) return;
+											setValue(item.value);
+											onChange(item.value);
+											setOpen(false);
+										}}
+									>
+										<Check
+											className={cn(
+												"mr-2 h-4 w-4",
+												optionValue === normalizedValue
+													? "opacity-100"
+													: "opacity-0",
+											)}
+										/>
+										<div className="w-full flex gap-3 items-center">
+											{option.label}
+										</div>
+									</CommandItem>
+								);
+							})}
+						</CommandGroup>
+					</CommandList>
 				</Command>
 			</PopoverContent>
 		</Popover>
