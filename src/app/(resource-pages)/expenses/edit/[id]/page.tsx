@@ -1,20 +1,28 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
 import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { parseId } from "@/utility/resourceUtil";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export default async function ExpenseEditPageRoute({
-	params: { id },
+	params,
 }: {
-	params: { id: string };
+	params: { id?: string };
 }) {
-	const parsedId = parseId(id);
+	if (!params?.id) {
+		return null;
+	}
+
+	const parsedId = parseId(params.id);
+	if (!parsedId) {
+		return null;
+	}
+
 	const expense = await getExpense(parsedId);
 	serverQueryClient.setQueryData(["expenses", `${parsedId}`], expense);
 	return (

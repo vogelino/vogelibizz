@@ -1,6 +1,6 @@
+import { z } from "zod";
 import type { ResourceType } from "@/db/schema";
 import type { ActionType } from "@/utility/data/createQueryFunction";
-import { z } from "zod";
 
 export function singularizeResourceName(resourceName: ResourceType): string {
 	if (resourceName.endsWith("ies")) return `${resourceName.slice(0, -3)}y`;
@@ -17,7 +17,7 @@ export function getQueryCompletionMessage({
 }: {
 	action: ActionType;
 	resourceName: ResourceType;
-	data: { name: string } | { name: string }[] | string | number;
+	data: { name: string } | { name: string }[] | string | number | unknown;
 	resolution: "failure" | "success";
 	details?: string;
 }) {
@@ -29,13 +29,19 @@ export function getQueryCompletionMessage({
 			: getSubstantiveByAction(action);
 	const resourceNameInSingular = singularizeResourceName(resourceName);
 	const isPlural = Array.isArray(data) && data.length > 1;
-	const isId = typeof data === "number" || typeof data === "string";
 	const isSingularWithName =
-		(Array.isArray(data) && data.length === 1 && "name" in data[0]) ||
-		(!isId && "name" in data);
+		Array.isArray(data) &&
+		data.length === 1 &&
+		data[0] &&
+		typeof data[0] === "object" &&
+		"name" in data[0];
+	const isNamedObject =
+		!Array.isArray(data) && data && typeof data === "object" && "name" in data;
 	const singleItemSuffix = isSingularWithName
-		? `with name '${!isId && "name" in data ? data.name : data[0].name}'`
-		: `with id '${data}'`;
+		? `with name '${data[0].name}'`
+		: isNamedObject
+			? `with name '${data.name}'`
+			: `with id '${String(data)}'`;
 	const itemPart = isPlural
 		? `${data.length} ${resourceName}`
 		: `${resourceNameInSingular} ${singleItemSuffix}`;
@@ -62,6 +68,10 @@ function getSubstantiveByAction(action: ActionType) {
 }
 
 export function parseId(id: unknown) {
+	if (id === undefined || id === null || id === "") {
+		return undefined;
+	}
+
 	return z
 		.union([z.string(), z.number()], {
 			message: `The provided ID is not a valid number or string. Received "${id}"`,

@@ -1,10 +1,10 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getProject } from "@/app/api/projects/[id]/getProject";
 import EditResourceModal from "@/components/EditResourceModal";
 import ProjectEdit from "@/components/ProjectEdit";
 import type { ProjectType } from "@/db/schema";
 import serverQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 
 const resource = "projects";
 const resourceSingularName = singularizeResourceName(resource);
@@ -13,11 +13,19 @@ const capitalizedAction = action.charAt(0).toUpperCase() + action.slice(1);
 
 export const dynamic = "force-dynamic";
 export default async function ProjectEditModalRoute({
-	params: { id },
+	params,
 }: {
-	params: { id: string };
+	params: Promise<{ id?: string }>;
 }) {
+	const { id } = await params;
+	if (!id) {
+		return null;
+	}
+
 	const parsedId = parseId(id);
+	if (!parsedId) {
+		return null;
+	}
 	const formId = `${resource}-${action}-form-${parsedId}`;
 	const record = await getProject(parsedId);
 	serverQueryClient.setQueryData<ProjectType>(
