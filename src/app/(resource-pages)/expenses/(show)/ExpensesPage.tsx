@@ -1,16 +1,7 @@
 "use client";
 
-import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
@@ -39,37 +30,26 @@ export default function ExpensesPage() {
 	const deleteColumn = getDeleteColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
 		deleteMutation.mutate(id),
 	);
-	const [sorting, setSorting] = useState<SortingState>([]);
-	const [columnFilters, setFilters] = useState<ColumnFiltersState>([]);
+	const [categoryFilter, setCategoryFilter] = useState<
+		ExpenseWithMonthlyCLPPriceType["category"][]
+	>([]);
+	const [typeFilter, setTypeFilter] = useState<string | number | undefined>(
+		"All types",
+	);
+
 	const { data, error } = useExpenses();
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
 	const columns = useMemo(
-		() => [...expensesTableColumns, deleteColumn],
+		() =>
+			[
+				...expensesTableColumns,
+				deleteColumn,
+				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
+			] as ColumnDef<ExpenseWithMonthlyCLPPriceType, any>[],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	);
-
-	const table = useReactTable({
-		columns,
-		data: !error && data.length > 0 ? data : [],
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		onSortingChange: setSorting,
-		onColumnFiltersChange: setFilters,
-		state: { sorting, columnFilters },
-		initialState: {
-			pagination: { pageIndex: 0, pageSize: 1000 },
-			sorting: [
-				{
-					id: "last_modified",
-					desc: false,
-				},
-			],
-		},
-	});
 
 	const totalPerMonth = useMemo(() => getTotalPerMonth(data), [data]);
 
@@ -89,39 +69,6 @@ export default function ExpensesPage() {
 			</>
 		),
 	});
-
-	const typeFilter = useMemo(() => {
-		const typeFilterValue = columnFilters.find((f) => f.id === "type");
-		return typeFilterValue as
-			| (Omit<ColumnFilter, "value"> & {
-					value: ExpenseWithMonthlyCLPPriceType["type"];
-			  })
-			| undefined;
-	}, [columnFilters]);
-
-	const setType = useCallback((type: string | number) => {
-		setFilters((prev) => {
-			const otherFilters = prev.filter((f) => f.id !== "type");
-			if (`${type}` === "All types") return otherFilters;
-			return [...otherFilters, { id: "type", value: `${type}` }];
-		});
-	}, []);
-
-	const categoryFilter = useMemo(
-		() => columnFilters.filter((f) => f.id === "category"),
-		[columnFilters],
-	);
-
-	const setCategoryFilter = useCallback((categories: string[]) => {
-		setFilters((prev) => {
-			const otherFilters = prev.filter((f) => f.id !== "category");
-			if (categories.length === 0) return otherFilters;
-			return [...otherFilters, { id: "category", value: categories }];
-		});
-	}, []);
-
-	const categoryValues = categoryFilter[0]
-		?.value as ExpenseWithMonthlyCLPPriceType["category"][];
 	return (
 		<>
 			<div className="flex gap-6 justify-between items-center py-4 border-y border-border my-4">
@@ -129,26 +76,66 @@ export default function ExpensesPage() {
 					<strong>Total per month:</strong>
 					<span className="font-mono">{totalPerMonth}</span>
 				</div>
-				<div className="flex items-center gap-4">
-					<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
-						options={categoryOptions}
-						values={categoryValues}
-						placeholder="Filter by category"
-						selectedValueFormater={(value) => (
-							<ExpenseCategoryBadge
-								value={value as ExpenseWithMonthlyCLPPriceType["category"]}
-							/>
-						)}
-						onChange={(cat) => setCategoryFilter(cat.map((c) => `${c.value}`))}
-					/>
-					<Combobox
-						options={typeOptions}
-						value={typeFilter?.value}
-						onChange={setType}
-					/>
-				</div>
 			</div>
-			<div className="w-full mb-6">{data && <DataTable table={table} />}</div>
+			<div className="w-full mb-6">
+				{data && (
+					<DataTable
+						columns={columns}
+						data={!error && data.length > 0 ? data : []}
+						initialState={{
+							pagination: { pageIndex: 0, pageSize: 1000 },
+							sorting: [{ id: "last_modified", desc: false }],
+							columnFilters: [
+								...(categoryFilter.length
+									? [{ id: "category", value: categoryFilter }]
+									: []),
+								...(typeFilter && typeFilter !== "All types"
+									? [{ id: "type", value: String(typeFilter) }]
+									: []),
+							],
+						}}
+						toolbar={(table) => (
+							<div className="flex items-center gap-4">
+								<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
+									options={categoryOptions}
+									values={
+										categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
+									}
+									placeholder="Filter by category"
+									selectedValueFormater={(value) => (
+										<ExpenseCategoryBadge
+											value={
+												value as ExpenseWithMonthlyCLPPriceType["category"]
+											}
+										/>
+									)}
+									onChange={(cat) => {
+										const nextValues = cat.map(
+											(c) =>
+												c.value as ExpenseWithMonthlyCLPPriceType["category"],
+										);
+										setCategoryFilter(nextValues);
+										table.getColumn("category")?.setFilterValue(nextValues);
+									}}
+								/>
+								<Combobox
+									options={typeOptions}
+									value={typeFilter}
+									onChange={(value) => {
+										setTypeFilter(value);
+										const column = table.getColumn("type");
+										if (!column) return;
+										const nextValue = `${value}`;
+										column.setFilterValue(
+											nextValue === "All types" ? undefined : nextValue,
+										);
+									}}
+								/>
+							</div>
+						)}
+					/>
+				)}
+			</div>
 		</>
 	);
 }

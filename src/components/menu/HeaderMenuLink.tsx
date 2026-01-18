@@ -32,9 +32,7 @@ function HeaderMenuLink({
 					`inline-block w-screen sm:w-auto`,
 					`focus-visible:ring-2 focus-visible:ring-ring outline-none`,
 					!active && [`hover:bg-accent`],
-					active && [
-						`font-semibold bg-secondary sm:px-4 `,
-					],
+					active && [`font-semibold bg-secondary sm:px-4 `],
 					className,
 				)}
 				tabIndex={active ? -1 : 0}

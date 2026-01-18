@@ -8,10 +8,7 @@ export function PillText({
 	return (
 		<>
 			<span
-				className={cn(
-					`size-3 items-center inline-block`,
-					pillColorClass,
-				)}
+				className={cn(`size-3 items-center inline-block`, pillColorClass)}
 			/>
 			<span>{children}</span>
 		</>

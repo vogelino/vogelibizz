@@ -53,14 +53,14 @@
 	--width-screen: 100lvw;
 
 	--text-xs: 0.64rem;
-  --text-sm: 0.8rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.56rem;
-  --text-2xl: 1.95rem;
-  --text-3xl: 2.44rem;
-  --text-4xl: 3.05rem;
-  --text-5xl: 3.81rem;
+	--text-sm: 0.8rem;
+	--text-base: 1rem;
+	--text-lg: 1.25rem;
+	--text-xl: 1.56rem;
+	--text-2xl: 1.95rem;
+	--text-3xl: 2.44rem;
+	--text-4xl: 3.05rem;
+	--text-5xl: 3.81rem;
 }
 
 @utility text-balance {

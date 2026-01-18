@@ -17,15 +17,11 @@ export const projectTableColumns = [
 		minSize: 50,
 		maxSize: 50,
 		header: () => (
-			<span className="text-muted-foreground group-hover:text-inherit">
-				ID
-			</span>
+			<span className="text-muted-foreground group-hover:text-inherit">ID</span>
 		),
 		cell: function render({ getValue }) {
 			return (
-				<span className="text-muted-foreground">
-					{getValue<string>()}
-				</span>
+				<span className="text-muted-foreground">{getValue<string>()}</span>
 			);
 		},
 	}),
@@ -35,7 +31,11 @@ export const projectTableColumns = [
 		cell: function render({ getValue, row }) {
 			const id = row.original.id;
 			const value = getValue<string>();
-			return <InternalLink href={`/projects/edit/${id}`} className="text-base">{value}</InternalLink>;
+			return (
+				<InternalLink href={`/projects/edit/${id}`} className="text-base">
+					{value}
+				</InternalLink>
+			);
 		},
 	}),
 	columnHelper.accessor("status", {

@@ -163,10 +163,7 @@ const CommandShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
 		<span
-			className={cn(
-				"ml-auto tracking-widest text-muted-foreground",
-				className,
-			)}
+			className={cn("ml-auto tracking-widest text-muted-foreground", className)}
 			{...props}
 		/>
 	);
