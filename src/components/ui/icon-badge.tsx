@@ -26,7 +26,11 @@ export function IconBadge({
 			)}
 		>
 			{icon}
-			{label && <span className="max-w-full h-fit truncate [text-box-trim:trim-both]">{label}</span>}
+			{label && (
+				<span className="max-w-full h-fit truncate [text-box-trim:trim-both]">
+					{label}
+				</span>
+			)}
 		</Badge>
 	);
 }

@@ -43,9 +43,7 @@ export function ResponsiveModal({
 						: `inset-x-0 z-50 mt-24 flex h-auto`,
 				)}
 			>
-				{isDesktop ? null : (
-					<div className="mx-auto mt-4 h-2 w-25 bg-border" />
-				)}
+				{isDesktop ? null : <div className="mx-auto mt-4 h-2 w-25 bg-border" />}
 				{(title || description) && (
 					<DrawerHeader className="text-left">
 						{title && <DrawerTitle>{title}</DrawerTitle>}

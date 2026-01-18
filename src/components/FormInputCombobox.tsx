@@ -1,7 +1,6 @@
 import type { HTMLProps, ReactNode } from "react";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Combobox } from "@/components/ui/combobox";
-import { cn } from "@/utility/classNames";
 import type { OptionType } from "@/utility/useComboboxOptions";
 
 function FormInputCombobox({

@@ -12,7 +12,7 @@ function BizzLogo({ className }: BizzLogoProps) {
 				className,
 			)}
 		>
-		  Bizz
+			Bizz
 		</span>
 	);
 }

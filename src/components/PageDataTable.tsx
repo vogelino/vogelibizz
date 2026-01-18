@@ -1,16 +1,8 @@
 "use client";
 
-import {
-	type ColumnDef,
-	getCoreRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useCallback, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useCallback } from "react";
 import { DataTable } from "@/components/DataTable";
-import TablePagination from "@/components/DataTable/table-pagination";
 import type { ProjectType, ResourceType } from "@/db/schema";
 import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
@@ -55,8 +47,6 @@ export default function PageDataTable<
 	);
 	const deleteColumn = getDeleteColumn<DataType>(deleteAction);
 	const lastModifiedColumn = useLastModifiedColumn<ProjectType>();
-	const [sorting, setSorting] = useState<SortingState>([]);
-
 	const columns = [
 		...pageSpecificColumns,
 		lastModifiedColumn,
@@ -64,31 +54,18 @@ export default function PageDataTable<
 		// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	] as ColumnDef<DataType, any>[];
 
-	const table = useReactTable({
-		columns,
-		data,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		onSortingChange: setSorting,
-		state: { sorting },
-		initialState: {
-			sorting: [
-				{
-					id: defaultSortColumn,
-					desc: true,
-				},
-			],
-			pagination: { pageIndex: 0, pageSize: 50 },
-		},
-	});
-
 	return (
-		<>
-			<div className="w-full mb-6">
-				{data?.length > 0 && <DataTable table={table} />}
-			</div>
-			{table.getPageCount() > 1 && <TablePagination {...table} />}
-		</>
+		<div className="w-full mb-6">
+			{data?.length > 0 && (
+				<DataTable
+					columns={columns}
+					data={data}
+					initialState={{
+						sorting: [{ id: defaultSortColumn, desc: true }],
+						pagination: { pageIndex: 0, pageSize: 50 },
+					}}
+				/>
+			)}
+		</div>
 	);
 }
