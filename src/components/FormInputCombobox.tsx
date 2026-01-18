@@ -25,7 +25,7 @@ function FormInputCombobox({
 		<FormInputWrapper label={label} error={error}>
 			<input type="hidden" {...inputProps} />
 			<Combobox
-				className={cn("h-auto py-1 border-border", className)}
+				className={className}
 				options={options}
 				value={value}
 				onChange={(val) => onChange(val)}

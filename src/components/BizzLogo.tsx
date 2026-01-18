@@ -2,39 +2,17 @@ import { cn } from "@/utility/classNames";
 
 type BizzLogoProps = {
 	className?: string;
-	textClassName?: string;
-	color?: "fg" | "grayDark";
 };
-function BizzLogo({ className, textClassName, color = "fg" }: BizzLogoProps) {
+function BizzLogo({ className }: BizzLogoProps) {
 	return (
 		<span
 			className={cn(
-				color === "fg" && "text-foreground",
-				color === "grayDark" && "text-muted-foreground",
-				"font-special text-3xl inline-block",
-				"antialiased transition-colors",
-				"relative w-fit pr-18",
+				"uppercase inline-block tracking-widest",
+				"transition-colors font-semibold text-lg",
 				className,
 			)}
 		>
-			<span
-				className={cn(
-					"text-background text-strokewidth-4 select-none pointer-events-none",
-					color === "fg" && "text-stroke-strong",
-					color === "grayDark" && "text-stroke-muted",
-				)}
-				aria-hidden="true"
-			>
-				Vogeli
-			</span>
-			<span className="font-sans inline-block absolute top-1.5 right-0 font-bold">
-				BIZZ
-			</span>
-			<span
-				className={cn("absolute top-0 left-0 text-background", textClassName)}
-			>
-				Vogeli
-			</span>
+		  Bizz
 		</span>
 	);
 }

@@ -49,7 +49,7 @@ export const Menu = ({
 				href="/projects"
 				className={cn(
 					"group",
-					"px-4 -ml-4 py-2 rounded-full",
+					"px-4 -ml-4 py-2",
 					"focus:outline-none focus:ring-2 focus:ring-ring",
 				)}
 			>

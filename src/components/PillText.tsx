@@ -9,11 +9,11 @@ export function PillText({
 		<>
 			<span
 				className={cn(
-					`size-3 rounded-full items-center inline-block`,
+					`size-3 items-center inline-block`,
 					pillColorClass,
 				)}
 			/>
-			<span className="pt-1">{children}</span>
+			<span>{children}</span>
 		</>
 	);
 }

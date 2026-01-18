@@ -13,13 +13,13 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 		minSize: 50,
 		maxSize: 50,
 		header: () => (
-			<span className="text-xs font-mono text-muted-foreground group-hover:text-inherit">
+			<span className="text-muted-foreground group-hover:text-inherit">
 				ID
 			</span>
 		),
 		cell: function render({ getValue }) {
 			return (
-				<span className="text-xs font-mono text-muted-foreground">
+				<span className="text-muted-foreground">
 					{getValue<string>()}
 				</span>
 			);
@@ -31,7 +31,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 		cell: function render({ getValue, row }) {
 			const id = row.original.id;
 			const value = getValue<string>();
-			return <InternalLink href={`/clients/edit/${id}`}>{value}</InternalLink>;
+			return <InternalLink href={`/clients/edit/${id}`} className="text-base">{value}</InternalLink>;
 		},
 	}),
 	columnHelper.accessor("projects", {

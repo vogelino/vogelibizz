@@ -16,7 +16,7 @@ export const expensesTableColumns = [
 		cell: function render({ getValue, row }) {
 			const id = row.original.id;
 			const value = getValue<string>();
-			return <InternalLink href={`/expenses/edit/${id}`}>{value}</InternalLink>;
+			return <InternalLink href={`/expenses/edit/${id}`} className="text-base">{value}</InternalLink>;
 		},
 	}),
 	columnHelper.accessor("clpMonthlyPrice", {
@@ -27,7 +27,7 @@ export const expensesTableColumns = [
 			const value =
 				getValue<ExpenseWithMonthlyCLPPriceType["clpMonthlyPrice"]>();
 			return (
-				<span className="font-mono">{value && formatCurrency(value)}</span>
+				<span>{value && formatCurrency(value)}</span>
 			);
 		},
 	}),
@@ -39,7 +39,7 @@ export const expensesTableColumns = [
 			const currency = row.original.originalCurrency;
 			const value = getValue<ExpenseWithMonthlyCLPPriceType["originalPrice"]>();
 			return (
-				<span className="font-mono">
+				<span>
 					{value && formatCurrency(value, currency)}
 				</span>
 			);

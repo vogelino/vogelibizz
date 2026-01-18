@@ -13,7 +13,7 @@ type UseComboboxOptionsParams<OptionValueType> = {
 
 function useComboboxOptions<OptionValueType = string | number>({
 	optionValues = [],
-	renderer = (value) => <span className="pt-1">{String(value)}</span>,
+	renderer = (value) => <span>{String(value)}</span>,
 	accessorFn = (value) => String(value),
 }: UseComboboxOptionsParams<OptionValueType>) {
 	return useRef(

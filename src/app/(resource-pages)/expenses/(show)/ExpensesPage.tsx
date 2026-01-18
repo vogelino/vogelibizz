@@ -85,7 +85,7 @@ export default function ExpensesPage() {
 		renderer: (type) => (
 			<>
 				{mapTypeToIcon(type as TypeFilterType, 24)}
-				<span className="pt-1">{type}</span>
+				<span>{type}</span>
 			</>
 		),
 	});
@@ -125,7 +125,7 @@ export default function ExpensesPage() {
 	return (
 		<>
 			<div className="flex gap-6 justify-between items-center py-4 border-y border-border my-4">
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-x-4 flex-wrap">
 					<strong>Total per month:</strong>
 					<span className="font-mono">{totalPerMonth}</span>
 				</div>
@@ -142,7 +142,6 @@ export default function ExpensesPage() {
 						onChange={(cat) => setCategoryFilter(cat.map((c) => `${c.value}`))}
 					/>
 					<Combobox
-						className={"h-auto py-1 border-border"}
 						options={typeOptions}
 						value={typeFilter?.value}
 						onChange={setType}

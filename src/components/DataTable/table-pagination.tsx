@@ -63,7 +63,7 @@ function TablePagination({
 						<PaginationItem key={page}>
 							<PaginationLink
 								onClick={() => setPageIndex(page - 1)}
-								className={cn(page === currentPage && "bg-accent", "pt-2 pb-1")}
+								className={cn(page === currentPage && "bg-accent", "py-2")}
 							>
 								{page}
 							</PaginationLink>

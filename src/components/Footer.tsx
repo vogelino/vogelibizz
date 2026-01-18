@@ -24,7 +24,7 @@ function Footer() {
 					type="button"
 					aria-label="Scroll to top"
 					className={cn(
-						`p-1 bg-secondary text-secondary-foreground rounded-full`,
+						`p-1 bg-secondary text-secondary-foreground`,
 						`hover:bg-primary hover:text-primary-foreground transition-colors`,
 						`focus-visible:ring-2 focus-visible:ring-ring outline-none`,
 					)}

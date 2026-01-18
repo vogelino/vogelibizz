@@ -11,7 +11,7 @@ function PageHeaderTitle({
 	return (
 		<div
 			className={cn(
-				"font-special font-light text-3xl antialiased",
+				"antialiased uppercase",
 				"grid grid-cols-[1fr_auto] gap-4 items-center max-w-full",
 			)}
 		>

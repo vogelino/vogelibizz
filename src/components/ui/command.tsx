@@ -63,7 +63,7 @@ const CommandInput = React.forwardRef<
 		<CommandPrimitive.Input
 			ref={ref}
 			className={cn(
-				"flex h-10 w-full bg-transparent pb-3 outline-none pt-4 border-none",
+				"flex h-10 w-full bg-transparent py-2 outline-none border-none",
 				"placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
 				"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
 				className,
@@ -164,7 +164,7 @@ const CommandShortcut = ({
 	return (
 		<span
 			className={cn(
-				"ml-auto text-xs tracking-widest text-muted-foreground",
+				"ml-auto tracking-widest text-muted-foreground",
 				className,
 			)}
 			{...props}

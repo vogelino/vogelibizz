@@ -10,7 +10,7 @@ function LogoutButton() {
 				as="button"
 				onClick={() => signOut()}
 				title={<LogOut />}
-				className="w-10 sm:w-10 h-10 flex items-center justify-center sm:p-0"
+				className="text-base font-normal w-10 sm:w-10 h-10 flex items-center justify-center sm:p-0"
 			/>
 			<span className="text-base">Log out</span>
 		</>

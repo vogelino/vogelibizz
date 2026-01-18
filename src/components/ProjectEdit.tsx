@@ -129,7 +129,7 @@ export default function ProjectEdit({
 					/>
 				</FormInputWrapper>
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
-					<div className="bg-background dark:bg-card border border-border min-h-[356px]">
+					<div className="bg-background dark:bg-card border border-border min-h-89">
 						<ForwardedEditor value={content} onChange={setContent} />
 					</div>
 				</FormInputWrapper>

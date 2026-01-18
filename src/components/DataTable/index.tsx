@@ -43,7 +43,7 @@ export function DataTable<RecordType>({
 										<Button
 											variant="ghost"
 											onClick={column.getToggleSortingHandler()}
-											className={cn("-ml-4 hover:text-foreground group")}
+											className={cn("hover:text-foreground group")}
 										>
 											{label}
 											{!sort && <ArrowUpDown className={iconClass} />}
