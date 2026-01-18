@@ -12,13 +12,14 @@ export const dynamic = "force-dynamic";
 export default async function ExpenseEditPageRoute({
 	params,
 }: {
-	params: { id?: string };
+	params: Promise<{ id?: string }>;
 }) {
-	if (!params?.id) {
+	const { id } = await params;
+	if (!id) {
 		return null;
 	}
 
-	const parsedId = parseId(params.id);
+	const parsedId = parseId(id);
 	if (!parsedId) {
 		return null;
 	}
