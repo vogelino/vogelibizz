@@ -30,16 +30,16 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 			<DialogContent className="overflow-hidden p-0">
 				<Command
 					className={cn(
-						"[&_[cmdk-group-heading]]:px-2",
-						"[&_[cmdk-group-heading]]:font-medium",
-						"[&_[cmdk-group-heading]]:text-grayDark",
+						"**:[[cmdk-group-heading]]:px-2",
+						"**:[[cmdk-group-heading]]:font-medium",
+						"**:[[cmdk-group-heading]]:text-grayDark",
 						"[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0",
-						"[&_[cmdk-group]]:px-2",
+						"**:[[cmdk-group]]:px-2",
 						"[&_[cmdk-input-wrapper]_svg]:h-5",
 						"[&_[cmdk-input-wrapper]_svg]:w-5",
-						"[&_[cmdk-input]]:h-12",
-						"[&_[cmdk-item]]:px-2",
-						"[&_[cmdk-item]]:py-3",
+						"**:[[cmdk-input]]:h-12",
+						"**:[[cmdk-item]]:px-2",
+						"**:[[cmdk-item]]:py-3",
 						"[&_[cmdk-item]_svg]:h-5",
 						"[&_[cmdk-item]_svg]:w-5",
 					)}
@@ -106,11 +106,11 @@ const CommandGroup = React.forwardRef<
 		ref={ref}
 		className={cn(
 			"overflow-hidden text-foreground",
-			"[&_[cmdk-group-heading]]:px-4",
-			"[&_[cmdk-group-heading]]:py-1.5",
-			"[&_[cmdk-group-heading]]:text-sm",
-			"[&_[cmdk-group-heading]]:font-medium",
-			"[&_[cmdk-group-heading]]:text-grayDark",
+			"**:[[cmdk-group-heading]]:px-4",
+			"**:[[cmdk-group-heading]]:py-1.5",
+			"**:[[cmdk-group-heading]]:text-sm",
+			"**:[[cmdk-group-heading]]:font-medium",
+			"**:[[cmdk-group-heading]]:text-grayDark",
 			className,
 		)}
 		{...props}
