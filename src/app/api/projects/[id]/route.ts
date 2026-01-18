@@ -6,12 +6,11 @@ import {
 	getEditionRoute,
 	getQueryRouteWithId,
 } from "@/utility/apiUtil";
-import { parseId } from "@/utility/resourceUtil";
 import { getProject } from "./getProject";
 
 export const dynamic = "force-dynamic";
 export const GET = getQueryRouteWithId(
-	async (id) => await getProject(parseId(id)),
+	async (id) => await getProject(id),
 	(id) => `Project with id '${id}' does not exist`,
 );
 
@@ -25,17 +24,17 @@ export const PATCH = getEditionRoute(async (id, body) => {
 		.update(projects)
 		.set({
 			...parsedBody,
-			id: parseId(id),
+			id,
 			last_modified: new Date().toISOString(),
 		})
-		.where(eq(projects.id, parseId(id)));
+		.where(eq(projects.id, id));
 	const clientsRelations = (clients || []).map(async (client) => {
 		await db
 			.delete(projectsToClients)
-			.where(eq(projectsToClients.projectId, parseId(id)));
+			.where(eq(projectsToClients.projectId, id));
 		await db.insert(projectsToClients).values([
 			{
-				projectId: parseId(id),
+				projectId: id,
 				clientId: client.id,
 			},
 		]);
