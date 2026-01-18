@@ -2,7 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import EditResourceModal from "@/components/EditResourceModal";
 import ExpenseEdit from "@/components/ExpenseEdit";
-import serverQueryClient from "@/utility/data/serverQueryClient";
+import createServerQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 
 const resource = "expenses";
@@ -27,6 +27,7 @@ export default async function ExpenseEditModalRoute({
 	}
 	const formId = `${resource}-${action}-form-${parsedId}`;
 	const record = await getExpense(parsedId);
+	const serverQueryClient = createServerQueryClient();
 	serverQueryClient.setQueryData([resource, `${parsedId}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

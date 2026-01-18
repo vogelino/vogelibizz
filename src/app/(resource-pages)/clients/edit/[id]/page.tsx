@@ -5,7 +5,7 @@ import { getClient } from "@/app/api/clients/[id]/getClient";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import serverQueryClient from "@/utility/data/serverQueryClient";
+import createServerQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 
 const resource = "clients";
@@ -31,6 +31,7 @@ export default async function ClientEditPageRoute({
 
 	const formId = `${resource}-${action}-form-${parsedId}`;
 	const record = await getClient(parsedId);
+	const serverQueryClient = createServerQueryClient();
 	serverQueryClient.setQueryData([resource, `${parsedId}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeftToLine, Check, ChevronDown, X } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -50,6 +50,13 @@ export function MultiValueInput<OptionValueType extends string = string>({
 	);
 	const [selectedOptions, setSelectedOptions] =
 		useState<OptionType[]>(initialOptions);
+
+	useEffect(() => {
+		const nextOptions = initialValues
+			.map((optionValue) => options.find(getOptionComparator(optionValue))!)
+			.filter(Boolean);
+		setSelectedOptions(nextOptions);
+	}, [initialValues, options]);
 
 	const onOptionSelect = useCallback(
 		(newOptionValue: string | number) => {
@@ -103,17 +110,25 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								<div className="min-w-40 flex gap-4 justify-between items-center w-full">
 									<div className="flex gap-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
-											<button
-												type="button"
+											<span
 												key={option.value}
 												className="focusable rounded-full"
+												role="button"
+												tabIndex={0}
 												onClick={(evt) => {
 													evt.stopPropagation();
 													onOptionSelect(option.value);
 												}}
+												onKeyDown={(evt) => {
+													if (evt.key === "Enter" || evt.key === " ") {
+														evt.preventDefault();
+														evt.stopPropagation();
+														onOptionSelect(option.value);
+													}
+												}}
 											>
 												{selectedValueFormaterFn(option.value)}
-											</button>
+											</span>
 										))}
 
 										{selectedOptions.length > 5 && (

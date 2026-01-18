@@ -5,7 +5,7 @@ import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import serverQueryClient from "@/utility/data/serverQueryClient";
+import createServerQueryClient from "@/utility/data/serverQueryClient";
 import { parseId } from "@/utility/resourceUtil";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +24,7 @@ export default async function ExpenseEditPageRoute({
 	}
 
 	const expense = await getExpense(parsedId);
+	const serverQueryClient = createServerQueryClient();
 	serverQueryClient.setQueryData(["expenses", `${parsedId}`], expense);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

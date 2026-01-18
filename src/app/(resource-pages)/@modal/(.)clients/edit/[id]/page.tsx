@@ -3,7 +3,7 @@ import { getClient } from "@/app/api/clients/[id]/getClient";
 import ClientEdit from "@/components/ClientEdit";
 import EditResourceModal from "@/components/EditResourceModal";
 import type { ClientType } from "@/db/schema";
-import serverQueryClient from "@/utility/data/serverQueryClient";
+import createServerQueryClient from "@/utility/data/serverQueryClient";
 import { parseId, singularizeResourceName } from "@/utility/resourceUtil";
 
 const resource = "clients";
@@ -28,6 +28,7 @@ export default async function ClientEditModalRoute({
 	}
 	const formId = `${resource}-${action}-form-${parsedId}`;
 	const record = await getClient(parsedId);
+	const serverQueryClient = createServerQueryClient();
 	serverQueryClient.setQueryData<ClientType>([resource, `${parsedId}`], record);
 	return (
 		<HydrationBoundary state={dehydrate(serverQueryClient)}>

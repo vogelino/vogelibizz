@@ -6,7 +6,7 @@ import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import type { ProjectType } from "@/db/schema";
-import serverQueryClient from "@/utility/data/serverQueryClient";
+import createServerQueryClient from "@/utility/data/serverQueryClient";
 import { parseId } from "@/utility/resourceUtil";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,7 @@ export default async function ProjectEditPageRoute({
 	const record = await getProject(parsedId);
 	const idString = `${id}`;
 	const formId = `project-edit-form-${parsedId}`;
+	const serverQueryClient = createServerQueryClient();
 	serverQueryClient.setQueryData<ProjectType>(
 		["projects", `${parsedId}`],
 		record,
