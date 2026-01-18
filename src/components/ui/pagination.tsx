@@ -28,8 +28,8 @@ const PaginationContent = React.forwardRef<
 	<ul
 		ref={ref}
 		className={cn(
-			"flex flex-row items-center gap-px bg-grayLight",
-			"overflow-clip border border-grayLight",
+			"flex flex-row items-center gap-px bg-muted",
+			"overflow-clip border border-border",
 			className,
 		)}
 		{...props}
@@ -41,7 +41,7 @@ const PaginationItem = React.forwardRef<
 	HTMLLIElement,
 	React.ComponentProps<"li">
 >(({ className, ...props }, ref) => (
-	<li ref={ref} className={cn("bg-bg h-9", className)} {...props} />
+	<li ref={ref} className={cn("bg-background h-9", className)} {...props} />
 ));
 PaginationItem.displayName = "PaginationItem";
 
@@ -68,7 +68,7 @@ const PaginationLink = React.forwardRef<HTMLButtonElement, PaginationLinkProps>(
 			variant={isActive ? "default" : "ghost"}
 			size={size}
 			className={cn(
-				"px-1.5 py-2 hover:bg-alt rounded-none",
+				"px-1.5 py-2 hover:bg-accent rounded-none",
 				`border-none h-9 min-w-9`,
 				className,
 			)}
@@ -127,7 +127,7 @@ const PaginationEllipsis = ({
 		)}
 		{...props}
 	>
-		<MoreHorizontal size={20} className="text-grayDark opacity-50" />
+		<MoreHorizontal size={20} className="text-muted-foreground opacity-50" />
 		<span className="sr-only">More pages</span>
 	</span>
 );

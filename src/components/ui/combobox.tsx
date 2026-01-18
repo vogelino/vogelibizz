@@ -60,8 +60,8 @@ export function Combobox({
 					aria-expanded={open}
 					className={cn(
 						"w-fit justify-between rounded-none h-[38px]",
-						"hover:bg-alt hover:text-fg border-grayLight",
-						"text-base bg-bg dark:bg-grayUltraLight",
+						"hover:bg-accent hover:text-accent-foreground border-border",
+						"text-base bg-background dark:bg-card",
 						className,
 					)}
 				>

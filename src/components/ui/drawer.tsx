@@ -28,7 +28,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DrawerPrimitive.Overlay
 		ref={ref}
-		className={cn("fixed inset-0 z-50 bg-bgOverlay", className)}
+		className={cn("fixed inset-0 z-50 bg-overlay", className)}
 		{...props}
 	/>
 ));
@@ -44,7 +44,7 @@ const DrawerContent = React.forwardRef<
 			ref={ref}
 			className={cn(
 				`max-h-screen max-w-[100vw] fixed z-50 bottom-0`,
-				`flex-col bg-bg`,
+				`flex-col bg-background`,
 				className,
 			)}
 			{...props}
@@ -62,7 +62,7 @@ const DrawerHeader = ({
 	<div
 		className={cn(
 			"grid gap-1.5 p-6 pt-12 text-center sm:text-left",
-			"border-b border-grayMed",
+			"border-b border-border",
 			className,
 		)}
 		{...props}
@@ -77,7 +77,7 @@ const DrawerFooter = ({
 	<div
 		className={cn(
 			"mt-auto flex gap-4 justify-end p-6",
-			"border-t border-grayMed",
+			"border-t border-border",
 			className,
 		)}
 		{...props}
@@ -106,7 +106,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DrawerPrimitive.Description
 		ref={ref}
-		className={cn("text-sm text-grayDark", className)}
+		className={cn("text-sm text-muted-foreground", className)}
 		{...props}
 	/>
 ));

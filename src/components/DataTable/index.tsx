@@ -26,7 +26,7 @@ export function DataTable<RecordType>({
 						{headerGroup.headers.map((header) => {
 							const { column } = header;
 							const sort = column.getIsSorted();
-							const iconClass = cn("ml-2 h-4 w-4", sort && "text-fg");
+							const iconClass = cn("ml-2 h-4 w-4", sort && "text-foreground");
 							const label = header.isPlaceholder
 								? null
 								: flexRender(
@@ -43,7 +43,7 @@ export function DataTable<RecordType>({
 										<Button
 											variant="ghost"
 											onClick={column.getToggleSortingHandler()}
-											className={cn("-ml-4 hover:text-fg group")}
+											className={cn("-ml-4 hover:text-foreground group")}
 										>
 											{label}
 											{!sort && <ArrowUpDown className={iconClass} />}

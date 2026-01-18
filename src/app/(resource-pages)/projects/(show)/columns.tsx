@@ -17,13 +17,13 @@ export const projectTableColumns = [
 		minSize: 50,
 		maxSize: 50,
 		header: () => (
-			<span className="text-xs font-mono text-grayDark group-hover:text-inherit">
+			<span className="text-xs font-mono text-muted-foreground group-hover:text-inherit">
 				ID
 			</span>
 		),
 		cell: function render({ getValue }) {
 			return (
-				<span className="text-xs font-mono text-grayDark">
+				<span className="text-xs font-mono text-muted-foreground">
 					{getValue<string>()}
 				</span>
 			);

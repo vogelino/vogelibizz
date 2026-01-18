@@ -89,7 +89,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 	);
 
 	return (
-		<div className="flex items-center border border-grayMed rounded-full">
+		<div className="flex items-center border border-border rounded-full">
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
@@ -98,15 +98,15 @@ export function MultiValueInput<OptionValueType extends string = string>({
 						aria-expanded={open}
 						className={cn(
 							"w-fit justify-between rounded-none h-[38px]",
-							"hover:bg-alt hover:text-fg border-grayLight",
-							"text-base bg-bg dark:bg-grayUltraLight",
+							"hover:bg-accent hover:text-accent-foreground border-border",
+							"text-base bg-background dark:bg-card",
 							"p-0 pr-2 rounded-full",
 							className,
 						)}
 					>
-						<div className="flex gap-1 px-1.5 items-center border-r border-grayLight w-full">
+						<div className="flex gap-1 px-1.5 items-center border-r border-border w-full">
 							{!selectedOptions.length && (
-								<span className="text-grayDark opacity-80 inline-flex py-1 px-2 h-7 min-w-40">
+								<span className="text-muted-foreground opacity-80 inline-flex py-1 px-2 h-7 min-w-40">
 									{placeholder}
 								</span>
 							)}
@@ -135,7 +135,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 										))}
 
 										{selectedOptions.length > 5 && (
-											<span className="rounded-full bg-bg">
+											<span className="rounded-full bg-background">
 												<IconBadge
 													icon={null}
 													label={`+${selectedOptions.length - 5}`}
@@ -157,7 +157,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 												setSelectedOptions([]);
 											}
 										}}
-										className="text-grayDark hover:text-fg rounded-full focusable"
+										className="text-muted-foreground hover:text-foreground rounded-full focusable"
 										size={20}
 										tabIndex={0}
 										role="button"
@@ -239,7 +239,7 @@ function getDefaultValueFormatter(options: OptionType[]) {
 				icon={
 					<X
 						size={18}
-						className="text-grayDark hover:text-fg rounded-full shrink-0"
+						className="text-muted-foreground hover:text-foreground rounded-full shrink-0"
 						role="button"
 						aria-label={`Remove label ${option?.value}`}
 					/>

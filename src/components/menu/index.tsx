@@ -30,14 +30,14 @@ export const Menu = ({
 		},
 	];
 
-	const withBgClasses = "bg-bg border-grayMed";
+	const withBgClasses = "bg-background border-border";
 	const withoutBgClasses = "border-b-transparent";
 	return (
 		<header
 			className={cn(
 				!withBg && `logo-visible`,
 				`absolute top-0 left-1/2 -translate-x-1/2 w-screen z-40`,
-				`text-fg px-10`,
+				`text-foreground px-10`,
 				`border-b`,
 				`flex justify-between items-center py-2`,
 				`scrolled-top h-auto`,
@@ -50,10 +50,10 @@ export const Menu = ({
 				className={cn(
 					"group",
 					"px-4 -ml-4 py-2 rounded-full",
-					"focus:outline-none focus:ring-2 focus:ring-fg",
+					"focus:outline-none focus:ring-2 focus:ring-ring",
 				)}
 			>
-				<BizzLogo textClassName="group-hover:text-alt" />
+				<BizzLogo textClassName="group-hover:text-secondary-foreground" />
 			</Link>
 			<button
 				type="button"
@@ -69,7 +69,7 @@ export const Menu = ({
 				id="menu"
 				aria-label="Main navigation"
 				className={cn(
-					`fixed top-[101px] left-0 w-screen h-[calc(100svh-69px)] bg-bg md:bg-transparent`,
+					`fixed top-[101px] left-0 w-screen h-[calc(100svh-69px)] bg-background md:bg-transparent`,
 					`opacity-0 pointer-events-none md:opacity-100 md:static md:pointer-events-auto`,
 					`md:w-auto md:h-auto md:bg-none transition-opacity`,
 					`motion-reduce:transition-none flex gap-6 flex-wrap items-center`,
@@ -91,25 +91,25 @@ export const Menu = ({
 				<ul
 					className={cn(
 						`flex flex-col md:flex-row md:gap-4 items-center`,
-						`pl-6 border-l border-grayLight`,
+						`pl-6 border-l border-border`,
 					)}
 					aria-label="Secondary menu items"
 				>
 					<li
 						aria-label="Secondary menu link: Theme toggle"
 						className={cn(
-							`w-full md:w-auto py-5 md:p-0 text-grayDark`,
+							`w-full md:w-auto py-5 md:p-0 text-muted-foreground`,
 							`flex justify-between items-center pr-5 md:pr-0`,
 						)}
 					>
-						<div className="text-fg inline-flex items-center">
+						<div className="text-foreground inline-flex items-center">
 							<ThemeToggle />
 						</div>
 					</li>
 					<li
 						aria-label="Secondary menu link: User profile"
 						className={cn(
-							`w-full md:w-auto py-5 md:p-0 text-grayDark`,
+							`w-full md:w-auto py-5 md:p-0 text-muted-foreground`,
 							`flex justify-between items-center pr-5 md:pr-0`,
 						)}
 					>

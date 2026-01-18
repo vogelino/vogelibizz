@@ -23,7 +23,7 @@ function FormPageLayout({
 			<div
 				className={cn(
 					"flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center",
-					"border-b border-grayLight pb-6",
+					"border-b border-border pb-6",
 				)}
 			>
 				<h1>
@@ -41,7 +41,7 @@ function FormPageLayout({
 			{children}
 
 			{footerButtons && (
-				<div className="flex justify-end gap-2 pt-6 mt-8 border-t border-grayLight">
+				<div className="flex justify-end gap-2 pt-6 mt-8 border-t border-border">
 					{footerButtons}
 				</div>
 			)}

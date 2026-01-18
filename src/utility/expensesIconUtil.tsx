@@ -9,35 +9,35 @@ export const categoryToColorClass = (
 ): TailwindColorType => {
 	switch (category) {
 		case "Charity":
-			return "bg-red-500/5 border-red-500/20 text-red-700 dark:text-grayDark";
+			return "bg-red-500/5 border-red-500/20 text-red-700 dark:text-muted-foreground";
 		case "Transport":
-			return "bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-grayDark";
+			return "bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-muted-foreground";
 		case "Domain":
-			return "bg-green-500/5 border-green-500/20 text-green-700 dark:text-grayDark";
+			return "bg-green-500/5 border-green-500/20 text-green-700 dark:text-muted-foreground";
 		case "Entertainment":
-			return "bg-yellow-500/5 border-yellow-500/20 text-yellow-700 dark:text-grayDark";
+			return "bg-yellow-500/5 border-yellow-500/20 text-yellow-700 dark:text-muted-foreground";
 		case "Essentials":
-			return "bg-purple-500/5 border-purple-500/20 text-purple-700 dark:text-grayDark";
+			return "bg-purple-500/5 border-purple-500/20 text-purple-700 dark:text-muted-foreground";
 		case "Hardware":
-			return "bg-pink-500/5 border-pink-500/20 text-pink-700 dark:text-grayDark";
+			return "bg-pink-500/5 border-pink-500/20 text-pink-700 dark:text-muted-foreground";
 		case "Health & Wellbeing":
-			return "bg-orange-500/5 border-orange-500/20 text-orange-700 dark:text-grayDark";
+			return "bg-orange-500/5 border-orange-500/20 text-orange-700 dark:text-muted-foreground";
 		case "Hobby":
-			return "bg-indigo-500/5 border-indigo-500/20 text-indigo-700 dark:text-grayDark";
+			return "bg-indigo-500/5 border-indigo-500/20 text-indigo-700 dark:text-muted-foreground";
 		case "Home":
-			return "bg-gray-500/5 border-gray-500/20 text-gray-700 dark:text-grayDark";
+			return "bg-gray-500/5 border-gray-500/20 text-gray-700 dark:text-muted-foreground";
 		case "Present":
-			return "bg-teal-500/5 border-teal-500/20 text-teal-700 dark:text-grayDark";
+			return "bg-teal-500/5 border-teal-500/20 text-teal-700 dark:text-muted-foreground";
 		case "Savings":
-			return "bg-lime-500/5 border-lime-500/20 text-lime-700 dark:text-grayDark";
+			return "bg-lime-500/5 border-lime-500/20 text-lime-700 dark:text-muted-foreground";
 		case "Services":
-			return "bg-amber-500/5 border-amber-500/20 text-amber-700 dark:text-grayDark";
+			return "bg-amber-500/5 border-amber-500/20 text-amber-700 dark:text-muted-foreground";
 		case "Software":
-			return "bg-violet-500/5 border-violet-500/20 text-violet-700 dark:text-grayDark";
+			return "bg-violet-500/5 border-violet-500/20 text-violet-700 dark:text-muted-foreground";
 		case "Travel":
-			return "bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-grayDark";
+			return "bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-muted-foreground";
 		case "Administrative":
-			return "bg-sky-500/5 border-sky-500/20 text-sky-700 dark:text-grayDark";
+			return "bg-sky-500/5 border-sky-500/20 text-sky-700 dark:text-muted-foreground";
 		default:
 			return "inherit";
 	}

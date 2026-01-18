@@ -36,7 +36,7 @@ function CurrencyInput({
 				label: (
 					<span className="flex gap-2 justify-between w-full">
 						<span>{currencyDisplay.of(c)}</span>
-						<span className="text-grayDark opacity-80 flex gap-2">
+						<span className="text-muted-foreground opacity-80 flex gap-2">
 							<span>{getCurrencySymbol(c)}</span>
 							<span>·</span>
 							<span>{c}</span>
@@ -52,13 +52,13 @@ function CurrencyInput({
 		<FormInputWrapper label={label}>
 			<div className="flex">
 				<div className="relative w-full">
-					<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-grayDark opacity-80">
+					<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-muted-foreground opacity-80">
 						<Banknote />
 					</div>
 					<input type="hidden" {...inputProps} />
 					<ReactCurrencyInput
 						className={cn(
-							"form-input dark:bg-grayUltraLight",
+							"form-input dark:bg-card",
 							"ps-12 w-full font-mono border-r-0",
 							inputProps?.className,
 							className,
@@ -75,7 +75,7 @@ function CurrencyInput({
 				</div>
 				<input type="hidden" {...currencyProps} value={currency} />
 				<Combobox
-					className={cn("h-auto py-1 border-grayMed", className)}
+					className={cn("h-auto py-1 border-border", className)}
 					options={options}
 					value={currency}
 					onChange={(currency) =>

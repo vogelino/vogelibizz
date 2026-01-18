@@ -27,14 +27,14 @@ function HeaderMenuLink({
 				aria-label={`Header menu link: ${ariaLabel || title} page`}
 				className={cn(
 					`uppercase sm:normal-case text-3xl tracking-wide`,
-					`pb-5 px-6 border-b border-grayLight antialiased`,
+					`pb-5 px-6 border-b border-border antialiased`,
 					`sm:tracking-normal sm:border-none sm:py-1 transition-colors`,
 					`inline-block w-screen sm:w-auto sm:rounded-full`,
-					`focus-visible:ring-2 focus-visible:ring-fg outline-none`,
-					!active && [`pt-6 sm:text-xl hover:bg-alt sm:px-4 sm:pt-2`],
+					`focus-visible:ring-2 focus-visible:ring-ring outline-none`,
+					!active && [`pt-6 sm:text-xl hover:bg-accent sm:px-4 sm:pt-2`],
 					active && [
 						`text-4xl pt-4`,
-						`font-special bg-alt sm:text-[26px] sm:px-3 sm:pb-1 sm:pt-0`,
+						`font-special bg-secondary sm:text-[26px] sm:px-3 sm:pb-1 sm:pt-0`,
 					],
 					className,
 				)}
