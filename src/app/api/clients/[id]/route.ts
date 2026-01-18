@@ -11,12 +11,12 @@ import { getClient } from "./getClient";
 
 export const dynamic = "force-dynamic";
 export const GET = getQueryRouteWithId(
-	(id) => getClient(parseId(id)),
+	(id) => getClient(id),
 	(id) => `Client with id '${id}' does not exist`,
 );
 
 export const DELETE = getDeletionRoute((id) =>
-	db.delete(clients).where(eq(clients.id, parseId(id))),
+	db.delete(clients).where(eq(clients.id, id)),
 );
 
 export const PATCH = getEditionRoute(async (id, body) => {
@@ -25,17 +25,17 @@ export const PATCH = getEditionRoute(async (id, body) => {
 		.update(clients)
 		.set({
 			...parsedBody,
-			id: parseId(id),
+			id,
 			last_modified: new Date().toISOString(),
 		})
-		.where(eq(clients.id, parseId(id)));
+		.where(eq(clients.id, id));
 	const projectsRelations = (projects || []).map(async (project) => {
 		await db
 			.delete(projectsToClients)
-			.where(eq(projectsToClients.clientId, parseId(id)));
+			.where(eq(projectsToClients.clientId, id));
 		await db.insert(projectsToClients).values([
 			{
-				clientId: parseId(id),
+				clientId: id,
 				projectId: project.id,
 			},
 		]);
