@@ -69,7 +69,7 @@ export const Menu = ({
 				id="menu"
 				aria-label="Main navigation"
 				className={cn(
-					`fixed top-[101px] left-0 w-screen h-[calc(100svh-69px)] bg-background md:bg-transparent`,
+					`fixed top-25.25 left-0 w-screen h-[calc(100svh-69px)] bg-background md:bg-transparent`,
 					`opacity-0 pointer-events-none md:opacity-100 md:static md:pointer-events-auto`,
 					`md:w-auto md:h-auto md:bg-none transition-opacity`,
 					`motion-reduce:transition-none flex gap-6 flex-wrap items-center`,

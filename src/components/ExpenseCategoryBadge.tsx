@@ -19,7 +19,7 @@ function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 					<span className="flex gap-2 items-center">
 						<span
 							className={cn(
-								"size-2 rounded-full inline-block -mt-[2px]",
+								"size-2 rounded-full inline-block -mt-0.5",
 								categoryToOptionClass(value),
 							)}
 						/>

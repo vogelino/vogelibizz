@@ -97,7 +97,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							"w-fit justify-between rounded-none h-[38px]",
+							"w-fit justify-between rounded-none h-9.5",
 							"hover:bg-accent hover:text-accent-foreground border-border",
 							"text-base bg-background dark:bg-card",
 							"p-0 pr-2 rounded-full",
