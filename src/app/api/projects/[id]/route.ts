@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import db from "@/db";
 import { projectEditSchema, projects, projectsToClients } from "@/db/schema";
 import {
@@ -6,7 +7,6 @@ import {
 	getQueryRouteWithId,
 } from "@/utility/apiUtil";
 import { parseId } from "@/utility/resourceUtil";
-import { eq } from "drizzle-orm";
 import { getProject } from "./getProject";
 
 export const dynamic = "force-dynamic";

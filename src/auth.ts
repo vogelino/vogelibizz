@@ -3,7 +3,14 @@ import GitHub from "next-auth/providers/github";
 import env from "./env";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-	providers: [GitHub],
+	providers: [
+		GitHub({
+			clientId: env.server.AUTH_GITHUB_ID,
+			clientSecret: env.server.AUTH_GITHUB_SECRET,
+		}),
+	],
+	secret: env.server.AUTH_SECRET,
+	trustHost: true,
 });
 
 export async function isAuthenticatedAndAdmin(session?: Session | null) {

@@ -1,10 +1,10 @@
+import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
 import type { ExpenseWithMonthlyCLPPriceType } from "@/db/schema";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ExpenseWithMonthlyCLPPriceType>();
 
@@ -23,7 +23,7 @@ export const expensesTableColumns = [
 		id: "clpMonthlyPrice",
 		size: 100,
 		header: "CLP/Month",
-		cell: function render({ getValue, row }) {
+		cell: function render({ getValue }) {
 			const value =
 				getValue<ExpenseWithMonthlyCLPPriceType["clpMonthlyPrice"]>();
 			return (

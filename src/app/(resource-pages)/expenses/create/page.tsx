@@ -1,8 +1,8 @@
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 
 export default async function ExpenseCreatePageRoute() {
 	return (

@@ -1,7 +1,3 @@
-import * as React from "react";
-
-import { Button, type ButtonProps } from "@/components/ui/button";
-import { cn } from "@/utility/classNames";
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -9,10 +5,12 @@ import {
 	ChevronsRight,
 	MoreHorizontal,
 } from "lucide-react";
+import * as React from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
+import { cn } from "@/utility/classNames";
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 	<nav
-		role="navigation"
 		aria-label="pagination"
 		className={cn(
 			"mx-auto flex w-full justify-center gap-4 items-center",
@@ -64,7 +62,7 @@ const PaginationLink = React.forwardRef<HTMLButtonElement, PaginationLinkProps>(
 		ref,
 	) => (
 		<Button
-			// @ts-ignore
+			// @ts-expect-error
 			ref={ref}
 			aria-current={isActive ? "page" : undefined}
 			variant={isActive ? "default" : "ghost"}

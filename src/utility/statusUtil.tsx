@@ -1,4 +1,3 @@
-import type { ProjectType } from "@/db/schema";
 import {
 	CheckCircle2,
 	Circle,
@@ -9,6 +8,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import type { ProjectType } from "@/db/schema";
 
 type ColorType = "default" | "blue" | "green" | "red" | "orange";
 const statusToColorMap: Record<string, ColorType> = {

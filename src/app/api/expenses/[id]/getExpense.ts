@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import db from "@/db";
 import { expenses } from "@/db/schema";
 import { getExpensesWithMonthlyClpPrice } from "@/utility/expenseFetchUtil";
-import { eq } from "drizzle-orm";
 
 export async function getExpense(id: number) {
 	const expense = await db.query.expenses.findFirst({

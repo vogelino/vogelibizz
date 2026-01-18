@@ -1,12 +1,12 @@
 "use client";
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import ClientEdit from "@/components/ClientEdit";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import { singularizeResourceName } from "@/utility/resourceUtil";
-import { SaveIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 
 const resource = "clients";
 const resourceSingular = singularizeResourceName(resource);

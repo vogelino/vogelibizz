@@ -1,6 +1,6 @@
-import { cn } from "@/utility/classNames";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { cn } from "@/utility/classNames";
 
 function HeaderMenuLink({
 	as = Link,

@@ -1,7 +1,7 @@
 "use client";
-import HeaderMenuLink from "@/components/menu/HeaderMenuLink";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
+import HeaderMenuLink from "@/components/menu/HeaderMenuLink";
 
 function LogoutButton() {
 	return (

@@ -3,7 +3,7 @@ import { Font } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
 import type React from "react";
 
-const PDFViewer = dynamic(
+const _PDFViewer = dynamic(
 	() => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
 	{
 		ssr: false,

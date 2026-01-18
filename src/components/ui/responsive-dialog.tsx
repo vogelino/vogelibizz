@@ -1,6 +1,6 @@
 "use client";
+import { useMediaQuery } from "@custom-react-hooks/use-media-query";
 import type * as React from "react";
-
 import {
 	Drawer,
 	DrawerContent,
@@ -10,7 +10,6 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 import { cn } from "@/utility/classNames";
-import useMediaQuery from "@custom-react-hooks/use-media-query";
 
 export function ResponsiveModal({
 	children,

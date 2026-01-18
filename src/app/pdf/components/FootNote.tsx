@@ -1,11 +1,7 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import { COLORS, CONFIG } from "../variables";
 
-export const FootNote = ({
-	children,
-}: {
-	children: React.ReactNode;
-}) => (
+export const FootNote = ({ children }: { children: React.ReactNode }) => (
 	<>
 		<View style={styles.wrapper}>
 			<Text style={styles.asterisk}>*</Text>

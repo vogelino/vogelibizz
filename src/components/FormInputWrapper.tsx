@@ -6,11 +6,11 @@ function FormInputWrapper({
 	error,
 }: PropsWithChildren<{ label: ReactNode; error?: string }>) {
 	return (
-		<label className="flex flex-col gap-2">
+		<div className="flex flex-col gap-2">
 			<span className="text-grayDark">{label}</span>
 			{children}
 			{error && <span style={{ color: "red" }}>{error}</span>}
-		</label>
+		</div>
 	);
 }
 

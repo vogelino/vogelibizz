@@ -1,40 +1,40 @@
 "use client";
 
 import {
-  type ExpenseEditType,
-  type ExpenseWithMonthlyCLPPriceType,
-  type ResourceType,
-  projectEditSchema,
+	type ProjectEditType,
+	type ProjectType,
+	projectEditSchema,
+	type ResourceType,
 } from "@/db/schema";
+import { getNowInUTC } from "../timeUtil";
 import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
-import { getNowInUTC } from "../timeUtil";
 
 const resourceName: ResourceType = "projects";
 const action: ActionType = "edit";
 const inputZodSchema = projectEditSchema;
 
-const useProjectEdit = createMutationHook<ExpenseWithMonthlyCLPPriceType[]>({
-  resourceName,
-  action,
-  inputZodSchema,
-  mutationFn: createQueryFunction<void>({
-    resourceName,
-    action,
-    inputZodSchema,
-  }),
-  createOptimisticDataEntry,
+const useProjectEdit = createMutationHook<ProjectType[], ProjectEditType>({
+	resourceName,
+	action,
+	inputZodSchema,
+	mutationFn: createQueryFunction<void>({
+		resourceName,
+		action,
+		inputZodSchema,
+	}),
+	createOptimisticDataEntry,
 });
 
 export default useProjectEdit;
 
 function createOptimisticDataEntry(
-  oldData: ExpenseWithMonthlyCLPPriceType[] | undefined,
-  editedData: ExpenseEditType,
-): ExpenseWithMonthlyCLPPriceType[] {
-  return (oldData || []).map((c) =>
-    c.id === editedData.id
-      ? { ...c, ...editedData, last_modified: getNowInUTC() }
-      : c,
-  );
+	oldData: ProjectType[] | undefined,
+	editedData: ProjectEditType,
+): ProjectType[] {
+	return (oldData || []).map((c) =>
+		c.id === editedData.id
+			? { ...c, ...editedData, last_modified: getNowInUTC() }
+			: c,
+	);
 }

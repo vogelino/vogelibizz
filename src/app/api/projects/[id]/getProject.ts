@@ -1,11 +1,11 @@
+import { eq } from "drizzle-orm";
 import db from "@/db";
 import {
-	type ProjectType,
 	clients,
+	type ProjectType,
 	projects,
 	projectsToClients,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getProject(id: number): Promise<ProjectType> {
 	const projectsWithClients = await db

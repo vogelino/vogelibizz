@@ -1,3 +1,4 @@
+import type { useReactTable } from "@tanstack/react-table";
 import {
 	Pagination,
 	PaginationContent,
@@ -10,7 +11,6 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/utility/classNames";
-import type { useReactTable } from "@tanstack/react-table";
 
 type TablePaginationProps = Pick<
 	ReturnType<typeof useReactTable>,
@@ -21,7 +21,6 @@ type TablePaginationProps = Pick<
 	| "getCanNextPage"
 	| "nextPage"
 	| "previousPage"
-	| "setPageSize"
 >;
 
 function TablePagination({
@@ -32,7 +31,6 @@ function TablePagination({
 	getCanNextPage,
 	nextPage,
 	previousPage,
-	setPageSize,
 }: TablePaginationProps) {
 	const currentPage = getState().pagination.pageIndex + 1;
 	const paginationRange = getPaginationRangeWithEllipsis(

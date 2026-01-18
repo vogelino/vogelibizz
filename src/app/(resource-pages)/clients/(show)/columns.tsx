@@ -1,10 +1,10 @@
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
 import type { ClientType, ProjectType } from "@/db/schema";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ClientType>();
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 type ColumnsType<T> = ColumnDef<T, any>;
 
 export const clientTableColumns: ColumnsType<ClientType>[] = [

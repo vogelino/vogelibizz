@@ -1,5 +1,5 @@
-import { cn } from "@/utility/classNames";
 import type { ReactNode } from "react";
+import { cn } from "@/utility/classNames";
 import { Badge, type BadgeProps } from "./badge";
 
 export function IconBadge({

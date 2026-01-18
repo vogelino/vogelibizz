@@ -1,10 +1,13 @@
+import { type NextRequest, NextResponse } from "next/server";
+import type { Session } from "next-auth";
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
 import env from "./env";
 
 const adminEmails = env.server.AUTH_ADMIN_EMAILS;
 
-export default auth(async (req) => {
+type AuthenticatedRequest = NextRequest & { auth?: Session | null };
+
+export default auth(async (req: AuthenticatedRequest) => {
 	const loginUrl = `${env.server.NEXT_PUBLIC_BASE_URL}/login`;
 	const authenticatedUserEmail = req.auth?.user?.email;
 

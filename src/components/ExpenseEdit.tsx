@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
@@ -18,10 +21,8 @@ import {
 	categoryToOptionClass,
 	mapTypeToIcon,
 } from "@/utility/expensesIconUtil";
+import { getNowInUTC } from "@/utility/timeUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 export default function ExpenseEdit({
 	id,
@@ -95,8 +96,13 @@ export default function ExpenseEdit({
 					originalPrice,
 					originalCurrency,
 				};
-				if (id) editMutation.mutate({ ...expense, id });
-				else createMutation.mutate([expense]);
+				if (id) {
+					editMutation.mutate({
+						...expense,
+						id,
+						last_modified: getNowInUTC(),
+					});
+				} else createMutation.mutate([expense]);
 			})}
 			id={formId}
 			className="@container"

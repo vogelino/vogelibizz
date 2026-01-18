@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import type { ProjectType } from "@/db/schema";
 import env from "@/env";
@@ -10,14 +13,14 @@ import useProjects from "@/utility/data/useProjects";
 import useComboboxOptions, {
 	type OptionType,
 } from "@/utility/useComboboxOptions";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 
 export default function ClientEdit({
 	id,
 	formId,
-}: { id?: number | undefined; formId: string }) {
+}: {
+	id?: number | undefined;
+	formId: string;
+}) {
 	const router = useRouter();
 	const clientQuery = useClient(id);
 	const { data: client } = clientQuery;
@@ -96,7 +99,7 @@ export default function ClientEdit({
 					{typeof errors.name?.message === "string" && errors.name.message}
 				</label>
 				{!clientQuery.error && !clientQuery.isPending && (
-					<label className="flex flex-col gap-1">
+					<div className="flex flex-col gap-1">
 						<span className="text-grayDark">Projects</span>
 						<MultiValueInput
 							options={projectsOptions}
@@ -105,7 +108,7 @@ export default function ClientEdit({
 							className="w-full"
 							onChange={onProjectsChange}
 						/>
-					</label>
+					</div>
 				)}
 			</div>
 		</form>

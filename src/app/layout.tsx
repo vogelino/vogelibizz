@@ -3,9 +3,9 @@ import type React from "react";
 
 import Providers from "@/providers";
 import "@/styles/global.css";
+import NextTopLoader from "nextjs-toploader";
 import { cn } from "@/utility/classNames";
 import { fungis, lobular } from "@/utility/fonts";
-import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
 	title: "Vogelibizz",

@@ -1,12 +1,12 @@
-import FormInputWrapper from "@/components/FormInputWrapper";
-import { type ExpenseType, currencyEnum } from "@/db/schema";
-import { cn } from "@/utility/classNames";
-import { locale } from "@/utility/formatUtil";
 import { Banknote } from "lucide-react";
 import { type HTMLProps, type PropsWithChildren, useMemo } from "react";
 import ReactCurrencyInput, {
 	type CurrencyInputProps,
 } from "react-currency-input-field";
+import FormInputWrapper from "@/components/FormInputWrapper";
+import { currencyEnum, type ExpenseType } from "@/db/schema";
+import { cn } from "@/utility/classNames";
+import { locale } from "@/utility/formatUtil";
 import { Combobox } from "./combobox";
 
 const currencyDisplay = new Intl.DisplayNames(["en-GB"], { type: "currency" });

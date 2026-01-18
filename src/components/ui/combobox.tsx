@@ -1,7 +1,8 @@
 "use client";
 
+import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-
+import { type ReactNode, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -16,8 +17,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
-import type { PopoverContentProps } from "@radix-ui/react-popover";
-import { type ReactNode, useMemo, useState } from "react";
 
 export type ComboboxProps = {
 	options: {

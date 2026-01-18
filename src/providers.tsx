@@ -1,11 +1,11 @@
 "use client";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/providers/ThemeProvider";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { SessionProvider } from "next-auth/react";
 import { useRef } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function makeQueryClient() {
 	return new QueryClient({
@@ -19,7 +19,7 @@ function makeQueryClient() {
 	});
 }
 
-let browserQueryClient: QueryClient | undefined = undefined;
+let browserQueryClient: QueryClient | undefined;
 
 function getQueryClient() {
 	if (typeof window === "undefined") {

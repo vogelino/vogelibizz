@@ -1,5 +1,5 @@
-import type { ResourceType } from "@/db/schema";
 import Link from "next/link";
+import type { ResourceType } from "@/db/schema";
 import { IconBadge } from "./ui/icon-badge";
 
 function TableRelationsList({

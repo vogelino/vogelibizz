@@ -1,10 +1,10 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import createQueryFunction from "./createQueryFunction";
 
 type DataType = ExpenseWithMonthlyCLPPriceType[];

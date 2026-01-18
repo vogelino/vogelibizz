@@ -1,13 +1,7 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import { COLORS, CONFIG } from "../variables";
 
-export const Title = ({
-	prefix,
-	title,
-}: {
-	prefix: string;
-	title: string;
-}) => (
+export const Title = ({ prefix, title }: { prefix: string; title: string }) => (
 	<>
 		<View style={styles.wrapper}>
 			<View style={styles.line} />

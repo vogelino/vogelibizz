@@ -1,7 +1,7 @@
-import { cn } from "@/utility/classNames";
 import type { LinkProps } from "next/link";
 import Link from "next/link";
 import type React from "react";
+import { cn } from "@/utility/classNames";
 
 function InternalLink(
 	props: LinkProps & { className?: string; children?: React.ReactNode },

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ProjectType, ResourceType } from "@/db/schema";
 import { z } from "zod";
+import type { ProjectType, ResourceType } from "@/db/schema";
 import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
@@ -9,7 +9,7 @@ const resourceName: ResourceType = "projects";
 const action: ActionType = "delete";
 const inputZodSchema = z.number();
 
-const useProjectDelete = createMutationHook<ProjectType[]>({
+const useProjectDelete = createMutationHook<ProjectType[], ProjectType["id"]>({
 	resourceName,
 	action,
 	inputZodSchema,

@@ -1,8 +1,8 @@
 "use client";
-import Footer from "@/components/Footer";
-import { Menu } from "@/components/menu";
 import { usePathname } from "next/navigation";
 import type { PropsWithChildren, ReactNode } from "react";
+import Footer from "@/components/Footer";
+import { Menu } from "@/components/menu";
 
 export const PageLayout: React.FC<
 	PropsWithChildren<{

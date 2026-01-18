@@ -1,5 +1,16 @@
 "use client";
 
+import {
+	type ColumnFilter,
+	type ColumnFiltersState,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useCallback, useMemo, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
@@ -19,17 +30,6 @@ import {
 import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import {
-	type ColumnFilter,
-	type ColumnFiltersState,
-	type SortingState,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
 import { expensesTableColumns } from "./columns";
 
 type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
@@ -43,7 +43,7 @@ export default function ExpensesPage() {
 	const [columnFilters, setFilters] = useState<ColumnFiltersState>([]);
 	const { data, error } = useExpenses();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
 	const columns = useMemo(
 		() => [...expensesTableColumns, deleteColumn],
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,5 +1,14 @@
 "use client";
 
+import {
+	type ColumnDef,
+	getCoreRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useCallback, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import TablePagination from "@/components/DataTable/table-pagination";
 import type { ProjectType, ResourceType } from "@/db/schema";
@@ -8,15 +17,6 @@ import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useProjectDelete from "@/utility/data/useProjectDelete";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
-import {
-	type ColumnDef,
-	type SortingState,
-	getCoreRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useCallback, useState } from "react";
 
 export default function PageDataTable<
 	DataType extends Record<string, unknown>,
@@ -27,7 +27,7 @@ export default function PageDataTable<
 	defaultSortColumn = "last_modified",
 }: {
 	resource: ResourceType;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	columns: ColumnDef<DataType, any>[];
 	data: DataType[];
 	defaultSortColumn: string;
@@ -61,7 +61,7 @@ export default function PageDataTable<
 		...pageSpecificColumns,
 		lastModifiedColumn,
 		deleteColumn,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	] as ColumnDef<DataType, any>[];
 
 	const table = useReactTable({
