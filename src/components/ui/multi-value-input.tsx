@@ -55,7 +55,11 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		const nextOptions = initialValues
 			.map((optionValue) => options.find(getOptionComparator(optionValue))!)
 			.filter(Boolean);
-		setSelectedOptions(nextOptions);
+		setSelectedOptions((currentOptions) =>
+			areOptionsEqual(currentOptions, nextOptions)
+				? currentOptions
+				: nextOptions,
+		);
 	}, [initialValues, options]);
 
 	const onOptionSelect = useCallback(
@@ -212,6 +216,18 @@ function getOptionComparator(
 		const b = String(option.value).toLowerCase();
 		return include ? a === b : a !== b;
 	};
+}
+
+function areOptionsEqual(a: OptionType[], b: OptionType[]) {
+	if (a.length !== b.length) return false;
+	return a.every((option, index) => {
+		const otherOption = b[index];
+		if (!otherOption) return false;
+		return (
+			String(option.value).toLowerCase() ===
+			String(otherOption.value).toLowerCase()
+		);
+	});
 }
 
 function getDefaultValueFormatter(options: OptionType[]) {
