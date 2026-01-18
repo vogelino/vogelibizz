@@ -28,7 +28,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 			const id = row.original.id;
 			const value = getValue<string>();
 			return (
-				<InternalLink href={`/clients/edit/${id}`} className="text-base">
+				<InternalLink href={`/clients/edit/${id}`} className="text-base -ml-3 bg-transparent">
 					{value}
 				</InternalLink>
 			);

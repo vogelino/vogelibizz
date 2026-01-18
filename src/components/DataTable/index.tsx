@@ -106,7 +106,7 @@ export function DataTable<TData>({
 												<Button
 													variant="ghost"
 													onClick={column.getToggleSortingHandler()}
-													className={cn("group pl-0")}
+													className={cn("group pl-0 pr-6 hover:bg-transparent hover:text-primary")}
 												>
 													{label}
 													{!sort && <ArrowUpDown className={iconClass} />}
@@ -127,7 +127,7 @@ export function DataTable<TData>({
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id}>
+								<TableRow key={row.id} className="relative">
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
 											key={cell.id}

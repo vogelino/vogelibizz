@@ -19,7 +19,7 @@ export function IconBadge({
 			{...badgeProps}
 			className={cn(
 				"w-fit py-1 text-foreground border-border flex gap-1.5",
-				" max-w-40",
+				"max-w-40",
 				icon && `pl-1.5`,
 				badgeProps.className,
 				className,

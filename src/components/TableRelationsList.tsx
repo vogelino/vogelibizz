@@ -20,7 +20,7 @@ function TableRelationsList({
 	return (
 		<div className="flex gap-2">
 			{displayProjects.map((project) => (
-				<Link key={project.id} href={`/${relationResource}/edit/${project.id}`}>
+				<Link key={project.id} href={`/${relationResource}/edit/${project.id}`} className="focusable">
 					<IconBadge
 						icon={null}
 						label={project.name}
@@ -29,7 +29,7 @@ function TableRelationsList({
 				</Link>
 			))}
 			{isMore && (
-				<Link href={`/${originalResource}/edit/${originalId}`}>
+				<Link href={`/${originalResource}/edit/${originalId}`} className="focusable">
 					<IconBadge
 						icon={null}
 						label={`+${items.length - maxItems}`}
