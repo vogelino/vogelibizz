@@ -1,11 +1,12 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import db from "@/db";
 import { projectInsertSchema, projects, projectsToClients } from "@/db/schema";
 import { getCreationRoute } from "@/utility/apiUtil";
-import { NextResponse } from "next/server";
 import { getProjects } from "./getProjects";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 export const GET = auth(async () => {
 	return NextResponse.json(await getProjects());
 });

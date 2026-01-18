@@ -22,56 +22,50 @@ export const Table = ({
 		currency,
 	});
 	return (
-		<>
-			<View style={styles.wrapper}>
-				<View style={[styles.row, styles.headerRow]}>
-					<Text style={styles.rowNumber}>#</Text>
-					<Text style={styles.rowDescription}>
-						{LABELS[lang].tableHeaderDescription}
-					</Text>
-					<Text style={[styles.rowHours, styles.headerRowLabel]}>
-						{LABELS[lang].tableHeaderHours}
-					</Text>
-					<Text style={[styles.rowPrice, styles.headerRowLabel]}>
-						{`${LABELS[lang].tableHeaderPrice} (${currency})`}
-					</Text>
-				</View>
-				{rows.map(({ description, hoursCount }, idx) => (
-					<View style={styles.row} key={`${description}-${hoursCount}`}>
-						<Text style={styles.rowNumber}>
-							{`${idx + 1}`.padStart(2, "0")}
-						</Text>
-						<Text style={styles.rowDescription}>{description}</Text>
-						<Text style={styles.rowHours}>
-							{hoursCount.toLocaleString(lang)}
-						</Text>
-						<Text style={styles.rowPrice}>
-							{currencyFormatter.format(hoursCount * hourlyRate)}
-						</Text>
-					</View>
-				))}
-				<View style={[styles.row, styles.totalRow]}>
-					<Text style={styles.rowNumber} />
-					<Text style={[styles.rowDescription, styles.totalRowTotal]}>
-						{LABELS[lang].tableTotal}:
-					</Text>
-					<Text style={[styles.rowHours, styles.totalRowLabel]}>
-						{rows
-							.reduce((acc, { hoursCount }) => acc + hoursCount, 0)
-							.toLocaleString(lang)}
-					</Text>
-					<Text style={[styles.rowPrice, styles.totalRowLabel]}>
-						{currencyFormatter.format(
-							rows.reduce(
-								(acc, { hoursCount }) => acc + hoursCount * hourlyRate,
-								0,
-							),
-						)}
-						{hasFootNote && <Text style={styles.asterisk}> *</Text>}
-					</Text>
-				</View>
+		<View style={styles.wrapper}>
+			<View style={[styles.row, styles.headerRow]}>
+				<Text style={styles.rowNumber}>#</Text>
+				<Text style={styles.rowDescription}>
+					{LABELS[lang].tableHeaderDescription}
+				</Text>
+				<Text style={[styles.rowHours, styles.headerRowLabel]}>
+					{LABELS[lang].tableHeaderHours}
+				</Text>
+				<Text style={[styles.rowPrice, styles.headerRowLabel]}>
+					{`${LABELS[lang].tableHeaderPrice} (${currency})`}
+				</Text>
 			</View>
-		</>
+			{rows.map(({ description, hoursCount }, idx) => (
+				<View style={styles.row} key={`${description}-${hoursCount}`}>
+					<Text style={styles.rowNumber}>{`${idx + 1}`.padStart(2, "0")}</Text>
+					<Text style={styles.rowDescription}>{description}</Text>
+					<Text style={styles.rowHours}>{hoursCount.toLocaleString(lang)}</Text>
+					<Text style={styles.rowPrice}>
+						{currencyFormatter.format(hoursCount * hourlyRate)}
+					</Text>
+				</View>
+			))}
+			<View style={[styles.row, styles.totalRow]}>
+				<Text style={styles.rowNumber} />
+				<Text style={[styles.rowDescription, styles.totalRowTotal]}>
+					{LABELS[lang].tableTotal}:
+				</Text>
+				<Text style={[styles.rowHours, styles.totalRowLabel]}>
+					{rows
+						.reduce((acc, { hoursCount }) => acc + hoursCount, 0)
+						.toLocaleString(lang)}
+				</Text>
+				<Text style={[styles.rowPrice, styles.totalRowLabel]}>
+					{currencyFormatter.format(
+						rows.reduce(
+							(acc, { hoursCount }) => acc + hoursCount * hourlyRate,
+							0,
+						),
+					)}
+					{hasFootNote && <Text style={styles.asterisk}> *</Text>}
+				</Text>
+			</View>
+		</View>
 	);
 };
 

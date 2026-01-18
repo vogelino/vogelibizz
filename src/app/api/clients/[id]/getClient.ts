@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import db from "@/db";
 import {
 	type ClientType,
@@ -5,7 +6,6 @@ import {
 	projects,
 	projectsToClients,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getClient(id: number): Promise<ClientType> {
 	const clientsWithProjects = await db

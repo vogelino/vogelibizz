@@ -1,24 +1,21 @@
 "use client";
 
+import { ArrowUp } from "lucide-react";
 import BizzLogo from "@/components/BizzLogo";
 import { cn } from "@/utility/classNames";
-import { ArrowUp } from "lucide-react";
 
 const year = new Date().getFullYear();
 
 function Footer() {
 	return (
-		<footer
-			className="pt-6 pb-5 border-t border-grayMed bg-bg relative"
-			aria-label="Main page footer"
-		>
+		<footer className="pt-6 pb-5 border-t border-grayMed bg-bg relative">
 			<section
 				className={cn(
 					`px-6 flex justify-between gap-4 flex-wrap uppercase items-center`,
 					`tracking-wide text-grayDark`,
 				)}
 			>
-				<span aria-label={`Copyright ${year}`}>{year}</span>
+				<span>{year}</span>
 				<span>
 					<BizzLogo className="scale-75" color="grayDark" />
 				</span>

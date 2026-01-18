@@ -1,8 +1,8 @@
 "use client";
 import { Document, Page, StyleSheet, View } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
-import { FootNote } from "./components/FootNote";
 import { Footer } from "./components/Footer";
+import { FootNote } from "./components/FootNote";
 import { HourlyRateNotice } from "./components/HourlyRateNotice";
 import { Introduction } from "./components/Introduction";
 import { Letterhead } from "./components/Letterhead";

@@ -1,7 +1,7 @@
 "use client";
 
-import { type ClientType, clientSelectSchema } from "@/db/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { type ClientType, clientSelectSchema } from "@/db/schema";
 import createQueryFunction from "./createQueryFunction";
 
 type DataType = ClientType[];

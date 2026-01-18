@@ -1,6 +1,6 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getExpenses } from "@/app/api/expenses/getExpenses";
 import serverQueryClient from "@/utility/data/serverQueryClient";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import ExpensesPage from "./ExpensesPage";
 
 export const dynamic = "force-dynamic";

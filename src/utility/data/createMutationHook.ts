@@ -1,10 +1,10 @@
 "use client";
 
-import type { ResourceType } from "@/db/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import type { z } from "zod";
+import type { ResourceType } from "@/db/schema";
 import {
 	getQueryCompletionMessage,
 	singularizeResourceName,
@@ -12,7 +12,7 @@ import {
 } from "../resourceUtil";
 import type { ActionType } from "./createQueryFunction";
 
-function createMutationHook<DataType>({
+function createMutationHook<DataType, SchemaData>({
 	resourceName,
 	action,
 	inputZodSchema,
@@ -21,11 +21,11 @@ function createMutationHook<DataType>({
 }: {
 	resourceName: ResourceType;
 	action: ActionType;
-	inputZodSchema: z.ZodType;
-	mutationFn: (args?: z.infer<typeof inputZodSchema>) => Promise<void>;
+	inputZodSchema: z.ZodType<SchemaData>;
+	mutationFn: (args?: SchemaData) => Promise<void>;
 	createOptimisticDataEntry: (
 		old: DataType | undefined,
-		data: z.infer<typeof inputZodSchema>,
+		data: SchemaData,
 	) => DataType;
 }) {
 	return function hook() {
@@ -34,7 +34,7 @@ function createMutationHook<DataType>({
 		return useMutation({
 			mutationKey: [resourceName, action],
 			mutationFn,
-			onMutate: (data: z.infer<typeof inputZodSchema>) => {
+			onMutate: (data: SchemaData) => {
 				const input = inputZodSchema.parse(data);
 				queryClient.cancelQueries({ queryKey: [resourceName] });
 				const previousData = queryClient.getQueryData<DataType>([resourceName]);
@@ -46,7 +46,7 @@ function createMutationHook<DataType>({
 					pastPrincipe.charAt(0).toUpperCase() + pastPrincipe.slice(1);
 				const singularAcrtion = singularizeResourceName(resourceName);
 				const nameSuffix =
-					typeof input === "object" && "name" in input
+					input && typeof input === "object" && "name" in input
 						? ` "${input.name}"`
 						: "";
 				toastId.current = toast.loading(

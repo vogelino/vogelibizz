@@ -10,7 +10,7 @@ export function useDefaultSort({
 	defaultColumnId: string;
 	desc?: boolean;
 }): void {
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs once intentionally
 	useEffect(() => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const allParameterKeys = [...urlParams.keys()];

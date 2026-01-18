@@ -1,5 +1,5 @@
-import ResourcePageLayout from "@/components/ResourcePageLayout";
 import type { ReactNode } from "react";
+import ResourcePageLayout from "@/components/ResourcePageLayout";
 
 function ProjectsLayout({ children }: { children: ReactNode }) {
 	return (

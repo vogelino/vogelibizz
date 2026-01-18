@@ -1,8 +1,12 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { Session } from "next-auth";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { parseId } from "@/utility/resourceUtil";
-import { NextResponse } from "next/server";
-import { z } from "zod";
 import type { ActionType } from "./data/createQueryFunction";
+
+type AuthenticatedRequest = NextRequest & { auth?: Session | null };
 
 async function validateParams(
 	params: unknown,
@@ -18,7 +22,7 @@ async function validateParams(
 	return { id: parseId(objTest.data.id), error: null };
 }
 
-async function validateBody<
+async function _validateBody<
 	InputType extends { id: number | string },
 	InputSchema extends z.ZodSchema<InputType>,
 >(
@@ -54,54 +58,64 @@ export async function handleNotFoundDbQuery<T>(data: T, notFoundMessage = "") {
 export function getEditionRoute(
 	mutateData: (inputId: number, body?: unknown) => Promise<unknown>,
 ) {
-	return auth(async (req, { params = {} }) => {
-		let body = {};
-		try {
-			body = await req.json();
-			body = z.object({}).passthrough().parse(body);
-		} catch (err) {
-			return handleError(err, "edit");
-		}
-		const validation = await validateParams(params);
-		if (validation.error || !validation.id)
-			return NextResponse.json(
-				{ error: validation.error },
-				{ status: 400, statusText: "Invalid Parameters" },
-			);
-		const id = validation.id;
-		try {
-			console.log(`–––––––––––––––––––––––––`);
-			console.log(`Mutating using the id and body`);
-			console.log(`–––––––––––––––––––––––––`);
-			await mutateData(id, body);
-			return NextResponse.json({ success: true }, { status: 200 });
-		} catch (err) {
-			return handleError(err, "edit");
-		}
-	});
+	return auth(
+		async (
+			req: AuthenticatedRequest,
+			{ params = {} }: { params?: unknown },
+		) => {
+			let body = {};
+			try {
+				body = await req.json();
+				body = z.object({}).passthrough().parse(body);
+			} catch (err) {
+				return handleError(err, "edit");
+			}
+			const validation = await validateParams(params);
+			if (validation.error || !validation.id)
+				return NextResponse.json(
+					{ error: validation.error },
+					{ status: 400, statusText: "Invalid Parameters" },
+				);
+			const id = validation.id;
+			try {
+				console.log(`–––––––––––––––––––––––––`);
+				console.log(`Mutating using the id and body`);
+				console.log(`–––––––––––––––––––––––––`);
+				await mutateData(id, body);
+				return NextResponse.json({ success: true }, { status: 200 });
+			} catch (err) {
+				return handleError(err, "edit");
+			}
+		},
+	);
 }
 
 export function getDeletionRoute(mutateData: (id: number) => Promise<unknown>) {
-	return auth(async (_req, { params = {} }) => {
-		const { id, error } = await validateParams(params);
-		if (error || !id)
-			return NextResponse.json(
-				{ error },
-				{ status: 400, statusText: error || "Missing ID in params" },
-			);
-		try {
-			await mutateData(id);
-			return NextResponse.json({ success: true }, { status: 200 });
-		} catch (err) {
-			return handleError(err, "delete");
-		}
-	});
+	return auth(
+		async (
+			_req: AuthenticatedRequest,
+			{ params = {} }: { params?: unknown },
+		) => {
+			const { id, error } = await validateParams(params);
+			if (error || !id)
+				return NextResponse.json(
+					{ error },
+					{ status: 400, statusText: error || "Missing ID in params" },
+				);
+			try {
+				await mutateData(id);
+				return NextResponse.json({ success: true }, { status: 200 });
+			} catch (err) {
+				return handleError(err, "delete");
+			}
+		},
+	);
 }
 
 export function getCreationRoute<T extends z.ZodSchema>(
 	mutateData: (body: z.infer<T>) => Promise<unknown>,
 ) {
-	return auth(async (req) => {
+	return auth(async (req: AuthenticatedRequest) => {
 		try {
 			const bodyJson = await req.json();
 			await mutateData(bodyJson);
@@ -117,18 +131,20 @@ export function getQueryRouteWithId(
 	getNotFoundMessage = (id: number | string) =>
 		`Resource with id '${id}' does not exist`,
 ) {
-	return auth(async (_req, { params }) => {
-		const validation = await validateParams(params);
-		if (validation.error || !validation.id)
-			return NextResponse.json(
-				{ error: validation.error || "Missing ID" },
-				{ status: 400 },
+	return auth(
+		async (_req: AuthenticatedRequest, { params }: { params: unknown }) => {
+			const validation = await validateParams(params);
+			if (validation.error || !validation.id)
+				return NextResponse.json(
+					{ error: validation.error || "Missing ID" },
+					{ status: 400 },
+				);
+			return handleNotFoundDbQuery(
+				await getData(parseId(validation.id)),
+				getNotFoundMessage(validation.id),
 			);
-		return handleNotFoundDbQuery(
-			await getData(parseId(validation.id)),
-			getNotFoundMessage(validation.id),
-		);
-	});
+		},
+	);
 }
 
 function handleError(err: unknown, action: ActionType) {

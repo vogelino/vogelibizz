@@ -1,4 +1,6 @@
 "use client";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Trash } from "lucide-react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,13 +13,11 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Trash } from "lucide-react";
 import { parseId } from "./resourceUtil";
 
 export function getDeleteColumn<ColumnType = unknown>(
 	deleteAction: (id: number) => void = () => undefined,
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 ): ColumnDef<ColumnType, any> {
 	return {
 		id: "actions",

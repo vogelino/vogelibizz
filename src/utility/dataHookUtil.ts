@@ -1,7 +1,7 @@
-import type { ResourceType } from "@/db/schema";
-import env from "@/env";
 import { redirect } from "next/navigation";
 import { ZodError, type ZodSchema } from "zod";
+import type { ResourceType } from "@/db/schema";
+import env from "@/env";
 
 export async function handleFetchResponse<
 	T extends { id?: undefined | number | string },

@@ -14,7 +14,7 @@ export const Introduction = ({
 	<>
 		<Title prefix={titlePrefix} title={subject} />
 		<View style={styles.text}>
-			{introduction.split("\n").map((line, index) => (
+			{introduction.split("\n").map((line, _index) => (
 				<Text key={line} style={styles.paragraph}>
 					{line}
 				</Text>

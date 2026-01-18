@@ -1,5 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { forwardRef, useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { SimpleMDEReactProps } from "react-simplemde-editor";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import type { ClientType, ProjectType } from "@/db/schema";
@@ -12,11 +17,6 @@ import { statusList } from "@/utility/statusUtil";
 import useComboboxOptions, {
 	type OptionType,
 } from "@/utility/useComboboxOptions";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { forwardRef, useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import type { SimpleMDEReactProps } from "react-simplemde-editor";
 import { MultiValueInput } from "./ui/multi-value-input";
 
 const DynamicEditor = dynamic(
@@ -99,7 +99,7 @@ export default function ProjectEdit({
 			onSubmit={handleSubmit((values) => {
 				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
 				const project = { ...values, content, status, clients: projectClients };
-				if (id) editMutation.mutate({ ...project, id });
+				if (id) editMutation.mutate({ ...project, id: Number(id) });
 				else createMutation.mutate([project]);
 			})}
 			id={formId}
@@ -143,7 +143,7 @@ export default function ProjectEdit({
 					className="w-full"
 				/>
 				{!projectQuery.error && !projectQuery.isPending && (
-					<label className="flex flex-col gap-1">
+					<div className="flex flex-col gap-1">
 						<span className="text-grayDark">Clients</span>
 						<MultiValueInput
 							options={clientsOptions}
@@ -152,7 +152,7 @@ export default function ProjectEdit({
 							className="w-full"
 							onChange={onProjectsChange}
 						/>
-					</label>
+					</div>
 				)}
 			</div>
 		</form>

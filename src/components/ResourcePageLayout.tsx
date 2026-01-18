@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import ResourceCreateButton from "@/components/ResourceCreateButton";
 import type { ResourceType } from "@/db/schema";
-import type { ReactNode } from "react";
 
 function ResourcePageLayout({
 	resource,

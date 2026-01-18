@@ -1,7 +1,14 @@
 "use client";
 
+import {
+	Check,
+	Laptop,
+	type LucideIcon,
+	MoonIcon,
+	SunIcon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
-
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -10,14 +17,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utility/classNames";
-import {
-	Check,
-	Laptop,
-	type LucideIcon,
-	MoonIcon,
-	SunIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
 
 type ThemeOptionType = {
 	name: string;

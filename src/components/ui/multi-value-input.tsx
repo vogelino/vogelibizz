@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeftToLine, Check, ChevronDown, X } from "lucide-react";
-
+import { type ReactNode, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -16,7 +16,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/utility/classNames";
-import { type ReactNode, useCallback, useState } from "react";
 import { IconBadge } from "./icon-badge";
 
 type OptionType = {
@@ -30,7 +29,7 @@ type MultiValueInputProps<OptionValueType> = {
 	values?: OptionValueType[];
 	className?: string;
 	placeholder?: string;
-	selectedValueFormater?: (value: string | number) => JSX.Element;
+	selectedValueFormater?: (value: string | number) => ReactNode;
 };
 
 export function MultiValueInput<OptionValueType extends string = string>({
@@ -103,24 +102,19 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								<div className="min-w-40 flex gap-4 justify-between items-center w-full">
 									<div className="flex gap-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
-											<span
-												role="button"
+											<button
+												type="button"
 												key={option.value}
 												className="focusable rounded-full"
-												onKeyDown={(evt) => {
-													if (evt.key === "Enter" || evt.key === " ") {
-														evt.stopPropagation();
-														onOptionSelect(option.value);
-													}
-												}}
 												onClick={(evt) => {
 													evt.stopPropagation();
 													onOptionSelect(option.value);
 												}}
 											>
 												{selectedValueFormaterFn(option.value)}
-											</span>
+											</button>
 										))}
+
 										{selectedOptions.length > 5 && (
 											<span className="rounded-full bg-bg">
 												<IconBadge

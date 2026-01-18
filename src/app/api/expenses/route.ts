@@ -1,11 +1,12 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import db from "@/db";
 import { expenseInsertSchema, expenses } from "@/db/schema";
 import { getCreationRoute } from "@/utility/apiUtil";
-import { NextResponse } from "next/server";
 import { getExpenses } from "./getExpenses";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 export const GET = auth(async () => {
 	console.log("GET /api/expenses");
 	try {

@@ -1,6 +1,6 @@
+import { ZodError, type ZodObject, type ZodSchema, type ZodTypeAny } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
-import { type AnyZodObject, ZodError, type ZodSchema } from "zod";
 import { handleFetchResponse } from "../dataHookUtil";
 import { parseId } from "../resourceUtil";
 
@@ -23,7 +23,9 @@ type CreateArgs = CommonArgs<"create"> & {
 	inputZodSchema: ZodSchema;
 };
 type DeleteArgs = CommonArgs<"delete">;
-type EditArgs = CommonArgs<"edit"> & { inputZodSchema: AnyZodObject };
+type EditArgs = CommonArgs<"edit"> & {
+	inputZodSchema: ZodObject<Record<string, ZodTypeAny>>;
+};
 
 type CreateQueryFnArgs =
 	| CreateArgs
@@ -92,7 +94,7 @@ function createCreateFn<OutputType>(
 			}),
 			crudAction: "create",
 			resourceName,
-			data: input,
+			data: input as { id?: string | number },
 		});
 	};
 }
@@ -114,7 +116,7 @@ function createEditFn<OutputType>(
 				}),
 				crudAction: "edit",
 				resourceName,
-				data: input,
+				data: input as { id?: string | number },
 			});
 		} catch (error) {
 			if (error instanceof ZodError) {

@@ -6,14 +6,14 @@ export * from "./projectsDbSchema";
 export * from "./projectsToClientsDbSchema";
 export * from "./projectsToInvoicesDbSchema";
 export * from "./projectsToQuotesDbSchema";
-export * from "./settingsDbSchema";
 export * from "./quotesDbSchema";
+export * from "./settingsDbSchema";
 
 export type ResourceType =
-  | "projects"
-  | "currencies"
-  | "clients"
-  | "expenses"
-  | "quotes"
-  | "settings"
-  | "invoices";
+	| "projects"
+	| "currencies"
+	| "clients"
+	| "expenses"
+	| "quotes"
+	| "settings"
+	| "invoices";

@@ -1,12 +1,13 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import db from "@/db";
 import { clientInsertSchema, clients } from "@/db/schema";
 import { getCreationRoute } from "@/utility/apiUtil";
-import { NextResponse } from "next/server";
 import { projectsToClients } from "./../../../db/schema/projectsToClientsDbSchema";
 import { getClients } from "./getClients";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 export const GET = auth(async () => {
 	const clients = await getClients();
 	return NextResponse.json(clients);
