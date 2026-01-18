@@ -7,7 +7,6 @@ import {
 	getEditionRoute,
 	getQueryRouteWithId,
 } from "@/utility/apiUtil";
-import { parseId } from "@/utility/resourceUtil";
 import { getExpense } from "./getExpense";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +24,7 @@ export const GET = getQueryRouteWithId(
 );
 
 export const DELETE = getDeletionRoute(
-	async (id) => await db.delete(expenses).where(eq(expenses.id, parseId(id))),
+	async (id) => await db.delete(expenses).where(eq(expenses.id, id)),
 );
 
 export const PATCH = getEditionRoute((id, body) => {
@@ -34,8 +33,8 @@ export const PATCH = getEditionRoute((id, body) => {
 		.update(expenses)
 		.set({
 			...parsedBody,
-			id: parseId(id),
+			id,
 			last_modified: new Date().toISOString(),
 		})
-		.where(eq(expenses.id, parseId(id)));
+		.where(eq(expenses.id, id));
 });

@@ -68,15 +68,14 @@ function getSubstantiveByAction(action: ActionType) {
 }
 
 export function parseId(id: unknown) {
-	if (id === undefined || id === null || id === "") {
-		return undefined;
-	}
-
 	return z
 		.union([z.string(), z.number()], {
 			message: `The provided ID is not a valid number or string. Received "${id}"`,
 		})
 		.transform((id) => Number(id))
+		.refine((parsedId) => !Number.isNaN(parsedId), {
+			message: `The provided ID is not a valid number or string. Received "${id}"`,
+		})
 		.parse(id);
 }
 

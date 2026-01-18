@@ -6,7 +6,6 @@ import {
 	getEditionRoute,
 	getQueryRouteWithId,
 } from "@/utility/apiUtil";
-import { parseId } from "@/utility/resourceUtil";
 import { getClient } from "./getClient";
 
 export const dynamic = "force-dynamic";
