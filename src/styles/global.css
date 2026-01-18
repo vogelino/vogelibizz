@@ -272,7 +272,7 @@
 	}
 
 	html .form-textarea {
-		@apply min-h-[120px] resize-y;
+		@apply min-h-30 resize-y;
 	}
 
 	html .form-checkbox,

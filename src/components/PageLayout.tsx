@@ -12,7 +12,7 @@ export const PageLayout: React.FC<
 	const pathname = usePathname();
 	return (
 		<>
-			<div className="layout pt-[101px]">
+			<div className="layout pt-25.25">
 				<Menu currentPage={pathname.replace(/^\//, "")} />
 				<div className="content min-h-[calc(100vh-101px-83px)]">
 					<div>{children}</div>
