@@ -1,5 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import createQueryFunction from "./createQueryFunction";
 
 type DataType = ProjectType;
@@ -8,20 +8,16 @@ const action = "querySingle";
 const outputZodSchema = projectSelectSchema;
 
 function useProject(id?: string | number) {
-	const queryKey = [resourceName, `${id}`];
-	if (!id)
-		return {
-			data: null,
-			isPending: false,
-			error: null,
-		};
-	return useSuspenseQuery<DataType>({
+	const parsedId = id ? Number(id) : undefined;
+	const queryKey = [resourceName, `${parsedId ?? ""}`];
+	return useQuery<DataType>({
 		queryKey,
+		enabled: Number.isFinite(parsedId),
 		queryFn: createQueryFunction<DataType>({
 			resourceName,
 			action,
 			outputZodSchema,
-			id,
+			id: parsedId ?? "",
 		}),
 	});
 }
