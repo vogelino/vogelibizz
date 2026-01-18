@@ -9,17 +9,25 @@ import type { ActionType } from "./data/createQueryFunction";
 type AuthenticatedRequest = NextRequest & { auth?: Session | null };
 
 async function validateParams(
-	params: unknown,
+	paramsPromise: unknown,
+	bodyFallback?: unknown,
 ): Promise<{ id: number; error: null } | { id?: undefined; error: string }> {
+	const params = await paramsPromise;
 	const idSchema = z.union([z.string(), z.number()]);
 	const idTest = idSchema.safeParse(params);
 	if (idTest.success) return { id: parseId(idTest.data), error: null };
+
 	const objTest = z.object({ id: idSchema }).safeParse(params);
-	if (objTest.error) {
-		console.log(`Missing ID in params object`, objTest.error);
-		return { error: `Missing ID in params object` };
-	}
-	return { id: parseId(objTest.data.id), error: null };
+	if (!objTest.error) return { id: parseId(objTest.data.id), error: null };
+
+	const bodyTest = z
+		.object({ id: idSchema })
+		.safeParse(bodyFallback ?? undefined);
+	if (!bodyTest.error) return { id: parseId(bodyTest.data.id), error: null };
+
+	const fallbackLabel = bodyFallback ? "request body" : "params object";
+	console.log(`Missing ID in ${fallbackLabel}`, objTest.error);
+	return { error: `Missing ID in ${fallbackLabel}` };
 }
 
 async function _validateBody<
@@ -70,7 +78,7 @@ export function getEditionRoute(
 			} catch (err) {
 				return handleError(err, "edit");
 			}
-			const validation = await validateParams(params);
+			const validation = await validateParams(params, body);
 			if (validation.error || !validation.id)
 				return NextResponse.json(
 					{ error: validation.error },
@@ -112,9 +120,9 @@ export function getDeletionRoute(mutateData: (id: number) => Promise<unknown>) {
 	);
 }
 
-export function getCreationRoute<T extends z.ZodSchema>(
-	mutateData: (body: z.infer<T>) => Promise<unknown>,
-) {
+export const getCreationRoute = (
+	mutateData: (body: unknown) => Promise<unknown>,
+) => {
 	return auth(async (req: AuthenticatedRequest) => {
 		try {
 			const bodyJson = await req.json();
@@ -124,7 +132,7 @@ export function getCreationRoute<T extends z.ZodSchema>(
 			return handleError(err, "create");
 		}
 	});
-}
+};
 
 export function getQueryRouteWithId(
 	getData: (id: number) => Promise<unknown>,
@@ -165,5 +173,3 @@ function handleError(err: unknown, action: ActionType) {
 	console.log(`–––––––––––––––––––––––––`);
 	return NextResponse.json({ error: err }, { status: 500 });
 }
-
-export default {};
