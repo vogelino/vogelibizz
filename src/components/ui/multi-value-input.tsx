@@ -9,6 +9,7 @@ import {
 	CommandGroup,
 	CommandInput,
 	CommandItem,
+	CommandList,
 } from "@/components/ui/command";
 import {
 	Popover,
@@ -153,31 +154,33 @@ export function MultiValueInput<OptionValueType extends string = string>({
 				<PopoverContent className="w-fit p-0" align="end">
 					<Command>
 						<CommandInput placeholder="Search..." />
-						<CommandEmpty>Nothing found.</CommandEmpty>
-						<CommandGroup>
-							{options.map((option) => (
-								<CommandItem
-									key={option.value}
-									value={String(option.value)}
-									onSelect={(newValue) =>
-										onOptionSelect(newValue as OptionValueType)
-									}
-								>
-									<Check
-										className={cn(
-											"mr-2 h-4 w-4",
-											selectedOptions.find(getOptionComparator(option.value))
-												? "opacity-100"
-												: "opacity-0",
-										)}
-									/>
+						<CommandList>
+							<CommandEmpty>Nothing found.</CommandEmpty>
+							<CommandGroup>
+								{options.map((option) => (
+									<CommandItem
+										key={option.value}
+										value={String(option.value)}
+										onSelect={(newValue) =>
+											onOptionSelect(newValue as OptionValueType)
+										}
+									>
+										<Check
+											className={cn(
+												"mr-2 h-4 w-4",
+												selectedOptions.find(getOptionComparator(option.value))
+													? "opacity-100"
+													: "opacity-0",
+											)}
+										/>
 
-									<div className="w-full flex gap-3 items-center">
-										{option.label}
-									</div>
-								</CommandItem>
-							))}
-						</CommandGroup>
+										<div className="w-full flex gap-3 items-center">
+											{option.label}
+										</div>
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
 					</Command>
 				</PopoverContent>
 			</Popover>
