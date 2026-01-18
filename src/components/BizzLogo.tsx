@@ -13,7 +13,7 @@ function BizzLogo({ className, textClassName, color = "fg" }: BizzLogoProps) {
 				color === "grayDark" && "text-grayDark",
 				"font-special text-3xl inline-block",
 				"antialiased transition-colors",
-				"relative w-fit pr-[4.5rem]",
+				"relative w-fit pr-18",
 				className,
 			)}
 		>

@@ -80,7 +80,7 @@ export const categoryToOptionClass = <
 		case "Administrative":
 			return "bg-sky-500";
 		default:
-			return "bg-gradient-to-r from-red-500 via-yellow-500 to-green-500";
+			return "bg-linear-to-r from-red-500 via-yellow-500 to-green-500";
 	}
 };
 
