@@ -12,7 +12,7 @@ function PageHeaderTitle({
 		<div
 			className={cn(
 				"font-special font-light text-3xl antialiased",
-				"grid grid-cols-[1fr,auto] gap-4 items-center max-w-full",
+				"grid grid-cols-[1fr_auto] gap-4 items-center max-w-full",
 			)}
 		>
 			<div className="truncate">
