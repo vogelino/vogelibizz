@@ -29,7 +29,7 @@ export default function RootLayout({
 			<head />
 			<body>
 				<NextTopLoader
-					color="var(--fg)"
+					color="hsl(var(--primary))"
 					height={1}
 					shadow={""}
 					showSpinner={false}

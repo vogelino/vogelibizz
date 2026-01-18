@@ -110,7 +110,7 @@ export default function ExpenseEdit({
 			<div className="flex flex-col gap-6">
 				<FormInputWrapper label="Name" error={errors?.name?.message as string}>
 					<input
-						className="form-input dark:bg-grayUltraLight"
+						className="form-input dark:bg-card"
 						placeholder="Expense name"
 						type="text"
 						{...register("name", { required: true })}

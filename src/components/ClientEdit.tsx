@@ -87,7 +87,7 @@ export default function ClientEdit({
 		>
 			<div className="flex flex-col gap-6">
 				<label className="flex flex-col gap-1">
-					<span className="text-grayDark">Name</span>
+					<span className="text-muted-foreground">Name</span>
 					<input
 						type="text"
 						{...register("name", {
@@ -100,7 +100,7 @@ export default function ClientEdit({
 				</label>
 				{!clientQuery.error && !clientQuery.isPending && (
 					<div className="flex flex-col gap-1">
-						<span className="text-grayDark">Projects</span>
+						<span className="text-muted-foreground">Projects</span>
 						<MultiValueInput
 							options={projectsOptions}
 							values={clientProjects.map((project) => String(project.id)) || []}

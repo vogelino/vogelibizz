@@ -36,7 +36,7 @@ export function ResponsiveModal({
 		>
 			<DrawerContent
 				className={cn(
-					`border-grayMed`,
+					"border-border",
 					isDesktop ? "border-l" : "border-t",
 					isDesktop
 						? "h-full w-[640px] mt-24 right-0"
@@ -44,7 +44,7 @@ export function ResponsiveModal({
 				)}
 			>
 				{isDesktop ? null : (
-					<div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-grayMed" />
+					<div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-border" />
 				)}
 				{(title || description) && (
 					<DrawerHeader className="text-left">

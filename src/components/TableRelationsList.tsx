@@ -33,7 +33,7 @@ function TableRelationsList({
 					<IconBadge
 						icon={null}
 						label={`+${items.length - maxItems}`}
-						className="m-0 text-grayDark"
+						className="m-0 text-muted-foreground"
 					/>
 				</Link>
 			)}

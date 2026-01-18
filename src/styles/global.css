@@ -17,14 +17,38 @@
 		"Segoe UI Symbol", "Noto Color Emoji";
 	--font-serif: serif;
 	--font-mono: monospace;
-	--color-fg: var(--fg);
-	--color-bg: var(--bg);
-	--color-bgOverlay: var(--bgOverlay);
-	--color-alt: var(--alt);
-	--color-grayDark: var(--grayDark);
-	--color-grayMed: var(--grayMed);
-	--color-grayLight: var(--grayLight);
-	--color-grayUltraLight: var(--grayUltraLight);
+	--color-background: hsl(var(--background));
+	--color-foreground: hsl(var(--foreground));
+	--color-card: hsl(var(--card));
+	--color-card-foreground: hsl(var(--card-foreground));
+	--color-popover: hsl(var(--popover));
+	--color-popover-foreground: hsl(var(--popover-foreground));
+	--color-primary: hsl(var(--primary));
+	--color-primary-foreground: hsl(var(--primary-foreground));
+	--color-secondary: hsl(var(--secondary));
+	--color-secondary-foreground: hsl(var(--secondary-foreground));
+	--color-muted: hsl(var(--muted));
+	--color-muted-foreground: hsl(var(--muted-foreground));
+	--color-accent: hsl(var(--accent));
+	--color-accent-foreground: hsl(var(--accent-foreground));
+	--color-destructive: hsl(var(--destructive));
+	--color-destructive-foreground: hsl(var(--destructive-foreground));
+	--color-border: hsl(var(--border));
+	--color-input: hsl(var(--input));
+	--color-ring: hsl(var(--ring));
+	--color-chart-1: hsl(var(--chart-1));
+	--color-chart-2: hsl(var(--chart-2));
+	--color-chart-3: hsl(var(--chart-3));
+	--color-chart-4: hsl(var(--chart-4));
+	--color-chart-5: hsl(var(--chart-5));
+	--color-sidebar: hsl(var(--sidebar-background));
+	--color-sidebar-foreground: hsl(var(--sidebar-foreground));
+	--color-sidebar-primary: hsl(var(--sidebar-primary));
+	--color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+	--color-sidebar-accent: hsl(var(--sidebar-accent));
+	--color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+	--color-sidebar-border: hsl(var(--sidebar-border));
+	--color-sidebar-ring: hsl(var(--sidebar-ring));
 	--height-screen: 100lvh;
 	--width-screen: 100lvw;
 }
@@ -37,65 +61,182 @@
 	text-wrap: pretty;
 }
 
-@utility text-stroke-grayDark {
+@utility text-stroke-muted {
 	-webkit-text-stroke-width: 5px;
-	-webkit-text-stroke-color: var(--grayDark);
+	-webkit-text-stroke-color: var(--stroke-muted);
 }
 
-@utility text-stroke-fg {
+@utility text-stroke-strong {
 	-webkit-text-stroke-width: 5px;
-	-webkit-text-stroke-color: var(--fg);
+	-webkit-text-stroke-color: var(--stroke-strong);
 }
 
 @layer base {
 	::-moz-selection,
 	::selection {
-		@apply text-alt bg-fg;
+		background: var(--selection-bg);
+		color: var(--selection-text);
 	}
 
 	:root,
 	:root[data-theme="light"] {
-		--fg: #e30002;
-		--bg: #fcfeff;
-		--bgOverlay: rgba(241, 250, 255, 0.7);
-		--alt: #ffef9b;
-		--grayDark: #5d7280;
-		--grayMed: #d0dfe7;
-		--grayLight: #e1ecf2;
-		--grayUltraLight: #f1faff;
+		--background: 200 100% 99%;
+		--foreground: 359 100% 45%;
+		--card: 200 100% 99%;
+		--card-foreground: 359 100% 45%;
+		--popover: 200 100% 99%;
+		--popover-foreground: 359 100% 45%;
+		--primary: 359 100% 45%;
+		--primary-foreground: 200 100% 99%;
+		--secondary: 50 100% 80%;
+		--secondary-foreground: 359 100% 45%;
+		--muted: 201 40% 92%;
+		--muted-foreground: 204 16% 43%;
+		--accent: 50 100% 80%;
+		--accent-foreground: 359 100% 45%;
+		--destructive: 359 100% 45%;
+		--destructive-foreground: 200 100% 99%;
+		--border: 201 32% 86%;
+		--input: 201 32% 86%;
+		--ring: 359 100% 45%;
+		--chart-1: 359 100% 45%;
+		--chart-2: 50 100% 80%;
+		--chart-3: 204 16% 43%;
+		--chart-4: 201 32% 86%;
+		--chart-5: 201 40% 92%;
+		--sidebar-background: 200 100% 99%;
+		--sidebar-foreground: 204 16% 43%;
+		--sidebar-primary: 359 100% 45%;
+		--sidebar-primary-foreground: 200 100% 99%;
+		--sidebar-accent: 50 100% 80%;
+		--sidebar-accent-foreground: 359 100% 45%;
+		--sidebar-border: 201 32% 86%;
+		--sidebar-ring: 359 100% 45%;
+		--overlay: color-mix(in hsl, hsl(var(--background)) 70%, transparent);
+		--selection-bg: hsl(var(--primary));
+		--selection-text: hsl(var(--secondary));
+		--stroke-muted: hsl(var(--muted-foreground));
+		--stroke-strong: hsl(var(--foreground));
 	}
 
 	:root[data-theme="dark"] {
-		--fg: #ffef9b;
-		--bg: #1c1c1c;
-		--bgOverlay: rgba(13, 13, 13, 0.7);
-		--alt: #e30002;
-		--grayDark: #ababab;
-		--grayMed: #000000;
-		--grayLight: hwb(0 17% 83%);
-		--grayUltraLight: #0d0d0d;
+		--background: 0 0% 11%;
+		--foreground: 50 100% 80%;
+		--card: 0 0% 11%;
+		--card-foreground: 50 100% 80%;
+		--popover: 0 0% 11%;
+		--popover-foreground: 50 100% 80%;
+		--primary: 50 100% 80%;
+		--primary-foreground: 0 0% 11%;
+		--secondary: 359 100% 45%;
+		--secondary-foreground: 0 0% 11%;
+		--muted: 0 0% 17%;
+		--muted-foreground: 0 0% 67%;
+		--accent: 359 100% 45%;
+		--accent-foreground: 50 100% 80%;
+		--destructive: 359 100% 45%;
+		--destructive-foreground: 50 100% 80%;
+		--border: 0 0% 0%;
+		--input: 0 0% 0%;
+		--ring: 50 100% 80%;
+		--chart-1: 50 100% 80%;
+		--chart-2: 359 100% 45%;
+		--chart-3: 0 0% 67%;
+		--chart-4: 0 0% 17%;
+		--chart-5: 0 0% 0%;
+		--sidebar-background: 0 0% 11%;
+		--sidebar-foreground: 0 0% 67%;
+		--sidebar-primary: 50 100% 80%;
+		--sidebar-primary-foreground: 0 0% 11%;
+		--sidebar-accent: 359 100% 45%;
+		--sidebar-accent-foreground: 50 100% 80%;
+		--sidebar-border: 0 0% 17%;
+		--sidebar-ring: 50 100% 80%;
+		--overlay: color-mix(in hsl, hsl(var(--background)) 70%, transparent);
+		--selection-bg: hsl(var(--primary));
+		--selection-text: hsl(var(--accent-foreground));
+		--stroke-muted: hsl(var(--muted-foreground));
+		--stroke-strong: hsl(var(--foreground));
 	}
 
 	@media (prefers-contrast: more) {
 		:root[data-theme="light"] {
-			--fg: #b60003;
-			--bg: #ffffff;
-			--bgOverlay: rgba(93, 114, 128, 0.8);
-			--alt: #ffef9b;
-			--grayDark: #1d2022;
-			--grayMed: #666c6f;
-			--grayLight: #b7c3ca;
-			--grayUltraLight: #ffffff;
+			--background: 0 0% 100%;
+			--foreground: 359 100% 36%;
+			--card: 0 0% 100%;
+			--card-foreground: 359 100% 36%;
+			--popover: 0 0% 100%;
+			--popover-foreground: 359 100% 36%;
+			--primary: 359 100% 36%;
+			--primary-foreground: 0 0% 100%;
+			--secondary: 50 100% 80%;
+			--secondary-foreground: 359 100% 36%;
+			--muted: 202 15% 75%;
+			--muted-foreground: 204 8% 12%;
+			--accent: 50 100% 80%;
+			--accent-foreground: 359 100% 36%;
+			--destructive: 359 100% 36%;
+			--destructive-foreground: 0 0% 100%;
+			--border: 200 4% 42%;
+			--input: 200 4% 42%;
+			--ring: 359 100% 36%;
+			--chart-1: 359 100% 36%;
+			--chart-2: 50 100% 80%;
+			--chart-3: 204 8% 12%;
+			--chart-4: 200 4% 42%;
+			--chart-5: 202 15% 75%;
+			--sidebar-background: 0 0% 100%;
+			--sidebar-foreground: 204 8% 12%;
+			--sidebar-primary: 359 100% 36%;
+			--sidebar-primary-foreground: 0 0% 100%;
+			--sidebar-accent: 50 100% 80%;
+			--sidebar-accent-foreground: 359 100% 36%;
+			--sidebar-border: 200 4% 42%;
+			--sidebar-ring: 359 100% 36%;
+			--overlay: color-mix(in hsl, hsl(var(--background)) 70%, transparent);
+			--selection-bg: hsl(var(--primary));
+			--selection-text: hsl(var(--secondary));
+			--stroke-muted: hsl(var(--muted-foreground));
+			--stroke-strong: hsl(var(--foreground));
 		}
 		:root[data-theme="dark"] {
-			--fg: #fff6c8;
-			--bg: #000000;
-			--bgOverlay: rgba(0, 0, 0, 0.8);
-			--alt: #000000;
-			--grayDark: #fff6c8;
-			--grayMed: #e30002;
-			--grayLight: #e30002;
-			--grayUltraLight: #000;
+			--background: 0 0% 0%;
+			--foreground: 50 100% 89%;
+			--card: 0 0% 0%;
+			--card-foreground: 50 100% 89%;
+			--popover: 0 0% 0%;
+			--popover-foreground: 50 100% 89%;
+			--primary: 50 100% 89%;
+			--primary-foreground: 0 0% 0%;
+			--secondary: 0 0% 0%;
+			--secondary-foreground: 50 100% 89%;
+			--muted: 359 100% 45%;
+			--muted-foreground: 50 100% 89%;
+			--accent: 0 0% 0%;
+			--accent-foreground: 50 100% 89%;
+			--destructive: 359 100% 45%;
+			--destructive-foreground: 50 100% 89%;
+			--border: 359 100% 45%;
+			--input: 359 100% 45%;
+			--ring: 50 100% 89%;
+			--chart-1: 50 100% 89%;
+			--chart-2: 359 100% 45%;
+			--chart-3: 50 100% 89%;
+			--chart-4: 359 100% 45%;
+			--chart-5: 0 0% 0%;
+			--sidebar-background: 0 0% 0%;
+			--sidebar-foreground: 50 100% 89%;
+			--sidebar-primary: 50 100% 89%;
+			--sidebar-primary-foreground: 0 0% 0%;
+			--sidebar-accent: 0 0% 0%;
+			--sidebar-accent-foreground: 50 100% 89%;
+			--sidebar-border: 359 100% 45%;
+			--sidebar-ring: 50 100% 89%;
+			--overlay: color-mix(in hsl, hsl(var(--background)) 70%, transparent);
+			--selection-bg: hsl(var(--primary));
+			--selection-text: hsl(var(--accent-foreground));
+			--stroke-muted: hsl(var(--muted-foreground));
+			--stroke-strong: hsl(var(--foreground));
 		}
 	}
 
@@ -106,9 +247,9 @@
 	html .form-number,
 	html .form-checkbox,
 	html .form-radio {
-		@apply w-full border border-grayMed bg-bg px-3 py-2 text-fg;
-		@apply focusable focus-visible:border-fg focus-visible:ring-2 focus-visible:ring-fg/30;
-		@apply placeholder:text-grayDark/70;
+		@apply w-full border border-border bg-background px-3 py-2 text-foreground;
+		@apply focusable focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30;
+		@apply placeholder:text-muted-foreground/70;
 		@apply transition-colors duration-200;
 	}
 	@supports (-webkit-touch-callout: none) {
@@ -136,7 +277,7 @@
 
 	html .form-checkbox,
 	html .form-radio {
-		@apply h-4 w-4 rounded border-grayMed bg-bg text-fg;
+		@apply h-4 w-4 rounded border-border bg-background text-foreground;
 	}
 
 	html .form-select,
@@ -144,8 +285,8 @@
 		@apply pr-10;
 		appearance: none;
 		background-image:
-			linear-gradient(45deg, transparent 50%, var(--grayDark) 50%),
-			linear-gradient(135deg, var(--grayDark) 50%, transparent 50%);
+			linear-gradient(45deg, transparent 50%, var(--stroke-muted) 50%),
+			linear-gradient(135deg, var(--stroke-muted) 50%, transparent 50%);
 		background-position:
 			calc(100% - 18px) calc(1em + 2px),
 			calc(100% - 13px) calc(1em + 2px);
@@ -160,14 +301,14 @@
 	html[data-theme="dark"] .form-select,
 	html[data-theme="dark"] .form-multiselect,
 	html[data-theme="dark"] .form-number {
-		@apply bg-grayUltraLight text-fg placeholder:text-grayDark/70;
+		@apply bg-card text-foreground placeholder:text-muted-foreground/70;
 	}
 
 	html[data-theme="dark"] .form-select,
 	html[data-theme="dark"] .form-multiselect {
 		background-image:
-			linear-gradient(45deg, transparent 50%, var(--grayDark) 50%),
-			linear-gradient(135deg, var(--grayDark) 50%, transparent 50%);
+			linear-gradient(45deg, transparent 50%, var(--stroke-muted) 50%),
+			linear-gradient(135deg, var(--stroke-muted) 50%, transparent 50%);
 	}
 
 	html .form-input::-webkit-outer-spin-button,
@@ -192,31 +333,25 @@
 	html,
 	body {
 		scroll-behavior: smooth;
-		@apply text-fg bg-bg;
-	}
-
-	::-moz-selection,
-	::selection {
-		background: var(--bg, #ffef9b);
-		color: var(--fg, #e30002);
+		@apply text-foreground bg-background;
 	}
 }
 
 @utility focusable {
-	@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-fg;
-	@apply focus-visible:ring-offset-2 focus-visible:ring-offset-bg;
+	@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+	@apply focus-visible:ring-offset-2 focus-visible:ring-offset-background;
 }
 
 html div.CodeMirror,
 html .EasyMDEContainer .CodeMirror {
-	@apply text-inherit bg-bg border-none;
+	@apply text-inherit bg-background border-none;
 }
 html[data-theme="dark"] div.CodeMirror,
 html[data-theme="dark"] .EasyMDEContainer .CodeMirror {
-	@apply bg-grayUltraLight;
+	@apply bg-card;
 }
 html div.CodeMirror .cm-link,
 html div.CodeMirror .cm-url {
-	color: var(--fg);
-	background: var(--alt);
+	color: hsl(var(--primary));
+	background: hsl(var(--secondary));
 }

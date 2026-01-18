@@ -12,7 +12,7 @@ function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 	value: ValueType;
 }) {
 	return (
-		<div className="rounded-full bg-bg w-fit">
+		<div className="rounded-full bg-background w-fit">
 			<IconBadge
 				icon={null}
 				label={

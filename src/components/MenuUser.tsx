@@ -22,7 +22,7 @@ export default function MenuUser() {
 					variant="ghost"
 					size="icon"
 					className={cn(
-						"size-8 aspect-square rounded-full bg-grayUltraLight overflow-clip border-grayLight",
+						"size-8 aspect-square rounded-full bg-muted overflow-clip border-border",
 						"transition-opacity hover:opacity-75 border",
 					)}
 				>

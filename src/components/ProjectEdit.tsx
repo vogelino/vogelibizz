@@ -129,7 +129,7 @@ export default function ProjectEdit({
 					/>
 				</FormInputWrapper>
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
-					<div className="bg-bg dark:bg-grayUltraLight border border-grayMed min-h-[356px]">
+					<div className="bg-background dark:bg-card border border-border min-h-[356px]">
 						<ForwardedEditor value={content} onChange={setContent} />
 					</div>
 				</FormInputWrapper>
@@ -144,7 +144,7 @@ export default function ProjectEdit({
 				/>
 				{!projectQuery.error && !projectQuery.isPending && (
 					<div className="flex flex-col gap-1">
-						<span className="text-grayDark">Clients</span>
+						<span className="text-muted-foreground">Clients</span>
 						<MultiValueInput
 							options={clientsOptions}
 							values={projectClients.map((client) => String(client.id)) || []}
