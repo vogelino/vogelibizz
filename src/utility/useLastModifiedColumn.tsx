@@ -19,7 +19,7 @@ export function useLastModifiedColumn<
 				getNowInUTC(),
 			);
 			return (
-				<span className="text-muted-foreground">
+				<span className="text-muted-foreground text-nowrap">
 					{ucFirst(formattedDateWithTime)}
 				</span>
 			);
