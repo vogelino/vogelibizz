@@ -11,6 +11,7 @@
 		"build": "bun run check && next build",
 		"start": "next start",
 		"check": "bunx @biomejs/biome check --write src",
+		"format": "bunx @biomejs/biome format --write .",
 		"db:generate": "drizzle-kit generate:pg",
 		"db:studio": "drizzle-kit studio",
 		"db:migrate": "cross-env POSTGRES_MIGRATING=true bun run drizzle-kit push:pg",
