@@ -53,7 +53,7 @@ export const Menu = ({
 					"focus:outline-none focus:ring-2 focus:ring-ring",
 				)}
 			>
-				<BizzLogo textClassName="group-hover:text-secondary-foreground" />
+				<BizzLogo />
 			</Link>
 			<button
 				type="button"

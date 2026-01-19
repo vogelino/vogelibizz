@@ -71,11 +71,9 @@ export default function ExpensesPage() {
 	});
 	return (
 		<>
-			<div className="flex gap-6 justify-between items-center py-4 border-y border-border my-4">
-				<div className="flex items-center gap-x-4 flex-wrap">
-					<strong>Total per month:</strong>
-					<span className="font-mono">{totalPerMonth}</span>
-				</div>
+			<div className="flex flex-col p-4 bg-muted my-4">
+				<span className="text-sm text-muted-foreground">Monthly total</span>
+				<span className="text-lg">{totalPerMonth}</span>
 			</div>
 			<div className="w-full mb-6">
 				{data && (
