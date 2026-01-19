@@ -2,7 +2,7 @@
 
 import { ArrowLeftToLine, Check, ChevronDown, X } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -92,27 +92,27 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		<div className="flex items-center border border-border">
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
-					<Button
-						variant="ghost"
+					<div
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
+    				  buttonVariants({ variant: "ghost" }),
 							"w-fit justify-between h-auto min-h-9.5",
 							"hover:bg-accent hover:text-accent-foreground border-border",
 							"text-base bg-background dark:bg-card",
-							"p-0 pr-2",
+							"p-0 pr-2 py-1.5",
 							className,
 						)}
 					>
-						<div className="flex gap-1 px-3 items-center border-r border-border w-full">
+						<div className="flex gap-4 pl-1.5 pr-3 items-center border-r border-border w-full">
 							{!selectedOptions.length && (
-								<span className="text-muted-foreground opacity-80 min-w-40 [text-box-trim:trim-both]">
+								<span className="text-muted-foreground pl-1.5 opacity-80 min-w-40 [text-box-trim:trim-both]">
 									{placeholder}
 								</span>
 							)}
 							{selectedOptions.length > 0 && (
 								<div className="min-w-40 flex gap-4 justify-between items-center w-full">
-									<div className="flex gap-1">
+									<div className="flex gap-x-1.5 gap-y-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
 											<button
 												key={option.value}
@@ -167,7 +167,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 							)}
 						</div>
 						<ChevronDown className="inline-block" />
-					</Button>
+					</div>
 				</PopoverTrigger>
 				<PopoverContent className="w-fit p-0" align="end">
 					<Command>
