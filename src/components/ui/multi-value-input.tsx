@@ -92,11 +92,12 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		<div className="flex items-center border border-border">
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
-					<div
+					<Button
+						type="button"
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-    				  buttonVariants({ variant: "ghost" }),
+							buttonVariants({ variant: "ghost" }),
 							"w-fit justify-between h-auto min-h-9.5",
 							"hover:bg-accent hover:text-accent-foreground border-border",
 							"text-base bg-background dark:bg-card",
@@ -167,7 +168,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 							)}
 						</div>
 						<ChevronDown className="inline-block" />
-					</div>
+					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-fit p-0" align="end">
 					<Command>

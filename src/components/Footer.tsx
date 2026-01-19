@@ -17,7 +17,7 @@ function Footer() {
 			>
 				<span>{year}</span>
 				<span>
-					<BizzLogo className="scale-75" color="grayDark" />
+					<BizzLogo className="scale-75" />
 				</span>
 				<button
 					id="back-to-top"

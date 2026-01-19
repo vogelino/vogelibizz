@@ -106,7 +106,9 @@ export function DataTable<TData>({
 												<Button
 													variant="ghost"
 													onClick={column.getToggleSortingHandler()}
-													className={cn("group pl-0 pr-6 hover:bg-transparent hover:text-primary")}
+													className={cn(
+														"group pl-0 pr-6 hover:bg-transparent hover:text-primary",
+													)}
 												>
 													{label}
 													{!sort && <ArrowUpDown className={iconClass} />}
