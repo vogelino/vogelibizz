@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import type { ResourceType } from "@/db/schema";
+import { Link, linkOptions } from "@tanstack/react-router";
 import { IconBadge } from "./ui/icon-badge";
+import type { RoutedResource } from "@/utility/routedResources";
 
 function TableRelationsList({
 	originalId,
@@ -11,8 +11,8 @@ function TableRelationsList({
 	useModalLinks = false,
 }: {
 	originalId: number;
-	originalResource: ResourceType;
-	relationResource: ResourceType;
+	originalResource: RoutedResource;
+	relationResource: RoutedResource;
 	items: { id: number; name: string }[];
 	maxItems?: number;
 	useModalLinks?: boolean;
@@ -24,16 +24,11 @@ function TableRelationsList({
 			{displayProjects.map((project) => (
 				<Link
 					key={project.id}
-					to={
-						useModalLinks
-							? `/${relationResource}/edit/${project.id}/modal`
-							: `/${relationResource}/edit/${project.id}`
-					}
+					{...getEditLink(relationResource, project.id, useModalLinks)}
 					mask={
 						useModalLinks
 							? {
-									to: `/${relationResource}/edit/$id`,
-									params: { id: String(project.id) },
+									...getEditLink(relationResource, project.id, false),
 									unmaskOnReload: true,
 								}
 							: undefined
@@ -49,16 +44,11 @@ function TableRelationsList({
 			))}
 			{isMore && (
 				<Link
-					to={
-						useModalLinks
-							? `/${originalResource}/edit/${originalId}/modal`
-							: `/${originalResource}/edit/${originalId}`
-					}
+					{...getEditLink(originalResource, originalId, useModalLinks)}
 					mask={
 						useModalLinks
 							? {
-									to: `/${originalResource}/edit/$id`,
-									params: { id: String(originalId) },
+									...getEditLink(originalResource, originalId, false),
 									unmaskOnReload: true,
 								}
 							: undefined
@@ -74,6 +64,32 @@ function TableRelationsList({
 			)}
 		</div>
 	);
+}
+
+function getEditLink(
+	resource: RoutedResource,
+	id: number,
+	modal: boolean,
+) {
+	const params = { id: String(id) };
+	switch (resource) {
+		case "clients":
+			return modal
+				? linkOptions({ to: "/clients/edit/$id/modal", params })
+				: linkOptions({ to: "/clients/edit/$id", params });
+		case "expenses":
+			return modal
+				? linkOptions({ to: "/expenses/edit/$id/modal", params })
+				: linkOptions({ to: "/expenses/edit/$id", params });
+		case "projects":
+			return modal
+				? linkOptions({ to: "/projects/edit/$id/modal", params })
+				: linkOptions({ to: "/projects/edit/$id", params });
+		default: {
+			const _exhaustive: never = resource;
+			throw new Error(`Unhandled resource ${_exhaustive}`);
+		}
+	}
 }
 
 export default TableRelationsList;

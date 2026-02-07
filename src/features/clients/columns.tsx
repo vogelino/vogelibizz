@@ -3,10 +3,11 @@ import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
 import {
 	type ClientType,
-	clientSelectSchema,
 	type ProjectType,
+	clientSelectSchema,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 const columnHelper = createColumnHelper<ClientType>();
 // biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -34,7 +35,8 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 			const value = getValue<string>();
 			return (
 				<InternalLink
-					href={`/clients/edit/${id}/modal`}
+					to="/clients/edit/$id/modal"
+					params={{ id: String(id) }}
 					className="text-base -ml-3 bg-transparent"
 					mask={{
 						to: "/clients/edit/$id",
@@ -42,7 +44,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 						unmaskOnReload: true,
 					}}
 					prefetchQuery={{
-						queryKey: ["clients", `${id}`],
+						queryKey: queryKeys.clients.detail(id).queryKey,
 						queryFn: createQueryFunction<ClientType>({
 							resourceName: "clients",
 							action: "querySingle",

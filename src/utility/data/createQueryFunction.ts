@@ -1,4 +1,4 @@
-import { ZodError, type ZodObject, type ZodSchema, type ZodTypeAny } from "zod";
+import { ZodError, type ZodSchema } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
 import { handleFetchResponse } from "../dataHookUtil";
@@ -14,43 +14,67 @@ type CommonArgs<A extends ActionType> = {
 	resourceName: ResourceType;
 	action: A;
 };
-type QueryAllArgs = CommonArgs<"queryAll"> & { outputZodSchema: ZodSchema };
-type QuerySingleArgs = CommonArgs<"querySingle"> & {
-	outputZodSchema: ZodSchema;
+type DataWithOptionalId = { id?: undefined | number | string };
+type DataWithRequiredId = { id: number | string };
+type DataCollection = Array<DataWithOptionalId>;
+type CreateInput = DataWithOptionalId | DataCollection;
+
+type QueryAllArgs<OutputType> = CommonArgs<"queryAll"> & {
+	outputZodSchema: ZodSchema<OutputType>;
+};
+type QuerySingleArgs<OutputType> = CommonArgs<"querySingle"> & {
+	outputZodSchema: ZodSchema<OutputType>;
 	id: string | number;
 };
-type CreateArgs = CommonArgs<"create"> & {
-	inputZodSchema: ZodSchema;
+type CreateArgs<InputType extends CreateInput> = CommonArgs<"create"> & {
+	inputZodSchema: ZodSchema<InputType>;
 };
 type DeleteArgs = CommonArgs<"delete">;
-type EditArgs = CommonArgs<"edit"> & {
-	inputZodSchema: ZodObject<Record<string, ZodTypeAny>>;
+type EditArgs<InputType extends DataWithRequiredId> = CommonArgs<"edit"> & {
+	inputZodSchema: ZodSchema<InputType>;
 };
 
-type CreateQueryFnArgs =
-	| CreateArgs
-	| EditArgs
-	| QuerySingleArgs
-	| QueryAllArgs
+type CreateQueryFnArgs<OutputType, InputType extends CreateInput> =
+	| CreateArgs<InputType>
+	| EditArgs<DataWithRequiredId>
+	| QuerySingleArgs<OutputType>
+	| QueryAllArgs<OutputType>
 	| DeleteArgs;
 
 const apiBaseUrl = env.client.VITE_PUBLIC_BASE_URL;
 
 export default function createQueryFunction<OutputType>(
-	args: CreateQueryFnArgs,
+	args: QueryAllArgs<OutputType>,
+): () => Promise<OutputType>;
+export default function createQueryFunction<OutputType>(
+	args: QuerySingleArgs<OutputType>,
+): () => Promise<OutputType>;
+export default function createQueryFunction<OutputType, InputType extends CreateInput>(
+	args: CreateArgs<InputType>,
+): (data: InputType) => Promise<OutputType>;
+export default function createQueryFunction<OutputType, InputType extends DataWithRequiredId>(
+	args: EditArgs<InputType>,
+): (data: InputType) => Promise<OutputType>;
+export default function createQueryFunction<OutputType>(
+	args: DeleteArgs,
+): (id: unknown) => Promise<OutputType>;
+export default function createQueryFunction<OutputType, InputType extends CreateInput>(
+	args: CreateQueryFnArgs<OutputType, InputType>,
 ) {
 	if (args.action === "queryAll") return createQueryAllFn<OutputType>(args);
 	if (args.action === "querySingle")
 		return createQuerySingleFn<OutputType>(args);
-	if (args.action === "create") return createCreateFn<OutputType>(args);
-	if (args.action === "edit") return createEditFn<OutputType>(args);
+	if (args.action === "create")
+		return createCreateFn<OutputType, InputType>(args);
+	if (args.action === "edit")
+		return createEditFn<OutputType, DataWithRequiredId>(args);
 	if (args.action === "delete") return createDeleteFn<OutputType>(args);
 	throw new Error("Unknown action");
 }
 
 function createQueryAllFn<OutputType>(
-	args: QueryAllArgs,
-): () => Promise<OutputType> {
+	args: QueryAllArgs<OutputType>,
+) {
 	const { resourceName, outputZodSchema } = args;
 	return async function queryFn(): Promise<OutputType> {
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
@@ -64,8 +88,8 @@ function createQueryAllFn<OutputType>(
 }
 
 function createQuerySingleFn<OutputType>(
-	args: QuerySingleArgs,
-): (id: unknown) => Promise<OutputType> {
+	args: QuerySingleArgs<OutputType>,
+) {
 	const { resourceName, outputZodSchema } = args;
 	return async function queryFn(): Promise<OutputType> {
 		const parsedId = parseId(args.id);
@@ -80,11 +104,11 @@ function createQuerySingleFn<OutputType>(
 	};
 }
 
-function createCreateFn<OutputType>(
-	args: CreateArgs,
-): (data: unknown) => Promise<OutputType> {
+function createCreateFn<OutputType, InputType extends CreateInput>(
+	args: CreateArgs<InputType>,
+): (data: InputType) => Promise<OutputType> {
 	const { resourceName, inputZodSchema } = args;
-	return async function queryFn(data: unknown): Promise<OutputType> {
+	return async function queryFn(data: InputType): Promise<OutputType> {
 		const input = inputZodSchema.parse(data);
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
 		return handleFetchResponse({
@@ -94,16 +118,16 @@ function createCreateFn<OutputType>(
 			}),
 			crudAction: "create",
 			resourceName,
-			data: input as { id?: string | number },
+			data: input,
 		});
 	};
 }
 
-function createEditFn<OutputType>(
-	args: EditArgs,
-): (data: unknown) => Promise<OutputType> {
+function createEditFn<OutputType, InputType extends DataWithRequiredId>(
+	args: EditArgs<InputType>,
+): (data: InputType) => Promise<OutputType> {
 	const { resourceName, inputZodSchema } = args;
-	return async function queryFn(data: unknown): Promise<OutputType> {
+	return async function queryFn(data: InputType): Promise<OutputType> {
 		try {
 			const input = inputZodSchema.parse(data);
 			const apiUrl = `${apiBaseUrl}/api/${resourceName}/${input.id}`;
@@ -116,7 +140,7 @@ function createEditFn<OutputType>(
 				}),
 				crudAction: "edit",
 				resourceName,
-				data: input as { id?: string | number },
+				data: input,
 			});
 		} catch (error) {
 			if (error instanceof ZodError) {

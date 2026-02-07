@@ -11,7 +11,7 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "expenses";
-const action: ActionType = "create";
+const action = "create" satisfies ActionType;
 const inputZodSchema = expenseInsertSchema.array();
 
 const useExpenseCreate = createMutationHook<
@@ -21,7 +21,7 @@ const useExpenseCreate = createMutationHook<
 	resourceName,
 	action,
 	inputZodSchema,
-	mutationFn: createQueryFunction<void>({
+	mutationFn: createQueryFunction<void, ExpenseInsertType[]>({
 		resourceName,
 		action,
 		inputZodSchema,

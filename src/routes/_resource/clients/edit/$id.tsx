@@ -32,7 +32,6 @@ function ClientEditPageRoute() {
 	const { client } = Route.useLoaderData();
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
-	const idString = `${id}`;
 	const formId = `client-edit-form-${parsedId}`;
 	const isPending = useRouterState({ select: (state) => state.isLoading });
 
@@ -44,7 +43,7 @@ function ClientEditPageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to={`/clients/edit/${idString}`}>
+						<Link to="/clients">
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

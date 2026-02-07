@@ -11,14 +11,14 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "projects";
-const action: ActionType = "edit";
+const action = "edit" satisfies ActionType;
 const inputZodSchema = projectEditSchema;
 
 const useProjectEdit = createMutationHook<ProjectType[], ProjectEditType>({
 	resourceName,
 	action,
 	inputZodSchema,
-	mutationFn: createQueryFunction<void>({
+	mutationFn: createQueryFunction<void, ProjectEditType>({
 		resourceName,
 		action,
 		inputZodSchema,

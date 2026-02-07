@@ -6,7 +6,7 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "expenses";
-const action: ActionType = "delete";
+const action = "delete" satisfies ActionType;
 const inputZodSchema = z.number();
 
 const useExpenseDelete = createMutationHook<ExpenseType[], ExpenseType["id"]>({

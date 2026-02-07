@@ -2,26 +2,28 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ClientType, clientSelectSchema } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 type DataType = ClientType;
-const resourceName = "clients";
-const action = "querySingle";
-const outputZodSchema = clientSelectSchema;
 
 function useClient(id?: string | number, initialData?: DataType) {
-	const queryKey = [resourceName, `${id ?? ""}`];
-	return useQuery<DataType>({
-		queryKey,
+	const query =
+		id === undefined ? queryKeys.clients.detail("") : queryKeys.clients.detail(id);
+	const queryFn = createQueryFunction<ClientType>({
+		resourceName: "clients",
+		action: "querySingle",
+		outputZodSchema: clientSelectSchema,
+		id: id ?? "",
+	});
+	const initialDataOptions = initialData
+		? { initialData, initialDataUpdatedAt: Date.now() }
+		: {};
+	return useQuery({
+		...query,
+		queryFn,
 		enabled: Boolean(id),
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-			id: id ?? "",
-		}),
-		initialData,
-		initialDataUpdatedAt: initialData ? Date.now() : undefined,
+		...initialDataOptions,
 	});
 }
 

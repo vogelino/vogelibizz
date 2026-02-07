@@ -2,23 +2,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
-
-type DataType = ProjectType[];
-const resourceName = "projects";
-const action = "queryAll";
-const outputZodSchema = projectSelectSchema.array();
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 function useProjects({ enabled = true }: { enabled?: boolean } = {}) {
-	const queryKey = [resourceName];
-	return useQuery<DataType>({
-		queryKey,
+	const queryFn = createQueryFunction<ProjectType[]>({
+		resourceName: "projects",
+		action: "queryAll",
+		outputZodSchema: projectSelectSchema.array(),
+	});
+	return useQuery({
+		...queryKeys.projects.list,
+		queryFn,
 		enabled,
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-		}),
 	});
 }
 

@@ -4,7 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import type { z } from "zod";
-import type { ResourceType } from "@/db/schema";
+import type { RoutedResource } from "@/utility/routedResources";
+import { queryKeys } from "@/utility/queryKeys";
 import {
 	getQueryCompletionMessage,
 	singularizeResourceName,
@@ -19,10 +20,10 @@ function createMutationHook<DataType, SchemaData>({
 	mutationFn,
 	createOptimisticDataEntry,
 }: {
-	resourceName: ResourceType;
+	resourceName: RoutedResource;
 	action: ActionType;
 	inputZodSchema: z.ZodType<SchemaData>;
-	mutationFn: (args?: SchemaData) => Promise<void>;
+	mutationFn: (args: SchemaData) => Promise<void>;
 	createOptimisticDataEntry: (
 		old: DataType | undefined,
 		data: SchemaData,
@@ -36,28 +37,28 @@ function createMutationHook<DataType, SchemaData>({
 			mutationFn,
 			onMutate: (data: SchemaData) => {
 				const input = inputZodSchema.parse(data);
-				queryClient.cancelQueries({ queryKey: [resourceName] });
-				const previousData = queryClient.getQueryData<DataType>([resourceName]);
-				queryClient.setQueryData<DataType>([resourceName], (old) =>
+				const listQuery = queryKeys[resourceName].list;
+				queryClient.cancelQueries({ queryKey: listQuery.queryKey });
+				const previousData = queryClient.getQueryData<DataType>(
+					listQuery.queryKey,
+				);
+				queryClient.setQueryData<DataType>(listQuery.queryKey, (old) =>
 					createOptimisticDataEntry(old, input),
 				);
 				const previousSingleData = new Map<string, unknown>();
 				const candidates = Array.isArray(input) ? input : [input];
 				candidates.forEach((candidate) => {
-					if (
-						!candidate ||
-						typeof candidate !== "object" ||
-						!("id" in candidate)
-					) {
+					if (!candidate || typeof candidate !== "object") {
 						return;
 					}
-					const id = String(candidate.id ?? "");
+					const id = "id" in candidate ? String(candidate.id ?? "") : "";
 					if (!id) return;
+					const detailQuery = queryKeys[resourceName].detail(id);
 					previousSingleData.set(
 						id,
-						queryClient.getQueryData([resourceName, id]),
+						queryClient.getQueryData(detailQuery.queryKey),
 					);
-					queryClient.setQueryData([resourceName, id], (old) =>
+					queryClient.setQueryData(detailQuery.queryKey, (old) =>
 						old && typeof old === "object"
 							? { ...old, ...candidate }
 							: candidate,
@@ -92,11 +93,12 @@ function createMutationHook<DataType, SchemaData>({
 			},
 			onError: (err, data, context) => {
 				queryClient.setQueryData<DataType>(
-					[resourceName],
+					queryKeys[resourceName].list.queryKey,
 					context?.previousData,
 				);
 				context?.previousSingleData?.forEach((value, id) => {
-					queryClient.setQueryData([resourceName, id], value);
+					const detailQuery = queryKeys[resourceName].detail(id);
+					queryClient.setQueryData(detailQuery.queryKey, value);
 				});
 				const errorMessage = getQueryCompletionMessage({
 					action,
@@ -113,22 +115,24 @@ function createMutationHook<DataType, SchemaData>({
 				});
 			},
 			onSettled: (_data, _error, variables) => {
-				queryClient.invalidateQueries({ queryKey: [resourceName] });
+				queryClient.invalidateQueries({
+					queryKey: queryKeys[resourceName].list.queryKey,
+				});
 				const parsedVariables = inputZodSchema.safeParse(variables);
 				if (parsedVariables.success) {
 					const candidates = Array.isArray(parsedVariables.data)
 						? parsedVariables.data
 						: [parsedVariables.data];
 					candidates.forEach((candidate) => {
-						if (
-							candidate &&
-							typeof candidate === "object" &&
-							"id" in candidate
-						) {
-							queryClient.invalidateQueries({
-								queryKey: [resourceName, String(candidate.id ?? "")],
-							});
+						if (!candidate || typeof candidate !== "object") {
+							return;
 						}
+						const id = "id" in candidate ? String(candidate.id ?? "") : "";
+						if (!id) return;
+						const detailQuery = queryKeys[resourceName].detail(id);
+						queryClient.invalidateQueries({
+							queryKey: detailQuery.queryKey,
+						});
 					});
 				}
 			},
