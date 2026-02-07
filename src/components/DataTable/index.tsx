@@ -84,7 +84,7 @@ export function DataTable<TData>({
 	return (
 		<div className="space-y-4">
 			{toolbar ? (
-				<div>{loading ? toolbarSkeleton ?? null : toolbar(table)}</div>
+				<div>{loading ? (toolbarSkeleton ?? null) : toolbar(table)}</div>
 			) : null}
 			<div className="rounded-md">
 				<Table>
@@ -138,10 +138,7 @@ export function DataTable<TData>({
 					<TableBody>
 						{loading ? (
 							[...Array(Math.max(1, skeletonRows))].map((_, rowIndex) => (
-								<TableRow
-									key={`skeleton-row-${rowIndex}`}
-									className="relative"
-								>
+								<TableRow key={`skeleton-row-${rowIndex}`} className="relative">
 									{table.getAllColumns().map((column, colIndex) => (
 										<TableCell
 											key={`skeleton-cell-${rowIndex}-${colIndex}`}

@@ -86,8 +86,9 @@ function getValueInTargetCurrencyPerMonth({
 	if (!rates) return null;
 	let monthlyPrice = value;
 	if (currency !== targetCurrency) {
-		const originRate = currency === "CLP" ? 1 : rates.get(currency) ?? 0;
-		const targetRate = targetCurrency === "CLP" ? 1 : rates.get(targetCurrency) ?? 0;
+		const originRate = currency === "CLP" ? 1 : (rates.get(currency) ?? 0);
+		const targetRate =
+			targetCurrency === "CLP" ? 1 : (rates.get(targetCurrency) ?? 0);
 		const clpValue = originRate ? value / originRate : 0;
 		monthlyPrice = targetRate ? clpValue * targetRate : 0;
 	}

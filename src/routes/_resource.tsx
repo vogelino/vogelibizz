@@ -51,10 +51,7 @@ function ResourceLayout() {
 
 	useEffect(() => {
 		if (!settings) return;
-		queryClient.setQueryData(
-			queryKeys.settings.current.queryKey,
-			settings,
-		);
+		queryClient.setQueryData(queryKeys.settings.current.queryKey, settings);
 	}, [queryClient, settings]);
 
 	if (hydrated && status !== "loading" && !data) {

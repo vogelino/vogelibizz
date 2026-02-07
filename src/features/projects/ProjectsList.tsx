@@ -5,7 +5,11 @@ import type { ProjectType } from "@/db/schema";
 import useProjects from "@/utility/data/useProjects";
 import { projectTableColumns } from "./columns";
 
-export default function ProjectList({ loading = false }: { loading?: boolean }) {
+export default function ProjectList({
+	loading = false,
+}: {
+	loading?: boolean;
+}) {
 	const { data = [], error, isPending } = useProjects();
 	const isLoading = loading || isPending;
 
