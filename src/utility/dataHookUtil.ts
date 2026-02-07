@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { ZodError, type ZodSchema } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
@@ -29,8 +28,13 @@ export async function handleFetchResponse<
 	}
 
 	const json = await response.json();
-	if (json.error === "Unauthorized")
-		return redirect(`${env.server.NEXT_PUBLIC_BASE_URL}/login`);
+	if (json.error === "Unauthorized") {
+		if (typeof window !== "undefined") {
+			window.location.assign(`${env.client.VITE_PUBLIC_BASE_URL}/login`);
+			return json;
+		}
+		throw new Error("Unauthorized");
+	}
 	if (json.error) throw json.error;
 
 	if (!zodSchema) return json;

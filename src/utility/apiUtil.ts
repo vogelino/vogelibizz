@@ -1,12 +1,23 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import type { Session } from "next-auth";
 import { z } from "zod";
-import { auth } from "@/auth";
+import { isAuthenticatedAndAdmin } from "@/auth";
 import { parseId } from "@/utility/resourceUtil";
 import type { ActionType } from "./data/createQueryFunction";
 
-type AuthenticatedRequest = NextRequest & { auth?: Session | null };
+export type HandlerContext = {
+	request: Request;
+	params?: Record<string, string>;
+};
+
+export function json(data: unknown, init: ResponseInit = {}) {
+	const headers = new Headers(init.headers);
+	if (!headers.has("Content-Type")) {
+		headers.set("Content-Type", "application/json");
+	}
+	return new Response(JSON.stringify(data), {
+		...init,
+		headers,
+	});
+}
 
 async function validateParams(
 	paramsPromise: unknown,
@@ -56,82 +67,81 @@ async function _validateBody<
 
 export async function handleNotFoundDbQuery<T>(data: T, notFoundMessage = "") {
 	if (!data)
-		return NextResponse.json(
+		return json(
 			{ error: notFoundMessage || "Resource not found" },
 			{ status: 404 },
 		);
-	return NextResponse.json(data);
+	return json(data);
 }
 
 export function getEditionRoute(
 	mutateData: (inputId: number, body?: unknown) => Promise<unknown>,
 ) {
-	return auth(
-		async (
-			req: AuthenticatedRequest,
-			{ params = {} }: { params?: unknown },
-		) => {
-			let body = {};
-			try {
-				body = await req.json();
-				body = z.object({}).passthrough().parse(body);
-			} catch (err) {
-				return handleError(err, "edit");
-			}
-			const validation = await validateParams(params, body);
-			if (validation.error || !validation.id)
-				return NextResponse.json(
-					{ error: validation.error },
-					{ status: 400, statusText: "Invalid Parameters" },
-				);
-			const id = validation.id;
-			try {
-				console.log(`–––––––––––––––––––––––––`);
-				console.log(`Mutating using the id and body`);
-				console.log(`–––––––––––––––––––––––––`);
-				await mutateData(id, body);
-				return NextResponse.json({ success: true }, { status: 200 });
-			} catch (err) {
-				return handleError(err, "edit");
-			}
-		},
-	);
+	return async ({ request, params = {} }: HandlerContext) => {
+		const allowed = await ensureAdmin();
+		if (allowed) return allowed;
+
+		let body = {};
+		try {
+			body = await request.json();
+			body = z.object({}).passthrough().parse(body);
+		} catch (err) {
+			return handleError(err, "edit");
+		}
+		const validation = await validateParams(params, body);
+		if (validation.error || !validation.id)
+			return json(
+				{ error: validation.error },
+				{ status: 400, statusText: "Invalid Parameters" },
+			);
+		const id = validation.id;
+		try {
+			console.log(`–––––––––––––––––––––––––`);
+			console.log(`Mutating using the id and body`);
+			console.log(`–––––––––––––––––––––––––`);
+			await mutateData(id, body);
+			return json({ success: true }, { status: 200 });
+		} catch (err) {
+			return handleError(err, "edit");
+		}
+	};
 }
 
 export function getDeletionRoute(mutateData: (id: number) => Promise<unknown>) {
-	return auth(
-		async (
-			_req: AuthenticatedRequest,
-			{ params = {} }: { params?: unknown },
-		) => {
-			const { id, error } = await validateParams(params);
-			if (error || !id)
-				return NextResponse.json(
-					{ error },
-					{ status: 400, statusText: error || "Missing ID in params" },
-				);
-			try {
-				await mutateData(id);
-				return NextResponse.json({ success: true }, { status: 200 });
-			} catch (err) {
-				return handleError(err, "delete");
-			}
-		},
-	);
+	return async ({ params = {} }: HandlerContext) => {
+		const allowed = await ensureAdmin();
+		if (allowed) return allowed;
+
+		const { id, error } = await validateParams(params);
+		if (error || !id)
+			return json(
+				{ error },
+				{ status: 400, statusText: error || "Missing ID in params" },
+			);
+		try {
+			await mutateData(id);
+			return json({ success: true }, { status: 200 });
+		} catch (err) {
+			return handleError(err, "delete");
+		}
+	};
 }
 
 export const getCreationRoute = (
 	mutateData: (body: unknown) => Promise<unknown>,
 ) => {
-	return auth(async (req: AuthenticatedRequest) => {
+	return async ({ request }: HandlerContext) => {
+		const allowed = await ensureAdmin();
+		if (allowed) return allowed;
+
 		try {
-			const bodyJson = await req.json();
+			const bodyJson = await request.json();
 			await mutateData(bodyJson);
-			return NextResponse.json({ success: true }, { status: 200 });
+			return json({ success: true }, { status: 200 });
 		} catch (err) {
 			return handleError(err, "create");
 		}
-	});
+	};
 };
 
 export function getQueryRouteWithId(
@@ -139,20 +149,18 @@ export function getQueryRouteWithId(
 	getNotFoundMessage = (id: number | string) =>
 		`Resource with id '${id}' does not exist`,
 ) {
-	return auth(
-		async (_req: AuthenticatedRequest, { params }: { params: unknown }) => {
-			const validation = await validateParams(params);
-			if (validation.error || !validation.id)
-				return NextResponse.json(
-					{ error: validation.error || "Missing ID" },
-					{ status: 400 },
-				);
-			return handleNotFoundDbQuery(
-				await getData(parseId(validation.id)),
-				getNotFoundMessage(validation.id),
-			);
-		},
-	);
+	return async ({ params }: HandlerContext) => {
+		const allowed = await ensureAdmin();
+		if (allowed) return allowed;
+
+		const validation = await validateParams(params);
+		if (validation.error || !validation.id)
+			return json({ error: validation.error || "Missing ID" }, { status: 400 });
+		return handleNotFoundDbQuery(
+			await getData(parseId(validation.id)),
+			getNotFoundMessage(validation.id),
+		);
+	};
 }
 
 function handleError(err: unknown, action: ActionType) {
@@ -164,12 +172,20 @@ function handleError(err: unknown, action: ActionType) {
 			.join("\n");
 		console.log(joinedIssues);
 		console.log(`–––––––––––––––––––––––––`);
-		return NextResponse.json(
+		return json(
 			{ error: joinedIssues },
 			{ status: 400, statusText: "Invalid body" },
 		);
 	}
 	console.log(err);
 	console.log(`–––––––––––––––––––––––––`);
-	return NextResponse.json({ error: err }, { status: 500 });
+	return json({ error: err }, { status: 500 });
+}
+
+async function ensureAdmin() {
+	const allowed = await isAuthenticatedAndAdmin();
+	if (!allowed) {
+		return json({ error: "Unauthorized" }, { status: 401 });
+	}
+	return null;
 }

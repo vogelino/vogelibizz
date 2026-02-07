@@ -1,14 +1,19 @@
-import type { LinkProps } from "next/link";
-import Link from "next/link";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";
 
 function InternalLink(
-	props: LinkProps & { className?: string; children?: React.ReactNode },
+	props: Omit<LinkProps, "to"> & {
+		href: LinkProps["to"];
+		className?: string;
+		children?: React.ReactNode;
+	},
 ) {
+	const { href, ...rest } = props;
 	return (
 		<Link
-			{...props}
+			{...rest}
+			to={href}
 			className={cn(
 				`hyphen-auto`,
 				`outline-none focusable px-3 py-2`,

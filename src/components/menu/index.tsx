@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -46,7 +46,7 @@ export const Menu = ({
 			)}
 		>
 			<Link
-				href="/projects"
+				to="/projects"
 				className={cn(
 					"group",
 					"px-4 -ml-4 py-2",
@@ -82,7 +82,7 @@ export const Menu = ({
 					{menuItems.map((item) => (
 						<HeaderMenuLink
 							key={item.key}
-							href={item.route ?? "/"}
+							to={item.route ?? "/"}
 							title={item.label ?? "-"}
 							active={currentPage.split("/")[0] === item.key}
 						/>

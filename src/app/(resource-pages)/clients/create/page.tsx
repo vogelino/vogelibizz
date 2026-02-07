@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ export default function ClientCreatePageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/${resource}`}>
+						<Link to={`/${resource}`}>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

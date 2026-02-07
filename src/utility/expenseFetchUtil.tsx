@@ -53,7 +53,7 @@ export async function getExpensesWithMonthlyClpPrice(
 }
 
 export async function fetchOpenExchangeRates(): Promise<OpenExchangeRatesReturnType | null> {
-	const API_ID = env.client.NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY;
+	const API_ID = env.client.VITE_PUBLIC_OPENEXCHANGERATES_API_KEY;
 
 	let rawJson: unknown;
 	try {

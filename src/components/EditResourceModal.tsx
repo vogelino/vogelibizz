@@ -1,7 +1,6 @@
 "use client";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,8 @@ export default function EditResourceModal({
 	title?: string;
 }>) {
 	const resourcePluralName = `${resourceSingularName}s`.toLowerCase();
-	const router = useRouter();
-	const pathname = usePathname();
+	const navigate = useNavigate();
+	const pathname = useLocation().pathname;
 	const actionLabel = crudAction === "create" ? "Create" : "Edit";
 	const label = `${actionLabel} ${resourceSingularName.toLocaleLowerCase()}`;
 	const expectedPathname = `/${resourcePluralName}/${crudAction}${
@@ -34,11 +33,11 @@ export default function EditResourceModal({
 		<ResponsiveModal
 			open={isOpened}
 			title={<PageHeaderTitle name={title || label} id={id} />}
-			onClose={() => router.push(`/${resourcePluralName}`)}
+			onClose={() => navigate({ to: `/${resourcePluralName}` })}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/${resourcePluralName}`}>Cancel</Link>
+						<Link to={`/${resourcePluralName}`}>Cancel</Link>
 					</Button>
 					<Button type="submit" form={formId}>
 						<SaveIcon />

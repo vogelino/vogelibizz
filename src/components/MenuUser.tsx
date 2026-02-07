@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import { useSession } from "next-auth/react";
 import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSession } from "@/providers/SessionProvider";
 import { cn } from "@/utility/classNames";
 
 export default function MenuUser() {
@@ -27,11 +26,11 @@ export default function MenuUser() {
 					)}
 				>
 					{session.data?.user?.image && (
-						<Image
+						<img
 							src={session.data.user.image}
 							width={32}
 							height={32}
-							alt={`Profile picture of ${session.data.user.name}`}
+							alt={`Profile of ${session.data.user.name}`}
 							className="animate-in fade-in"
 						/>
 					)}

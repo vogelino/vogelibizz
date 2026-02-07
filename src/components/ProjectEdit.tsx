@@ -1,14 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { SimpleMDEReactProps } from "react-simplemde-editor";
+import ClientOnly from "@/components/ClientOnly";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import type { ClientType, ProjectType } from "@/db/schema";
-import env from "@/env";
 import useClients from "@/utility/data/useClients";
 import useProject from "@/utility/data/useProject";
 import useProjectCreate from "@/utility/data/useProjectCreate";
@@ -19,14 +17,10 @@ import useComboboxOptions, {
 } from "@/utility/useComboboxOptions";
 import { MultiValueInput } from "./ui/multi-value-input";
 
-const DynamicEditor = dynamic(
-	async () => (await import("@/components/ui/text-editor")).TextareaEditor,
-	{ ssr: false },
-);
-const ForwardedEditor = forwardRef<HTMLDivElement, SimpleMDEReactProps>(
-	(props, ref) => <DynamicEditor forwardedRef={ref} {...props} />,
-);
-ForwardedEditor.displayName = "ForwardedEditor";
+const TextareaEditor = lazy(async () => {
+	const mod = await import("@/components/ui/text-editor");
+	return { default: mod.TextareaEditor };
+});
 
 export default function ProjectEdit({
 	id,
@@ -35,7 +29,7 @@ export default function ProjectEdit({
 	id?: string | number;
 	formId: string;
 }) {
-	const router = useRouter();
+	const navigate = useNavigate();
 	const clientsQuery = useClients();
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
@@ -97,7 +91,7 @@ export default function ProjectEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/projects`);
+				navigate({ to: "/projects" });
 				const project = { ...values, content, status, clients: projectClients };
 				if (id) editMutation.mutate({ ...project, id: Number(id) });
 				else createMutation.mutate([project]);
@@ -130,7 +124,11 @@ export default function ProjectEdit({
 				</FormInputWrapper>
 				<FormInputWrapper label="Content" error={errors?.content?.message}>
 					<div className="bg-background dark:bg-card border border-border min-h-89">
-						<ForwardedEditor value={content} onChange={setContent} />
+						<ClientOnly fallback={<div className="p-4 text-sm">Loading…</div>}>
+							<Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
+								<TextareaEditor value={content} onChange={setContent} />
+							</Suspense>
+						</ClientOnly>
 					</div>
 				</FormInputWrapper>
 				<FormInputCombobox
