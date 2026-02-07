@@ -9,7 +9,7 @@ const resourceName = "clients";
 const action = "querySingle";
 const outputZodSchema = clientSelectSchema;
 
-function useClient(id?: string | number) {
+function useClient(id?: string | number, initialData?: DataType) {
 	const queryKey = [resourceName, `${id ?? ""}`];
 	return useQuery<DataType>({
 		queryKey,
@@ -20,6 +20,8 @@ function useClient(id?: string | number) {
 			outputZodSchema,
 			id: id ?? "",
 		}),
+		initialData,
+		initialDataUpdatedAt: initialData ? Date.now() : undefined,
 	});
 }
 

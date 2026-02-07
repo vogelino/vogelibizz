@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { getExpense } from "@/app/api/expenses/[id]/getExpense";
+import { getExpense } from "@/server/api/expenses/getExpense";
 import db from "@/db";
 import { expenseEditSchema, expenses } from "@/db/schema";
 import {

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { getProject } from "@/app/api/projects/[id]/getProject";
+import { getProject } from "@/server/api/projects/getProject";
 import db from "@/db";
 import { projectEditSchema, projects, projectsToClients } from "@/db/schema";
 import {
