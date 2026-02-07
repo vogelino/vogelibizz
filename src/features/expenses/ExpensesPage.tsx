@@ -122,7 +122,9 @@ export default function ExpensesPage({
 										(c) => c.value as ExpenseWithMonthlyCLPPriceType["category"],
 									);
 									setCategoryFilter(nextValues);
-									table.getColumn("category")?.setFilterValue(nextValues);
+									table
+										.getColumn("category")
+										?.setFilterValue(nextValues.length ? nextValues : undefined);
 								}}
 								loading={isLoading}
 							/>
