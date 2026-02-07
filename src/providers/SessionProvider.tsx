@@ -24,8 +24,37 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 		useState<SessionContextValue["status"]>("unauthenticated");
 
 	useEffect(() => {
-		setStatus("unauthenticated");
-		setSession(null);
+		let canceled = false;
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 3000);
+
+		async function loadSession() {
+			setStatus("loading");
+			try {
+				const response = await fetch("/api/auth/session", {
+					credentials: "include",
+					signal: controller.signal,
+				});
+				if (!response.ok) throw new Error("Failed to fetch session");
+				const data = await response.json();
+				if (canceled) return;
+				const nextSession = Object.keys(data || {}).length ? data : null;
+				setSession(nextSession);
+				setStatus(nextSession ? "authenticated" : "unauthenticated");
+			} catch (_err) {
+				if (canceled) return;
+				setSession(null);
+				setStatus("unauthenticated");
+			}
+		}
+
+		void loadSession();
+
+		return () => {
+			clearTimeout(timeout);
+			canceled = true;
+			controller.abort();
+		};
 	}, []);
 
 	const value = useMemo(
@@ -47,11 +76,14 @@ export function useSession() {
 
 export function signIn({
 	redirectTo = "/projects",
+	provider = "github",
 }: {
 	redirectTo?: string;
+	provider?: string;
 } = {}) {
 	if (typeof window !== "undefined") {
-		window.location.assign(redirectTo);
+		const params = new URLSearchParams({ callbackUrl: redirectTo });
+		window.location.assign(`/api/auth/signin/${provider}?${params.toString()}`);
 	}
 }
 
@@ -61,6 +93,7 @@ export function signOut({
 	redirectTo?: string;
 } = {}) {
 	if (typeof window !== "undefined") {
-		window.location.assign(redirectTo);
+		const params = new URLSearchParams({ callbackUrl: redirectTo });
+		window.location.assign(`/api/auth/signout?${params.toString()}`);
 	}
 }
