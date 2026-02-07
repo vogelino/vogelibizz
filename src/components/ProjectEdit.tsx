@@ -157,8 +157,12 @@ export default function ProjectEdit({
 				>
 					{!isLoading && (
 						<div className="bg-background dark:bg-card border border-border min-h-89">
-							<ClientOnly fallback={<div className="p-4 text-sm">Loading…</div>}>
-								<Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
+							<ClientOnly
+								fallback={<div className="p-4 text-sm">Loading…</div>}
+							>
+								<Suspense
+									fallback={<div className="p-4 text-sm">Loading…</div>}
+								>
 									<TextareaEditor value={content} onChange={setContent} />
 								</Suspense>
 							</ClientOnly>

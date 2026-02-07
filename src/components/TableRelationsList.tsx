@@ -66,11 +66,7 @@ function TableRelationsList({
 	);
 }
 
-function getEditLink(
-	resource: RoutedResource,
-	id: number,
-	modal: boolean,
-) {
+function getEditLink(resource: RoutedResource, id: number, modal: boolean) {
 	const params = { id: String(id) };
 	switch (resource) {
 		case "clients":

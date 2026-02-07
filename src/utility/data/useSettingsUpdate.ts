@@ -26,10 +26,7 @@ function useSettingsUpdate() {
 			});
 		},
 		onSuccess: (settings) => {
-			queryClient.setQueryData(
-				queryKeys.settings.current.queryKey,
-				settings,
-			);
+			queryClient.setQueryData(queryKeys.settings.current.queryKey, settings);
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.expenses.list.queryKey,
 			});

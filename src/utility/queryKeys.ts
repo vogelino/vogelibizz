@@ -24,7 +24,4 @@ const settings = createQueryKeys("settings", {
 });
 
 export const queryKeys = mergeQueryKeys(projects, clients, expenses, settings);
-export type QueryResourceKey = Extract<
-	ResourceType,
-	keyof typeof queryKeys
->;
+export type QueryResourceKey = Extract<ResourceType, keyof typeof queryKeys>;

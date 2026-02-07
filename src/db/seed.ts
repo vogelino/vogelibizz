@@ -16,13 +16,13 @@ async function main() {
 		seeds,
 	] = await Promise.all([
 		import("drizzle-orm"),
-			import("drizzle-orm/postgres-js/migrator"),
-			import("@/db"),
-			import("@/db/schema"),
-			import("@/env"),
-			import("$/drizzle.config"),
-			import("./seeds"),
-		]);
+		import("drizzle-orm/postgres-js/migrator"),
+		import("@/db"),
+		import("@/db/schema"),
+		import("@/env"),
+		import("$/drizzle.config"),
+		import("./seeds"),
+	]);
 
 	if (!env.default.server.POSTGRES_SEEDING) {
 		throw new Error('You must set DB_SEEDING to "true" when running seeds');

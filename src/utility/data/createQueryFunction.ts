@@ -49,18 +49,21 @@ export default function createQueryFunction<OutputType>(
 export default function createQueryFunction<OutputType>(
 	args: QuerySingleArgs<OutputType>,
 ): () => Promise<OutputType>;
-export default function createQueryFunction<OutputType, InputType extends CreateInput>(
-	args: CreateArgs<InputType>,
-): (data: InputType) => Promise<OutputType>;
-export default function createQueryFunction<OutputType, InputType extends DataWithRequiredId>(
-	args: EditArgs<InputType>,
-): (data: InputType) => Promise<OutputType>;
+export default function createQueryFunction<
+	OutputType,
+	InputType extends CreateInput,
+>(args: CreateArgs<InputType>): (data: InputType) => Promise<OutputType>;
+export default function createQueryFunction<
+	OutputType,
+	InputType extends DataWithRequiredId,
+>(args: EditArgs<InputType>): (data: InputType) => Promise<OutputType>;
 export default function createQueryFunction<OutputType>(
 	args: DeleteArgs,
 ): (id: unknown) => Promise<OutputType>;
-export default function createQueryFunction<OutputType, InputType extends CreateInput>(
-	args: CreateQueryFnArgs<OutputType, InputType>,
-) {
+export default function createQueryFunction<
+	OutputType,
+	InputType extends CreateInput,
+>(args: CreateQueryFnArgs<OutputType, InputType>) {
 	if (args.action === "queryAll") return createQueryAllFn<OutputType>(args);
 	if (args.action === "querySingle")
 		return createQuerySingleFn<OutputType>(args);
@@ -72,9 +75,7 @@ export default function createQueryFunction<OutputType, InputType extends Create
 	throw new Error("Unknown action");
 }
 
-function createQueryAllFn<OutputType>(
-	args: QueryAllArgs<OutputType>,
-) {
+function createQueryAllFn<OutputType>(args: QueryAllArgs<OutputType>) {
 	const { resourceName, outputZodSchema } = args;
 	return async function queryFn(): Promise<OutputType> {
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
@@ -87,9 +88,7 @@ function createQueryAllFn<OutputType>(
 	};
 }
 
-function createQuerySingleFn<OutputType>(
-	args: QuerySingleArgs<OutputType>,
-) {
+function createQuerySingleFn<OutputType>(args: QuerySingleArgs<OutputType>) {
 	const { resourceName, outputZodSchema } = args;
 	return async function queryFn(): Promise<OutputType> {
 		const parsedId = parseId(args.id);
