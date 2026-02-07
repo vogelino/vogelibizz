@@ -25,6 +25,8 @@ export const Route = createFileRoute("/_resource/projects/edit/$id")({
 	},
 	component: ProjectEditPageRoute,
 	pendingComponent: ProjectEditPagePending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ProjectEditPageRoute() {
