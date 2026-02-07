@@ -29,15 +29,18 @@ export default function ExpenseEdit({
 	id,
 	formId,
 	initialData,
+	loading = false,
 }: {
 	id?: number;
 	formId: string;
 	initialData?: ExpenseWithMonthlyCLPPriceType;
+	loading?: boolean;
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
 	const { data: expense } = useExpense(id, initialData);
 	const navigate = useNavigate();
+	const isLoading = loading || (Boolean(id) && !expense);
 	const [type, setType] = useState(expense?.type ?? "Freelance");
 	const [category, setCategory] = useState(
 		expense?.category ?? "Administrative",
@@ -105,20 +108,6 @@ export default function ExpenseEdit({
 		optionValues: expenseRateEnum.enumValues,
 	});
 
-	if (id && !expense) {
-		return (
-			<div className="flex flex-col gap-6">
-				<Skeleton className="h-10 w-full" />
-				<div className="grid @md:grid-cols-2 gap-6">
-					<Skeleton className="h-10 w-full" />
-					<Skeleton className="h-10 w-full" />
-					<Skeleton className="h-10 w-full" />
-					<Skeleton className="h-10 w-full" />
-				</div>
-			</div>
-		);
-	}
-
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
@@ -143,14 +132,21 @@ export default function ExpenseEdit({
 			className="@container"
 		>
 			<div className="flex flex-col gap-6">
-				<FormInputWrapper label="Name" error={errors?.name?.message as string}>
-					<input
-						className="form-input dark:bg-card"
-						placeholder="Expense name"
-						type="text"
-						{...register("name", { required: true })}
-						defaultValue={expense?.name}
-					/>
+				<FormInputWrapper
+					label="Name"
+					error={errors?.name?.message as string}
+					loading={isLoading}
+					loadingChildren={<Skeleton className="h-9 w-full" />}
+				>
+					{!isLoading && (
+						<input
+							className="form-input dark:bg-card"
+							placeholder="Expense name"
+							type="text"
+							{...register("name", { required: true })}
+							defaultValue={expense?.name}
+						/>
+					)}
 				</FormInputWrapper>
 				<div className="grid @md:grid-cols-2 gap-6">
 					<FormInputCombobox
@@ -161,6 +157,7 @@ export default function ExpenseEdit({
 						onChange={(val) => setCategory(val as ExpenseType["category"])}
 						error={errors?.category?.message as string}
 						className="w-full"
+						loading={isLoading}
 					/>
 					<FormInputCombobox
 						options={typeOptions}
@@ -170,6 +167,7 @@ export default function ExpenseEdit({
 						onChange={(val) => setType(val as ExpenseType["type"])}
 						className="w-full"
 						error={errors?.type?.message as string}
+						loading={isLoading}
 					/>
 					<CurrencyInput
 						label="Original price"
@@ -179,6 +177,7 @@ export default function ExpenseEdit({
 						onValueChange={setOriginalPrice}
 						currency={originalCurrency}
 						value={originalPrice}
+						loading={isLoading}
 					/>
 					<FormInputCombobox
 						options={rateOptions}
@@ -188,6 +187,7 @@ export default function ExpenseEdit({
 						onChange={(val) => setRate(val as ExpenseType["rate"])}
 						className="w-full"
 						error={errors?.rate?.message as string}
+						loading={isLoading}
 					/>
 				</div>
 			</div>

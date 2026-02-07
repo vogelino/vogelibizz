@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_resource/projects/edit/$id")({
 		return { project };
 	},
 	component: ProjectEditPageRoute,
+	pendingComponent: ProjectEditPagePending,
 });
 
 function ProjectEditPageRoute() {
@@ -33,6 +34,7 @@ function ProjectEditPageRoute() {
 	if (!parsedId) return null;
 	const idString = `${id}`;
 	const formId = `project-edit-form-${parsedId}`;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<FormPageLayout
@@ -53,7 +55,29 @@ function ProjectEditPageRoute() {
 				</>
 			}
 		>
-			<ProjectEdit id={parsedId} formId={formId} initialData={project} />
+			<ProjectEdit
+				id={parsedId}
+				formId={formId}
+				initialData={project}
+				loading={isPending}
+			/>
+		</FormPageLayout>
+	);
+}
+
+function ProjectEditPagePending() {
+	const { id } = Route.useParams();
+	const parsedId = parseId(id);
+	if (!parsedId) return null;
+	const formId = `project-edit-form-${parsedId}`;
+	return (
+		<FormPageLayout
+			id={parsedId}
+			title="Edit project"
+			allLink="/projects"
+			footerButtons={null}
+		>
+			<ProjectEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { type ClientType, clientSelectSchema } from "@/db/schema";
 import createQueryFunction from "./createQueryFunction";
 
@@ -9,10 +9,11 @@ const resourceName = "clients";
 const action = "queryAll";
 const outputZodSchema = clientSelectSchema.array();
 
-function useClients() {
+function useClients({ enabled = true }: { enabled?: boolean } = {}) {
 	const queryKey = [resourceName];
-	return useSuspenseQuery<DataType>({
+	return useQuery<DataType>({
 		queryKey,
+		enabled,
 		queryFn: createQueryFunction<DataType>({
 			resourceName,
 			action,

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id")({
 		return { expense };
 	},
 	component: ExpenseEditPageRoute,
+	pendingComponent: ExpenseEditPagePending,
 });
 
 function ExpenseEditPageRoute() {
@@ -34,6 +35,7 @@ function ExpenseEditPageRoute() {
 	const { expense } = Route.useLoaderData();
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<FormPageLayout
@@ -58,7 +60,25 @@ function ExpenseEditPageRoute() {
 				id={parsedId}
 				formId={`expense-edit-form-${parsedId}`}
 				initialData={expense}
+				loading={isPending}
 			/>
+		</FormPageLayout>
+	);
+}
+
+function ExpenseEditPagePending() {
+	const { id } = Route.useParams();
+	const parsedId = parseId(id);
+	if (!parsedId) return null;
+	const formId = `expense-edit-form-${parsedId}`;
+	return (
+		<FormPageLayout
+			id={parsedId}
+			title="Edit expense"
+			allLink="/expenses"
+			footerButtons={null}
+		>
+			<ExpenseEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

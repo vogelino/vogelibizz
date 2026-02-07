@@ -7,6 +7,7 @@ import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
@@ -26,7 +27,11 @@ import { expensesTableColumns } from "./columns";
 
 type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
 
-export default function ExpensesPage() {
+export default function ExpensesPage({
+	loading = false,
+}: {
+	loading?: boolean;
+}) {
 	const deleteMutation = useExpenseDelete();
 	const deleteColumn = getDeleteColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
 		deleteMutation.mutate(id),
@@ -40,7 +45,8 @@ export default function ExpensesPage() {
 		"All types",
 	);
 
-	const { data, error } = useExpenses();
+	const { data = [], error, isPending } = useExpenses();
+	const isLoading = loading || isPending;
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
 	const columns = useMemo(
@@ -77,66 +83,66 @@ export default function ExpensesPage() {
 		<>
 			<div className="flex flex-col p-4 bg-muted my-4">
 				<span className="text-sm text-muted-foreground">Monthly total</span>
-				<span className="text-lg">{totalPerMonth}</span>
+				<span className="text-lg">
+					{isLoading ? <Skeleton className="h-6 w-24" /> : totalPerMonth}
+				</span>
 			</div>
 			<div className="w-full mb-6">
-				{data && (
-					<DataTable
-						columns={columns}
-						data={!error && data.length > 0 ? data : []}
-						initialState={{
-							pagination: { pageIndex: 0, pageSize: 1000 },
-							sorting: [{ id: "last_modified", desc: false }],
-							columnFilters: [
-								...(categoryFilter.length
-									? [{ id: "category", value: categoryFilter }]
-									: []),
-								...(typeFilter && typeFilter !== "All types"
-									? [{ id: "type", value: String(typeFilter) }]
-									: []),
-							],
-						}}
-						toolbar={(table) => (
-							<div className="flex items-center gap-4">
-								<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
-									options={categoryOptions}
-									values={
-										categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
-									}
-									placeholder="Filter by category"
-									selectedValueFormater={(value) => (
-										<ExpenseCategoryBadge
-											value={
-												value as ExpenseWithMonthlyCLPPriceType["category"]
-											}
-										/>
-									)}
-									onChange={(cat) => {
-										const nextValues = cat.map(
-											(c) =>
-												c.value as ExpenseWithMonthlyCLPPriceType["category"],
-										);
-										setCategoryFilter(nextValues);
-										table.getColumn("category")?.setFilterValue(nextValues);
-									}}
-								/>
-								<Combobox
-									options={typeOptions}
-									value={typeFilter}
-									onChange={(value) => {
-										setTypeFilter(value);
-										const column = table.getColumn("type");
-										if (!column) return;
-										const nextValue = `${value}`;
-										column.setFilterValue(
-											nextValue === "All types" ? undefined : nextValue,
-										);
-									}}
-								/>
-							</div>
-						)}
-					/>
-				)}
+				<DataTable
+					columns={columns}
+					data={!error && data.length > 0 ? data : []}
+					loading={isLoading}
+					initialState={{
+						pagination: { pageIndex: 0, pageSize: 1000 },
+						sorting: [{ id: "last_modified", desc: false }],
+						columnFilters: [
+							...(categoryFilter.length
+								? [{ id: "category", value: categoryFilter }]
+								: []),
+							...(typeFilter && typeFilter !== "All types"
+								? [{ id: "type", value: String(typeFilter) }]
+								: []),
+						],
+					}}
+					toolbar={(table) => (
+						<div className="flex items-center gap-4">
+							<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
+								options={categoryOptions}
+								values={
+									categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
+								}
+								placeholder="Filter by category"
+								selectedValueFormater={(value) => (
+									<ExpenseCategoryBadge
+										value={value as ExpenseWithMonthlyCLPPriceType["category"]}
+									/>
+								)}
+								onChange={(cat) => {
+									const nextValues = cat.map(
+										(c) => c.value as ExpenseWithMonthlyCLPPriceType["category"],
+									);
+									setCategoryFilter(nextValues);
+									table.getColumn("category")?.setFilterValue(nextValues);
+								}}
+								loading={isLoading}
+							/>
+							<Combobox
+								options={typeOptions}
+								value={typeFilter}
+								onChange={(value) => {
+									setTypeFilter(value);
+									const column = table.getColumn("type");
+									if (!column) return;
+									const nextValue = `${value}`;
+									column.setFilterValue(
+										nextValue === "All types" ? undefined : nextValue,
+									);
+								}}
+								loading={isLoading}
+							/>
+						</div>
+					)}
+				/>
 			</div>
 		</>
 	);

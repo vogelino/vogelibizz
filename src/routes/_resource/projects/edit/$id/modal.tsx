@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useRouterState,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ProjectList from "@/features/projects/ProjectsList";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
@@ -26,6 +30,7 @@ export const Route = createFileRoute("/_resource/projects/edit/$id/modal")({
 		return { project };
 	},
 	component: ProjectEditModal,
+	pendingComponent: ProjectEditModalPending,
 });
 
 function ProjectEditModal() {
@@ -35,6 +40,7 @@ function ProjectEditModal() {
 	const parsedId = parseId(id);
 	if (!parsedId) return <ProjectList />;
 	const formId = `project-edit-form-${parsedId}`;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<>
@@ -60,7 +66,34 @@ function ProjectEditModal() {
 					</>
 				}
 			>
-				<ProjectEdit id={parsedId} formId={formId} initialData={project} />
+				<ProjectEdit
+					id={parsedId}
+					formId={formId}
+					initialData={project}
+					loading={isPending}
+				/>
+			</ResponsiveModal>
+		</>
+	);
+}
+
+function ProjectEditModalPending() {
+	const { id } = Route.useParams();
+	const navigate = useNavigate();
+	const parsedId = parseId(id);
+	if (!parsedId) return <ProjectList />;
+	const formId = `project-edit-form-${parsedId}`;
+
+	return (
+		<>
+			<ProjectList />
+			<ResponsiveModal
+				open
+				title={<PageHeaderTitle name="Edit project" id={parsedId} />}
+				onClose={() => navigate({ to: "/projects" })}
+				footer={null}
+			>
+				<ProjectEdit id={parsedId} formId={formId} loading />
 			</ResponsiveModal>
 		</>
 	);

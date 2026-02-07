@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useRouterState,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ClientList from "@/features/clients/ClientsList";
 import ClientEdit from "@/components/ClientEdit";
@@ -26,6 +30,7 @@ export const Route = createFileRoute("/_resource/clients/edit/$id/modal")({
 		return { client };
 	},
 	component: ClientEditModal,
+	pendingComponent: ClientEditModalPending,
 });
 
 function ClientEditModal() {
@@ -35,6 +40,7 @@ function ClientEditModal() {
 	const parsedId = parseId(id);
 	if (!parsedId) return <ClientList />;
 	const formId = `client-edit-form-${parsedId}`;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<>
@@ -60,7 +66,34 @@ function ClientEditModal() {
 					</>
 				}
 			>
-				<ClientEdit id={parsedId} formId={formId} initialData={client} />
+				<ClientEdit
+					id={parsedId}
+					formId={formId}
+					initialData={client}
+					loading={isPending}
+				/>
+			</ResponsiveModal>
+		</>
+	);
+}
+
+function ClientEditModalPending() {
+	const { id } = Route.useParams();
+	const navigate = useNavigate();
+	const parsedId = parseId(id);
+	if (!parsedId) return <ClientList />;
+	const formId = `client-edit-form-${parsedId}`;
+
+	return (
+		<>
+			<ClientList />
+			<ResponsiveModal
+				open
+				title={<PageHeaderTitle name="Edit client" id={parsedId} />}
+				onClose={() => navigate({ to: "/clients" })}
+				footer={null}
+			>
+				<ClientEdit id={parsedId} formId={formId} loading />
 			</ResponsiveModal>
 		</>
 	);

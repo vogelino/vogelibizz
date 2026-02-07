@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { Skeleton } from "@/components/ui/skeleton";
+import ClientList from "@/features/clients/ClientsList";
 import ResourcePageLayout from "@/components/ResourcePageLayout";
 
 export const Route = createFileRoute("/_resource/clients")({
@@ -18,11 +18,7 @@ function ClientsLayout() {
 function ClientsPending() {
 	return (
 		<ResourcePageLayout resource="clients">
-			<div className="flex flex-col gap-4">
-				<Skeleton className="h-9 w-1/3" />
-				<Skeleton className="h-9 w-full" />
-				<Skeleton className="h-9 w-full" />
-			</div>
+			<ClientList loading />
 		</ResourcePageLayout>
 	);
 }

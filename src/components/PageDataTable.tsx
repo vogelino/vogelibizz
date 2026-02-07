@@ -17,12 +17,14 @@ export default function PageDataTable<
 	columns: pageSpecificColumns,
 	data,
 	defaultSortColumn = "last_modified",
+	loading = false,
 }: {
 	resource: ResourceType;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	columns: ColumnDef<DataType, any>[];
 	data: DataType[];
 	defaultSortColumn: string;
+	loading?: boolean;
 }) {
 	const clientDeleteMutation = useClientDelete();
 	const projectDeleteMutation = useProjectDelete();
@@ -56,10 +58,11 @@ export default function PageDataTable<
 
 	return (
 		<div className="w-full mb-6">
-			{data?.length > 0 && (
+			{(loading || data?.length > 0) && (
 				<DataTable
 					columns={columns}
 					data={data}
+					loading={loading}
 					initialState={{
 						sorting: [{ id: defaultSortColumn, desc: true }],
 						pagination: { pageIndex: 0, pageSize: 50 },
