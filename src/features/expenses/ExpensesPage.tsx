@@ -92,6 +92,12 @@ export default function ExpensesPage({
 					columns={columns}
 					data={!error && data.length > 0 ? data : []}
 					loading={isLoading}
+					toolbarSkeleton={
+						<div className="flex items-center gap-4">
+							<Skeleton className="h-9 w-64" />
+							<Skeleton className="h-9 w-40" />
+						</div>
+					}
 					initialState={{
 						pagination: { pageIndex: 0, pageSize: 1000 },
 						sorting: [{ id: "last_modified", desc: false }],
@@ -119,12 +125,15 @@ export default function ExpensesPage({
 								)}
 								onChange={(cat) => {
 									const nextValues = cat.map(
-										(c) => c.value as ExpenseWithMonthlyCLPPriceType["category"],
+										(c) =>
+											c.value as ExpenseWithMonthlyCLPPriceType["category"],
 									);
 									setCategoryFilter(nextValues);
 									table
 										.getColumn("category")
-										?.setFilterValue(nextValues.length ? nextValues : undefined);
+										?.setFilterValue(
+											nextValues.length ? nextValues : undefined,
+										);
 								}}
 								loading={isLoading}
 							/>
