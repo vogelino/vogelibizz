@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 import { getExpense } from "@/app/api/expenses/[id]/getExpense";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -36,7 +36,7 @@ export default async function ExpenseEditPageRoute({
 				footerButtons={
 					<>
 						<Button asChild variant="outline">
-							<Link href={`/expenses`}>
+							<Link to={`/expenses`}>
 								<span>{"Cancel"}</span>
 							</Link>
 						</Button>

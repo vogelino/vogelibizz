@@ -34,7 +34,7 @@ type CreateQueryFnArgs =
 	| QueryAllArgs
 	| DeleteArgs;
 
-const apiBaseUrl = env.client.NEXT_PUBLIC_BASE_URL;
+const apiBaseUrl = env.client.VITE_PUBLIC_BASE_URL;
 
 export default function createQueryFunction<OutputType>(
 	args: CreateQueryFnArgs,

@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 import { getProject } from "@/app/api/projects/[id]/getProject";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
@@ -42,7 +42,7 @@ export default async function ProjectEditPageRoute({
 				footerButtons={
 					<>
 						<Button asChild variant="outline">
-							<Link href={`/projects/edit/${idString}`}>
+							<Link to={`/projects/edit/${idString}`}>
 								<span>{"Cancel"}</span>
 							</Link>
 						</Button>

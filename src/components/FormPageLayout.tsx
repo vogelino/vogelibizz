@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { ListIcon } from "lucide-react";
-import Link from "next/link";
 import type React from "react";
 import type { PropsWithChildren } from "react";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
@@ -31,7 +31,7 @@ function FormPageLayout({
 				</h1>
 				<div className="flex gap-2">
 					<Button asChild variant="outline">
-						<Link href={allLink}>
+						<Link to={allLink}>
 							<ListIcon />
 							<span>See all</span>
 						</Link>

@@ -14,8 +14,8 @@ const emailListSchema = z.string().transform((val) => {
 });
 
 const PublicEnvSchema = z.object({
-	NEXT_PUBLIC_BASE_URL: z.url(),
-	NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY: z.string(),
+	VITE_PUBLIC_BASE_URL: z.url(),
+	VITE_PUBLIC_OPENEXCHANGERATES_API_KEY: z.string(),
 });
 
 const ServerEnvSchema = PublicEnvSchema.merge(
@@ -23,7 +23,7 @@ const ServerEnvSchema = PublicEnvSchema.merge(
 		// Node envs
 		NODE_ENV: z.string().default("development"),
 
-		// Next Auth
+		// Auth
 		AUTH_SECRET: z.string(),
 		AUTH_GITHUB_ID: z.string(),
 		AUTH_GITHUB_SECRET: z.string(),
@@ -71,12 +71,11 @@ export default {
 		return parseEnvSchema(ServerEnvSchema, process.env);
 	},
 	get client(): z.infer<typeof PublicEnvSchema> {
-		// On the client the env vars won't be included in process.env
-		// if not accessed explicitly
+		// Vite exposes public env vars via import.meta.env
 		return parseEnvSchema(PublicEnvSchema, {
-			NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-			NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY:
-				process.env.NEXT_PUBLIC_OPENEXCHANGERATES_API_KEY,
+			VITE_PUBLIC_BASE_URL: import.meta.env.VITE_PUBLIC_BASE_URL,
+			VITE_PUBLIC_OPENEXCHANGERATES_API_KEY: import.meta.env
+				.VITE_PUBLIC_OPENEXCHANGERATES_API_KEY,
 		});
 	},
 };

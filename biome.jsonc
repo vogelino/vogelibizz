@@ -1,29 +1,43 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
-	"files": {
-		"includes": [
-			"*.json",
-			"*.jsonc",
-			"src/**/*.ts",
-			"src/**/*.tsx",
-			"src/**/*.json",
-			"src/**/*.css"
-		]
-	},
-	"css": {
-		"parser": {
-			"tailwindDirectives": true
-		}
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"style": {
-				"noUnusedTemplateLiteral": "off",
-				"noNonNullAssertion": "off"
-			}
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "files": {
+    "includes": [
+      "*.json",
+      "*.jsonc",
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "src/**/*.json",
+      "src/**/*.css"
+    ],
+    "experimentalScannerIgnores": [
+      "src/routeTree.gen.ts"
+    ]
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noUnusedTemplateLiteral": "off",
+        "noNonNullAssertion": "off"
+      }
+    }
+  }
 }

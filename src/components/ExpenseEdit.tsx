@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import FormInputCombobox from "@/components/FormInputCombobox";
@@ -13,7 +13,6 @@ import {
 	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
-import env from "@/env";
 import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
@@ -34,7 +33,7 @@ export default function ExpenseEdit({
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
 	const { data: expense } = useExpense(id);
-	const router = useRouter();
+	const navigate = useNavigate();
 	const [type, setType] = useState(expense?.type ?? "Freelance");
 	const [category, setCategory] = useState(
 		expense?.category ?? "Administrative",
@@ -87,7 +86,7 @@ export default function ExpenseEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/expenses`);
+				navigate({ to: "/expenses" });
 				const expense = {
 					...values,
 					type,

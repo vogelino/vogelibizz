@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import type { ProjectType } from "@/db/schema";
-import env from "@/env";
 import useClient from "@/utility/data/useClient";
 import useClientCreate from "@/utility/data/useClientCreate";
 import useClientEdit from "@/utility/data/useClientEdit";
@@ -21,7 +20,7 @@ export default function ClientEdit({
 	id?: number | undefined;
 	formId: string;
 }) {
-	const router = useRouter();
+	const navigate = useNavigate();
 	const clientQuery = useClient(id);
 	const { data: client } = clientQuery;
 	const projectsQuery = useProjects();
@@ -74,7 +73,7 @@ export default function ClientEdit({
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
-				router.push(`${env.client.NEXT_PUBLIC_BASE_URL}/clients`);
+				navigate({ to: "/clients" });
 				const client = {
 					...values,
 					name: values.name ?? "",

@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
 import { getClient } from "@/app/api/clients/[id]/getClient";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -42,7 +42,7 @@ export default async function ClientEditPageRoute({
 				footerButtons={
 					<>
 						<Button asChild variant="outline">
-							<Link href={`/${resource}/${action}/${parsedId}`}>
+							<Link to={`/${resource}/${action}/${parsedId}`}>
 								<span>{"Cancel"}</span>
 							</Link>
 						</Button>

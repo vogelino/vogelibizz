@@ -1,7 +1,6 @@
 "use client";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import ClientEdit from "@/components/ClientEdit";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
@@ -16,19 +15,19 @@ const formId = `${resource}-${action}-form`;
 
 export const dynamic = "force-dynamic";
 export default function ClientCreateModalRoute() {
-	const router = useRouter();
-	const pathname = usePathname();
+	const navigate = useNavigate();
+	const pathname = useLocation().pathname;
 	return (
 		<ResponsiveModal
 			open={pathname === `/${resource}/${action}`}
 			title={
 				<PageHeaderTitle name={`${capitalizedAction} ${resourceSingular}`} />
 			}
-			onClose={() => router.push("/clients")}
+			onClose={() => navigate({ to: "/clients" })}
 			footer={
 				<>
 					<Button asChild variant="outline">
-						<Link href={`/${resource}`}>Cancel</Link>
+						<Link to={`/${resource}`}>Cancel</Link>
 					</Button>
 					<Button type="submit" form={formId}>
 						<SaveIcon />

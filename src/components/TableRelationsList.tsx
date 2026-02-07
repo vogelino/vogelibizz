@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type { ResourceType } from "@/db/schema";
 import { IconBadge } from "./ui/icon-badge";
 
@@ -22,7 +22,7 @@ function TableRelationsList({
 			{displayProjects.map((project) => (
 				<Link
 					key={project.id}
-					href={`/${relationResource}/edit/${project.id}`}
+					to={`/${relationResource}/edit/${project.id}`}
 					className="focusable"
 				>
 					<IconBadge
@@ -34,7 +34,7 @@ function TableRelationsList({
 			))}
 			{isMore && (
 				<Link
-					href={`/${originalResource}/edit/${originalId}`}
+					to={`/${originalResource}/edit/${originalId}`}
 					className="focusable"
 				>
 					<IconBadge

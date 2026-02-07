@@ -1,29 +1,26 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { cn } from "@/utility/classNames";
 
 function HeaderMenuLink({
-	as = Link,
 	onClick,
-	href,
+	to,
 	title,
 	className,
 	active,
 	ariaLabel,
 }: {
-	as?: typeof Link | string;
 	onClick?: () => void;
-	href?: string;
+	to?: string;
 	title: ReactNode;
 	ariaLabel?: string;
 	className?: string;
 	active?: boolean;
 }) {
-	const Tag = as;
 	return (
 		<li className="inline-block w-full sm:w-auto">
-			<Tag
-				href={href ?? "/"}
+			<Link
+				to={to ?? "/"}
 				aria-label={`Header menu link: ${ariaLabel || title} page`}
 				className={cn(
 					`uppercase sm:normal-case text-base font-normal`,
@@ -39,7 +36,7 @@ function HeaderMenuLink({
 				onClick={onClick}
 			>
 				{title}
-			</Tag>
+			</Link>
 		</li>
 	);
 }
