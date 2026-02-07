@@ -1,13 +1,13 @@
 import { Document, Font, Page, StyleSheet, View } from "@react-pdf/renderer";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect } from "react";
-import { Footer } from "@/app/pdf/components/Footer";
-import { FootNote } from "@/app/pdf/components/FootNote";
-import { HourlyRateNotice } from "@/app/pdf/components/HourlyRateNotice";
-import { Introduction } from "@/app/pdf/components/Introduction";
-import { Letterhead } from "@/app/pdf/components/Letterhead";
-import { Table } from "@/app/pdf/components/Table";
-import { CONFIG, CONTENT } from "@/app/pdf/variables";
+import { Footer } from "@/pdf/components/Footer";
+import { FootNote } from "@/pdf/components/FootNote";
+import { HourlyRateNotice } from "@/pdf/components/HourlyRateNotice";
+import { Introduction } from "@/pdf/components/Introduction";
+import { Letterhead } from "@/pdf/components/Letterhead";
+import { Table } from "@/pdf/components/Table";
+import { CONFIG, CONTENT } from "@/pdf/variables";
 import ClientOnly from "@/components/ClientOnly";
 
 const PDFViewer = lazy(async () => {

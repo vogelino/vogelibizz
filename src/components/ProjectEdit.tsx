@@ -26,15 +26,17 @@ const TextareaEditor = lazy(async () => {
 export default function ProjectEdit({
 	id,
 	formId,
+	initialData,
 }: {
 	id?: string | number;
 	formId: string;
+	initialData?: ProjectType;
 }) {
 	const navigate = useNavigate();
 	const clientsQuery = useClients();
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
-	const projectQuery = useProject(id);
+	const projectQuery = useProject(id, initialData);
 	const { data: project } = projectQuery;
 	const [status, setStatus] = useState(project?.status ?? "active");
 	const [content, setContent] = useState(project?.content ?? "");

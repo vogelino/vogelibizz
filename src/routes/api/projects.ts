@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getProjects } from "@/app/api/projects/getProjects";
+import { getProjects } from "@/server/api/projects/getProjects";
 import db from "@/db";
 import { projectInsertSchema, projects, projectsToClients } from "@/db/schema";
 import { json } from "@/utility/apiUtil";

@@ -8,12 +8,14 @@ function TableRelationsList({
 	maxItems = 2,
 	originalResource,
 	relationResource,
+	useModalLinks = false,
 }: {
 	originalId: number;
 	originalResource: ResourceType;
 	relationResource: ResourceType;
 	items: { id: number; name: string }[];
 	maxItems?: number;
+	useModalLinks?: boolean;
 }) {
 	const displayProjects = items.slice(0, maxItems);
 	const isMore = items.length > maxItems;
@@ -22,7 +24,20 @@ function TableRelationsList({
 			{displayProjects.map((project) => (
 				<Link
 					key={project.id}
-					to={`/${relationResource}/edit/${project.id}`}
+					to={
+						useModalLinks
+							? `/${relationResource}/edit/${project.id}/modal`
+							: `/${relationResource}/edit/${project.id}`
+					}
+					mask={
+						useModalLinks
+							? {
+									to: `/${relationResource}/edit/$id`,
+									params: { id: String(project.id) },
+									unmaskOnReload: true,
+								}
+							: undefined
+					}
 					className="focusable"
 				>
 					<IconBadge
@@ -34,7 +49,20 @@ function TableRelationsList({
 			))}
 			{isMore && (
 				<Link
-					to={`/${originalResource}/edit/${originalId}`}
+					to={
+						useModalLinks
+							? `/${originalResource}/edit/${originalId}/modal`
+							: `/${originalResource}/edit/${originalId}`
+					}
+					mask={
+						useModalLinks
+							? {
+									to: `/${originalResource}/edit/$id`,
+									params: { id: String(originalId) },
+									unmaskOnReload: true,
+								}
+							: undefined
+					}
 					className="focusable"
 				>
 					<IconBadge

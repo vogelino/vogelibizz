@@ -115,10 +115,11 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								<div className="min-w-40 flex gap-4 justify-between items-center w-full">
 									<div className="flex gap-x-1.5 gap-y-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
-											<button
+											<span
 												key={option.value}
 												className="focusable text-sm trim-both items-center h-fit"
-												type="button"
+												role="button"
+												tabIndex={0}
 												onClick={(evt) => {
 													evt.stopPropagation();
 													onOptionSelect(option.value);
@@ -132,7 +133,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 												}}
 											>
 												{selectedValueFormaterFn(option.value)}
-											</button>
+											</span>
 										))}
 
 										{selectedOptions.length > 5 && (

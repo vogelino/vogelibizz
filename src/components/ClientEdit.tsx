@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ProjectType } from "@/db/schema";
+import type { ClientType, ProjectType } from "@/db/schema";
 import useClient from "@/utility/data/useClient";
 import useClientCreate from "@/utility/data/useClientCreate";
 import useClientEdit from "@/utility/data/useClientEdit";
@@ -17,12 +17,14 @@ import useComboboxOptions, {
 export default function ClientEdit({
 	id,
 	formId,
+	initialData,
 }: {
 	id?: number | undefined;
 	formId: string;
+	initialData?: ClientType;
 }) {
 	const navigate = useNavigate();
-	const clientQuery = useClient(id);
+	const clientQuery = useClient(id, initialData);
 	const { data: client } = clientQuery;
 	const projectsQuery = useProjects();
 	const editMutation = useClientEdit();

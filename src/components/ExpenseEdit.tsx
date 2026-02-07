@@ -1,7 +1,7 @@
 "use client";
 
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
@@ -10,6 +10,7 @@ import CurrencyInput from "@/components/ui/currency-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	type ExpenseType,
+	type ExpenseWithMonthlyCLPPriceType,
 	expenseCategoryEnum,
 	expenseRateEnum,
 	expenseTypeEnum,
@@ -27,13 +28,15 @@ import useComboboxOptions from "@/utility/useComboboxOptions";
 export default function ExpenseEdit({
 	id,
 	formId,
+	initialData,
 }: {
 	id?: number;
 	formId: string;
+	initialData?: ExpenseWithMonthlyCLPPriceType;
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
-	const { data: expense } = useExpense(id);
+	const { data: expense } = useExpense(id, initialData);
 	const navigate = useNavigate();
 	const [type, setType] = useState(expense?.type ?? "Freelance");
 	const [category, setCategory] = useState(

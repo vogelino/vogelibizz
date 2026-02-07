@@ -11,7 +11,7 @@ const resourceName = "expenses";
 const action = "querySingle";
 const outputZodSchema = expenseSelectSchema;
 
-function useExpense(id?: DataType["id"]) {
+function useExpense(id?: DataType["id"], initialData?: DataType) {
 	const queryKey = [resourceName, `${id ?? ""}`];
 	return useQuery<DataType>({
 		queryKey,
@@ -22,6 +22,8 @@ function useExpense(id?: DataType["id"]) {
 			outputZodSchema,
 			id: id ?? "",
 		}),
+		initialData,
+		initialDataUpdatedAt: initialData ? Date.now() : undefined,
 	});
 }
 

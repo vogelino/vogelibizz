@@ -4,6 +4,7 @@ import {
 	Outlet,
 	redirect,
 } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { useSession } from "@/providers/SessionProvider";
 
@@ -30,7 +31,13 @@ export const Route = createFileRoute("/_resource")({
 
 function ResourceLayout() {
 	const { data, status } = useSession();
-	if (status !== "loading" && !data) {
+	const [hydrated, setHydrated] = useState(false);
+
+	useEffect(() => {
+		setHydrated(true);
+	}, []);
+
+	if (hydrated && status !== "loading" && !data) {
 		return <Navigate to="/login" replace />;
 	}
 	return (
