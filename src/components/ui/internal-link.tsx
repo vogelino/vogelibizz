@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";
@@ -7,9 +8,20 @@ function InternalLink(
 		href: LinkProps["to"];
 		className?: string;
 		children?: React.ReactNode;
+		prefetchQuery?: {
+			queryKey: unknown[];
+			queryFn: () => Promise<unknown>;
+		};
 	},
 ) {
-	const { href, ...rest } = props;
+	const { href, prefetchQuery, onMouseEnter, onFocus, ...rest } = props;
+	const queryClient = useQueryClient();
+
+	const handlePrefetch = () => {
+		if (!prefetchQuery) return;
+		void queryClient.prefetchQuery(prefetchQuery);
+	};
+
 	return (
 		<Link
 			{...rest}
@@ -23,6 +35,14 @@ function InternalLink(
 				`transition-colors motion-reduce:transition-none`,
 				props.className,
 			)}
+			onMouseEnter={(event) => {
+				handlePrefetch();
+				onMouseEnter?.(event);
+			}}
+			onFocus={(event) => {
+				handlePrefetch();
+				onFocus?.(event);
+			}}
 		/>
 	);
 }

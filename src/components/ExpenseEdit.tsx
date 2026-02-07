@@ -7,6 +7,7 @@ import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	type ExpenseType,
 	expenseCategoryEnum,
@@ -49,6 +50,7 @@ export default function ExpenseEdit({
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -60,6 +62,23 @@ export default function ExpenseEdit({
 			rate,
 		},
 	});
+
+	useEffect(() => {
+		if (!expense) return;
+		setType(expense.type ?? "Freelance");
+		setCategory(expense.category ?? "Administrative");
+		setRate(expense.rate ?? "Monthly");
+		setOriginalPrice(expense.originalPrice ?? 0);
+		setOriginalCurrency(expense.originalCurrency ?? "USD");
+		reset({
+			name: expense.name ?? "",
+			category: expense.category ?? "Administrative",
+			type: expense.type ?? "Freelance",
+			originalPrice: expense.originalPrice ?? 0,
+			originalCurrency: expense.originalCurrency ?? "USD",
+			rate: expense.rate ?? "Monthly",
+		});
+	}, [expense, reset]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -82,6 +101,20 @@ export default function ExpenseEdit({
 	const rateOptions = useComboboxOptions<ExpenseType["rate"]>({
 		optionValues: expenseRateEnum.enumValues,
 	});
+
+	if (id && !expense) {
+		return (
+			<div className="flex flex-col gap-6">
+				<Skeleton className="h-10 w-full" />
+				<div className="grid @md:grid-cols-2 gap-6">
+					<Skeleton className="h-10 w-full" />
+					<Skeleton className="h-10 w-full" />
+					<Skeleton className="h-10 w-full" />
+					<Skeleton className="h-10 w-full" />
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<form

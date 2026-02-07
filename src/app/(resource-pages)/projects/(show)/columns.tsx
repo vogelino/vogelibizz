@@ -2,7 +2,12 @@ import { createColumnHelper } from "@tanstack/react-table";
 import TableRelationsList from "@/components/TableRelationsList";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ClientType, ProjectType } from "@/db/schema";
+import {
+	type ClientType,
+	type ProjectType,
+	projectSelectSchema,
+} from "@/db/schema";
+import createQueryFunction from "@/utility/data/createQueryFunction";
 import {
 	mapStatusToIcon,
 	mapStatusToLabel,
@@ -32,7 +37,19 @@ export const projectTableColumns = [
 			const id = row.original.id;
 			const value = getValue<string>();
 			return (
-				<InternalLink href={`/projects/edit/${id}`} className="text-base">
+				<InternalLink
+					href={`/projects/edit/${id}`}
+					className="text-base"
+					prefetchQuery={{
+						queryKey: ["projects", `${id}`],
+						queryFn: createQueryFunction<ProjectType>({
+							resourceName: "projects",
+							action: "querySingle",
+							outputZodSchema: projectSelectSchema,
+							id,
+						}),
+					}}
+				>
 					{value}
 				</InternalLink>
 			);
