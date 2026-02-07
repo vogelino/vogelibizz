@@ -1,14 +1,24 @@
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { connection, db } from "@/db";
-import env from "@/env";
-import config from "$/drizzle.config";
+import { loadDotEnv } from "@/utility/loadDotEnv";
 
-if (!env.server.POSTGRES_MIGRATING) {
-	throw new Error(
-		'You must set POSTGRES_MIGRATING to "true" when running migrations',
-	);
+async function main() {
+	loadDotEnv();
+
+	const [{ migrate }, { connection, db }, env, config] = await Promise.all([
+		import("drizzle-orm/postgres-js/migrator"),
+		import("@/db"),
+		import("@/env"),
+		import("$/drizzle.config"),
+	]);
+
+	if (!env.default.server.POSTGRES_MIGRATING) {
+		throw new Error(
+			'You must set POSTGRES_MIGRATING to "true" when running migrations',
+		);
+	}
+
+	await migrate(db, { migrationsFolder: config.default.out! });
+
+	await connection.end();
 }
 
-await migrate(db, { migrationsFolder: config.out! });
-
-await connection.end();
+await main();

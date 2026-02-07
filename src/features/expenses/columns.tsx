@@ -3,6 +3,7 @@ import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
 import {
+	type CurrencyIdType,
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
@@ -13,7 +14,8 @@ import { formatCurrency } from "@/utility/formatUtil";
 
 const columnHelper = createColumnHelper<ExpenseWithMonthlyCLPPriceType>();
 
-export const expensesTableColumns = [
+export function getExpensesTableColumns(targetCurrency: CurrencyIdType) {
+	return [
 	columnHelper.accessor("name", {
 		id: "name",
 		size: 1000,
@@ -49,11 +51,13 @@ export const expensesTableColumns = [
 	columnHelper.accessor("clpMonthlyPrice", {
 		id: "clpMonthlyPrice",
 		size: 100,
-		header: "CLP/Month",
+		header: `${targetCurrency}/Month`,
 		cell: function render({ getValue }) {
 			const value =
 				getValue<ExpenseWithMonthlyCLPPriceType["clpMonthlyPrice"]>();
-			return <span>{value && formatCurrency(value)}</span>;
+			return (
+				<span>{value && formatCurrency(value, targetCurrency)}</span>
+			);
 		},
 	}),
 	columnHelper.accessor("originalPrice", {
@@ -100,4 +104,5 @@ export const expensesTableColumns = [
 			);
 		},
 	}),
-];
+	];
+}

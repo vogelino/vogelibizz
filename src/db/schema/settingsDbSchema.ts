@@ -1,8 +1,11 @@
 import { integer, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
+import { currencyEnum } from "./currenciesDbSchema";
 
 export const settings = pgTable("settings", {
 	id: serial("id").primaryKey(),
 	companyDisplayName: text("company_display_name").notNull(),
+	targetCurrency: currencyEnum("target_currency").notNull().default("CLP"),
 	companyLegalName: text("company_legal_name"),
 	companySvgLogoString: text("company_svg_logo_string"),
 	companySvgIconString: text("company_svg_icon_string"),
@@ -21,3 +24,6 @@ export const settings = pgTable("settings", {
 	companyBankSwiftCode: text("company_bank_swift_code"),
 	companyDefaultHourlyRate: integer("company_default_hourly_rate").default(50),
 });
+
+export const settingsSelectSchema = createSelectSchema(settings);
+export type SettingsType = typeof settings.$inferSelect;
