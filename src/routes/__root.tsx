@@ -28,7 +28,12 @@ export const Route = createRootRoute({
 function RootComponent() {
 	const htmlStyle = { "--font-inter": "Inter" } as React.CSSProperties;
 	return (
-		<html lang="en" className="font-sans" style={htmlStyle}>
+		<html
+			lang="en"
+			className="font-sans"
+			style={htmlStyle}
+			suppressHydrationWarning
+		>
 			<head>
 				<HeadContent />
 			</head>

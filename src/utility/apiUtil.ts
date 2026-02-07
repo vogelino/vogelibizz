@@ -78,7 +78,7 @@ export function getEditionRoute(
 	mutateData: (inputId: number, body?: unknown) => Promise<unknown>,
 ) {
 	return async ({ request, params = {} }: HandlerContext) => {
-		const allowed = await ensureAdmin();
+		const allowed = await ensureAdmin(request);
 		if (allowed) return allowed;
 
 		let body = {};
@@ -108,8 +108,8 @@ export function getEditionRoute(
 }
 
 export function getDeletionRoute(mutateData: (id: number) => Promise<unknown>) {
-	return async ({ params = {} }: HandlerContext) => {
-		const allowed = await ensureAdmin();
+	return async ({ request, params = {} }: HandlerContext) => {
+		const allowed = await ensureAdmin(request);
 		if (allowed) return allowed;
 
 		const { id, error } = await validateParams(params);
@@ -131,7 +131,7 @@ export const getCreationRoute = (
 	mutateData: (body: unknown) => Promise<unknown>,
 ) => {
 	return async ({ request }: HandlerContext) => {
-		const allowed = await ensureAdmin();
+		const allowed = await ensureAdmin(request);
 		if (allowed) return allowed;
 
 		try {
@@ -149,8 +149,8 @@ export function getQueryRouteWithId(
 	getNotFoundMessage = (id: number | string) =>
 		`Resource with id '${id}' does not exist`,
 ) {
-	return async ({ params }: HandlerContext) => {
-		const allowed = await ensureAdmin();
+	return async ({ request, params }: HandlerContext) => {
+		const allowed = await ensureAdmin(request);
 		if (allowed) return allowed;
 
 		const validation = await validateParams(params);
@@ -182,8 +182,8 @@ function handleError(err: unknown, action: ActionType) {
 	return json({ error: err }, { status: 500 });
 }
 
-async function ensureAdmin() {
-	const allowed = await isAuthenticatedAndAdmin();
+async function ensureAdmin(request: Request) {
+	const allowed = await isAuthenticatedAndAdmin(undefined, request);
 	if (!allowed) {
 		return json({ error: "Unauthorized" }, { status: 401 });
 	}

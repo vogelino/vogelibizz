@@ -24,6 +24,7 @@ const ServerEnvSchema = PublicEnvSchema.merge(
 		NODE_ENV: z.string().default("development"),
 
 		// Auth
+		AUTH_URL: z.string().optional(),
 		AUTH_SECRET: z.string(),
 		AUTH_GITHUB_ID: z.string(),
 		AUTH_GITHUB_SECRET: z.string(),
