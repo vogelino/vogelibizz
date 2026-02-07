@@ -25,6 +25,8 @@ export const Route = createFileRoute("/_resource/clients/edit/$id")({
 	},
 	component: ClientEditPageRoute,
 	pendingComponent: ClientEditPagePending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ClientEditPageRoute() {

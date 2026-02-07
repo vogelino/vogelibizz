@@ -34,6 +34,8 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id/modal")({
 	},
 	component: ExpenseEditModal,
 	pendingComponent: ExpenseEditModalPending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ExpenseEditModal() {

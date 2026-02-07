@@ -31,6 +31,8 @@ export const Route = createFileRoute("/_resource/clients/edit/$id/modal")({
 	},
 	component: ClientEditModal,
 	pendingComponent: ClientEditModalPending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ClientEditModal() {

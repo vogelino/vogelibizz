@@ -28,6 +28,8 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id")({
 	},
 	component: ExpenseEditPageRoute,
 	pendingComponent: ExpenseEditPagePending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ExpenseEditPageRoute() {

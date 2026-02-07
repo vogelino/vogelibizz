@@ -31,6 +31,8 @@ export const Route = createFileRoute("/_resource/projects/edit/$id/modal")({
 	},
 	component: ProjectEditModal,
 	pendingComponent: ProjectEditModalPending,
+	pendingMs: 0,
+	pendingMinMs: 200,
 });
 
 function ProjectEditModal() {
