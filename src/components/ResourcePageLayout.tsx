@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import ResourceCreateButton from "@/components/ResourceCreateButton";
-import type { ResourceType } from "@/db/schema";
+import type { RoutedResource } from "@/utility/routedResources";
 
 function ResourcePageLayout({
 	resource,
 	children,
 }: {
-	resource: ResourceType;
+	resource: RoutedResource;
 	children: ReactNode;
 }) {
 	return (

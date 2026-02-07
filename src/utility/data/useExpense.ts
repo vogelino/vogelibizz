@@ -2,28 +2,32 @@
 import { useQuery } from "@tanstack/react-query";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
-	expenseSelectSchema,
+	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 type DataType = ExpenseWithMonthlyCLPPriceType;
-const resourceName = "expenses";
-const action = "querySingle";
-const outputZodSchema = expenseSelectSchema;
 
 function useExpense(id?: DataType["id"], initialData?: DataType) {
-	const queryKey = [resourceName, `${id ?? ""}`];
-	return useQuery<DataType>({
-		queryKey,
+	const query =
+		id === undefined
+			? queryKeys.expenses.detail("")
+			: queryKeys.expenses.detail(id);
+	const queryFn = createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
+		resourceName: "expenses",
+		action: "querySingle",
+		outputZodSchema: expenseWithMonthlyCLPPriceSchema,
+		id: id ?? "",
+	});
+	const initialDataOptions = initialData
+		? { initialData, initialDataUpdatedAt: Date.now() }
+		: {};
+	return useQuery({
+		...query,
+		queryFn,
 		enabled: Boolean(id),
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-			id: id ?? "",
-		}),
-		initialData,
-		initialDataUpdatedAt: initialData ? Date.now() : undefined,
+		...initialDataOptions,
 	});
 }
 

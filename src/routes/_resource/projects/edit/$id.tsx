@@ -32,7 +32,6 @@ function ProjectEditPageRoute() {
 	const { project } = Route.useLoaderData();
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
-	const idString = `${id}`;
 	const formId = `project-edit-form-${parsedId}`;
 	const isPending = useRouterState({ select: (state) => state.isLoading });
 
@@ -44,7 +43,7 @@ function ProjectEditPageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to={`/projects/edit/${idString}`}>
+						<Link to="/projects">
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

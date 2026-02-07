@@ -2,9 +2,7 @@ import { ZodError, type ZodSchema } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
 
-export async function handleFetchResponse<
-	T extends { id?: undefined | number | string },
->({
+export async function handleFetchResponse<OutputType>({
 	response,
 	data,
 	crudAction,
@@ -12,13 +10,26 @@ export async function handleFetchResponse<
 	zodSchema,
 }: {
 	response: Response;
-	data?: undefined | T | number | string;
+	data?:
+		| undefined
+		| { id?: undefined | number | string }
+		| Array<{ id?: undefined | number | string }>
+		| number
+		| string;
 	crudAction: "create" | "edit" | "delete" | "query";
 	resourceName: ResourceType;
-	zodSchema?: ZodSchema;
-}) {
-	const id =
-		typeof data === "number" || typeof data === "string" ? data : data?.id;
+	zodSchema?: ZodSchema<OutputType>;
+}): Promise<OutputType> {
+	let id: number | string | undefined;
+	if (typeof data === "number" || typeof data === "string") {
+		id = data;
+	} else if (data && typeof data === "object") {
+		if (Array.isArray(data)) {
+			id = data.at(0)?.id;
+		} else {
+			id = data.id;
+		}
+	}
 
 	const withIdText = id ? ` with id "${id}"` : "";
 	if (!response.ok) {

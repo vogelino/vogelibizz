@@ -2,23 +2,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ClientType, clientSelectSchema } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
-
-type DataType = ClientType[];
-const resourceName = "clients";
-const action = "queryAll";
-const outputZodSchema = clientSelectSchema.array();
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 function useClients({ enabled = true }: { enabled?: boolean } = {}) {
-	const queryKey = [resourceName];
-	return useQuery<DataType>({
-		queryKey,
+	const queryFn = createQueryFunction<ClientType[]>({
+		resourceName: "clients",
+		action: "queryAll",
+		outputZodSchema: clientSelectSchema.array(),
+	});
+	return useQuery({
+		...queryKeys.clients.list,
+		queryFn,
 		enabled,
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-		}),
 	});
 }
 

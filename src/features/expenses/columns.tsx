@@ -4,9 +4,10 @@ import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
-	expenseSelectSchema,
+	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 
@@ -22,7 +23,8 @@ export const expensesTableColumns = [
 			const value = getValue<string>();
 			return (
 				<InternalLink
-					href={`/expenses/edit/${id}/modal`}
+					to="/expenses/edit/$id/modal"
+					params={{ id: String(id) }}
 					className="text-base"
 					mask={{
 						to: "/expenses/edit/$id",
@@ -30,11 +32,11 @@ export const expensesTableColumns = [
 						unmaskOnReload: true,
 					}}
 					prefetchQuery={{
-						queryKey: ["expenses", `${id}`],
+						queryKey: queryKeys.expenses.detail(id).queryKey,
 						queryFn: createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
 							resourceName: "expenses",
 							action: "querySingle",
-							outputZodSchema: expenseSelectSchema,
+							outputZodSchema: expenseWithMonthlyCLPPriceSchema,
 							id,
 						}),
 					}}

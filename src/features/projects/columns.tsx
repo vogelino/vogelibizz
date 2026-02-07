@@ -8,6 +8,7 @@ import {
 	projectSelectSchema,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 import {
 	mapStatusToIcon,
 	mapStatusToLabel,
@@ -38,7 +39,8 @@ export const projectTableColumns = [
 			const value = getValue<string>();
 			return (
 				<InternalLink
-					href={`/projects/edit/${id}/modal`}
+					to="/projects/edit/$id/modal"
+					params={{ id: String(id) }}
 					className="text-base"
 					mask={{
 						to: "/projects/edit/$id",
@@ -46,7 +48,7 @@ export const projectTableColumns = [
 						unmaskOnReload: true,
 					}}
 					prefetchQuery={{
-						queryKey: ["projects", `${id}`],
+						queryKey: queryKeys.projects.detail(id).queryKey,
 						queryFn: createQueryFunction<ProjectType>({
 							resourceName: "projects",
 							action: "querySingle",

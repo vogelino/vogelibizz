@@ -5,7 +5,7 @@ import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
-	expenseSelectSchema,
+	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import { parseId } from "@/utility/resourceUtil";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id")({
 		const expense = await createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
 			resourceName: "expenses",
 			action: "querySingle",
-			outputZodSchema: expenseSelectSchema,
+			outputZodSchema: expenseWithMonthlyCLPPriceSchema,
 			id: parsedId,
 		})();
 		return { expense };

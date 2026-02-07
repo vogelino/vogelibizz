@@ -1,20 +1,24 @@
 import { useQueryClient } from "@tanstack/react-query";
+import type { QueryFunction } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";
 
-function InternalLink(
+function InternalLink<TQueryKey extends readonly unknown[]>(
 	props: Omit<LinkProps, "to"> & {
-		href: LinkProps["to"];
+		to: LinkProps["to"];
+		params?: LinkProps["params"];
 		className?: string;
 		children?: React.ReactNode;
 		prefetchQuery?: {
-			queryKey: unknown[];
-			queryFn: () => Promise<unknown>;
+			queryKey: TQueryKey;
+			queryFn: QueryFunction<unknown, TQueryKey>;
 		};
+		onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
+		onFocus?: React.FocusEventHandler<HTMLAnchorElement>;
 	},
 ) {
-	const { href, prefetchQuery, onMouseEnter, onFocus, ...rest } = props;
+	const { to, prefetchQuery, onMouseEnter, onFocus, ...rest } = props;
 	const queryClient = useQueryClient();
 
 	const handlePrefetch = () => {
@@ -25,7 +29,7 @@ function InternalLink(
 	return (
 		<Link
 			{...rest}
-			to={href}
+			to={to}
 			className={cn(
 				`hyphen-auto`,
 				`outline-none focusable px-3 py-2`,

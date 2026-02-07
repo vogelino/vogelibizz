@@ -1,26 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 type DataType = ProjectType;
-const resourceName = "projects";
-const action = "querySingle";
-const outputZodSchema = projectSelectSchema;
 
 function useProject(id?: string | number, initialData?: DataType) {
 	const parsedId = id ? Number(id) : undefined;
-	const queryKey = [resourceName, `${parsedId ?? ""}`];
-	return useQuery<DataType>({
-		queryKey,
+	const query =
+		parsedId === undefined
+			? queryKeys.projects.detail("")
+			: queryKeys.projects.detail(parsedId);
+	const queryFn = createQueryFunction<ProjectType>({
+		resourceName: "projects",
+		action: "querySingle",
+		outputZodSchema: projectSelectSchema,
+		id: parsedId ?? "",
+	});
+	const initialDataOptions = initialData
+		? { initialData, initialDataUpdatedAt: Date.now() }
+		: {};
+	return useQuery({
+		...query,
+		queryFn,
 		enabled: Number.isFinite(parsedId),
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-			id: parsedId ?? "",
-		}),
-		initialData,
-		initialDataUpdatedAt: initialData ? Date.now() : undefined,
+		...initialDataOptions,
 	});
 }
 

@@ -11,14 +11,14 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "clients";
-const action: ActionType = "create";
+const action = "create" satisfies ActionType;
 const inputZodSchema = clientInsertSchema.array();
 
 const useClientCreate = createMutationHook<ClientType[], ClientInsertType[]>({
 	resourceName,
 	action,
 	inputZodSchema,
-	mutationFn: createQueryFunction<void>({
+	mutationFn: createQueryFunction<void, ClientInsertType[]>({
 		resourceName,
 		action,
 		inputZodSchema,

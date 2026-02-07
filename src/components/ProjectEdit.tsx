@@ -81,7 +81,7 @@ export default function ProjectEdit({
 	}, [project, reset]);
 
 	const clientsOptions = useComboboxOptions<ClientType>({
-		optionValues: clientsQuery.data,
+		optionValues: clientsQuery.data ?? [],
 		renderer: (client) => client?.name || "",
 		accessorFn: ({ id }) => String(id),
 	});

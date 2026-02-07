@@ -5,23 +5,19 @@ import {
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
-import createQueryFunction from "./createQueryFunction";
-
-type DataType = ExpenseWithMonthlyCLPPriceType[];
-const resourceName = "expenses";
-const action = "queryAll";
-const outputZodSchema = expenseWithMonthlyCLPPriceSchema.array();
+import createQueryFunction from "@/utility/data/createQueryFunction";
+import { queryKeys } from "@/utility/queryKeys";
 
 function useExpenses({ enabled = true }: { enabled?: boolean } = {}) {
-	const queryKey = [resourceName];
-	return useQuery<DataType>({
-		queryKey,
+	const queryFn = createQueryFunction<ExpenseWithMonthlyCLPPriceType[]>({
+		resourceName: "expenses",
+		action: "queryAll",
+		outputZodSchema: expenseWithMonthlyCLPPriceSchema.array(),
+	});
+	return useQuery({
+		...queryKeys.expenses.list,
+		queryFn,
 		enabled,
-		queryFn: createQueryFunction<DataType>({
-			resourceName,
-			action,
-			outputZodSchema,
-		}),
 	});
 }
 

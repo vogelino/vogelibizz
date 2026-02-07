@@ -6,7 +6,7 @@ import createMutationHook from "./createMutationHook";
 import createQueryFunction, { type ActionType } from "./createQueryFunction";
 
 const resourceName: ResourceType = "projects";
-const action: ActionType = "delete";
+const action = "delete" satisfies ActionType;
 const inputZodSchema = z.number();
 
 const useProjectDelete = createMutationHook<ProjectType[], ProjectType["id"]>({
