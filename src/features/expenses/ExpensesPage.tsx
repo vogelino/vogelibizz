@@ -64,10 +64,34 @@ export default function ExpensesPage({
 		[targetCurrency],
 	);
 
-	const totalPerMonth = useMemo(
-		() => getTotalPerMonth(data, targetCurrency),
-		[data, targetCurrency],
-	);
+	const { totalLabel, filteredLabel, showFilteredTotal } = useMemo(() => {
+		const hasCategoryFilter = categoryFilter.length > 0;
+		const hasTypeFilter = typeFilter !== "All types";
+		const filteredData =
+			hasCategoryFilter || hasTypeFilter
+				? data.filter((expense) => {
+						if (
+							hasCategoryFilter &&
+							!categoryFilter.includes(expense.category)
+						) {
+							return false;
+						}
+						if (hasTypeFilter && expense.type !== typeFilter) {
+							return false;
+						}
+						return true;
+					})
+				: data;
+
+		const total = getTotalPerMonthValue(data);
+		const filtered = getTotalPerMonthValue(filteredData);
+
+		return {
+			totalLabel: total ? formatCurrency(total, targetCurrency) : "–",
+			filteredLabel: filtered ? formatCurrency(filtered, targetCurrency) : "–",
+			showFilteredTotal: hasCategoryFilter || hasTypeFilter,
+		};
+	}, [categoryFilter, data, targetCurrency, typeFilter]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -87,11 +111,48 @@ export default function ExpensesPage({
 	});
 	return (
 		<>
-			<div className="flex flex-col p-4 bg-muted my-4">
-				<span className="text-sm text-muted-foreground">Monthly total</span>
-				<span className="text-lg">
-					{isLoading ? <Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" /> : totalPerMonth}
-				</span>
+			<div className="p-4 bg-muted my-4">
+				{showFilteredTotal ? (
+					<div className="flex flex-wrap gap-6">
+						<div className="flex flex-col">
+							<span className="text-sm text-muted-foreground">
+								Filtered total
+							</span>
+							<span className="text-lg">
+								{isLoading ? (
+									<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
+								) : (
+									filteredLabel
+								)}
+							</span>
+						</div>
+						<div className="flex flex-col">
+							<span className="text-sm text-muted-foreground">
+								Monthly total
+							</span>
+							<span className="text-lg">
+								{isLoading ? (
+									<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
+								) : (
+									totalLabel
+								)}
+							</span>
+						</div>
+					</div>
+				) : (
+					<div className="flex flex-col">
+						<span className="text-sm text-muted-foreground">
+							Monthly total
+						</span>
+						<span className="text-lg">
+							{isLoading ? (
+								<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
+							) : (
+								totalLabel
+							)}
+						</span>
+					</div>
+				)}
 			</div>
 			<div className="w-full mb-6">
 				<DataTable
@@ -165,13 +226,9 @@ export default function ExpensesPage({
 	);
 }
 
-function getTotalPerMonth(
-	data: ExpenseWithMonthlyCLPPriceType[],
-	targetCurrency: string,
-) {
-	const total = data?.reduce((a, b) => {
+function getTotalPerMonthValue(data: ExpenseWithMonthlyCLPPriceType[]) {
+	return data?.reduce((a, b) => {
 		const monthlyPrice = b.clpMonthlyPrice;
 		return a + (monthlyPrice ?? 0);
 	}, 0);
-	return total ? formatCurrency(total, targetCurrency) : "–";
 }
