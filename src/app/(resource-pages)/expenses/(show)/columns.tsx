@@ -2,7 +2,11 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import type { ExpenseWithMonthlyCLPPriceType } from "@/db/schema";
+import {
+	type ExpenseWithMonthlyCLPPriceType,
+	expenseSelectSchema,
+} from "@/db/schema";
+import createQueryFunction from "@/utility/data/createQueryFunction";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 
@@ -17,7 +21,19 @@ export const expensesTableColumns = [
 			const id = row.original.id;
 			const value = getValue<string>();
 			return (
-				<InternalLink href={`/expenses/edit/${id}`} className="text-base">
+				<InternalLink
+					href={`/expenses/edit/${id}`}
+					className="text-base"
+					prefetchQuery={{
+						queryKey: ["expenses", `${id}`],
+						queryFn: createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
+							resourceName: "expenses",
+							action: "querySingle",
+							outputZodSchema: expenseSelectSchema,
+							id,
+						}),
+					}}
+				>
 					{value}
 				</InternalLink>
 			);

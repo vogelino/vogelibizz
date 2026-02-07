@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import ClientOnly from "@/components/ClientOnly";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ClientType, ProjectType } from "@/db/schema";
 import useClients from "@/utility/data/useClients";
 import useProject from "@/utility/data/useProject";
@@ -47,6 +48,7 @@ export default function ProjectEdit({
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -61,8 +63,17 @@ export default function ProjectEdit({
 	});
 
 	useEffect(() => {
-		setProjectClients(project?.clients || []);
-	}, [project?.clients]);
+		if (!project) return;
+		setStatus(project.status ?? "active");
+		setContent(project.content ?? "");
+		setProjectClients(project.clients || []);
+		reset({
+			name: project.name ?? "",
+			content: project.content ?? "",
+			status: project.status ?? "active",
+			description: project.description ?? "",
+		});
+	}, [project, reset]);
 
 	const clientsOptions = useComboboxOptions<ClientType>({
 		optionValues: clientsQuery.data,
@@ -87,6 +98,18 @@ export default function ProjectEdit({
 		},
 		[clientsQuery.data],
 	);
+
+	if (Boolean(id) && projectQuery.isPending) {
+		return (
+			<div className="flex flex-col gap-4">
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-32 w-full" />
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
+			</div>
+		);
+	}
 
 	return (
 		<form

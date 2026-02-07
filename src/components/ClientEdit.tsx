@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ProjectType } from "@/db/schema";
 import useClient from "@/utility/data/useClient";
 import useClientCreate from "@/utility/data/useClientCreate";
@@ -35,6 +36,7 @@ export default function ClientEdit({
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -43,8 +45,12 @@ export default function ClientEdit({
 	});
 
 	useEffect(() => {
+		if (!client) return;
 		setClientProjects(client?.projects || []);
-	}, [client?.projects]);
+		reset({
+			name: client.name ?? "",
+		});
+	}, [client, reset]);
 
 	const projectsOptions = useComboboxOptions<ProjectType>({
 		optionValues: projectsQuery.data,
@@ -69,6 +75,15 @@ export default function ClientEdit({
 		},
 		[projectsQuery.data],
 	);
+
+	if (id && clientQuery.isPending) {
+		return (
+			<div className="flex flex-col gap-6">
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
+			</div>
+		);
+	}
 
 	return (
 		<form
