@@ -84,7 +84,7 @@ export default function ExpensesPage({
 			<div className="flex flex-col p-4 bg-muted my-4">
 				<span className="text-sm text-muted-foreground">Monthly total</span>
 				<span className="text-lg">
-					{isLoading ? <Skeleton className="h-6 w-24" /> : totalPerMonth}
+					{isLoading ? <Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" /> : totalPerMonth}
 				</span>
 			</div>
 			<div className="w-full mb-6">
