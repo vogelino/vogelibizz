@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useRouterState,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ExpensesPage from "@/features/expenses/ExpensesPage";
 import ExpenseEdit from "@/components/ExpenseEdit";
@@ -29,6 +33,7 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id/modal")({
 		return { expense };
 	},
 	component: ExpenseEditModal,
+	pendingComponent: ExpenseEditModalPending,
 });
 
 function ExpenseEditModal() {
@@ -38,6 +43,7 @@ function ExpenseEditModal() {
 	const parsedId = parseId(id);
 	if (!parsedId) return <ExpensesPage />;
 	const formId = `expense-edit-form-${parsedId}`;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<>
@@ -63,7 +69,34 @@ function ExpenseEditModal() {
 					</>
 				}
 			>
-				<ExpenseEdit id={parsedId} formId={formId} initialData={expense} />
+				<ExpenseEdit
+					id={parsedId}
+					formId={formId}
+					initialData={expense}
+					loading={isPending}
+				/>
+			</ResponsiveModal>
+		</>
+	);
+}
+
+function ExpenseEditModalPending() {
+	const { id } = Route.useParams();
+	const navigate = useNavigate();
+	const parsedId = parseId(id);
+	if (!parsedId) return <ExpensesPage />;
+	const formId = `expense-edit-form-${parsedId}`;
+
+	return (
+		<>
+			<ExpensesPage />
+			<ResponsiveModal
+				open
+				title={<PageHeaderTitle name="Edit expense" id={parsedId} />}
+				onClose={() => navigate({ to: "/expenses" })}
+				footer={null}
+			>
+				<ExpenseEdit id={parsedId} formId={formId} loading />
 			</ResponsiveModal>
 		</>
 	);

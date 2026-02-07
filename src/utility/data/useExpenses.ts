@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
@@ -12,10 +12,11 @@ const resourceName = "expenses";
 const action = "queryAll";
 const outputZodSchema = expenseWithMonthlyCLPPriceSchema.array();
 
-function useExpenses() {
+function useExpenses({ enabled = true }: { enabled?: boolean } = {}) {
 	const queryKey = [resourceName];
-	return useSuspenseQuery<DataType>({
+	return useQuery<DataType>({
 		queryKey,
+		enabled,
 		queryFn: createQueryFunction<DataType>({
 			resourceName,
 			action,

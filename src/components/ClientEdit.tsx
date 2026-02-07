@@ -3,6 +3,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import FormInputWrapper from "@/components/FormInputWrapper";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ClientType, ProjectType } from "@/db/schema";
@@ -18,14 +19,17 @@ export default function ClientEdit({
 	id,
 	formId,
 	initialData,
+	loading = false,
 }: {
 	id?: number | undefined;
 	formId: string;
 	initialData?: ClientType;
+	loading?: boolean;
 }) {
 	const navigate = useNavigate();
 	const clientQuery = useClient(id, initialData);
 	const { data: client } = clientQuery;
+	const isLoading = loading || (Boolean(id) && clientQuery.isPending);
 	const projectsQuery = useProjects();
 	const editMutation = useClientEdit();
 	const [clientProjects, setClientProjects] = useState<
@@ -78,15 +82,6 @@ export default function ClientEdit({
 		[projectsQuery.data],
 	);
 
-	if (id && clientQuery.isPending) {
-		return (
-			<div className="flex flex-col gap-6">
-				<Skeleton className="h-10 w-full" />
-				<Skeleton className="h-10 w-full" />
-			</div>
-		);
-	}
-
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
@@ -102,30 +97,38 @@ export default function ClientEdit({
 			id={formId}
 		>
 			<div className="flex flex-col gap-6">
-				<label className="flex flex-col gap-1">
-					<span className="text-muted-foreground">Name</span>
-					<input
-						type="text"
-						{...register("name", {
-							required: "This field is required",
-						})}
-						defaultValue={client?.name}
-						className="form-input"
-					/>
-					{typeof errors.name?.message === "string" && errors.name.message}
-				</label>
-				{!clientQuery.error && !clientQuery.isPending && (
-					<div className="flex flex-col gap-1">
-						<span className="text-muted-foreground">Projects</span>
-						<MultiValueInput
-							options={projectsOptions}
-							values={clientProjects.map((project) => String(project.id)) || []}
-							placeholder="Select the clients' projects"
-							className="w-full"
-							onChange={onProjectsChange}
+				<FormInputWrapper
+					label="Name"
+					error={
+						typeof errors.name?.message === "string"
+							? errors.name.message
+							: undefined
+					}
+					loading={isLoading}
+					loadingChildren={<Skeleton className="h-9 w-full" />}
+				>
+					{!isLoading && (
+						<input
+							type="text"
+							{...register("name", {
+								required: "This field is required",
+							})}
+							defaultValue={client?.name}
+							className="form-input"
 						/>
-					</div>
-				)}
+					)}
+				</FormInputWrapper>
+				<div className="flex flex-col gap-1">
+					<span className="text-muted-foreground">Projects</span>
+					<MultiValueInput
+						options={projectsOptions}
+						values={clientProjects.map((project) => String(project.id)) || []}
+						placeholder="Select the clients' projects"
+						className="w-full"
+						onChange={onProjectsChange}
+						loading={isLoading || projectsQuery.isPending}
+					/>
+				</div>
 			</div>
 		</form>
 	);

@@ -16,6 +16,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utility/classNames";
 import { IconBadge } from "./icon-badge";
 
@@ -31,6 +32,7 @@ type MultiValueInputProps<OptionValueType> = {
 	className?: string;
 	placeholder?: string;
 	selectedValueFormater?: (value: string | number) => ReactNode;
+	loading?: boolean;
 };
 
 export function MultiValueInput<OptionValueType extends string = string>({
@@ -40,6 +42,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 	className,
 	placeholder = "Select options",
 	selectedValueFormater,
+	loading = false,
 }: MultiValueInputProps<OptionValueType>) {
 	const onChange = originalOnChange || (() => {});
 	const selectedValueFormaterFn =
@@ -87,6 +90,24 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		},
 		[selectedOptions, options, onChange],
 	);
+
+	if (loading) {
+		return (
+			<div className="flex items-center border border-border">
+				<div
+					className={cn(
+						buttonVariants({ variant: "ghost" }),
+						"w-full h-9",
+						"bg-background dark:bg-card",
+						"p-0",
+						className,
+					)}
+				>
+					<Skeleton className="h-9 w-full" />
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex items-center border border-border">

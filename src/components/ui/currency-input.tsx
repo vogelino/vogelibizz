@@ -4,6 +4,7 @@ import ReactCurrencyInput, {
 	type CurrencyInputProps,
 } from "react-currency-input-field";
 import FormInputWrapper from "@/components/FormInputWrapper";
+import { Skeleton } from "@/components/ui/skeleton";
 import { currencyEnum, type ExpenseType } from "@/db/schema";
 import { cn } from "@/utility/classNames";
 import { locale } from "@/utility/formatUtil";
@@ -20,6 +21,7 @@ function CurrencyInput({
 	onCurrencyChange,
 	onValueChange,
 	label = "Amount",
+	loading = false,
 }: PropsWithChildren<{
 	inputProps: CurrencyInputProps;
 	currencyProps: HTMLProps<HTMLInputElement>;
@@ -29,6 +31,7 @@ function CurrencyInput({
 	value: number | undefined;
 	label?: string;
 	className?: string;
+	loading?: boolean;
 }>) {
 	const options = useMemo(
 		() =>
@@ -49,41 +52,52 @@ function CurrencyInput({
 	);
 
 	return (
-		<FormInputWrapper label={label}>
-			<div className="flex">
-				<div className="relative w-full">
-					<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-muted-foreground opacity-80">
-						<Banknote />
+		<FormInputWrapper
+			label={label}
+			loading={loading}
+			loadingChildren={
+				<div className="flex gap-2">
+					<Skeleton className="h-9 w-full" />
+					<Skeleton className="h-9 w-24" />
+				</div>
+			}
+		>
+			{!loading && (
+				<div className="flex">
+					<div className="relative w-full">
+						<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-muted-foreground opacity-80">
+							<Banknote />
+						</div>
+						<input type="hidden" {...inputProps} />
+						<ReactCurrencyInput
+							className={cn(
+								"form-input dark:bg-card",
+								"ps-12 w-full font-mono border-r-0",
+								inputProps?.className,
+								className,
+							)}
+							placeholder="0.00"
+							required
+							defaultValue={value}
+							onValueChange={(_value, _name, values) =>
+								values?.float && onValueChange(values?.float)
+							}
+							intlConfig={{ locale }}
+							decimalScale={2}
+						/>
 					</div>
-					<input type="hidden" {...inputProps} />
-					<ReactCurrencyInput
-						className={cn(
-							"form-input dark:bg-card",
-							"ps-12 w-full font-mono border-r-0",
-							inputProps?.className,
-							className,
-						)}
-						placeholder="0.00"
-						required
-						defaultValue={value}
-						onValueChange={(_value, _name, values) =>
-							values?.float && onValueChange(values?.float)
+					<input type="hidden" {...currencyProps} value={currency} />
+					<Combobox
+						className={className}
+						options={options}
+						value={currency}
+						onChange={(currency) =>
+							onCurrencyChange(currency as ExpenseType["originalCurrency"])
 						}
-						intlConfig={{ locale }}
-						decimalScale={2}
+						selectedValueFormater={() => <span>{currency}</span>}
 					/>
 				</div>
-				<input type="hidden" {...currencyProps} value={currency} />
-				<Combobox
-					className={className}
-					options={options}
-					value={currency}
-					onChange={(currency) =>
-						onCurrencyChange(currency as ExpenseType["originalCurrency"])
-					}
-					selectedValueFormater={() => <span>{currency}</span>}
-				/>
-			</div>
+			)}
 		</FormInputWrapper>
 	);
 }

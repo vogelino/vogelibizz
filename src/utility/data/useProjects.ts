@@ -1,6 +1,6 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
 import createQueryFunction from "./createQueryFunction";
 
@@ -9,10 +9,11 @@ const resourceName = "projects";
 const action = "queryAll";
 const outputZodSchema = projectSelectSchema.array();
 
-function useProjects() {
+function useProjects({ enabled = true }: { enabled?: boolean } = {}) {
 	const queryKey = [resourceName];
-	return useSuspenseQuery<DataType>({
+	return useQuery<DataType>({
 		queryKey,
+		enabled,
 		queryFn: createQueryFunction<DataType>({
 			resourceName,
 			action,

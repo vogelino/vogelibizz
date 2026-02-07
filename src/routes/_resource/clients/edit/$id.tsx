@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_resource/clients/edit/$id")({
 		return { client };
 	},
 	component: ClientEditPageRoute,
+	pendingComponent: ClientEditPagePending,
 });
 
 function ClientEditPageRoute() {
@@ -33,6 +34,7 @@ function ClientEditPageRoute() {
 	if (!parsedId) return null;
 	const idString = `${id}`;
 	const formId = `client-edit-form-${parsedId}`;
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<FormPageLayout
@@ -53,7 +55,29 @@ function ClientEditPageRoute() {
 				</>
 			}
 		>
-			<ClientEdit id={parsedId} formId={formId} initialData={client} />
+			<ClientEdit
+				id={parsedId}
+				formId={formId}
+				initialData={client}
+				loading={isPending}
+			/>
+		</FormPageLayout>
+	);
+}
+
+function ClientEditPagePending() {
+	const { id } = Route.useParams();
+	const parsedId = parseId(id);
+	if (!parsedId) return null;
+	const formId = `client-edit-form-${parsedId}`;
+	return (
+		<FormPageLayout
+			id={parsedId}
+			title="Edit client"
+			allLink="/clients"
+			footerButtons={null}
+		>
+			<ClientEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

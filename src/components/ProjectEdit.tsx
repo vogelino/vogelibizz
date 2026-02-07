@@ -27,10 +27,12 @@ export default function ProjectEdit({
 	id,
 	formId,
 	initialData,
+	loading = false,
 }: {
 	id?: string | number;
 	formId: string;
 	initialData?: ProjectType;
+	loading?: boolean;
 }) {
 	const navigate = useNavigate();
 	const clientsQuery = useClients();
@@ -38,6 +40,7 @@ export default function ProjectEdit({
 	const createMutation = useProjectCreate();
 	const projectQuery = useProject(id, initialData);
 	const { data: project } = projectQuery;
+	const isLoading = loading || (Boolean(id) && projectQuery.isPending);
 	const [status, setStatus] = useState(project?.status ?? "active");
 	const [content, setContent] = useState(project?.content ?? "");
 	const [projectClients, setProjectClients] = useState<
@@ -101,18 +104,6 @@ export default function ProjectEdit({
 		[clientsQuery.data],
 	);
 
-	if (Boolean(id) && projectQuery.isPending) {
-		return (
-			<div className="flex flex-col gap-4">
-				<Skeleton className="h-10 w-full" />
-				<Skeleton className="h-10 w-full" />
-				<Skeleton className="h-32 w-full" />
-				<Skeleton className="h-10 w-full" />
-				<Skeleton className="h-10 w-full" />
-			</div>
-		);
-	}
-
 	return (
 		<form
 			onSubmit={handleSubmit((values) => {
@@ -124,37 +115,55 @@ export default function ProjectEdit({
 			id={formId}
 		>
 			<div className="flex flex-col gap-4">
-				<FormInputWrapper label="Name" error={errors?.name?.message}>
-					<input
-						type="text"
-						{...register("name", {
-							required: "This field is required",
-						})}
-						className="form-input"
-						defaultValue={project?.name || ""}
-					/>
+				<FormInputWrapper
+					label="Name"
+					error={errors?.name?.message}
+					loading={isLoading}
+					loadingChildren={<Skeleton className="h-9 w-full" />}
+				>
+					{!isLoading && (
+						<input
+							type="text"
+							{...register("name", {
+								required: "This field is required",
+							})}
+							className="form-input"
+							defaultValue={project?.name || ""}
+						/>
+					)}
 				</FormInputWrapper>
 				<FormInputWrapper
 					label="Description"
 					error={errors?.description?.message}
+					loading={isLoading}
+					loadingChildren={<Skeleton className="h-9 w-full" />}
 				>
-					<input
-						type="text"
-						{...register("description", {
-							required: "This field is required",
-						})}
-						className="form-input"
-						defaultValue={project?.description || ""}
-					/>
+					{!isLoading && (
+						<input
+							type="text"
+							{...register("description", {
+								required: "This field is required",
+							})}
+							className="form-input"
+							defaultValue={project?.description || ""}
+						/>
+					)}
 				</FormInputWrapper>
-				<FormInputWrapper label="Content" error={errors?.content?.message}>
-					<div className="bg-background dark:bg-card border border-border min-h-89">
-						<ClientOnly fallback={<div className="p-4 text-sm">Loading…</div>}>
-							<Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
-								<TextareaEditor value={content} onChange={setContent} />
-							</Suspense>
-						</ClientOnly>
-					</div>
+				<FormInputWrapper
+					label="Content"
+					error={errors?.content?.message}
+					loading={isLoading}
+					loadingChildren={<Skeleton className="h-32 w-full" />}
+				>
+					{!isLoading && (
+						<div className="bg-background dark:bg-card border border-border min-h-89">
+							<ClientOnly fallback={<div className="p-4 text-sm">Loading…</div>}>
+								<Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
+									<TextareaEditor value={content} onChange={setContent} />
+								</Suspense>
+							</ClientOnly>
+						</div>
+					)}
 				</FormInputWrapper>
 				<FormInputCombobox
 					onChange={(val) => setStatus(val as ProjectType["status"])}
@@ -164,19 +173,19 @@ export default function ProjectEdit({
 					label="Status"
 					error={errors?.status?.message}
 					className="w-full"
+					loading={isLoading}
 				/>
-				{!projectQuery.error && !projectQuery.isPending && (
-					<div className="flex flex-col gap-1">
-						<span className="text-muted-foreground">Clients</span>
-						<MultiValueInput
-							options={clientsOptions}
-							values={projectClients.map((client) => String(client.id)) || []}
-							placeholder="Select the projects' clients"
-							className="w-full"
-							onChange={onProjectsChange}
-						/>
-					</div>
-				)}
+				<div className="flex flex-col gap-1">
+					<span className="text-muted-foreground">Clients</span>
+					<MultiValueInput
+						options={clientsOptions}
+						values={projectClients.map((client) => String(client.id)) || []}
+						placeholder="Select the projects' clients"
+						className="w-full"
+						onChange={onProjectsChange}
+						loading={isLoading || clientsQuery.isPending}
+					/>
+				</div>
 			</div>
 		</form>
 	);

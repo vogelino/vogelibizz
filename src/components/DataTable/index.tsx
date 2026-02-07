@@ -17,6 +17,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -37,6 +38,9 @@ type DataTableProps<TData> = {
 		pagination?: PaginationState;
 	};
 	toolbar?: (table: TanstackTable<TData>) => ReactNode;
+	loading?: boolean;
+	skeletonRows?: number;
+	toolbarSkeleton?: ReactNode;
 };
 
 export function DataTable<TData>({
@@ -44,6 +48,9 @@ export function DataTable<TData>({
 	data,
 	initialState,
 	toolbar,
+	loading = false,
+	skeletonRows = 6,
+	toolbarSkeleton,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -76,7 +83,9 @@ export function DataTable<TData>({
 
 	return (
 		<div className="space-y-4">
-			{toolbar ? <div>{toolbar(table)}</div> : null}
+			{toolbar ? (
+				<div>{loading ? toolbarSkeleton ?? null : toolbar(table)}</div>
+			) : null}
 			<div className="rounded-md">
 				<Table>
 					<TableHeader>
@@ -127,7 +136,23 @@ export function DataTable<TData>({
 						))}
 					</TableHeader>
 					<TableBody>
-						{table.getRowModel().rows?.length ? (
+						{loading ? (
+							[...Array(Math.max(1, skeletonRows))].map((_, rowIndex) => (
+								<TableRow
+									key={`skeleton-row-${rowIndex}`}
+									className="relative"
+								>
+									{table.getAllColumns().map((column, colIndex) => (
+										<TableCell
+											key={`skeleton-cell-${rowIndex}-${colIndex}`}
+											style={{ width: `${column.getSize()}px` }}
+										>
+											<Skeleton className="h-5 w-full" />
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow key={row.id} className="relative">
 									{row.getVisibleCells().map((cell) => (

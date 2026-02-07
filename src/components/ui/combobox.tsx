@@ -4,6 +4,7 @@ import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Command,
 	CommandEmpty,
@@ -29,6 +30,7 @@ export type ComboboxProps = {
 	className?: string;
 	selectedValueFormater?: (value: string | number) => ReactNode;
 	align?: PopoverContentProps["align"];
+	loading?: boolean;
 };
 export function Combobox({
 	options,
@@ -40,7 +42,11 @@ export function Combobox({
 			? options.find((option) => option.value === value)?.label
 			: "Select value...",
 	align = "end",
+	loading = false,
 }: ComboboxProps) {
+	if (loading) {
+		return <Skeleton className={cn("h-9 w-full", className)} />;
+	}
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState<string | number | undefined>(
 		initialValue ?? options[0]?.value,

@@ -5,8 +5,9 @@ import type { ProjectType } from "@/db/schema";
 import useProjects from "@/utility/data/useProjects";
 import { projectTableColumns } from "./columns";
 
-export default function ProjectList() {
-	const { data, error } = useProjects();
+export default function ProjectList({ loading = false }: { loading?: boolean }) {
+	const { data = [], error, isPending } = useProjects();
+	const isLoading = loading || isPending;
 
 	return (
 		<PageDataTable<ProjectType>
@@ -14,6 +15,7 @@ export default function ProjectList() {
 			columns={projectTableColumns}
 			data={!error && data.length > 0 ? data : []}
 			defaultSortColumn="last_modified"
+			loading={isLoading}
 		/>
 	);
 }

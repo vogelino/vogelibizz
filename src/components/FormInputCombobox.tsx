@@ -11,6 +11,7 @@ function FormInputCombobox({
 	label,
 	inputProps,
 	className,
+	loading = false,
 }: {
 	error?: string;
 	inputProps: HTMLProps<HTMLInputElement>;
@@ -19,16 +20,21 @@ function FormInputCombobox({
 	label: ReactNode;
 	value: string;
 	className?: string;
+	loading?: boolean;
 }) {
 	return (
-		<FormInputWrapper label={label} error={error}>
-			<input type="hidden" {...inputProps} />
-			<Combobox
-				className={className}
-				options={options}
-				value={value}
-				onChange={(val) => onChange(val)}
-			/>
+		<FormInputWrapper label={label} error={error} loading={loading}>
+			{!loading && (
+				<>
+					<input type="hidden" {...inputProps} />
+					<Combobox
+						className={className}
+						options={options}
+						value={value}
+						onChange={(val) => onChange(val)}
+					/>
+				</>
+			)}
 		</FormInputWrapper>
 	);
 }
