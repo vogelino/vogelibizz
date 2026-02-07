@@ -19,7 +19,11 @@ const expenses = createQueryKeys("expenses", {
 	detail: (id: string | number) => [String(id)],
 });
 
-export const queryKeys = mergeQueryKeys(projects, clients, expenses);
+const settings = createQueryKeys("settings", {
+	current: null,
+});
+
+export const queryKeys = mergeQueryKeys(projects, clients, expenses, settings);
 export type QueryResourceKey = Extract<
 	ResourceType,
 	keyof typeof queryKeys

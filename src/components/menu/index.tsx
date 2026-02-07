@@ -1,8 +1,15 @@
+"use client";
+
 import { Link } from "@tanstack/react-router";
 import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Combobox } from "@/components/ui/combobox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { currencyEnum, type CurrencyIdType } from "@/db/schema";
 import { cn } from "@/utility/classNames";
+import useSettings from "@/utility/data/useSettings";
+import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
 import HeaderMenuLink from "./HeaderMenuLink";
 
 export const Menu = ({
@@ -12,6 +19,13 @@ export const Menu = ({
 	withBg?: boolean;
 	currentPage: string;
 }) => {
+	const settingsQuery = useSettings();
+	const settingsUpdate = useSettingsUpdate();
+	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
+	const currencyOptions = currencyEnum.enumValues.map((currency) => ({
+		value: currency,
+		label: currency,
+	}));
 	const menuItems = [
 		{
 			key: "projects",
@@ -95,6 +109,26 @@ export const Menu = ({
 					)}
 					aria-label="Secondary menu items"
 				>
+					<li
+						aria-label="Secondary menu: Target currency"
+						className={cn(
+							`w-full md:w-auto py-5 md:p-0 text-muted-foreground`,
+							`flex justify-between items-center pr-5 md:pr-0`,
+						)}
+					>
+						{settingsQuery.isPending ? (
+							<Skeleton className="h-9 w-24" />
+						) : (
+							<Combobox
+								options={currencyOptions}
+								value={targetCurrency}
+								onChange={(value) =>
+									settingsUpdate.mutate(value as CurrencyIdType)
+								}
+								className="min-w-24"
+							/>
+						)}
+					</li>
 					<li
 						aria-label="Secondary menu link: Theme toggle"
 						className={cn(

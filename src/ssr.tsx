@@ -1,5 +1,9 @@
 import { StartServer } from "@tanstack/react-start/server";
-import { getRouter } from "./router";
+import { loadDotEnv } from "@/utility/loadDotEnv";
+
+loadDotEnv();
+
+const { getRouter } = await import("./router");
 
 export default function render() {
 	const router = getRouter();

@@ -4,4 +4,4 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-ALTER TABLE "expenses" ADD COLUMN "original_currency" "currency" DEFAULT 'CLP' NOT NULL;
+ALTER TABLE "expenses" ADD COLUMN IF NOT EXISTS "original_currency" "currency" DEFAULT 'CLP' NOT NULL;

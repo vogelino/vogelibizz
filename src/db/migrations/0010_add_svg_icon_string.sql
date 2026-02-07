@@ -1,1 +1,1 @@
-ALTER TABLE "clients" ADD COLUMN "svg_icon_string" text;
+ALTER TABLE "clients" ADD COLUMN IF NOT EXISTS "svg_icon_string" text;

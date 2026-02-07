@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS "settings" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"company_display_name" text NOT NULL,
+	"target_currency" "currency" DEFAULT 'CLP' NOT NULL,
+	"company_legal_name" text,
+	"company_svg_logo_string" text,
+	"company_svg_icon_string" text,
+	"company_tax_id" text,
+	"company_street_name" text,
+	"company_street_number" text,
+	"company_district" text,
+	"company_country_code" text,
+	"company_email" text,
+	"company_phone" text,
+	"company_website" text,
+	"company_bank_owner" text,
+	"company_bank_name" text,
+	"company_bank_account_number" text,
+	"company_bank_address" text,
+	"company_bank_swift_code" text,
+	"company_default_hourly_rate" integer DEFAULT 50
+);

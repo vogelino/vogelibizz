@@ -15,6 +15,7 @@ import {
 } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenses from "@/utility/data/useExpenses";
+import useSettings from "@/utility/data/useSettings";
 import {
 	categoryToOptionClass,
 	mapTypeToIcon,
@@ -23,7 +24,7 @@ import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import { expensesTableColumns } from "./columns";
+import { getExpensesTableColumns } from "./columns";
 
 type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
 
@@ -46,22 +47,27 @@ export default function ExpensesPage({
 	);
 
 	const { data = [], error, isPending } = useExpenses();
+	const settingsQuery = useSettings();
+	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
 	const isLoading = loading || isPending;
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
 	const columns = useMemo(
 		() =>
 			[
-				...expensesTableColumns,
+				...getExpensesTableColumns(targetCurrency),
 				lastModifiedColumn,
 				deleteColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseWithMonthlyCLPPriceType, any>[],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
+		[targetCurrency],
 	);
 
-	const totalPerMonth = useMemo(() => getTotalPerMonth(data), [data]);
+	const totalPerMonth = useMemo(
+		() => getTotalPerMonth(data, targetCurrency),
+		[data, targetCurrency],
+	);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -159,10 +165,13 @@ export default function ExpensesPage({
 	);
 }
 
-function getTotalPerMonth(data: ExpenseWithMonthlyCLPPriceType[]) {
+function getTotalPerMonth(
+	data: ExpenseWithMonthlyCLPPriceType[],
+	targetCurrency: string,
+) {
 	const total = data?.reduce((a, b) => {
 		const monthlyPrice = b.clpMonthlyPrice;
 		return a + (monthlyPrice ?? 0);
 	}, 0);
-	return total ? formatCurrency(total) : "–";
+	return total ? formatCurrency(total, targetCurrency) : "–";
 }

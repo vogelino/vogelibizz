@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS "expenses" (
 	CONSTRAINT "expenses_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
-ALTER TABLE "clients" ADD COLUMN "last_modified" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
-ALTER TABLE "invoices" ADD COLUMN "last_modified" timestamp;--> statement-breakpoint
-ALTER TABLE "projects" ADD COLUMN "last_modified" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
-ALTER TABLE "projects" ADD COLUMN "content" text DEFAULT '';--> statement-breakpoint
-ALTER TABLE "quotes" ADD COLUMN "last_modified" timestamp DEFAULT now() NOT NULL;
+ALTER TABLE "clients" ADD COLUMN IF NOT EXISTS "last_modified" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "invoices" ADD COLUMN IF NOT EXISTS "last_modified" timestamp;--> statement-breakpoint
+ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "last_modified" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "content" text DEFAULT '';--> statement-breakpoint
+ALTER TABLE "quotes" ADD COLUMN IF NOT EXISTS "last_modified" timestamp DEFAULT now() NOT NULL;

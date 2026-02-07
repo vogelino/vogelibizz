@@ -2,7 +2,7 @@
 
 import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -51,6 +51,11 @@ export function Combobox({
 	const [value, setValue] = useState<string | number | undefined>(
 		initialValue ?? options[0]?.value,
 	);
+
+	useEffect(() => {
+		if (initialValue === undefined) return;
+		setValue(initialValue);
+	}, [initialValue]);
 
 	const normalizedValue = value === undefined ? "" : String(value);
 	const selectedOption = useMemo(

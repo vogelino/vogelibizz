@@ -3,10 +3,20 @@ import {
 	type CurrencyType,
 	currencyEnum,
 } from "@/db/schema";
+import env from "@/env";
 import { fetchOpenExchangeRates } from "@/utility/expenseFetchUtil";
 import { randomToMax } from "@/utility/randomUti";
 
 async function getSeedData(): Promise<CurrencyType[]> {
+	if (env.server.POSTGRES_SEEDING) {
+		return currencyEnum.enumValues.map((id) => ({
+			id,
+			usdRate: randomToMax(10),
+			last_modified: new Date("2000-01-01").toISOString(),
+			created_at: new Date("2000-01-01").toISOString(),
+		}));
+	}
+
 	const exchangeRates = await fetchOpenExchangeRates();
 
 	if (!exchangeRates?.rates || Object.keys(exchangeRates.rates).length === 0) {

@@ -9,6 +9,7 @@ import {
 	currencyEnum,
 	type ExpenseType,
 	type ExpenseWithMonthlyCLPPriceType,
+	settings,
 } from "@/db/schema";
 import env from "@/env";
 
@@ -40,14 +41,16 @@ export async function getExpensesWithMonthlyClpPrice(
 	expenses: ExpenseType[],
 ): Promise<ExpenseWithMonthlyCLPPriceType[]> {
 	const rates = await getExchangeRates();
+	const targetCurrency = await getTargetCurrency();
 	return expenses.map((expense) => ({
 		...expense,
 		clpMonthlyPrice:
-			getValueInCLPPerMonth({
+			getValueInTargetCurrencyPerMonth({
 				value: expense.originalPrice,
 				rates: rates,
 				billingRate: expense.rate,
 				currency: expense.originalCurrency,
+				targetCurrency,
 			}) ?? expense.originalPrice,
 	}));
 }
@@ -67,22 +70,26 @@ export async function fetchOpenExchangeRates(): Promise<OpenExchangeRatesReturnT
 	return parseOpenExchangeRatesResponse(rawJson);
 }
 
-function getValueInCLPPerMonth({
+function getValueInTargetCurrencyPerMonth({
 	value,
 	currency,
 	rates,
 	billingRate,
+	targetCurrency,
 }: {
 	value: number;
 	currency: ExpenseType["originalCurrency"];
 	rates: null | RatesMapType;
 	billingRate: ExpenseType["rate"];
+	targetCurrency: CurrencyIdType;
 }) {
 	if (!rates) return null;
 	let monthlyPrice = value;
-	if (currency !== "CLP") {
-		const rate = rates.get(currency) ?? 0;
-		monthlyPrice = rate ? value / rate : 0;
+	if (currency !== targetCurrency) {
+		const originRate = currency === "CLP" ? 1 : rates.get(currency) ?? 0;
+		const targetRate = targetCurrency === "CLP" ? 1 : rates.get(targetCurrency) ?? 0;
+		const clpValue = originRate ? value / originRate : 0;
+		monthlyPrice = targetRate ? clpValue * targetRate : 0;
 	}
 	if (billingRate !== "Monthly") {
 		switch (billingRate) {
@@ -122,6 +129,13 @@ function getValueInCLPPerMonth({
 		}
 	}
 	return monthlyPrice;
+}
+
+async function getTargetCurrency(): Promise<CurrencyIdType> {
+	const currentSettings = await db.query.settings.findFirst({
+		columns: { targetCurrency: true },
+	});
+	return currentSettings?.targetCurrency ?? "CLP";
 }
 
 function currencyToRatesMap(
