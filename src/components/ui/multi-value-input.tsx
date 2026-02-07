@@ -168,13 +168,20 @@ export function MultiValueInput<OptionValueType extends string = string>({
 									</div>
 
 									<ArrowLeftToLine
-										onClick={() => {
+										onPointerDown={(evt) => {
+											evt.preventDefault();
+											evt.stopPropagation();
+										}}
+										onClick={(evt) => {
+											evt.stopPropagation();
 											setSelectedOptions([]);
 											onChange([]);
 											setOpen(false);
 										}}
 										onKeyDown={(evt) => {
 											if (evt.key === "Enter" || evt.key === " ") {
+												evt.preventDefault();
+												evt.stopPropagation();
 												setOpen(false);
 												onChange([]);
 												setSelectedOptions([]);
