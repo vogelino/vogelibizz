@@ -254,12 +254,36 @@ export default function ExpensesPage({
 							series={categorySeries}
 							colorForLabel={getCategoryStrokeColor}
 							loading={isLoading}
+							onSegmentClick={(label) => {
+								const nextCategory = expenseCategoryEnum.enumValues.find(
+									(value) => value === label,
+								);
+								if (!nextCategory) return;
+								setCategoryFilter([nextCategory]);
+								tableRef.current
+									?.getColumn("category")
+									?.setFilterValue([nextCategory]);
+								setTypeFilter("All types");
+								tableRef.current?.getColumn("type")?.setFilterValue(undefined);
+							}}
 						/>
 						<MiniPieChart
 							title="By type"
 							series={typeSeries}
 							colorForLabel={getTypeStrokeColor}
 							loading={isLoading}
+							onSegmentClick={(label) => {
+								const nextType = expenseTypeEnum.enumValues.find(
+									(value) => value === label,
+								);
+								if (!nextType) return;
+								setTypeFilter(nextType);
+								tableRef.current?.getColumn("type")?.setFilterValue(nextType);
+								setCategoryFilter([]);
+								tableRef.current
+									?.getColumn("category")
+									?.setFilterValue(undefined);
+							}}
 						/>
 					</div>
 				</div>
@@ -405,11 +429,13 @@ function MiniPieChart({
 	series,
 	colorForLabel,
 	loading,
+	onSegmentClick,
 }: {
 	title: string;
 	series: { label: string; value: number }[];
 	colorForLabel: (label: string) => string;
 	loading: boolean;
+	onSegmentClick?: (label: string) => void;
 }) {
 	if (loading) {
 		return (
@@ -524,7 +550,7 @@ function MiniPieChart({
 											strokeDasharray={dashArray}
 											strokeDashoffset={dashOffset}
 											fill="none"
-											className="cursor-default"
+											className={onSegmentClick ? "cursor-pointer" : "cursor-default"}
 											onMouseEnter={(event) => {
 												const bounds =
 													wrapperRef.current?.getBoundingClientRect();
@@ -552,6 +578,7 @@ function MiniPieChart({
 											onMouseLeave={() => {
 												setTooltip((prev) => ({ ...prev, visible: false }));
 											}}
+											onClick={() => onSegmentClick?.(item.label)}
 										/>
 									</TooltipTrigger>
 									<TooltipContent>
