@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -88,11 +88,23 @@ export function DataTable<TData>({
 		},
 	});
 
+	const selectedRows = useMemo(
+		() => table.getSelectedRowModel().rows.map((row) => row.original),
+		[table, rowSelection],
+	);
+
 	useEffect(() => {
 		if (!enableRowSelection || !onSelectionChange) return;
-		const selected = table.getSelectedRowModel().rows.map((row) => row.original);
-		onSelectionChange(selected);
-	}, [enableRowSelection, onSelectionChange, rowSelection, table]);
+		onSelectionChange(selectedRows);
+	}, [enableRowSelection, onSelectionChange, selectedRows]);
+
+	const skeletonRowKeys = useMemo(
+		() =>
+			Array.from({ length: Math.max(1, skeletonRows) }, (_, index) =>
+				`sr-${index}-${skeletonRows}`,
+			),
+		[skeletonRows],
+	);
 
 	const showPagination = table.getPageCount() > 1;
 
@@ -152,11 +164,11 @@ export function DataTable<TData>({
 					</TableHeader>
 					<TableBody>
 						{loading ? (
-							[...Array(Math.max(1, skeletonRows))].map((_, rowIndex) => (
-								<TableRow key={`skeleton-row-${rowIndex}`} className="relative">
-									{table.getAllColumns().map((column, colIndex) => (
+							skeletonRowKeys.map((rowKey) => (
+								<TableRow key={rowKey} className="relative">
+									{table.getAllColumns().map((column) => (
 										<TableCell
-											key={`skeleton-cell-${rowIndex}-${colIndex}`}
+											key={`${rowKey}-${column.id}`}
 											style={{ width: `${column.getSize()}px` }}
 										>
 											<Skeleton className="h-5 w-full" />

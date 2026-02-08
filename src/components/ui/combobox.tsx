@@ -44,9 +44,6 @@ export function Combobox({
 	align = "end",
 	loading = false,
 }: ComboboxProps) {
-	if (loading) {
-		return <Skeleton className={cn("h-9 w-full", className)} />;
-	}
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState<string | number | undefined>(
 		initialValue ?? options[0]?.value,
@@ -62,6 +59,9 @@ export function Combobox({
 		() => options.find((option) => String(option.value) === normalizedValue),
 		[options, normalizedValue],
 	);
+	if (loading) {
+		return <Skeleton className={cn("h-9 w-full", className)} />;
+	}
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>

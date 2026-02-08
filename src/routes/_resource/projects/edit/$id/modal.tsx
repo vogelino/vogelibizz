@@ -39,10 +39,10 @@ function ProjectEditModal() {
 	const { id } = Route.useParams();
 	const { project } = Route.useLoaderData();
 	const navigate = useNavigate();
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return <ProjectList />;
 	const formId = `project-edit-form-${parsedId}`;
-	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<>
