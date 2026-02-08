@@ -90,7 +90,7 @@ export function DataTable<TData>({
 
 	const selectedRows = useMemo(
 		() => table.getSelectedRowModel().rows.map((row) => row.original),
-		[table, rowSelection],
+		[table],
 	);
 
 	useEffect(() => {

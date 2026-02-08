@@ -536,60 +536,62 @@ function MiniPieChart({
 							const percentLabel = total
 								? `${Math.round(baseRatio * 100)}%`
 								: "0%";
+							const circle = (
+								<circle
+									key={item.label}
+									cx={size / 2}
+									cy={size / 2}
+									r={radius}
+									style={{ stroke }}
+									strokeWidth={strokeWidth}
+									strokeDasharray={dashArray}
+									strokeDashoffset={dashOffset}
+									fill="none"
+									className={onSegmentClick ? "cursor-pointer" : "cursor-default"}
+									role={onSegmentClick ? "button" : undefined}
+									tabIndex={onSegmentClick ? 0 : undefined}
+									aria-label={
+										onSegmentClick ? `Filter by ${item.label}` : undefined
+									}
+									onMouseEnter={(event) => {
+										const bounds = wrapperRef.current?.getBoundingClientRect();
+										if (!bounds) return;
+										setTooltip({
+											label: item.label,
+											percent: percentLabel,
+											color: stroke,
+											x: event.clientX - bounds.left,
+											y: event.clientY - bounds.top,
+											visible: true,
+										});
+									}}
+									onMouseMove={(event) => {
+										const bounds = wrapperRef.current?.getBoundingClientRect();
+										if (!bounds) return;
+										setTooltip((prev) => ({
+											...prev,
+											color: stroke,
+											x: event.clientX - bounds.left,
+											y: event.clientY - bounds.top,
+										}));
+									}}
+									onMouseLeave={() => {
+										setTooltip((prev) => ({ ...prev, visible: false }));
+									}}
+									onClick={() => onSegmentClick?.(item.label)}
+									onKeyDown={(event) => {
+										if (!onSegmentClick) return;
+										if (event.key === "Enter" || event.key === " ") {
+											event.preventDefault();
+											onSegmentClick(item.label);
+										}
+									}}
+								/>
+							);
 							return (
 								<Tooltip key={item.label}>
 									<TooltipTrigger asChild>
-										<circle
-											cx={size / 2}
-											cy={size / 2}
-											r={radius}
-											style={{ stroke }}
-											strokeWidth={strokeWidth}
-											strokeDasharray={dashArray}
-											strokeDashoffset={dashOffset}
-											fill="none"
-											className={onSegmentClick ? "cursor-pointer" : "cursor-default"}
-											role={onSegmentClick ? "button" : undefined}
-											tabIndex={onSegmentClick ? 0 : undefined}
-											aria-label={
-												onSegmentClick ? `Filter by ${item.label}` : undefined
-											}
-											onMouseEnter={(event) => {
-												const bounds =
-													wrapperRef.current?.getBoundingClientRect();
-												if (!bounds) return;
-												setTooltip({
-													label: item.label,
-													percent: percentLabel,
-													color: stroke,
-													x: event.clientX - bounds.left,
-													y: event.clientY - bounds.top,
-													visible: true,
-												});
-											}}
-											onMouseMove={(event) => {
-												const bounds =
-													wrapperRef.current?.getBoundingClientRect();
-												if (!bounds) return;
-												setTooltip((prev) => ({
-													...prev,
-													color: stroke,
-													x: event.clientX - bounds.left,
-													y: event.clientY - bounds.top,
-												}));
-											}}
-											onMouseLeave={() => {
-												setTooltip((prev) => ({ ...prev, visible: false }));
-											}}
-											onClick={() => onSegmentClick?.(item.label)}
-											onKeyDown={(event) => {
-												if (!onSegmentClick) return;
-												if (event.key === "Enter" || event.key === " ") {
-													event.preventDefault();
-													onSegmentClick(item.label);
-												}
-											}}
-										/>
+										<span>{circle}</span>
 									</TooltipTrigger>
 									<TooltipContent>
 										{item.label} · {percentLabel}
