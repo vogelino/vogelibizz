@@ -1,10 +1,12 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
+import { SelectionCheckbox } from "@/components/SelectionCheckbox";
+import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +32,7 @@ import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
+import { useResourceActions } from "@/components/ResourcePageLayout";
 import { getExpensesTableColumns } from "./columns";
 
 type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
@@ -51,6 +54,12 @@ export default function ExpensesPage({
 	const [typeFilter, setTypeFilter] = useState<string | number | undefined>(
 		"All types",
 	);
+	const [selectedRows, setSelectedRows] = useState<
+		ExpenseWithMonthlyCLPPriceType[]
+	>([]);
+	const tableRef = useRef<TanstackTable<ExpenseWithMonthlyCLPPriceType> | null>(
+		null,
+	);
 
 	const { data = [], error, isPending } = useExpenses();
 	const settingsQuery = useSettings();
@@ -58,16 +67,46 @@ export default function ExpensesPage({
 	const isLoading = loading || isPending;
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
+	const selectionColumn = useMemo(
+		() =>
+			({
+				id: "select",
+				header: ({ table }) => (
+					<SelectionCheckbox
+						checked={table.getIsAllPageRowsSelected()}
+						indeterminate={table.getIsSomePageRowsSelected()}
+						onChange={(checked) =>
+							table.toggleAllPageRowsSelected(checked)
+						}
+						ariaLabel="Select all rows"
+					/>
+				),
+				cell: ({ row }) => (
+					<SelectionCheckbox
+						checked={row.getIsSelected()}
+						indeterminate={row.getIsSomeSelected()}
+						onChange={(checked) => row.toggleSelected(checked)}
+						ariaLabel="Select row"
+					/>
+				),
+				size: 36,
+				enableSorting: false,
+				enableHiding: false,
+			}) as ColumnDef<ExpenseWithMonthlyCLPPriceType, unknown>,
+		[],
+	);
+
 	const columns = useMemo(
 		() =>
 			[
+				selectionColumn,
 				...getExpensesTableColumns(targetCurrency),
 				lastModifiedColumn,
 				deleteColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseWithMonthlyCLPPriceType, any>[],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[targetCurrency],
+		[targetCurrency, selectionColumn],
 	);
 
 	const {
@@ -141,6 +180,28 @@ export default function ExpensesPage({
 			</>
 		),
 	});
+
+	const selectionActions = useMemo(() => {
+		if (selectedRows.length === 0) return null;
+		return (
+			<Button
+				type="button"
+				variant="destructive"
+				size="sm"
+				disabled={isLoading}
+				onClick={() => {
+					for (const row of selectedRows) {
+						deleteMutation.mutate(row.id);
+					}
+					setSelectedRows([]);
+					tableRef.current?.resetRowSelection();
+				}}
+			>
+				Delete selected ({selectedRows.length})
+			</Button>
+		);
+	}, [deleteMutation, isLoading, selectedRows]);
+	useResourceActions(selectionActions);
 	return (
 		<>
 			<div className="p-4 bg-muted my-4">
@@ -207,6 +268,8 @@ export default function ExpensesPage({
 					columns={columns}
 					data={!error && data.length > 0 ? data : []}
 					loading={isLoading}
+					enableRowSelection
+					onSelectionChange={setSelectedRows}
 					toolbarSkeleton={
 						<div className="flex items-center gap-4">
 							<Skeleton className="h-9 w-64" />
@@ -227,6 +290,10 @@ export default function ExpensesPage({
 					}}
 					toolbar={(table) => (
 						<div className="flex items-center gap-4">
+							{(() => {
+								tableRef.current = table;
+								return null;
+							})()}
 							<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
 								options={categoryOptions}
 								values={
@@ -266,6 +333,22 @@ export default function ExpensesPage({
 								}}
 								loading={isLoading}
 							/>
+							{showFilteredTotal ? (
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									disabled={isLoading}
+									onClick={() => {
+										setCategoryFilter([]);
+										setTypeFilter("All types");
+										table.getColumn("category")?.setFilterValue(undefined);
+										table.getColumn("type")?.setFilterValue(undefined);
+									}}
+								>
+									Clear filters
+								</Button>
+							) : null}
 						</div>
 					)}
 				/>
