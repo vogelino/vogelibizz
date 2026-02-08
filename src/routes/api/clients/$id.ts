@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { getClient } from "@/server/api/clients/getClient";
 import db from "@/db";
 import { clientEditSchema, clients, projectsToClients } from "@/db/schema";
+import { getClient } from "@/server/api/clients/getClient";
 import {
 	getDeletionRoute,
 	getEditionRoute,

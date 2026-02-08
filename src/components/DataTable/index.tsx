@@ -100,8 +100,9 @@ export function DataTable<TData>({
 
 	const skeletonRowKeys = useMemo(
 		() =>
-			Array.from({ length: Math.max(1, skeletonRows) }, (_, index) =>
-				`sr-${index}-${skeletonRows}`,
+			Array.from(
+				{ length: Math.max(1, skeletonRows) },
+				(_, index) => `sr-${index}-${skeletonRows}`,
 			),
 		[skeletonRows],
 	);

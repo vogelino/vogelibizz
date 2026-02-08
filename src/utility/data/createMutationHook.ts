@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import type { z } from "zod";
-import type { RoutedResource } from "@/utility/routedResources";
 import { queryKeys } from "@/utility/queryKeys";
+import type { RoutedResource } from "@/utility/routedResources";
 import {
 	getQueryCompletionMessage,
 	singularizeResourceName,

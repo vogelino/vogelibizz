@@ -3,9 +3,9 @@ import { fileURLToPath } from "node:url";
 import type db from "@/db";
 import {
 	currencyEnum,
-	expenseCategoryEnum,
-	expenseRateEnum,
-	expenseTypeEnum,
+	type expenseCategoryEnum,
+	type expenseRateEnum,
+	type expenseTypeEnum,
 	expenses as schema,
 } from "../schema";
 import expensesSeedData from "./data/expensesSeedData";
@@ -50,7 +50,10 @@ export async function seedExpenses(db: db) {
 
 function parseOrbitSubscriptions() {
 	const filePath = fileURLToPath(
-		new URL("../../../db-data/Orbit_Subscriptions_2026-02-08.csv", import.meta.url),
+		new URL(
+			"../../../db-data/Orbit_Subscriptions_2026-02-08.csv",
+			import.meta.url,
+		),
 	);
 	const raw = readFileSync(filePath, "utf8");
 	const lines = raw.split(/\r?\n/);
@@ -119,10 +122,10 @@ function parseCsvLine(line: string) {
 	let inQuotes = false;
 	for (let i = 0; i < line.length; i += 1) {
 		const char = line[i];
-		if (char === "\"") {
+		if (char === '"') {
 			const nextChar = line[i + 1];
-			if (inQuotes && nextChar === "\"") {
-				current += "\"";
+			if (inQuotes && nextChar === '"') {
+				current += '"';
 				i += 1;
 			} else {
 				inQuotes = !inQuotes;

@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
+import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
@@ -30,9 +31,8 @@ import {
 } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
-import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-import { useResourceActions } from "@/components/ResourcePageLayout";
+import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { getExpensesTableColumns } from "./columns";
 
 type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
@@ -465,8 +465,7 @@ function MiniPieChart({
 	const total = trimmedSeries.reduce((acc, item) => acc + item.value, 0);
 	const positiveSeries = trimmedSeries.filter((item) => item.value > 0);
 	const positiveCount = positiveSeries.length;
-	const minRatio =
-		positiveCount > 0 ? Math.min(0.03, 1 / positiveCount) : 0;
+	const minRatio = positiveCount > 0 ? Math.min(0.03, 1 / positiveCount) : 0;
 	const smallItems = positiveSeries.filter(
 		(item) => item.value / total < minRatio,
 	);
@@ -539,15 +538,22 @@ function MiniPieChart({
 							return (
 								<Tooltip key={item.label}>
 									<TooltipTrigger asChild>
+										{/* biome-ignore lint/a11y/useSemanticElements: SVG segments need pointer events; no semantic button in SVG */}
 										<g
-											role={onSegmentClick ? "button" : undefined}
-											tabIndex={onSegmentClick ? 0 : undefined}
+											role="button"
+											tabIndex={0}
 											aria-label={
-												onSegmentClick ? `Filter by ${item.label}` : undefined
+												onSegmentClick
+													? `Filter by ${item.label}`
+													: `${item.label} segment`
 											}
-											className={onSegmentClick ? "cursor-pointer" : "cursor-default"}
+											aria-disabled={onSegmentClick ? undefined : true}
+											className={
+												onSegmentClick ? "cursor-pointer" : "cursor-default"
+											}
 											onMouseEnter={(event) => {
-												const bounds = wrapperRef.current?.getBoundingClientRect();
+												const bounds =
+													wrapperRef.current?.getBoundingClientRect();
 												if (!bounds) return;
 												setTooltip({
 													label: item.label,
@@ -559,7 +565,8 @@ function MiniPieChart({
 												});
 											}}
 											onMouseMove={(event) => {
-												const bounds = wrapperRef.current?.getBoundingClientRect();
+												const bounds =
+													wrapperRef.current?.getBoundingClientRect();
 												if (!bounds) return;
 												setTooltip((prev) => ({
 													...prev,

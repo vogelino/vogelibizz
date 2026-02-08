@@ -1,6 +1,6 @@
 import { Link, linkOptions } from "@tanstack/react-router";
-import { IconBadge } from "./ui/icon-badge";
 import type { RoutedResource } from "@/utility/routedResources";
+import { IconBadge } from "./ui/icon-badge";
 
 function TableRelationsList({
 	originalId,

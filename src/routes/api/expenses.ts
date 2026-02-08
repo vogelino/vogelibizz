@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getExpenses } from "@/server/api/expenses/getExpenses";
 import db from "@/db";
 import { expenseInsertSchema, expenses } from "@/db/schema";
+import { getExpenses } from "@/server/api/expenses/getExpenses";
 import { json } from "@/utility/apiUtil";
 
 export const Route = createFileRoute("/api/expenses")({

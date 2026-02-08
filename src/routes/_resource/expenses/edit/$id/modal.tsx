@@ -4,7 +4,6 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import ExpensesPage from "@/features/expenses/ExpensesPage";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
+import ExpensesPage from "@/features/expenses/ExpensesPage";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import { parseId } from "@/utility/resourceUtil";
 

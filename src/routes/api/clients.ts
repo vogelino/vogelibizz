@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getClients } from "@/server/api/clients/getClients";
 import db from "@/db";
 import { clientInsertSchema, clients, projectsToClients } from "@/db/schema";
+import { getClients } from "@/server/api/clients/getClients";
 import { json } from "@/utility/apiUtil";
 
 export const Route = createFileRoute("/api/clients")({

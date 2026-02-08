@@ -1,7 +1,6 @@
-import { loadDotEnv } from "@/utility/loadDotEnv";
-import type { Table } from "drizzle-orm";
+import type { getTableName as GetTableName, Table } from "drizzle-orm";
 import type { db as DbType } from "@/db";
-import type { getTableName as GetTableName } from "drizzle-orm";
+import { loadDotEnv } from "@/utility/loadDotEnv";
 
 async function main() {
 	loadDotEnv();

@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { isAuthenticatedAndAdmin } from "@/auth";
 import db from "@/db";
 import { currencyEnum, settings } from "@/db/schema";
-import { isAuthenticatedAndAdmin } from "@/auth";
-import { json } from "@/utility/apiUtil";
 import { getSettings } from "@/server/api/settings/getSettings";
+import { json } from "@/utility/apiUtil";
 
 const updateSettingsSchema = z.object({
 	targetCurrency: z.enum(currencyEnum.enumValues),

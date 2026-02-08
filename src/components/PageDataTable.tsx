@@ -3,9 +3,9 @@
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectType, ResourceType } from "@/db/schema";
 import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
@@ -13,9 +13,7 @@ import useProjectDelete from "@/utility/data/useProjectDelete";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 
-export default function PageDataTable<
-	DataType extends { id: number },
->({
+export default function PageDataTable<DataType extends { id: number }>({
 	resource,
 	columns: pageSpecificColumns,
 	data,
@@ -58,26 +56,28 @@ export default function PageDataTable<
 				id: "select",
 				header: ({ table }) => (
 					<div className="w-8">
-					<Checkbox
-						checked={
-							table.getIsAllPageRowsSelected() ||
-							(table.getIsSomePageRowsSelected() && "indeterminate")
-						}
-						onCheckedChange={(checked) => {
-							table.toggleAllPageRowsSelected(Boolean(checked));
-						}}
-						aria-label="Select all rows"
-					/>
+						<Checkbox
+							checked={
+								table.getIsAllPageRowsSelected() ||
+								(table.getIsSomePageRowsSelected() && "indeterminate")
+							}
+							onCheckedChange={(checked) => {
+								table.toggleAllPageRowsSelected(Boolean(checked));
+							}}
+							aria-label="Select all rows"
+						/>
 					</div>
 				),
 				cell: ({ row }) => (
-				<div className="w-8">
-					<Checkbox
-						checked={row.getIsSelected()}
-						onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))}
-						aria-label="Select row"
-					/>
-				</div>
+					<div className="w-8">
+						<Checkbox
+							checked={row.getIsSelected()}
+							onCheckedChange={(checked) =>
+								row.toggleSelected(Boolean(checked))
+							}
+							aria-label="Select row"
+						/>
+					</div>
 				),
 				size: 36,
 				enableSorting: false,

@@ -4,12 +4,12 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
-import ProjectList from "@/features/projects/ProjectsList";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import { type ProjectType, projectSelectSchema } from "@/db/schema";
+import ProjectList from "@/features/projects/ProjectsList";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import { parseId } from "@/utility/resourceUtil";
 

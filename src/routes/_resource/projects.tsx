@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import ProjectList from "@/features/projects/ProjectsList";
 import ResourcePageLayout from "@/components/ResourcePageLayout";
+import ProjectList from "@/features/projects/ProjectsList";
 
 export const Route = createFileRoute("/_resource/projects")({
 	component: ProjectsLayout,
