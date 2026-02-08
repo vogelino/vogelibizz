@@ -1,4 +1,3 @@
-import { getStartContext } from "@tanstack/start-storage-context";
 import type { AuthSession } from "start-authjs";
 import { getSession } from "start-authjs";
 import env from "@/env";
@@ -8,8 +7,11 @@ export type Session = AuthSession | null;
 
 export async function auth(request?: Request): Promise<Session> {
 	let resolvedRequest = request;
-	if (!resolvedRequest) {
+	if (!resolvedRequest && import.meta.env.SSR) {
 		try {
+			const { getStartContext } = await import(
+				"@tanstack/start-storage-context"
+			);
 			resolvedRequest = getStartContext({ throwIfNotFound: false })?.request;
 		} catch {
 			resolvedRequest = undefined;
