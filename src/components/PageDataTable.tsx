@@ -3,7 +3,7 @@
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
-import { SelectionCheckbox } from "@/components/SelectionCheckbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import type { ProjectType, ResourceType } from "@/db/schema";
@@ -57,22 +57,27 @@ export default function PageDataTable<
 			({
 				id: "select",
 				header: ({ table }) => (
-					<SelectionCheckbox
-						checked={table.getIsAllPageRowsSelected()}
-						indeterminate={table.getIsSomePageRowsSelected()}
-						onChange={(checked) =>
-							table.toggleAllPageRowsSelected(checked)
+					<div className="w-8">
+					<Checkbox
+						checked={
+							table.getIsAllPageRowsSelected() ||
+							(table.getIsSomePageRowsSelected() && "indeterminate")
 						}
-						ariaLabel="Select all rows"
+						onCheckedChange={(checked) => {
+							table.toggleAllPageRowsSelected(Boolean(checked));
+						}}
+						aria-label="Select all rows"
 					/>
+					</div>
 				),
 				cell: ({ row }) => (
-					<SelectionCheckbox
+				<div className="w-8">
+					<Checkbox
 						checked={row.getIsSelected()}
-						indeterminate={row.getIsSomeSelected()}
-						onChange={(checked) => row.toggleSelected(checked)}
-						ariaLabel="Select row"
+						onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))}
+						aria-label="Select row"
 					/>
+				</div>
 				),
 				size: 36,
 				enableSorting: false,
