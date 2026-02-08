@@ -1,10 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Navigate,
 	Outlet,
 	redirect,
 } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import type { SettingsType } from "@/db/schema";

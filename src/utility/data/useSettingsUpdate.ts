@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { settingsSelectSchema, type CurrencyIdType } from "@/db/schema";
+import { type CurrencyIdType, settingsSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { handleFetchResponse } from "@/utility/dataHookUtil";
 import { queryKeys } from "@/utility/queryKeys";

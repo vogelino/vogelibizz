@@ -3,8 +3,8 @@ import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
 import {
 	type ClientType,
-	type ProjectType,
 	clientSelectSchema,
+	type ProjectType,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import { queryKeys } from "@/utility/queryKeys";

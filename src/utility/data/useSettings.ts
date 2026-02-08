@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { settingsSelectSchema, type SettingsType } from "@/db/schema";
+import { type SettingsType, settingsSelectSchema } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import { queryKeys } from "@/utility/queryKeys";
 

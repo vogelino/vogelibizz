@@ -1,5 +1,5 @@
-import { useQueryClient } from "@tanstack/react-query";
 import type { QueryFunction } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";

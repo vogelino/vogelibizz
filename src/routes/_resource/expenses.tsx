@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import ExpensesPage from "@/features/expenses/ExpensesPage";
 import ResourcePageLayout from "@/components/ResourcePageLayout";
+import ExpensesPage from "@/features/expenses/ExpensesPage";
 
 export const Route = createFileRoute("/_resource/expenses")({
 	component: ExpensesLayout,

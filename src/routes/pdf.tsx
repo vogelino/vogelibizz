@@ -1,6 +1,7 @@
 import { Document, Font, Page, StyleSheet, View } from "@react-pdf/renderer";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect } from "react";
+import ClientOnly from "@/components/ClientOnly";
 import { Footer } from "@/pdf/components/Footer";
 import { FootNote } from "@/pdf/components/FootNote";
 import { HourlyRateNotice } from "@/pdf/components/HourlyRateNotice";
@@ -8,7 +9,6 @@ import { Introduction } from "@/pdf/components/Introduction";
 import { Letterhead } from "@/pdf/components/Letterhead";
 import { Table } from "@/pdf/components/Table";
 import { CONFIG, CONTENT } from "@/pdf/variables";
-import ClientOnly from "@/components/ClientOnly";
 
 const PDFViewer = lazy(async () => {
 	const mod = await import("@react-pdf/renderer");

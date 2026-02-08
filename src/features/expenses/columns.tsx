@@ -8,9 +8,9 @@ import {
 	expenseWithMonthlyCLPPriceSchema,
 } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
+import { queryKeys } from "@/utility/queryKeys";
 
 const columnHelper = createColumnHelper<ExpenseWithMonthlyCLPPriceType>();
 

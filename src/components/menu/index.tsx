@@ -6,7 +6,7 @@ import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Combobox } from "@/components/ui/combobox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { currencyEnum, type CurrencyIdType } from "@/db/schema";
+import { type CurrencyIdType, currencyEnum } from "@/db/schema";
 import { cn } from "@/utility/classNames";
 import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
