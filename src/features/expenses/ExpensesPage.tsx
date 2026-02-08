@@ -5,8 +5,8 @@ import { useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { PillText } from "@/components/PillText";
-import { SelectionCheckbox } from "@/components/SelectionCheckbox";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,21 +72,22 @@ export default function ExpensesPage({
 			({
 				id: "select",
 				header: ({ table }) => (
-					<SelectionCheckbox
-						checked={table.getIsAllPageRowsSelected()}
-						indeterminate={table.getIsSomePageRowsSelected()}
-						onChange={(checked) =>
-							table.toggleAllPageRowsSelected(checked)
+					<Checkbox
+						checked={
+							table.getIsAllPageRowsSelected() ||
+							(table.getIsSomePageRowsSelected() && "indeterminate")
 						}
-						ariaLabel="Select all rows"
+						onCheckedChange={(checked) => {
+							table.toggleAllPageRowsSelected(Boolean(checked));
+						}}
+						aria-label="Select all rows"
 					/>
 				),
 				cell: ({ row }) => (
-					<SelectionCheckbox
+					<Checkbox
 						checked={row.getIsSelected()}
-						indeterminate={row.getIsSomeSelected()}
-						onChange={(checked) => row.toggleSelected(checked)}
-						ariaLabel="Select row"
+						onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))}
+						aria-label="Select row"
 					/>
 				),
 				size: 36,
