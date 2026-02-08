@@ -13,7 +13,7 @@ import { queryKeys } from "@/utility/queryKeys";
 
 export const Route = createFileRoute("/_resource")({
 	beforeLoad: async () => {
-		if (typeof window !== "undefined") return;
+		if (!import.meta.env.SSR) return;
 		const [{ getStartContext }, { getSession }, { authConfig }, envModule] =
 			await Promise.all([
 				import("@tanstack/start-storage-context"),
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_resource")({
 		if (!authenticated) throw redirect({ to: "/login" });
 	},
 	loader: async () => {
-		if (typeof window !== "undefined") return { settings: null };
+		if (!import.meta.env.SSR) return { settings: null };
 		const { getSettings } = await import("@/server/api/settings/getSettings");
 		return { settings: await getSettings() };
 	},
