@@ -9,13 +9,14 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	type PaginationState,
+	type RowSelectionState,
 	type SortingState,
 	type Table as TanstackTable,
 	useReactTable,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -41,6 +42,8 @@ type DataTableProps<TData> = {
 	loading?: boolean;
 	skeletonRows?: number;
 	toolbarSkeleton?: ReactNode;
+	enableRowSelection?: boolean;
+	onSelectionChange?: (rows: TData[]) => void;
 };
 
 export function DataTable<TData>({
@@ -51,6 +54,8 @@ export function DataTable<TData>({
 	loading = false,
 	skeletonRows = 6,
 	toolbarSkeleton,
+	enableRowSelection = false,
+	onSelectionChange,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -61,6 +66,7 @@ export function DataTable<TData>({
 	const [pagination, setPagination] = useState<PaginationState>(
 		initialState?.pagination ?? { pageIndex: 0, pageSize: 10 },
 	);
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
 	const table = useReactTable({
 		data,
@@ -72,12 +78,21 @@ export function DataTable<TData>({
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onPaginationChange: setPagination,
+		onRowSelectionChange: setRowSelection,
+		enableRowSelection,
 		state: {
 			sorting,
 			columnFilters,
 			pagination,
+			rowSelection,
 		},
 	});
+
+	useEffect(() => {
+		if (!enableRowSelection || !onSelectionChange) return;
+		const selected = table.getSelectedRowModel().rows.map((row) => row.original);
+		onSelectionChange(selected);
+	}, [enableRowSelection, onSelectionChange, rowSelection, table]);
 
 	const showPagination = table.getPageCount() > 1;
 
@@ -151,7 +166,11 @@ export function DataTable<TData>({
 							))
 						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id} className="relative">
+								<TableRow
+									key={row.id}
+									className="relative"
+									data-state={row.getIsSelected() ? "selected" : undefined}
+								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
 											key={cell.id}
