@@ -39,10 +39,10 @@ function ClientEditModal() {
 	const { id } = Route.useParams();
 	const { client } = Route.useLoaderData();
 	const navigate = useNavigate();
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return <ClientList />;
 	const formId = `client-edit-form-${parsedId}`;
-	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<>

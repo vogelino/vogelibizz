@@ -32,10 +32,10 @@ export const Route = createFileRoute("/_resource/clients/edit/$id")({
 function ClientEditPageRoute() {
 	const { id } = Route.useParams();
 	const { client } = Route.useLoaderData();
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
 	const formId = `client-edit-form-${parsedId}`;
-	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<FormPageLayout

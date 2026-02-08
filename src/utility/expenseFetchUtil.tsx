@@ -9,7 +9,6 @@ import {
 	currencyEnum,
 	type ExpenseType,
 	type ExpenseWithMonthlyCLPPriceType,
-	settings,
 } from "@/db/schema";
 import env from "@/env";
 

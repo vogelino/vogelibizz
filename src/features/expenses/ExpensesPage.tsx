@@ -66,7 +66,6 @@ export default function ExpensesPage({
 	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
 	const isLoading = loading || isPending;
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: columns are stable from constants
 	const selectionColumn = useMemo(
 		() =>
 			({
@@ -106,8 +105,7 @@ export default function ExpensesPage({
 				deleteColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseWithMonthlyCLPPriceType, any>[],
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[targetCurrency, selectionColumn],
+		[targetCurrency, selectionColumn, deleteColumn, lastModifiedColumn],
 	);
 
 	const {
@@ -437,6 +435,23 @@ function MiniPieChart({
 	loading: boolean;
 	onSegmentClick?: (label: string) => void;
 }) {
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
+	const [tooltip, setTooltip] = useState<{
+		label: string;
+		percent: string;
+		color: string;
+		x: number;
+		y: number;
+		visible: boolean;
+	}>({
+		label: "",
+		percent: "0%",
+		color: "#94a3b8",
+		x: 0,
+		y: 0,
+		visible: false,
+	});
+
 	if (loading) {
 		return (
 			<div className="flex flex-col gap-2">
@@ -466,23 +481,6 @@ function MiniPieChart({
 	const radius = (size - strokeWidth) / 2;
 	const circumference = 2 * Math.PI * radius;
 	let offset = 0;
-	const wrapperRef = useRef<HTMLDivElement | null>(null);
-	const [tooltip, setTooltip] = useState<{
-		label: string;
-		percent: string;
-		color: string;
-		x: number;
-		y: number;
-		visible: boolean;
-	}>({
-		label: "",
-		percent: "0%",
-		color: "#94a3b8",
-		x: 0,
-		y: 0,
-		visible: false,
-	});
-
 	return (
 		<div className="flex flex-col gap-2">
 			<span className="text-xs text-muted-foreground">{title}</span>
@@ -551,6 +549,11 @@ function MiniPieChart({
 											strokeDashoffset={dashOffset}
 											fill="none"
 											className={onSegmentClick ? "cursor-pointer" : "cursor-default"}
+											role={onSegmentClick ? "button" : undefined}
+											tabIndex={onSegmentClick ? 0 : undefined}
+											aria-label={
+												onSegmentClick ? `Filter by ${item.label}` : undefined
+											}
 											onMouseEnter={(event) => {
 												const bounds =
 													wrapperRef.current?.getBoundingClientRect();
@@ -579,6 +582,13 @@ function MiniPieChart({
 												setTooltip((prev) => ({ ...prev, visible: false }));
 											}}
 											onClick={() => onSegmentClick?.(item.label)}
+											onKeyDown={(event) => {
+												if (!onSegmentClick) return;
+												if (event.key === "Enter" || event.key === " ") {
+													event.preventDefault();
+													onSegmentClick(item.label);
+												}
+											}}
 										/>
 									</TooltipTrigger>
 									<TooltipContent>

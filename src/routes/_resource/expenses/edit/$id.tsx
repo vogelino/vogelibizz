@@ -35,9 +35,9 @@ export const Route = createFileRoute("/_resource/expenses/edit/$id")({
 function ExpenseEditPageRoute() {
 	const { id } = Route.useParams();
 	const { expense } = Route.useLoaderData();
+	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
-	const isPending = useRouterState({ select: (state) => state.isLoading });
 
 	return (
 		<FormPageLayout

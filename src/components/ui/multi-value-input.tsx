@@ -2,7 +2,7 @@
 
 import { ArrowLeftToLine, Check, ChevronDown, X } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -113,10 +113,16 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		<div className="flex items-center border border-border">
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
-					<Button
-						type="button"
+					<div
 						role="combobox"
 						aria-expanded={open}
+						tabIndex={0}
+						onKeyDown={(event) => {
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								setOpen((current) => !current);
+							}
+						}}
 						className={cn(
 							buttonVariants({ variant: "ghost" }),
 							"w-fit justify-between h-auto min-h-9.5",
@@ -136,25 +142,17 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								<div className="min-w-40 flex gap-4 justify-between items-center w-full">
 									<div className="flex gap-x-1.5 gap-y-1">
 										{[...selectedOptions].slice(0, 5).map((option) => (
-											<span
+											<button
 												key={option.value}
+												type="button"
 												className="focusable text-sm trim-both items-center h-fit"
-												role="button"
-												tabIndex={0}
 												onClick={(evt) => {
 													evt.stopPropagation();
 													onOptionSelect(option.value);
 												}}
-												onKeyDown={(evt) => {
-													if (evt.key === "Enter" || evt.key === " ") {
-														evt.preventDefault();
-														evt.stopPropagation();
-														onOptionSelect(option.value);
-													}
-												}}
 											>
 												{selectedValueFormaterFn(option.value)}
-											</span>
+											</button>
 										))}
 
 										{selectedOptions.length > 5 && (
@@ -167,7 +165,8 @@ export function MultiValueInput<OptionValueType extends string = string>({
 										)}
 									</div>
 
-									<ArrowLeftToLine
+									<button
+										type="button"
 										onPointerDown={(evt) => {
 											evt.preventDefault();
 											evt.stopPropagation();
@@ -178,26 +177,16 @@ export function MultiValueInput<OptionValueType extends string = string>({
 											onChange([]);
 											setOpen(false);
 										}}
-										onKeyDown={(evt) => {
-											if (evt.key === "Enter" || evt.key === " ") {
-												evt.preventDefault();
-												evt.stopPropagation();
-												setOpen(false);
-												onChange([]);
-												setSelectedOptions([]);
-											}
-										}}
 										className="text-muted-foreground hover:text-foreground focusable"
-										size={20}
-										tabIndex={0}
-										role="button"
 										aria-label="Clear selected options"
-									/>
+									>
+										<ArrowLeftToLine size={20} />
+									</button>
 								</div>
 							)}
 						</div>
 						<ChevronDown className="inline-block" />
-					</Button>
+					</div>
 				</PopoverTrigger>
 				<PopoverContent className="w-fit p-0" align="end">
 					<Command>
@@ -270,8 +259,7 @@ function getDefaultValueFormatter(options: OptionType[]) {
 					<X
 						size={18}
 						className="text-muted-foreground hover:text-foreground shrink-0"
-						role="button"
-						aria-label={`Remove label ${option?.value}`}
+						aria-hidden="true"
 					/>
 				}
 				label={option?.label}
