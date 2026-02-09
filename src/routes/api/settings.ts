@@ -1,21 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
-import { isAuthenticatedAndAdmin } from "@/auth";
-import db from "@/db";
-import { currencyEnum, settings } from "@/db/schema";
-import { getSettings } from "@/server/api/settings/getSettings";
 import { json } from "@/utility/apiUtil";
-
-const updateSettingsSchema = z.object({
-	targetCurrency: z.enum(currencyEnum.enumValues),
-});
 
 export const Route = createFileRoute("/api/settings")({
 	server: {
 		handlers: {
-			GET: async () => json(await getSettings()),
+			GET: async () => {
+				const { getSettings } = await import("@/server/api/settings/getSettings");
+				return json(await getSettings());
+			},
 			PUT: async ({ request }) => {
+				const [
+					{ isAuthenticatedAndAdmin },
+					{ z },
+					{ currencyEnum, settings },
+					{ eq },
+					{ default: db },
+					{ getSettings },
+				] = await Promise.all([
+					import("@/auth"),
+					import("zod"),
+					import("@/db/schema"),
+					import("drizzle-orm"),
+					import("@/db"),
+					import("@/server/api/settings/getSettings"),
+				]);
+				const updateSettingsSchema = z.object({
+					targetCurrency: z.enum(currencyEnum.enumValues),
+				});
 				const allowed = await isAuthenticatedAndAdmin(undefined, request);
 				if (!allowed) return json({ error: "Unauthorized" }, { status: 401 });
 				const body = await request.json();

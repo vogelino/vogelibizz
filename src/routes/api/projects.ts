@@ -1,16 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import db from "@/db";
-import { projectInsertSchema, projects, projectsToClients } from "@/db/schema";
-import { getProjects } from "@/server/api/projects/getProjects";
 import { json } from "@/utility/apiUtil";
 
 export const Route = createFileRoute("/api/projects")({
 	server: {
 		handlers: {
-			GET: async () => json(await getProjects()),
+			GET: async () => {
+				const { getProjects } = await import("@/server/api/projects/getProjects");
+				return json(await getProjects());
+			},
 			POST: async ({ request }) => {
 				const body = await request.json();
+				const [
+					{ projectInsertSchema, projects, projectsToClients },
+					{ default: db },
+				] = await Promise.all([import("@/db/schema"), import("@/db")]);
 				const parsedBody = projectInsertSchema.array().parse(body);
+				if (parsedBody.length === 0) {
+					return json(
+						{ error: "At least one project is required." },
+						{ status: 400 },
+					);
+				}
 				const promises = parsedBody.map(async ({ clients, ...project }) => {
 					const dbProject = await db
 						.insert(projects)
