@@ -74,26 +74,70 @@ export function useSession() {
 	return useContext(SessionContext);
 }
 
-export function signIn({
+async function getCsrfToken(): Promise<string | null> {
+	try {
+		const response = await fetch("/api/auth/csrf", {
+			credentials: "include",
+		});
+		if (!response.ok) return null;
+		const data = (await response.json()) as { csrfToken?: string };
+		return data.csrfToken ?? null;
+	} catch {
+		return null;
+	}
+}
+
+function submitPostForm(action: string, fields: Record<string, string>) {
+	const form = document.createElement("form");
+	form.method = "POST";
+	form.action = action;
+	for (const [name, value] of Object.entries(fields)) {
+		const input = document.createElement("input");
+		input.type = "hidden";
+		input.name = name;
+		input.value = value;
+		form.appendChild(input);
+	}
+	document.body.appendChild(form);
+	form.submit();
+}
+
+export async function signIn({
 	redirectTo = "/projects",
 	provider = "github",
 }: {
 	redirectTo?: string;
 	provider?: string;
 } = {}) {
-	if (typeof window !== "undefined") {
-		const params = new URLSearchParams({ callbackUrl: redirectTo });
-		window.location.assign(`/api/auth/signin/${provider}?${params.toString()}`);
+	if (typeof window === "undefined") return;
+	const csrfToken = await getCsrfToken();
+	if (!csrfToken) {
+		window.location.assign(
+			`/api/auth/signin?callbackUrl=${encodeURIComponent(redirectTo)}`,
+		);
+		return;
 	}
+	submitPostForm(`/api/auth/signin/${provider}`, {
+		csrfToken,
+		callbackUrl: redirectTo,
+	});
 }
 
-export function signOut({
+export async function signOut({
 	redirectTo = "/login",
 }: {
 	redirectTo?: string;
 } = {}) {
-	if (typeof window !== "undefined") {
-		const params = new URLSearchParams({ callbackUrl: redirectTo });
-		window.location.assign(`/api/auth/signout?${params.toString()}`);
+	if (typeof window === "undefined") return;
+	const csrfToken = await getCsrfToken();
+	if (!csrfToken) {
+		window.location.assign(
+			`/api/auth/signout?callbackUrl=${encodeURIComponent(redirectTo)}`,
+		);
+		return;
 	}
+	submitPostForm("/api/auth/signout", {
+		csrfToken,
+		callbackUrl: redirectTo,
+	});
 }
