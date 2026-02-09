@@ -1,8 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { eq } from "drizzle-orm";
-import db from "@/db";
-import { clientEditSchema, clients, projectsToClients } from "@/db/schema";
-import { getClient } from "@/server/api/clients/getClient";
 import {
 	getDeletionRoute,
 	getEditionRoute,
@@ -12,8 +8,20 @@ import {
 export const Route = createFileRoute("/api/clients/$id")({
 	server: {
 		handlers: {
-			GET: getQueryRouteWithId(getClient),
+			GET: getQueryRouteWithId(async (id) => {
+				const { getClient } = await import("@/server/api/clients/getClient");
+				return getClient(id);
+			}),
 			PATCH: getEditionRoute(async (id, body) => {
+				const [
+					{ clientEditSchema, clients, projectsToClients },
+					{ default: db },
+					{ eq },
+				] = await Promise.all([
+					import("@/db/schema"),
+					import("@/db"),
+					import("drizzle-orm"),
+				]);
 				const parsedBody = clientEditSchema.parse({ ...(body as object), id });
 				const { projects, ...client } = parsedBody;
 				await db.update(clients).set(client).where(eq(clients.id, id));
@@ -30,6 +38,12 @@ export const Route = createFileRoute("/api/clients/$id")({
 				}
 			}),
 			DELETE: getDeletionRoute(async (id) => {
+				const [{ clients, projectsToClients }, { default: db }, { eq }] =
+					await Promise.all([
+						import("@/db/schema"),
+						import("@/db"),
+						import("drizzle-orm"),
+					]);
 				await db
 					.delete(projectsToClients)
 					.where(eq(projectsToClients.clientId, id));
