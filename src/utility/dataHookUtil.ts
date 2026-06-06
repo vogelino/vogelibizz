@@ -2,6 +2,36 @@ import { ZodError, type ZodSchema } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
 
+export function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+	const headers = new Headers(init.headers);
+	return fetch(input, {
+		credentials: "include",
+		...init,
+		headers,
+	});
+}
+
+export async function apiGetJson<OutputType>(input: RequestInfo | URL) {
+	const response = await apiFetch(input);
+	if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+	return response.json() as Promise<OutputType>;
+}
+
+export function apiPostForm(
+	input: RequestInfo | URL,
+	body: Record<string, string>,
+	init: RequestInit = {},
+) {
+	const headers = new Headers(init.headers);
+	headers.set("Content-Type", "application/x-www-form-urlencoded");
+	return apiFetch(input, {
+		...init,
+		method: "POST",
+		headers,
+		body: new URLSearchParams(body),
+	});
+}
+
 export async function handleFetchResponse<OutputType>({
 	response,
 	data,

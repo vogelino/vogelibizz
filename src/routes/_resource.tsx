@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Navigate,
@@ -9,7 +8,7 @@ import { useEffect, useState } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import type { SettingsType } from "@/db/schema";
 import { useSession } from "@/providers/SessionProvider";
-import { queryKeys } from "@/utility/queryKeys";
+import { settingsQueryOptions } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource")({
 	beforeLoad: async () => {
@@ -29,36 +28,30 @@ export const Route = createFileRoute("/_resource")({
 			!!email && envModule.default.server.AUTH_ADMIN_EMAILS.includes(email);
 		if (!authenticated) throw redirect({ to: "/login" });
 	},
-	loader: async () => {
-		if (!import.meta.env.SSR) return { settings: null };
-		const { getSettings } = await import("@/server/api/settings/getSettings");
-		return { settings: await getSettings() };
+	loader: async ({ context }) => {
+		return {
+			settings: await context.queryClient.ensureQueryData(
+				settingsQueryOptions(),
+			),
+		};
 	},
 	component: ResourceLayout,
 });
 
 function ResourceLayout() {
 	const { data, status } = useSession();
-	const { settings } = Route.useLoaderData() as {
-		settings: SettingsType | null;
-	};
-	const queryClient = useQueryClient();
+	const { settings } = Route.useLoaderData() as { settings: SettingsType };
 	const [hydrated, setHydrated] = useState(false);
 
 	useEffect(() => {
 		setHydrated(true);
 	}, []);
 
-	useEffect(() => {
-		if (!settings) return;
-		queryClient.setQueryData(queryKeys.settings.current.queryKey, settings);
-	}, [queryClient, settings]);
-
 	if (hydrated && status !== "loading" && !data) {
 		return <Navigate to="/login" replace />;
 	}
 	return (
-		<PageLayout>
+		<PageLayout settings={settings}>
 			<Outlet />
 		</PageLayout>
 	);

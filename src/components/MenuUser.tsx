@@ -8,7 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "@/providers/SessionProvider";
+import { signOut, useSession } from "@/providers/SessionProvider";
 import { cn } from "@/utility/classNames";
 
 export default function MenuUser() {
@@ -38,7 +38,7 @@ export default function MenuUser() {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
-				<DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => signOut()}>
 					<LogoutButton />
 				</DropdownMenuItem>
 			</DropdownMenuContent>

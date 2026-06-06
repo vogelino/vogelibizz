@@ -1,4 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useMemo } from "react";
+import { sessionQueryOptions } from "@/utility/data/queryOptions";
+import { apiGetJson, apiPostForm } from "@/utility/dataHookUtil";
 
 export type Session = {
 	user?: {
@@ -19,43 +22,15 @@ const SessionContext = createContext<SessionContextValue>({
 });
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-	const [session, setSession] = useState<Session>(null);
-	const [status, setStatus] =
-		useState<SessionContextValue["status"]>("unauthenticated");
-
-	useEffect(() => {
-		let canceled = false;
-		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), 3000);
-
-		async function loadSession() {
-			setStatus("loading");
-			try {
-				const response = await fetch("/api/auth/session", {
-					credentials: "include",
-					signal: controller.signal,
-				});
-				if (!response.ok) throw new Error("Failed to fetch session");
-				const data = await response.json();
-				if (canceled) return;
-				const nextSession = Object.keys(data || {}).length ? data : null;
-				setSession(nextSession);
-				setStatus(nextSession ? "authenticated" : "unauthenticated");
-			} catch (_err) {
-				if (canceled) return;
-				setSession(null);
-				setStatus("unauthenticated");
-			}
-		}
-
-		void loadSession();
-
-		return () => {
-			clearTimeout(timeout);
-			canceled = true;
-			controller.abort();
-		};
-	}, []);
+	const { data: session = null, status: queryStatus } = useQuery(
+		sessionQueryOptions(),
+	);
+	const status: SessionContextValue["status"] =
+		queryStatus === "pending"
+			? "loading"
+			: session
+				? "authenticated"
+				: "unauthenticated";
 
 	const value = useMemo(
 		() => ({
@@ -76,11 +51,7 @@ export function useSession() {
 
 async function getCsrfToken(): Promise<string | null> {
 	try {
-		const response = await fetch("/api/auth/csrf", {
-			credentials: "include",
-		});
-		if (!response.ok) return null;
-		const data = (await response.json()) as { csrfToken?: string };
+		const data = await apiGetJson<{ csrfToken?: string }>("/api/auth/csrf");
 		return data.csrfToken ?? null;
 	} catch {
 		return null;
@@ -131,13 +102,19 @@ export async function signOut({
 	if (typeof window === "undefined") return;
 	const csrfToken = await getCsrfToken();
 	if (!csrfToken) {
+		window.location.assign(redirectTo);
+		return;
+	}
+
+	const response = await apiPostForm("/api/auth/signout", {
+		csrfToken,
+		callbackUrl: redirectTo,
+	});
+	if (!response.ok) {
 		window.location.assign(
 			`/api/auth/signout?callbackUrl=${encodeURIComponent(redirectTo)}`,
 		);
 		return;
 	}
-	submitPostForm("/api/auth/signout", {
-		csrfToken,
-		callbackUrl: redirectTo,
-	});
+	window.location.assign(redirectTo);
 }

@@ -1,20 +1,20 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { type ClientType, clientSelectSchema } from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
+import type { ClientType } from "@/db/schema";
+import { clientsQueryOptions } from "@/utility/data/queryOptions";
 
-function useClients({ enabled = true }: { enabled?: boolean } = {}) {
-	const queryFn = createQueryFunction<ClientType[]>({
-		resourceName: "clients",
-		action: "queryAll",
-		outputZodSchema: clientSelectSchema.array(),
-	});
+function useClients({
+	enabled = true,
+	initialData,
+}: {
+	enabled?: boolean;
+	initialData?: ClientType[];
+} = {}) {
 	return useQuery({
-		...queryKeys.clients.list,
-		queryFn,
+		...clientsQueryOptions(),
 		enabled,
+		...(initialData ? { initialData, initialDataUpdatedAt: Date.now() } : {}),
 	});
 }
 

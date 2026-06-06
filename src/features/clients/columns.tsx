@@ -1,13 +1,8 @@
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import TableRelationsList from "@/components/TableRelationsList";
 import InternalLink from "@/components/ui/internal-link";
-import {
-	type ClientType,
-	clientSelectSchema,
-	type ProjectType,
-} from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
+import type { ClientType, ProjectType } from "@/db/schema";
+import { clientQueryOptions } from "@/utility/data/queryOptions";
 
 const columnHelper = createColumnHelper<ClientType>();
 // biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -43,15 +38,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 						params: { id: String(id) },
 						unmaskOnReload: true,
 					}}
-					prefetchQuery={{
-						queryKey: queryKeys.clients.detail(id).queryKey,
-						queryFn: createQueryFunction<ClientType>({
-							resourceName: "clients",
-							action: "querySingle",
-							outputZodSchema: clientSelectSchema,
-							id,
-						}),
-					}}
+					prefetchQuery={clientQueryOptions(id)}
 				>
 					{value}
 				</InternalLink>

@@ -6,7 +6,11 @@ import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Combobox } from "@/components/ui/combobox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { type CurrencyIdType, currencyEnum } from "@/db/schema";
+import {
+	type CurrencyIdType,
+	currencyEnum,
+	type SettingsType,
+} from "@/db/schema";
 import { cn } from "@/utility/classNames";
 import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
@@ -15,11 +19,13 @@ import HeaderMenuLink from "./HeaderMenuLink";
 export const Menu = ({
 	withBg = true,
 	currentPage = "",
+	initialSettings,
 }: {
 	withBg?: boolean;
 	currentPage: string;
+	initialSettings?: SettingsType;
 }) => {
-	const settingsQuery = useSettings();
+	const settingsQuery = useSettings(initialSettings);
 	const settingsUpdate = useSettingsUpdate();
 	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
 	const currencyOptions = currencyEnum.enumValues.map((currency) => ({

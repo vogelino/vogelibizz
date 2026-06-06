@@ -5,12 +5,16 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ClientList from "@/features/clients/ClientsList";
+import { projectsQueryOptions } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/clients/create/modal")({
+	loader: ({ context }) =>
+		context.queryClient.ensureQueryData(projectsQueryOptions()),
 	component: ClientCreateModal,
 });
 
 function ClientCreateModal() {
+	const projects = Route.useLoaderData();
 	const navigate = useNavigate();
 	const formId = "client-create-form";
 
@@ -38,7 +42,7 @@ function ClientCreateModal() {
 					</>
 				}
 			>
-				<ClientEdit formId={formId} />
+				<ClientEdit formId={formId} initialProjects={projects} />
 			</ResponsiveModal>
 		</>
 	);

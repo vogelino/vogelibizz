@@ -2,15 +2,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
-import {
-	type CurrencyIdType,
-	type ExpenseWithMonthlyCLPPriceType,
-	expenseWithMonthlyCLPPriceSchema,
+import type {
+	CurrencyIdType,
+	ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
+import { expenseQueryOptions } from "@/utility/data/queryOptions";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import { queryKeys } from "@/utility/queryKeys";
 
 const columnHelper = createColumnHelper<ExpenseWithMonthlyCLPPriceType>();
 
@@ -33,15 +31,7 @@ export function getExpensesTableColumns(targetCurrency: CurrencyIdType) {
 							params: { id: String(id) },
 							unmaskOnReload: true,
 						}}
-						prefetchQuery={{
-							queryKey: queryKeys.expenses.detail(id).queryKey,
-							queryFn: createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
-								resourceName: "expenses",
-								action: "querySingle",
-								outputZodSchema: expenseWithMonthlyCLPPriceSchema,
-								id,
-							}),
-						}}
+						prefetchQuery={expenseQueryOptions(id)}
 					>
 						{value}
 					</InternalLink>

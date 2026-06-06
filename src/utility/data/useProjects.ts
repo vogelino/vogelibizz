@@ -1,20 +1,20 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { type ProjectType, projectSelectSchema } from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
+import type { ProjectType } from "@/db/schema";
+import { projectsQueryOptions } from "@/utility/data/queryOptions";
 
-function useProjects({ enabled = true }: { enabled?: boolean } = {}) {
-	const queryFn = createQueryFunction<ProjectType[]>({
-		resourceName: "projects",
-		action: "queryAll",
-		outputZodSchema: projectSelectSchema.array(),
-	});
+function useProjects({
+	enabled = true,
+	initialData,
+}: {
+	enabled?: boolean;
+	initialData?: ProjectType[];
+} = {}) {
 	return useQuery({
-		...queryKeys.projects.list,
-		queryFn,
+		...projectsQueryOptions(),
 		enabled,
+		...(initialData ? { initialData, initialDataUpdatedAt: Date.now() } : {}),
 	});
 }
 

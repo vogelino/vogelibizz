@@ -1,7 +1,7 @@
 import { ZodError, type ZodSchema } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
-import { handleFetchResponse } from "../dataHookUtil";
+import { apiFetch, handleFetchResponse } from "../dataHookUtil";
 import { parseId } from "../resourceUtil";
 
 export type ActionType =
@@ -80,7 +80,7 @@ function createQueryAllFn<OutputType>(args: QueryAllArgs<OutputType>) {
 	return async function queryFn(): Promise<OutputType> {
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
 		return handleFetchResponse({
-			response: await fetch(apiUrl),
+			response: await apiFetch(apiUrl),
 			crudAction: "query",
 			resourceName,
 			zodSchema: outputZodSchema,
@@ -94,7 +94,7 @@ function createQuerySingleFn<OutputType>(args: QuerySingleArgs<OutputType>) {
 		const parsedId = parseId(args.id);
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}/${parsedId}`;
 		return handleFetchResponse({
-			response: await fetch(apiUrl),
+			response: await apiFetch(apiUrl),
 			crudAction: "query",
 			resourceName,
 			zodSchema: outputZodSchema,
@@ -111,7 +111,7 @@ function createCreateFn<OutputType, InputType extends CreateInput>(
 		const input = inputZodSchema.parse(data);
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}`;
 		return handleFetchResponse({
-			response: await fetch(apiUrl, {
+			response: await apiFetch(apiUrl, {
 				method: "POST",
 				body: JSON.stringify(input),
 			}),
@@ -130,10 +130,8 @@ function createEditFn<OutputType, InputType extends DataWithRequiredId>(
 		try {
 			const input = inputZodSchema.parse(data);
 			const apiUrl = `${apiBaseUrl}/api/${resourceName}/${input.id}`;
-			console.log(`Editing ${resourceName}`, input, apiUrl);
-			console.log(`–––––––––––––––––––––––––––––––––––––––`);
 			return handleFetchResponse({
-				response: await fetch(apiUrl, {
+				response: await apiFetch(apiUrl, {
 					method: "PATCH",
 					body: JSON.stringify(input),
 				}),
@@ -155,11 +153,10 @@ function createDeleteFn<OutputType>(
 ): (id: unknown) => Promise<OutputType> {
 	const { resourceName } = args;
 	return async function queryFn(id: unknown): Promise<OutputType> {
-		console.log(`Deleting ${resourceName}`, id);
 		const parsedId = parseId(id);
 		const apiUrl = `${apiBaseUrl}/api/${resourceName}/${parsedId}`;
 		return handleFetchResponse({
-			response: await fetch(apiUrl, {
+			response: await apiFetch(apiUrl, {
 				method: "DELETE",
 			}),
 			crudAction: "delete",

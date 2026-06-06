@@ -8,26 +8,21 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
-import { type ProjectType, projectSelectSchema } from "@/db/schema";
 import ProjectList from "@/features/projects/ProjectsList";
-import createQueryFunction from "@/utility/data/createQueryFunction";
+import {
+	clientsQueryOptions,
+	projectQueryOptions,
+} from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/projects/edit/$id/modal")({
-	loader: async ({ params }) => {
+	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		if (typeof window === "undefined") {
-			const { getProject } = await import("@/server/api/projects/getProject");
-			const project = await getProject(parsedId);
-			return { project };
-		}
-		const project = await createQueryFunction<ProjectType>({
-			resourceName: "projects",
-			action: "querySingle",
-			outputZodSchema: projectSelectSchema,
-			id: parsedId,
-		})();
-		return { project };
+		const [project, clients] = await Promise.all([
+			context.queryClient.ensureQueryData(projectQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(clientsQueryOptions()),
+		]);
+		return { project, clients };
 	},
 	component: ProjectEditModal,
 	pendingComponent: ProjectEditModalPending,
@@ -37,7 +32,7 @@ export const Route = createFileRoute("/_resource/projects/edit/$id/modal")({
 
 function ProjectEditModal() {
 	const { id } = Route.useParams();
-	const { project } = Route.useLoaderData();
+	const { clients, project } = Route.useLoaderData();
 	const navigate = useNavigate();
 	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
@@ -72,6 +67,7 @@ function ProjectEditModal() {
 					id={parsedId}
 					formId={formId}
 					initialData={project}
+					initialClients={clients}
 					loading={isPending}
 				/>
 			</ResponsiveModal>

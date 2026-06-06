@@ -3,15 +3,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type CurrencyIdType, settingsSelectSchema } from "@/db/schema";
 import env from "@/env";
-import { handleFetchResponse } from "@/utility/dataHookUtil";
-import { queryKeys } from "@/utility/queryKeys";
+import { apiFetch, handleFetchResponse } from "@/utility/dataHookUtil";
+import { expensesQuery, settingsQuery } from "./queryFactories";
 
 function useSettingsUpdate() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationKey: ["settings", "update"],
 		mutationFn: async (targetCurrency: CurrencyIdType) => {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${env.client.VITE_PUBLIC_BASE_URL}/api/settings`,
 				{
 					method: "PUT",
@@ -26,9 +26,9 @@ function useSettingsUpdate() {
 			});
 		},
 		onSuccess: (settings) => {
-			queryClient.setQueryData(queryKeys.settings.current.queryKey, settings);
+			queryClient.setQueryData(settingsQuery.current().queryKey, settings);
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.expenses.list.queryKey,
+				queryKey: expensesQuery.list().queryKey,
 			});
 		},
 	});

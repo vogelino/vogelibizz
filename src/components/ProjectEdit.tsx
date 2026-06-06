@@ -27,15 +27,17 @@ export default function ProjectEdit({
 	id,
 	formId,
 	initialData,
+	initialClients,
 	loading = false,
 }: {
 	id?: string | number;
 	formId: string;
 	initialData?: ProjectType;
+	initialClients?: ClientType[];
 	loading?: boolean;
 }) {
 	const navigate = useNavigate();
-	const clientsQuery = useClients();
+	const clientsQuery = useClients({ initialData: initialClients });
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
 	const projectQuery = useProject(id, initialData);

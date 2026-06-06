@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import type { z } from "zod";
-import { queryKeys } from "@/utility/queryKeys";
 import type { RoutedResource } from "@/utility/routedResources";
 import {
 	getQueryCompletionMessage,
@@ -12,6 +11,7 @@ import {
 	verbToPresentParticiple,
 } from "../resourceUtil";
 import type { ActionType } from "./createQueryFunction";
+import { resourceQueryFactories } from "./queryFactories";
 
 function createMutationHook<DataType, SchemaData>({
 	resourceName,
@@ -37,7 +37,8 @@ function createMutationHook<DataType, SchemaData>({
 			mutationFn,
 			onMutate: (data: SchemaData) => {
 				const input = inputZodSchema.parse(data);
-				const listQuery = queryKeys[resourceName].list;
+				const resourceQueries = resourceQueryFactories[resourceName];
+				const listQuery = resourceQueries.list();
 				queryClient.cancelQueries({ queryKey: listQuery.queryKey });
 				const previousData = queryClient.getQueryData<DataType>(
 					listQuery.queryKey,
@@ -53,7 +54,7 @@ function createMutationHook<DataType, SchemaData>({
 					}
 					const id = "id" in candidate ? String(candidate.id ?? "") : "";
 					if (!id) return;
-					const detailQuery = queryKeys[resourceName].detail(id);
+					const detailQuery = resourceQueries.detail(id);
 					previousSingleData.set(
 						id,
 						queryClient.getQueryData(detailQuery.queryKey),
@@ -92,12 +93,13 @@ function createMutationHook<DataType, SchemaData>({
 				});
 			},
 			onError: (err, data, context) => {
+				const resourceQueries = resourceQueryFactories[resourceName];
 				queryClient.setQueryData<DataType>(
-					queryKeys[resourceName].list.queryKey,
+					resourceQueries.list().queryKey,
 					context?.previousData,
 				);
 				context?.previousSingleData?.forEach((value, id) => {
-					const detailQuery = queryKeys[resourceName].detail(id);
+					const detailQuery = resourceQueries.detail(id);
 					queryClient.setQueryData(detailQuery.queryKey, value);
 				});
 				const errorMessage = getQueryCompletionMessage({
@@ -115,8 +117,9 @@ function createMutationHook<DataType, SchemaData>({
 				});
 			},
 			onSettled: (_data, _error, variables) => {
+				const resourceQueries = resourceQueryFactories[resourceName];
 				queryClient.invalidateQueries({
-					queryKey: queryKeys[resourceName].list.queryKey,
+					queryKey: resourceQueries.list().queryKey,
 				});
 				const parsedVariables = inputZodSchema.safeParse(variables);
 				if (parsedVariables.success) {
@@ -129,7 +132,7 @@ function createMutationHook<DataType, SchemaData>({
 						}
 						const id = "id" in candidate ? String(candidate.id ?? "") : "";
 						if (!id) return;
-						const detailQuery = queryKeys[resourceName].detail(id);
+						const detailQuery = resourceQueries.detail(id);
 						queryClient.invalidateQueries({
 							queryKey: detailQuery.queryKey,
 						});

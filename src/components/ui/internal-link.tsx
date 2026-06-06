@@ -1,19 +1,16 @@
-import type { QueryFunction } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";
 
-function InternalLink<TQueryKey extends readonly unknown[]>(
+function InternalLink(
 	props: Omit<LinkProps, "to"> & {
 		to: LinkProps["to"];
 		params?: LinkProps["params"];
 		className?: string;
 		children?: React.ReactNode;
-		prefetchQuery?: {
-			queryKey: TQueryKey;
-			queryFn: QueryFunction<unknown, TQueryKey>;
-		};
+		prefetchQuery?: Parameters<QueryClient["prefetchQuery"]>[0];
 		onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
 		onFocus?: React.FocusEventHandler<HTMLAnchorElement>;
 	},

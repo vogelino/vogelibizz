@@ -1,31 +1,16 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import {
-	type ExpenseWithMonthlyCLPPriceType,
-	expenseWithMonthlyCLPPriceSchema,
-} from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
+import type { ExpenseWithMonthlyCLPPriceType } from "@/db/schema";
+import { expenseQueryOptions } from "@/utility/data/queryOptions";
 
 type DataType = ExpenseWithMonthlyCLPPriceType;
 
 function useExpense(id?: DataType["id"], initialData?: DataType) {
-	const query =
-		id === undefined
-			? queryKeys.expenses.detail("")
-			: queryKeys.expenses.detail(id);
-	const queryFn = createQueryFunction<ExpenseWithMonthlyCLPPriceType>({
-		resourceName: "expenses",
-		action: "querySingle",
-		outputZodSchema: expenseWithMonthlyCLPPriceSchema,
-		id: id ?? "",
-	});
 	const initialDataOptions = initialData
 		? { initialData, initialDataUpdatedAt: Date.now() }
 		: {};
 	return useQuery({
-		...query,
-		queryFn,
+		...expenseQueryOptions(id ?? ""),
 		enabled: Boolean(id),
 		...initialDataOptions,
 	});

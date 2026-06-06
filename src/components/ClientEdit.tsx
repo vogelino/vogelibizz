@@ -19,18 +19,20 @@ export default function ClientEdit({
 	id,
 	formId,
 	initialData,
+	initialProjects,
 	loading = false,
 }: {
 	id?: number | undefined;
 	formId: string;
 	initialData?: ClientType;
+	initialProjects?: ProjectType[];
 	loading?: boolean;
 }) {
 	const navigate = useNavigate();
 	const clientQuery = useClient(id, initialData);
 	const { data: client } = clientQuery;
 	const isLoading = loading || (Boolean(id) && clientQuery.isPending);
-	const projectsQuery = useProjects();
+	const projectsQuery = useProjects({ initialData: initialProjects });
 	const editMutation = useClientEdit();
 	const [clientProjects, setClientProjects] = useState<
 		{

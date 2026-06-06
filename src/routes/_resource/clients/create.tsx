@@ -3,12 +3,16 @@ import { SaveIcon } from "lucide-react";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
+import { projectsQueryOptions } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/clients/create")({
+	loader: ({ context }) =>
+		context.queryClient.ensureQueryData(projectsQueryOptions()),
 	component: ClientCreatePageRoute,
 });
 
 function ClientCreatePageRoute() {
+	const projects = Route.useLoaderData();
 	return (
 		<FormPageLayout
 			title="Create client"
@@ -27,7 +31,7 @@ function ClientCreatePageRoute() {
 				</>
 			}
 		>
-			<ClientEdit formId="client-create-form" />
+			<ClientEdit formId="client-create-form" initialProjects={projects} />
 		</FormPageLayout>
 	);
 }

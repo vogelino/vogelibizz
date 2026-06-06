@@ -3,25 +3,20 @@ import { SaveIcon } from "lucide-react";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
-import { type ProjectType, projectSelectSchema } from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
+import {
+	clientsQueryOptions,
+	projectQueryOptions,
+} from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/projects/edit/$id")({
-	loader: async ({ params }) => {
+	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		if (typeof window === "undefined") {
-			const { getProject } = await import("@/server/api/projects/getProject");
-			const project = await getProject(parsedId);
-			return { project };
-		}
-		const project = await createQueryFunction<ProjectType>({
-			resourceName: "projects",
-			action: "querySingle",
-			outputZodSchema: projectSelectSchema,
-			id: parsedId,
-		})();
-		return { project };
+		const [project, clients] = await Promise.all([
+			context.queryClient.ensureQueryData(projectQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(clientsQueryOptions()),
+		]);
+		return { project, clients };
 	},
 	component: ProjectEditPageRoute,
 	pendingComponent: ProjectEditPagePending,
@@ -31,7 +26,7 @@ export const Route = createFileRoute("/_resource/projects/edit/$id")({
 
 function ProjectEditPageRoute() {
 	const { id } = Route.useParams();
-	const { project } = Route.useLoaderData();
+	const { clients, project } = Route.useLoaderData();
 	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
@@ -60,6 +55,7 @@ function ProjectEditPageRoute() {
 				id={parsedId}
 				formId={formId}
 				initialData={project}
+				initialClients={clients}
 				loading={isPending}
 			/>
 		</FormPageLayout>

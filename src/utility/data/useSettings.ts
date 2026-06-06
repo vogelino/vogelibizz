@@ -1,19 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { type SettingsType, settingsSelectSchema } from "@/db/schema";
-import createQueryFunction from "@/utility/data/createQueryFunction";
-import { queryKeys } from "@/utility/queryKeys";
+import type { SettingsType } from "@/db/schema";
+import { settingsQueryOptions } from "@/utility/data/queryOptions";
 
-function useSettings() {
-	const queryFn = createQueryFunction<SettingsType>({
-		resourceName: "settings",
-		action: "queryAll",
-		outputZodSchema: settingsSelectSchema,
-	});
+function useSettings(initialData?: SettingsType) {
 	return useQuery({
-		...queryKeys.settings.current,
-		queryFn,
+		...settingsQueryOptions(),
+		...(initialData ? { initialData, initialDataUpdatedAt: Date.now() } : {}),
 	});
 }
 

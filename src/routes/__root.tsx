@@ -1,14 +1,16 @@
 import {
-	createRootRoute,
+	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
 	Scripts,
+	useRouter,
 } from "@tanstack/react-router";
 import type React from "react";
 import Providers from "@/providers";
+import type { RouterContext } from "@/router";
 import appCss from "@/styles/global.css?url";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -26,6 +28,8 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+	const router = useRouter();
+	const { queryClient } = router.options.context as RouterContext;
 	const htmlStyle = { "--font-inter": "Inter" } as React.CSSProperties;
 	return (
 		<html
@@ -38,7 +42,7 @@ function RootComponent() {
 				<HeadContent />
 			</head>
 			<body>
-				<Providers>
+				<Providers queryClient={queryClient}>
 					<Outlet />
 				</Providers>
 				<Scripts />
