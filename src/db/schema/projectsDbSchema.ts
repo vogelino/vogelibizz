@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
@@ -7,7 +7,7 @@ import { projectsToClients } from "./projectsToClientsDbSchema";
 import { projectsToInvoices } from "./projectsToInvoicesDbSchema";
 import { projectsToQuotes } from "./projectsToQuotesDbSchema";
 
-export const projectStatusEnum = pgEnum("project_status", [
+const projectStatusEnumValues = [
 	"todo",
 	"active",
 	"paused",
@@ -15,19 +15,25 @@ export const projectStatusEnum = pgEnum("project_status", [
 	"cancelled",
 	"negotiating",
 	"waiting_for_feedback",
-]);
+] as const;
 
-export const projects = pgTable("projects", {
-	id: serial("id").primaryKey(),
+export const projectStatusEnum = {
+	enumValues: projectStatusEnumValues,
+};
+
+export const projects = sqliteTable("projects", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
 	name: text("name").notNull().unique(),
-	created_at: timestamp("created_at", { mode: "string" })
+	created_at: text("created_at")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	last_modified: timestamp("last_modified", { mode: "string" })
+	last_modified: text("last_modified")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
 	description: text("description"),
-	status: projectStatusEnum("status").default("todo").notNull(),
+	status: text("status", { enum: projectStatusEnumValues })
+		.default("todo")
+		.notNull(),
 	content: text("content").default(""),
 });
 

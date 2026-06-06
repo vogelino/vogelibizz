@@ -1,15 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, primaryKey, serial } from "drizzle-orm/pg-core";
+import { integer, primaryKey, sqliteTable } from "drizzle-orm/sqlite-core";
 import { clients } from "./clientsDbSchema";
 import { projects } from "./projectsDbSchema";
 
-export const projectsToClients = pgTable(
+export const projectsToClients = sqliteTable(
 	"projects_to_clients",
 	{
-		projectId: serial("project_id").references(() => projects.id, {
+		projectId: integer("project_id").references(() => projects.id, {
 			onDelete: "cascade",
 		}),
-		clientId: serial("client_id").references(() => clients.id, {
+		clientId: integer("client_id").references(() => clients.id, {
 			onDelete: "cascade",
 		}),
 	},

@@ -33,11 +33,16 @@ yarn-error.log*
 
 # vercel
 .vercel
+.output
+
+#tanstack
+/.tanstack/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 src/routeTree.gen.ts
 
-# docker
-db-data/
+# wrangler
+.wrangler
+!.wrangler/deploy/config.json

@@ -11,7 +11,9 @@ export async function runWithStartContext<T>(
 
 export function getStartContext<TThrow extends boolean = true>(opts?: {
 	throwIfNotFound?: TThrow;
-}): TThrow extends false ? StartStorageContext | undefined : StartStorageContext {
+}): TThrow extends false
+	? StartStorageContext | undefined
+	: StartStorageContext {
 	if (opts?.throwIfNotFound !== false) {
 		throw new Error(
 			"No Start context found in client runtime. Use this only on the server.",

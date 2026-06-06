@@ -3,22 +3,19 @@ import { loadDotEnv } from "@/utility/loadDotEnv";
 async function main() {
 	loadDotEnv();
 
-	const [{ migrate }, { connection, db }, env, config] = await Promise.all([
-		import("drizzle-orm/postgres-js/migrator"),
+	const [{ migrate }, { getDb }, config] = await Promise.all([
+		import("drizzle-orm/d1/migrator"),
 		import("@/db"),
-		import("@/env"),
 		import("$/drizzle.config"),
 	]);
 
-	if (!env.default.server.POSTGRES_MIGRATING) {
+	if (!(globalThis as { DB?: unknown }).DB) {
 		throw new Error(
-			'You must set POSTGRES_MIGRATING to "true" when running migrations',
+			"D1 binding not found on globalThis.DB. Run migrations via wrangler so the DB binding is available.",
 		);
 	}
 
-	await migrate(db, { migrationsFolder: config.default.out! });
-
-	await connection.end();
+	await migrate(getDb(), { migrationsFolder: config.default.out! });
 }
 
 await main();

@@ -9,9 +9,7 @@ export const Route = createFileRoute("/api/expenses/$id")({
 	server: {
 		handlers: {
 			GET: getQueryRouteWithId(async (id) => {
-				const { getExpense } = await import(
-					"@/server/api/expenses/getExpense"
-				);
+				const { getExpense } = await import("@/server/api/expenses/getExpense");
 				return getExpense(id);
 			}),
 			PATCH: getEditionRoute(async (id, body) => {

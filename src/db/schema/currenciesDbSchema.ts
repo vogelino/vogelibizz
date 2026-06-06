@@ -1,16 +1,11 @@
 import { relations } from "drizzle-orm";
-import {
-	doublePrecision,
-	pgEnum,
-	pgTable,
-	timestamp,
-} from "drizzle-orm/pg-core";
+import { real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
 import { projects } from "./projectsDbSchema";
 
-export const currencyEnum = pgEnum("currency", [
+const currencyEnumValues = [
 	"CLF",
 	"CLP",
 	"EUR",
@@ -51,17 +46,23 @@ export const currencyEnum = pgEnum("currency", [
 	"BHD",
 	"BGN",
 	"ARS",
-]);
+] as const;
 
-export const currencies = pgTable("currencies", {
-	id: currencyEnum("original_currency").unique().primaryKey(),
-	created_at: timestamp("created_at", { mode: "string" })
+export const currencyEnum = {
+	enumValues: currencyEnumValues,
+};
+
+export const currencies = sqliteTable("currencies", {
+	id: text("original_currency", { enum: currencyEnumValues })
+		.unique()
+		.primaryKey(),
+	created_at: text("created_at")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	last_modified: timestamp("last_modified", { mode: "string" })
+	last_modified: text("last_modified")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	usdRate: doublePrecision("usdRate").notNull().default(0.0),
+	usdRate: real("usdRate").notNull().default(0.0),
 });
 
 export type CurrencyType = typeof currencies.$inferSelect;

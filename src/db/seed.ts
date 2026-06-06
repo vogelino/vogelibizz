@@ -5,34 +5,29 @@ import { loadDotEnv } from "@/utility/loadDotEnv";
 async function main() {
 	loadDotEnv();
 
-	const [
-		{ getTableName, sql },
-		{ migrate },
-		{ connection, db },
-		schema,
-		env,
-		config,
-		seeds,
-	] = await Promise.all([
-		import("drizzle-orm"),
-		import("drizzle-orm/postgres-js/migrator"),
-		import("@/db"),
-		import("@/db/schema"),
-		import("@/env"),
-		import("$/drizzle.config"),
-		import("./seeds"),
-	]);
+	const [{ getTableName, sql }, { migrate }, { getDb }, schema, config, seeds] =
+		await Promise.all([
+			import("drizzle-orm"),
+			import("drizzle-orm/d1/migrator"),
+			import("@/db"),
+			import("@/db/schema"),
+			import("$/drizzle.config"),
+			import("./seeds"),
+		]);
 
-	if (!env.default.server.POSTGRES_SEEDING) {
-		throw new Error('You must set DB_SEEDING to "true" when running seeds');
+	if (!(globalThis as { DB?: unknown }).DB) {
+		throw new Error(
+			"D1 binding not found on globalThis.DB. Run seeds via wrangler so the DB binding is available.",
+		);
 	}
 
+	const db = getDb();
 	const tableCheck = await db.execute(
-		sql<{ exists: string | null }>`
-			select to_regclass('public.expenses') as exists
+		sql<{ name: string | null }>`
+			select name from sqlite_master where type = 'table' and name = 'expenses'
 		`,
 	);
-	const hasExpensesTable = Boolean(tableCheck[0]?.exists);
+	const hasExpensesTable = Boolean(tableCheck[0]?.name);
 
 	if (!hasExpensesTable) {
 		await migrate(db, { migrationsFolder: config.default.out! });
@@ -52,10 +47,6 @@ async function main() {
 	]) {
 		await resetTable(db, table, getTableName);
 	}
-
-	await db.execute(
-		sql`ALTER TABLE "settings" ADD COLUMN IF NOT EXISTS "target_currency" "currency" DEFAULT 'CLP' NOT NULL`,
-	);
 
 	console.log(`Seeding lookup tables:`);
 	console.log(`- expenses`);
@@ -77,8 +68,6 @@ async function main() {
 	console.log(`Seeding tables with relations:`);
 	console.log(`- projects`);
 	await seeds.seedProjects(db);
-
-	await connection.end();
 }
 
 await main();

@@ -1,12 +1,5 @@
 import { ZodError, z } from "zod";
 
-const stringBoolean = z.coerce
-	.string()
-	.transform((val) => {
-		return val === "true";
-	})
-	.default(false);
-
 const emailListSchema = z.string().transform((val) => {
 	const emails = val.split(",");
 	const emailArray = z.array(z.string().email()).parse(emails);
@@ -29,15 +22,6 @@ const ServerEnvSchema = PublicEnvSchema.merge(
 		AUTH_GITHUB_ID: z.string(),
 		AUTH_GITHUB_SECRET: z.string(),
 		AUTH_ADMIN_EMAILS: emailListSchema,
-
-		// Database envs
-		POSTGRES_URL: z.string(),
-		POSTGRES_USER: z.string(),
-		POSTGRES_PASSWORD: z.string(),
-		POSTGRES_HOST: z.string(),
-		POSTGRES_DATABASE: z.string(),
-		POSTGRES_MIGRATING: stringBoolean,
-		POSTGRES_SEEDING: stringBoolean,
 	}),
 );
 
@@ -67,9 +51,17 @@ function parseEnvSchema<T extends z.ZodSchema>(
 }
 export default {
 	get server(): z.infer<typeof ServerEnvSchema> {
-		// On the server process.env is fully available even
-		// if not requesting every single key explicitly
-		return parseEnvSchema(ServerEnvSchema, process.env);
+		const processEnv =
+			typeof process !== "undefined" && process.env ? process.env : {};
+		const globalEnv =
+			typeof globalThis !== "undefined"
+				? ((globalThis as { __START_ENV__?: Record<string, unknown> })
+						.__START_ENV__ ?? (globalThis as Record<string, unknown>))
+				: {};
+		return parseEnvSchema(ServerEnvSchema, {
+			...globalEnv,
+			...processEnv,
+		});
 	},
 	get client(): z.infer<typeof PublicEnvSchema> {
 		// Vite exposes public env vars via import.meta.env

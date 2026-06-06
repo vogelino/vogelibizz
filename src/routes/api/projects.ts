@@ -5,7 +5,9 @@ export const Route = createFileRoute("/api/projects")({
 	server: {
 		handlers: {
 			GET: async () => {
-				const { getProjects } = await import("@/server/api/projects/getProjects");
+				const { getProjects } = await import(
+					"@/server/api/projects/getProjects"
+				);
 				return json(await getProjects());
 			},
 			POST: async ({ request }) => {

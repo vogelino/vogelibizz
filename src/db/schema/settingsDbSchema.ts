@@ -1,11 +1,15 @@
-import { integer, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
 import { currencyEnum } from "./currenciesDbSchema";
 
-export const settings = pgTable("settings", {
-	id: serial("id").primaryKey(),
+export const settings = sqliteTable("settings", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
 	companyDisplayName: text("company_display_name").notNull(),
-	targetCurrency: currencyEnum("target_currency").notNull().default("CLP"),
+	targetCurrency: text("target_currency", {
+		enum: currencyEnum.enumValues,
+	})
+		.notNull()
+		.default("CLP"),
 	companyLegalName: text("company_legal_name"),
 	companySvgLogoString: text("company_svg_logo_string"),
 	companySvgIconString: text("company_svg_icon_string"),

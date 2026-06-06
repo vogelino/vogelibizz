@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
 import { projectsToClients } from "./projectsToClientsDbSchema";
 
-export const clients = pgTable("clients", {
-	id: serial("id").primaryKey(),
+export const clients = sqliteTable("clients", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
 	name: text("name").notNull().unique(),
 	legalName: text("legal_name"),
 	addressLine1: text("address_line_1"),
@@ -15,10 +15,10 @@ export const clients = pgTable("clients", {
 	taxId: text("tax_id"),
 	svgLogoString: text("svg_logo_string"),
 	svgIconString: text("svg_icon_string"),
-	created_at: timestamp("created_at", { mode: "string" })
+	created_at: text("created_at")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	last_modified: timestamp("last_modified", { mode: "string" })
+	last_modified: text("last_modified")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
 });

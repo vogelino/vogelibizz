@@ -1,15 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, primaryKey, serial } from "drizzle-orm/pg-core";
+import { integer, primaryKey, sqliteTable } from "drizzle-orm/sqlite-core";
 import { projects } from "./projectsDbSchema";
 import { quotes } from "./quotesDbSchema";
 
-export const projectsToQuotes = pgTable(
+export const projectsToQuotes = sqliteTable(
 	"projects_to_quotes",
 	{
-		projectId: serial("project_id").references(() => projects.id, {
+		projectId: integer("project_id").references(() => projects.id, {
 			onDelete: "cascade",
 		}),
-		quoteId: serial("quote_id").references(() => quotes.id, {
+		quoteId: integer("quote_id").references(() => quotes.id, {
 			onDelete: "cascade",
 		}),
 	},

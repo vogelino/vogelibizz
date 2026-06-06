@@ -1,17 +1,19 @@
 import { relations } from "drizzle-orm";
-import { date, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { getNowInUTC } from "@/utility/timeUtil";
 import { projectsToQuotes } from "./projectsToQuotesDbSchema";
 
-export const quotes = pgTable("quotes", {
-	id: serial("id").primaryKey(),
-	created_at: timestamp("created_at", { mode: "string" })
+export const quotes = sqliteTable("quotes", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	created_at: text("created_at")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	last_modified: timestamp("last_modified", { mode: "string" })
+	last_modified: text("last_modified")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	date: date("date", { mode: "string" }).notNull().defaultNow(),
+	date: text("date")
+		.$defaultFn(() => getNowInUTC())
+		.notNull(),
 	name: text("name").notNull().unique(),
 });
 

@@ -1,18 +1,11 @@
 import { relations } from "drizzle-orm";
-import {
-	doublePrecision,
-	pgEnum,
-	pgTable,
-	serial,
-	text,
-	timestamp,
-} from "drizzle-orm/pg-core";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
 import { currencies, currencyEnum } from "./currenciesDbSchema";
 
-export const expenseCategoryEnum = pgEnum("expense_category", [
+const expenseCategoryEnumValues = [
 	"Essentials",
 	"Home",
 	"Domain",
@@ -28,14 +21,19 @@ export const expenseCategoryEnum = pgEnum("expense_category", [
 	"Transport",
 	"Travel",
 	"Administrative",
-]);
+] as const;
 
-export const expenseTypeEnum = pgEnum("expense_type", [
-	"Personal",
-	"Freelance",
-]);
+export const expenseCategoryEnum = {
+	enumValues: expenseCategoryEnumValues,
+};
 
-export const expenseRateEnum = pgEnum("expense_rate", [
+const expenseTypeEnumValues = ["Personal", "Freelance"] as const;
+
+export const expenseTypeEnum = {
+	enumValues: expenseTypeEnumValues,
+};
+
+const expenseRateEnumValues = [
 	"Monthly",
 	"Daily",
 	"Hourly",
@@ -48,22 +46,34 @@ export const expenseRateEnum = pgEnum("expense_rate", [
 	"Bi-Yearly",
 	"Tri-Yearly",
 	"One-time",
-]);
+] as const;
 
-export const expenses = pgTable("expenses", {
-	id: serial("id").primaryKey(),
-	created_at: timestamp("created_at", { mode: "string" })
+export const expenseRateEnum = {
+	enumValues: expenseRateEnumValues,
+};
+
+export const expenses = sqliteTable("expenses", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	created_at: text("created_at")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
-	last_modified: timestamp("last_modified", { mode: "string" })
+	last_modified: text("last_modified")
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
 	name: text("name").notNull().unique(),
-	category: expenseCategoryEnum("category").notNull().default("Software"),
-	type: expenseTypeEnum("type").notNull().default("Personal"),
-	rate: expenseRateEnum("rate").notNull().default("Monthly"),
-	originalPrice: doublePrecision("original_price").notNull().default(0.0),
-	originalCurrency: currencyEnum("original_currency").notNull(),
+	category: text("category", { enum: expenseCategoryEnumValues })
+		.notNull()
+		.default("Software"),
+	type: text("type", { enum: expenseTypeEnumValues })
+		.notNull()
+		.default("Personal"),
+	rate: text("rate", { enum: expenseRateEnumValues })
+		.notNull()
+		.default("Monthly"),
+	originalPrice: real("original_price").notNull().default(0.0),
+	originalCurrency: text("original_currency", {
+		enum: currencyEnum.enumValues,
+	}).notNull(),
 });
 
 export type ExpenseType = typeof expenses.$inferSelect;

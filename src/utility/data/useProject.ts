@@ -20,6 +20,7 @@ function useProject(id?: string | number, initialData?: DataType) {
 	const initialDataOptions = initialData
 		? { initialData, initialDataUpdatedAt: Date.now() }
 		: {};
+
 	return useQuery({
 		...query,
 		queryFn,
