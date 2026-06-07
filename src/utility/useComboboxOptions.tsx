@@ -6,7 +6,7 @@ export type OptionType = {
 };
 
 type UseComboboxOptionsParams<OptionValueType> = {
-	optionValues: OptionValueType[];
+	optionValues: readonly OptionValueType[];
 	renderer?: (value: OptionValueType) => ReactNode;
 	accessorFn?: (value: OptionValueType) => string | number;
 };

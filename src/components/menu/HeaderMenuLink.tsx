@@ -1,6 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { Link, type ToOptions } from "@tanstack/react-router";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/utility/classNames";
+
+export type LinkPath = ComponentProps<typeof Link>["to"];
 
 function HeaderMenuLink({
 	onClick,
@@ -11,7 +13,7 @@ function HeaderMenuLink({
 	ariaLabel,
 }: {
 	onClick?: () => void;
-	to?: string;
+	to: ToOptions["to"];
 	title: ReactNode;
 	ariaLabel?: string;
 	className?: string;
@@ -20,7 +22,7 @@ function HeaderMenuLink({
 	return (
 		<li className="inline-block w-full sm:w-auto">
 			<Link
-				to={to ?? "/"}
+				to={to}
 				aria-label={`Header menu link: ${ariaLabel || title} page`}
 				className={cn(
 					`uppercase sm:normal-case text-base font-normal`,

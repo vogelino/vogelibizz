@@ -1,8 +1,8 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import ClientOnly from "@/components/ClientOnly";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
@@ -52,21 +52,22 @@ export default function ProjectEdit({
 		}[]
 	>(project?.clients || []);
 
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm({
+	const form = useForm({
 		defaultValues: {
 			name: project?.name ?? "",
-			content,
-			status,
 			description: project?.description ?? "",
 		},
-	});
-	const statusProps = register("status", {
-		required: "This field is required",
+		onSubmit: async ({ value }) => {
+			navigate({ to: "/projects" });
+			const projectData = {
+				...value,
+				content,
+				status,
+				clients: projectClients,
+			};
+			if (id) editMutation.mutate({ ...projectData, id: Number(id) });
+			else createMutation.mutate([projectData]);
+		},
 	});
 
 	useEffect(() => {
@@ -74,13 +75,9 @@ export default function ProjectEdit({
 		setStatus(project.status ?? "active");
 		setContent(project.content ?? "");
 		setProjectClients(project.clients || []);
-		reset({
-			name: project.name ?? "",
-			content: project.content ?? "",
-			status: project.status ?? "active",
-			description: project.description ?? "",
-		});
-	}, [project, reset]);
+		form.setFieldValue("name", project.name ?? "");
+		form.setFieldValue("description", project.description ?? "");
+	}, [project, form.setFieldValue]);
 
 	const clientsOptions = useComboboxOptions<ClientType>({
 		optionValues: clientsQuery.data ?? [],
@@ -108,52 +105,72 @@ export default function ProjectEdit({
 
 	return (
 		<form
-			onSubmit={handleSubmit((values) => {
-				navigate({ to: "/projects" });
-				const project = { ...values, content, status, clients: projectClients };
-				if (id) editMutation.mutate({ ...project, id: Number(id) });
-				else createMutation.mutate([project]);
-			})}
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
 			id={formId}
 		>
 			<div className="flex flex-col gap-4">
-				<FormInputWrapper
-					label="Name"
-					error={errors?.name?.message}
-					loading={isLoading}
-					loadingChildren={<Skeleton className="h-9 w-full" />}
+				<form.Field
+					name="name"
+					validators={{
+						onSubmit: ({ value }) =>
+							!value ? "This field is required" : undefined,
+					}}
 				>
-					{!isLoading && (
-						<input
-							type="text"
-							{...register("name", {
-								required: "This field is required",
-							})}
-							className="form-input"
-							defaultValue={project?.name || ""}
-						/>
+					{(field) => (
+						<FormInputWrapper
+							label="Name"
+							error={field.state.meta.errors[0]?.toString()}
+							loading={isLoading}
+							loadingChildren={<Skeleton className="h-9 w-full" />}
+						>
+							{!isLoading && (
+								<input
+									type="text"
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									className="form-input"
+									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
+									autoFocus
+								/>
+							)}
+						</FormInputWrapper>
 					)}
-				</FormInputWrapper>
-				<FormInputWrapper
-					label="Description"
-					error={errors?.description?.message}
-					loading={isLoading}
-					loadingChildren={<Skeleton className="h-9 w-full" />}
+				</form.Field>
+				<form.Field
+					name="description"
+					validators={{
+						onSubmit: ({ value }) =>
+							!value ? "This field is required" : undefined,
+					}}
 				>
-					{!isLoading && (
-						<input
-							type="text"
-							{...register("description", {
-								required: "This field is required",
-							})}
-							className="form-input"
-							defaultValue={project?.description || ""}
-						/>
+					{(field) => (
+						<FormInputWrapper
+							label="Description"
+							error={field.state.meta.errors[0]?.toString()}
+							loading={isLoading}
+							loadingChildren={<Skeleton className="h-9 w-full" />}
+						>
+							{!isLoading && (
+								<input
+									type="text"
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									className="form-input"
+								/>
+							)}
+						</FormInputWrapper>
 					)}
-				</FormInputWrapper>
+				</form.Field>
 				<FormInputWrapper
 					label="Content"
-					error={errors?.content?.message}
 					loading={isLoading}
 					loadingChildren={<Skeleton className="h-32 w-full" />}
 				>
@@ -175,9 +192,7 @@ export default function ProjectEdit({
 					onChange={(val) => setStatus(val as ProjectType["status"])}
 					value={status}
 					options={statusList}
-					inputProps={statusProps}
 					label="Status"
-					error={errors?.status?.message}
 					className="w-full"
 					loading={isLoading}
 				/>

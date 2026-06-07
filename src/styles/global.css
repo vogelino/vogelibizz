@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter/index.css";
 @source "../**/*.{js,jsx,md,mdx,ts,tsx}";
-@plugin "@tailwindcss/container-queries";
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:is(.dark, [data-theme="dark"]));
 

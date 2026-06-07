@@ -9,6 +9,7 @@ import type React from "react";
 import Providers from "@/providers";
 import type { RouterContext } from "@/router";
 import appCss from "@/styles/global.css?url";
+import { getThemeServerFn } from "@/utility/theme";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	head: () => ({
@@ -23,6 +24,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			{ rel: "icon", href: "/favicon.ico" },
 		],
 	}),
+	beforeLoad: async () => ({ theme: await getThemeServerFn() }),
 	notFoundComponent: () => <div>404 Not Found</div>,
 	component: RootComponent,
 });
@@ -30,11 +32,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootComponent() {
 	const router = useRouter();
 	const { queryClient } = router.options.context as RouterContext;
+	const { theme } = Route.useRouteContext();
 	const htmlStyle = { "--font-inter": "Inter" } as React.CSSProperties;
 	return (
 		<html
 			lang="en"
 			className="font-sans"
+			data-theme={theme === "auto" ? undefined : theme}
 			style={htmlStyle}
 			suppressHydrationWarning
 		>

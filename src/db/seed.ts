@@ -22,10 +22,8 @@ async function main() {
 	}
 
 	const db = getDb();
-	const tableCheck = await db.execute(
-		sql<{ name: string | null }>`
-			select name from sqlite_master where type = 'table' and name = 'expenses'
-		`,
+	const tableCheck = await db.all<{ name: string | null }>(
+		sql`select name from sqlite_master where type = 'table' and name = 'expenses'`,
 	);
 	const hasExpensesTable = Boolean(tableCheck[0]?.name);
 

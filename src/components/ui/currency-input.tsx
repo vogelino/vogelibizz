@@ -23,8 +23,8 @@ function CurrencyInput({
 	label = "Amount",
 	loading = false,
 }: PropsWithChildren<{
-	inputProps: CurrencyInputProps;
-	currencyProps: HTMLProps<HTMLInputElement>;
+	inputProps?: CurrencyInputProps;
+	currencyProps?: HTMLProps<HTMLInputElement>;
 	onCurrencyChange: (currency: ExpenseType["originalCurrency"]) => void;
 	onValueChange: (value: number) => void;
 	currency: ExpenseType["originalCurrency"];
@@ -68,7 +68,7 @@ function CurrencyInput({
 						<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-muted-foreground opacity-80">
 							<Banknote />
 						</div>
-						<input type="hidden" {...inputProps} />
+						{inputProps && <input type="hidden" {...inputProps} />}
 						<ReactCurrencyInput
 							className={cn(
 								"form-input dark:bg-card",
@@ -86,7 +86,9 @@ function CurrencyInput({
 							decimalScale={2}
 						/>
 					</div>
-					<input type="hidden" {...currencyProps} value={currency} />
+					{currencyProps && (
+						<input type="hidden" {...currencyProps} value={currency} />
+					)}
 					<Combobox
 						className={className}
 						options={options}

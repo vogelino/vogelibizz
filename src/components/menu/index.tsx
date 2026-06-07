@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
+import { Link, type ToOptions } from "@tanstack/react-router";
 import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -11,10 +11,19 @@ import {
 	currencyEnum,
 	type SettingsType,
 } from "@/db/schema";
+import { Route as ClientsRoute } from "@/routes/_resource/clients";
+import { Route as ExpensesRoute } from "@/routes/_resource/expenses";
+import { Route as ProjectRoute } from "@/routes/_resource/projects";
 import { cn } from "@/utility/classNames";
 import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
 import HeaderMenuLink from "./HeaderMenuLink";
+
+type MenuLinkType = {
+	key: string;
+	label: string;
+	route: ToOptions["to"];
+};
 
 export const Menu = ({
 	withBg = true,
@@ -32,21 +41,21 @@ export const Menu = ({
 		value: currency,
 		label: currency,
 	}));
-	const menuItems = [
+	const menuItems: MenuLinkType[] = [
 		{
 			key: "projects",
 			label: "Projects",
-			route: "/projects",
+			route: ProjectRoute.fullPath,
 		},
 		{
 			key: "clients",
 			label: "Clients",
-			route: "/clients",
+			route: ClientsRoute.fullPath,
 		},
 		{
 			key: "expenses",
 			label: "Expenses",
-			route: "/expenses",
+			route: ExpensesRoute.fullPath,
 		},
 	];
 

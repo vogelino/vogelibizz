@@ -1,5 +1,3 @@
-"use client";
-
 import {
 	Check,
 	Laptop,
@@ -7,8 +5,7 @@ import {
 	MoonIcon,
 	SunIcon,
 } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useRouteContext, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -17,36 +14,32 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utility/classNames";
+import type { Theme } from "@/utility/theme";
+import { setThemeServerFn } from "@/utility/theme";
 
 type ThemeOptionType = {
-	name: string;
+	name: Theme;
 	label: string;
 	Icon: LucideIcon;
 };
 const themeOptions: ThemeOptionType[] = [
-	{
-		name: "system",
-		label: "System",
-		Icon: Laptop,
-	},
-	{
-		name: "light",
-		label: "Light",
-		Icon: SunIcon,
-	},
-	{
-		name: "dark",
-		label: "Dark",
-		Icon: MoonIcon,
-	},
+	{ name: "auto", label: "System", Icon: Laptop },
+	{ name: "light", label: "Light", Icon: SunIcon },
+	{ name: "dark", label: "Dark", Icon: MoonIcon },
 ];
-export default function ThemeToggle() {
-	const { theme: originalTheme, setTheme: setOriginalTheme } = useTheme();
-	const [theme, setTheme] = useState("system");
 
-	useEffect(() => {
-		setTheme(originalTheme || "system");
-	}, [originalTheme]);
+export default function ThemeToggle() {
+	const { theme } = useRouteContext({ from: "__root__" });
+	const router = useRouter();
+
+	async function handleSetTheme(next: Theme) {
+		await setThemeServerFn({ data: next });
+		if (document.startViewTransition) {
+			document.startViewTransition(() => router.invalidate());
+		} else {
+			router.invalidate();
+		}
+	}
 
 	return (
 		<DropdownMenu>
@@ -69,7 +62,7 @@ export default function ThemeToggle() {
 				{themeOptions.map((option) => (
 					<DropdownMenuItem
 						key={option.name}
-						onClick={() => setOriginalTheme(option.name.toLowerCase())}
+						onClick={() => handleSetTheme(option.name)}
 					>
 						<div className="grid gap-2 items-center grid-cols-[auto_80px_auto]">
 							<option.Icon />

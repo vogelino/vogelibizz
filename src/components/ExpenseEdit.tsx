@@ -1,8 +1,8 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { PillText } from "@/components/PillText";
@@ -53,19 +53,27 @@ export default function ExpenseEdit({
 		expense?.originalCurrency ?? "USD",
 	);
 
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm({
+	const form = useForm({
 		defaultValues: {
 			name: expense?.name ?? "",
-			category,
-			type,
-			originalPrice,
-			originalCurrency,
-			rate,
+		},
+		onSubmit: async ({ value }) => {
+			navigate({ to: "/expenses" });
+			const expenseData = {
+				name: value.name,
+				type,
+				category,
+				rate,
+				originalPrice,
+				originalCurrency,
+			};
+			if (id) {
+				editMutation.mutate({
+					...expenseData,
+					id,
+					last_modified: getNowInUTC(),
+				});
+			} else createMutation.mutate([expenseData]);
 		},
 	});
 
@@ -76,15 +84,8 @@ export default function ExpenseEdit({
 		setRate(expense.rate ?? "Monthly");
 		setOriginalPrice(expense.originalPrice ?? 0);
 		setOriginalCurrency(expense.originalCurrency ?? "USD");
-		reset({
-			name: expense.name ?? "",
-			category: expense.category ?? "Administrative",
-			type: expense.type ?? "Freelance",
-			originalPrice: expense.originalPrice ?? 0,
-			originalCurrency: expense.originalCurrency ?? "USD",
-			rate: expense.rate ?? "Monthly",
-		});
-	}, [expense, reset]);
+		form.setFieldValue("name", expense.name ?? "");
+	}, [expense, form.setFieldValue]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -110,69 +111,64 @@ export default function ExpenseEdit({
 
 	return (
 		<form
-			onSubmit={handleSubmit((values) => {
-				navigate({ to: "/expenses" });
-				const expense = {
-					...values,
-					type,
-					category,
-					rate,
-					originalPrice,
-					originalCurrency,
-				};
-				if (id) {
-					editMutation.mutate({
-						...expense,
-						id,
-						last_modified: getNowInUTC(),
-					});
-				} else createMutation.mutate([expense]);
-			})}
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
 			id={formId}
 			className="@container"
 		>
 			<div className="flex flex-col gap-6">
-				<FormInputWrapper
-					label="Name"
-					error={errors?.name?.message as string}
-					loading={isLoading}
-					loadingChildren={<Skeleton className="h-9 w-full" />}
+				<form.Field
+					name="name"
+					validators={{
+						onSubmit: ({ value }) =>
+							!value ? "This field is required" : undefined,
+					}}
 				>
-					{!isLoading && (
-						<input
-							className="form-input dark:bg-card"
-							placeholder="Expense name"
-							type="text"
-							{...register("name", { required: true })}
-							defaultValue={expense?.name}
-						/>
+					{(field) => (
+						<FormInputWrapper
+							label="Name"
+							error={field.state.meta.errors[0]?.toString()}
+							loading={isLoading}
+							loadingChildren={<Skeleton className="h-9 w-full" />}
+						>
+							{!isLoading && (
+								<input
+									className="form-input dark:bg-card"
+									placeholder="Expense name"
+									type="text"
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
+									autoFocus
+								/>
+							)}
+						</FormInputWrapper>
 					)}
-				</FormInputWrapper>
+				</form.Field>
 				<div className="grid @md:grid-cols-2 gap-6">
 					<FormInputCombobox
 						options={categoryOptions}
-						inputProps={register("category")}
 						label="Category"
 						value={category}
 						onChange={(val) => setCategory(val as ExpenseType["category"])}
-						error={errors?.category?.message as string}
 						className="w-full"
 						loading={isLoading}
 					/>
 					<FormInputCombobox
 						options={typeOptions}
-						inputProps={register("type")}
 						label="Type"
 						value={type}
 						onChange={(val) => setType(val as ExpenseType["type"])}
 						className="w-full"
-						error={errors?.type?.message as string}
 						loading={isLoading}
 					/>
 					<CurrencyInput
 						label="Original price"
-						inputProps={register("originalPrice")}
-						currencyProps={register("originalCurrency")}
 						onCurrencyChange={setOriginalCurrency}
 						onValueChange={setOriginalPrice}
 						currency={originalCurrency}
@@ -181,12 +177,10 @@ export default function ExpenseEdit({
 					/>
 					<FormInputCombobox
 						options={rateOptions}
-						inputProps={register("rate")}
 						label="Billing Rate"
 						value={rate}
 						onChange={(val) => setRate(val as ExpenseType["rate"])}
 						className="w-full"
-						error={errors?.rate?.message as string}
 						loading={isLoading}
 					/>
 				</div>

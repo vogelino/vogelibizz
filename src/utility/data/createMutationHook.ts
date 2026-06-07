@@ -46,7 +46,7 @@ function createMutationHook<DataType, SchemaData>({
 				queryClient.setQueryData<DataType>(listQuery.queryKey, (old) =>
 					createOptimisticDataEntry(old, input),
 				);
-				const previousSingleData = new Map<string, unknown>();
+				const previousSingleData = new Map<string, () => void>();
 				const candidates = Array.isArray(input) ? input : [input];
 				candidates.forEach((candidate) => {
 					if (!candidate || typeof candidate !== "object") {
@@ -55,9 +55,9 @@ function createMutationHook<DataType, SchemaData>({
 					const id = "id" in candidate ? String(candidate.id ?? "") : "";
 					if (!id) return;
 					const detailQuery = resourceQueries.detail(id);
-					previousSingleData.set(
-						id,
-						queryClient.getQueryData(detailQuery.queryKey),
+					const prevData = queryClient.getQueryData(detailQuery.queryKey);
+					previousSingleData.set(id, () =>
+						queryClient.setQueryData(detailQuery.queryKey, prevData as never),
 					);
 					queryClient.setQueryData(detailQuery.queryKey, (old) =>
 						old && typeof old === "object"
@@ -98,9 +98,8 @@ function createMutationHook<DataType, SchemaData>({
 					resourceQueries.list().queryKey,
 					context?.previousData,
 				);
-				context?.previousSingleData?.forEach((value, id) => {
-					const detailQuery = resourceQueries.detail(id);
-					queryClient.setQueryData(detailQuery.queryKey, value);
+				context?.previousSingleData?.forEach((restore) => {
+					restore();
 				});
 				const errorMessage = getQueryCompletionMessage({
 					action,

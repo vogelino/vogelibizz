@@ -1,8 +1,8 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,24 +41,27 @@ export default function ClientEdit({
 		}[]
 	>(client?.projects || []);
 	const createMutation = useClientCreate();
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm({
+
+	const form = useForm({
 		defaultValues: {
-			name: client?.name,
+			name: client?.name ?? "",
+		},
+		onSubmit: async ({ value }) => {
+			navigate({ to: "/clients" });
+			const clientData = {
+				name: value.name,
+				projects: clientProjects,
+			};
+			if (id) editMutation.mutate({ ...clientData, id });
+			else createMutation.mutate([clientData]);
 		},
 	});
 
 	useEffect(() => {
 		if (!client) return;
 		setClientProjects(client?.projects || []);
-		reset({
-			name: client.name ?? "",
-		});
-	}, [client, reset]);
+		form.setFieldValue("name", client.name ?? "");
+	}, [client, form.setFieldValue]);
 
 	const projectsOptions = useComboboxOptions<ProjectType>({
 		optionValues: projectsQuery.data ?? [],
@@ -86,40 +89,43 @@ export default function ClientEdit({
 
 	return (
 		<form
-			onSubmit={handleSubmit((values) => {
-				navigate({ to: "/clients" });
-				const client = {
-					...values,
-					name: values.name ?? "",
-					projects: clientProjects,
-				};
-				if (id) editMutation.mutate({ ...client, id });
-				else createMutation.mutate([client]);
-			})}
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
 			id={formId}
 		>
 			<div className="flex flex-col gap-6">
-				<FormInputWrapper
-					label="Name"
-					error={
-						typeof errors.name?.message === "string"
-							? errors.name.message
-							: undefined
-					}
-					loading={isLoading}
-					loadingChildren={<Skeleton className="h-9 w-full" />}
+				<form.Field
+					name="name"
+					validators={{
+						onSubmit: ({ value }) =>
+							!value ? "This field is required" : undefined,
+					}}
 				>
-					{!isLoading && (
-						<input
-							type="text"
-							{...register("name", {
-								required: "This field is required",
-							})}
-							defaultValue={client?.name}
-							className="form-input"
-						/>
+					{(field) => (
+						<FormInputWrapper
+							label="Name"
+							error={field.state.meta.errors[0]?.toString()}
+							loading={isLoading}
+							loadingChildren={<Skeleton className="h-9 w-full" />}
+						>
+							{!isLoading && (
+								<input
+									type="text"
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									className="form-input"
+									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
+									autoFocus
+								/>
+							)}
+						</FormInputWrapper>
 					)}
-				</FormInputWrapper>
+				</form.Field>
 				<div className="flex flex-col gap-1">
 					<span className="text-muted-foreground">Projects</span>
 					<MultiValueInput

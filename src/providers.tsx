@@ -5,7 +5,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useRef } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "@/providers/SessionProvider";
-import { ThemeProvider } from "@/providers/ThemeProvider";
 
 function Providers({
 	children,
@@ -20,12 +19,10 @@ function Providers({
 		<>
 			<QueryClientProvider client={queryClientRef.current}>
 				<SessionProvider>
-					<ThemeProvider defaultTheme="system" enableSystem>
-						<TooltipProvider>
-							{children}
-							<ReactQueryDevtools initialIsOpen={false} />
-						</TooltipProvider>
-					</ThemeProvider>
+					<TooltipProvider>
+						{children}
+						<ReactQueryDevtools initialIsOpen={false} />
+					</TooltipProvider>
 				</SessionProvider>
 			</QueryClientProvider>
 			<Toaster />

@@ -191,13 +191,8 @@ export const resourceQueryFactories = {
 	projects: projectsQuery,
 	clients: clientsQuery,
 	expenses: expensesQuery,
-} satisfies Record<
-	QueryResourceKey,
-	{
-		list: () => { queryKey: readonly unknown[] };
-		detail: (id: string | number) => { queryKey: readonly unknown[] };
-	}
->;
+	settings: settingsQuery,
+};
 
 export const queryFactories = {
 	...resourceQueryFactories,

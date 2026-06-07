@@ -1,7 +1,7 @@
 import { projectStatusEnum } from "@/db/schema";
 import clientSeeds from "./clientsSeedData";
 
-function randomItemFromArray<T>(arr: T[]): T {
+function randomItemFromArray<T>(arr: readonly T[]): T {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 

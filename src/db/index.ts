@@ -1,5 +1,5 @@
 import { getStartContext } from "@tanstack/start-storage-context";
-import { drizzle } from "drizzle-orm/d1";
+import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
 import type { D1Database } from "@/db/d1Types";
 import * as schema from "@/db/schema";
 
@@ -18,7 +18,9 @@ function resolveD1Database(): D1Database {
 	return d1;
 }
 
-let cachedDb: ReturnType<typeof drizzle> | null = null;
+type SchemaDb = DrizzleD1Database<typeof schema> & { $client: D1Database };
+
+let cachedDb: SchemaDb | null = null;
 let cachedClient: D1Database | null = null;
 
 export function getDb() {
@@ -34,9 +36,9 @@ export function getDb() {
 	return cachedDb;
 }
 
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
+export const db = new Proxy({} as SchemaDb, {
 	get(_target, prop) {
-		return (getDb() as Record<PropertyKey, unknown>)[prop];
+		return (getDb() as unknown as Record<PropertyKey, unknown>)[prop];
 	},
 });
 

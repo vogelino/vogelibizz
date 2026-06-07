@@ -14,7 +14,7 @@ function FormInputCombobox({
 	loading = false,
 }: {
 	error?: string;
-	inputProps: HTMLProps<HTMLInputElement>;
+	inputProps?: HTMLProps<HTMLInputElement>;
 	options: OptionType[];
 	onChange: (value: string | number) => void;
 	label: ReactNode;
@@ -26,7 +26,7 @@ function FormInputCombobox({
 		<FormInputWrapper label={label} error={error} loading={loading}>
 			{!loading && (
 				<>
-					<input type="hidden" {...inputProps} />
+					{inputProps && <input type="hidden" {...inputProps} />}
 					<Combobox
 						className={className}
 						options={options}

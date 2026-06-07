@@ -1,17 +1,16 @@
-"use client";
-
-import { useTheme } from "next-themes";
+import { useRouteContext } from "@tanstack/react-router";
 import { Toaster as Sonner } from "sonner";
 import { cn } from "@/utility/classNames";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-	const { theme = "system" } = useTheme();
+	const { theme } = useRouteContext({ from: "__root__" });
+	const sonnerTheme = theme === "auto" ? "system" : theme;
 
 	return (
 		<Sonner
-			theme={theme as ToasterProps["theme"]}
+			theme={sonnerTheme as ToasterProps["theme"]}
 			className="toaster group"
 			toastOptions={{
 				classNames: {
