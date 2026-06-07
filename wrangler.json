@@ -1,0 +1,20 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanstack-start-app",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "./server-entry.ts",
+	"vars": {
+		"VITE_PUBLIC_BASE_URL": "https://tanstack-start-app.vogelibizz.workers.dev",
+		"VITE_PUBLIC_OPENEXCHANGERATES_API_KEY": "9d2337f794a94950a9eb60cb255195b5",
+		"AUTH_ADMIN_EMAILS": "contact@vogelino.com,samuel.goumaz@gmail.com",
+		"AUTH_URL": "https://tanstack-start-app.vogelibizz.workers.dev/api/auth"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "3e20bfb2-6c46-4e83-8760-957d3b91ae84",
+			"database_name": "vogelibizz"
+		}
+	]
+}

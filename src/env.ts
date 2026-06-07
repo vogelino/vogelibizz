@@ -58,7 +58,14 @@ export default {
 				? ((globalThis as { __START_ENV__?: Record<string, unknown> })
 						.__START_ENV__ ?? (globalThis as Record<string, unknown>))
 				: {};
+		// VITE_PUBLIC_* vars are baked in at build time via vite.config.ts define
+		const publicEnv = {
+			VITE_PUBLIC_BASE_URL: import.meta.env.VITE_PUBLIC_BASE_URL,
+			VITE_PUBLIC_OPENEXCHANGERATES_API_KEY: import.meta.env
+				.VITE_PUBLIC_OPENEXCHANGERATES_API_KEY,
+		};
 		return parseEnvSchema(ServerEnvSchema, {
+			...publicEnv,
 			...globalEnv,
 			...processEnv,
 		});
