@@ -110,13 +110,21 @@ export function DataTable<TData>({
 	const showPagination = table.getPageCount() > 1;
 
 	return (
-		<div className="space-y-4">
+		<>
 			{toolbar ? (
-				<div>{loading ? (toolbarSkeleton ?? null) : toolbar(table)}</div>
+				<div className="sticky px-6 md:px-10 left-0 pb-6">
+					{loading ? (toolbarSkeleton ?? null) : toolbar(table)}
+				</div>
 			) : null}
 			<div className="rounded-md">
 				<Table>
-					<TableHeader>
+					<TableHeader
+						className={cn(
+							"sticky top-16 bg-background z-10",
+							"[&_th:first-child]:pl-6 md:[&_th:first-child]:pl-10 [&_th:last-child]:pr-6 md:[&_th:last-child]:pr-10",
+							"shadow shadow-black/5",
+						)}
+					>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
@@ -163,7 +171,11 @@ export function DataTable<TData>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody>
+					<TableBody
+						className={cn(
+							"[&_td:first-child]:pl-6 md:[&_td:first-child]:pl-10 [&_td:last-child]:pr-6 md:[&_td:last-child]:pr-10",
+						)}
+					>
 						{loading ? (
 							skeletonRowKeys.map((rowKey) => (
 								<TableRow key={rowKey} className="relative">
@@ -234,6 +246,6 @@ export function DataTable<TData>({
 					</Button>
 				</div>
 			) : null}
-		</div>
+		</>
 	);
 }

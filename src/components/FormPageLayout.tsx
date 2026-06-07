@@ -19,7 +19,7 @@ function FormPageLayout({
 	footerButtons?: React.ReactNode;
 }>) {
 	return (
-		<div className="px-10 pb-8 max-w-3xl mx-auto">
+		<div className="px-6 md:px-10 pb-8 max-w-3xl mx-auto">
 			<div
 				className={cn(
 					"flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center",

@@ -1,6 +1,8 @@
 "use client";
 
 import { Link, type ToOptions } from "@tanstack/react-router";
+import { Menu as MenuIcon, X } from "lucide-react";
+import { useState } from "react";
 import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -11,9 +13,6 @@ import {
 	currencyEnum,
 	type SettingsType,
 } from "@/db/schema";
-import { Route as ClientsRoute } from "@/routes/_resource/clients";
-import { Route as ExpensesRoute } from "@/routes/_resource/expenses";
-import { Route as ProjectRoute } from "@/routes/_resource/projects";
 import { cn } from "@/utility/classNames";
 import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
@@ -34,6 +33,7 @@ export const Menu = ({
 	currentPage: string;
 	initialSettings?: SettingsType;
 }) => {
+	const [mobileOpen, setMobileOpen] = useState(false);
 	const settingsQuery = useSettings(initialSettings);
 	const settingsUpdate = useSettingsUpdate();
 	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
@@ -45,17 +45,17 @@ export const Menu = ({
 		{
 			key: "projects",
 			label: "Projects",
-			route: ProjectRoute.fullPath,
+			route: "/projects",
 		},
 		{
 			key: "clients",
 			label: "Clients",
-			route: ClientsRoute.fullPath,
+			route: "/clients",
 		},
 		{
 			key: "expenses",
 			label: "Expenses",
-			route: ExpensesRoute.fullPath,
+			route: "/expenses",
 		},
 	];
 
@@ -65,8 +65,8 @@ export const Menu = ({
 		<header
 			className={cn(
 				!withBg && `logo-visible`,
-				`absolute top-0 left-1/2 -translate-x-1/2 w-screen z-40`,
-				`text-foreground px-10`,
+				`left-0 sticky top-0 w-screen z-40`,
+				`text-foreground px-6 md:px-10`,
 				`border-b`,
 				`flex justify-between items-center py-2`,
 				`scrolled-top h-auto`,
@@ -86,41 +86,50 @@ export const Menu = ({
 			</Link>
 			<button
 				type="button"
-				aria-label="Hide the main navitation menu"
+				aria-label={
+					mobileOpen ? "Close navigation menu" : "Open navigation menu"
+				}
 				id="burger-menu"
-				aria-hidden="false"
-				aria-expanded="false"
-				className="md:hidden md:invisible"
+				aria-controls="menu"
+				aria-expanded={mobileOpen}
+				onClick={() => setMobileOpen((o) => !o)}
+				className="md:hidden p-2 -mr-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
 			>
-				<span />
+				{mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
 			</button>
 			<nav
 				id="menu"
 				aria-label="Main navigation"
 				className={cn(
-					`fixed top-25.25 left-0 w-screen h-[calc(100svh-69px)] bg-background md:bg-transparent`,
-					`opacity-0 pointer-events-none md:opacity-100 md:static md:pointer-events-auto`,
+					`fixed top-16 left-0 w-screen h-[calc(100svh-69px)] bg-background md:bg-transparent`,
+					`md:opacity-100 md:static md:pointer-events-auto`,
 					`md:w-auto md:h-auto md:bg-none transition-opacity`,
-					`motion-reduce:transition-none flex gap-6 flex-wrap items-center`,
+					`motion-reduce:transition-none flex gap-6`,
+					`max-md:grid max-md:grid-rows-[1fr_auto]`,
+					mobileOpen
+						? `opacity-100 pointer-events-auto`
+						: `opacity-0 pointer-events-none`,
 				)}
 			>
 				<ul
-					className={cn(`flex flex-col md:flex-row md:gap-4 items-center`)}
+					className={cn(`flex flex-col md:flex-row md:gap-4 items-center grow`)}
 					aria-label="Main menu items"
 				>
 					{menuItems.map((item) => (
 						<HeaderMenuLink
 							key={item.key}
-							to={item.route ?? "/"}
+							to={item.route}
 							title={item.label ?? "-"}
 							active={currentPage.split("/")[0] === item.key}
+							onClick={() => setMobileOpen(false)}
 						/>
 					))}
 				</ul>
 				<ul
 					className={cn(
-						`flex flex-col md:flex-row md:gap-4 items-center`,
-						`pl-6 border-l border-border`,
+						`flex md:gap-4 items-center grow-0 h-fit`,
+						`pl-6 border-l border-border w-full`,
+						`max-md:grid max-md:grid-cols-[1fr_auto_auto] max-md:gap-2`,
 					)}
 					aria-label="Secondary menu items"
 				>

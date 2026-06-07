@@ -34,7 +34,7 @@ function ResourcePageLayout({
 
 	return (
 		<ResourceActionsContext.Provider value={setActions}>
-			<div className="px-10 pb-8">
+			<div className="px-6 md:px-10 sticky left-0 pt-6 md:pt-10">
 				<div className="flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center">
 					<h1 className="text-lg font-semibold uppercase antialiased">
 						{resource}
@@ -44,8 +44,9 @@ function ResourcePageLayout({
 						<ResourceCreateButton resource={resource} />
 					</div>
 				</div>
-				{children}
 			</div>
+
+			{children}
 		</ResourceActionsContext.Provider>
 	);
 }

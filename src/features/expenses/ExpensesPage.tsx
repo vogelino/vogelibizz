@@ -203,22 +203,37 @@ export default function ExpensesPage({
 	useResourceActions(selectionActions);
 	return (
 		<>
-			<div className="p-4 bg-muted my-4">
-				<div className="flex flex-wrap items-start justify-between gap-6">
-					{showFilteredTotal ? (
-						<div className="flex flex-wrap gap-6">
-							<div className="flex flex-col">
-								<span className="text-sm text-muted-foreground">
-									Filtered total
-								</span>
-								<span className="text-lg">
-									{isLoading ? (
-										<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
-									) : (
-										filteredLabel
-									)}
-								</span>
+			<div className="px-6 md:px-10 sticky left-0">
+				<div className="p-4 bg-muted my-4">
+					<div className="flex flex-wrap items-start justify-between gap-6">
+						{showFilteredTotal ? (
+							<div className="flex flex-wrap gap-6">
+								<div className="flex flex-col">
+									<span className="text-sm text-muted-foreground">
+										Filtered total
+									</span>
+									<span className="text-lg">
+										{isLoading ? (
+											<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
+										) : (
+											filteredLabel
+										)}
+									</span>
+								</div>
+								<div className="flex flex-col">
+									<span className="text-sm text-muted-foreground">
+										Monthly total
+									</span>
+									<span className="text-lg">
+										{isLoading ? (
+											<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
+										) : (
+											totalLabel
+										)}
+									</span>
+								</div>
 							</div>
+						) : (
 							<div className="flex flex-col">
 								<span className="text-sm text-muted-foreground">
 									Monthly total
@@ -231,151 +246,135 @@ export default function ExpensesPage({
 									)}
 								</span>
 							</div>
+						)}
+						<div className="flex items-start gap-4">
+							<MiniPieChart
+								title="By category"
+								series={categorySeries}
+								colorForLabel={getCategoryStrokeColor}
+								loading={isLoading}
+								onSegmentClick={(label) => {
+									const nextCategory = expenseCategoryEnum.enumValues.find(
+										(value) => value === label,
+									);
+									if (!nextCategory) return;
+									setCategoryFilter([nextCategory]);
+									tableRef.current
+										?.getColumn("category")
+										?.setFilterValue([nextCategory]);
+									setTypeFilter("All types");
+									tableRef.current
+										?.getColumn("type")
+										?.setFilterValue(undefined);
+								}}
+							/>
+							<MiniPieChart
+								title="By type"
+								series={typeSeries}
+								colorForLabel={getTypeStrokeColor}
+								loading={isLoading}
+								onSegmentClick={(label) => {
+									const nextType = expenseTypeEnum.enumValues.find(
+										(value) => value === label,
+									);
+									if (!nextType) return;
+									setTypeFilter(nextType);
+									tableRef.current?.getColumn("type")?.setFilterValue(nextType);
+									setCategoryFilter([]);
+									tableRef.current
+										?.getColumn("category")
+										?.setFilterValue(undefined);
+								}}
+							/>
 						</div>
-					) : (
-						<div className="flex flex-col">
-							<span className="text-sm text-muted-foreground">
-								Monthly total
-							</span>
-							<span className="text-lg">
-								{isLoading ? (
-									<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
-								) : (
-									totalLabel
-								)}
-							</span>
-						</div>
-					)}
-					<div className="flex items-start gap-4">
-						<MiniPieChart
-							title="By category"
-							series={categorySeries}
-							colorForLabel={getCategoryStrokeColor}
-							loading={isLoading}
-							onSegmentClick={(label) => {
-								const nextCategory = expenseCategoryEnum.enumValues.find(
-									(value) => value === label,
-								);
-								if (!nextCategory) return;
-								setCategoryFilter([nextCategory]);
-								tableRef.current
-									?.getColumn("category")
-									?.setFilterValue([nextCategory]);
-								setTypeFilter("All types");
-								tableRef.current?.getColumn("type")?.setFilterValue(undefined);
-							}}
-						/>
-						<MiniPieChart
-							title="By type"
-							series={typeSeries}
-							colorForLabel={getTypeStrokeColor}
-							loading={isLoading}
-							onSegmentClick={(label) => {
-								const nextType = expenseTypeEnum.enumValues.find(
-									(value) => value === label,
-								);
-								if (!nextType) return;
-								setTypeFilter(nextType);
-								tableRef.current?.getColumn("type")?.setFilterValue(nextType);
-								setCategoryFilter([]);
-								tableRef.current
-									?.getColumn("category")
-									?.setFilterValue(undefined);
-							}}
-						/>
 					</div>
 				</div>
 			</div>
-			<div className="w-full mb-6">
-				<DataTable
-					columns={columns}
-					data={!error && data.length > 0 ? data : []}
-					loading={isLoading}
-					enableRowSelection
-					onSelectionChange={setSelectedRows}
-					toolbarSkeleton={
-						<div className="flex items-center gap-4">
-							<Skeleton className="h-9 w-64" />
-							<Skeleton className="h-9 w-40" />
-						</div>
-					}
-					initialState={{
-						pagination: { pageIndex: 0, pageSize: 1000 },
-						sorting: [{ id: "last_modified", desc: false }],
-						columnFilters: [
-							...(categoryFilter.length
-								? [{ id: "category", value: categoryFilter }]
-								: []),
-							...(typeFilter && typeFilter !== "All types"
-								? [{ id: "type", value: String(typeFilter) }]
-								: []),
-						],
-					}}
-					toolbar={(table) => (
-						<div className="flex items-center gap-4">
-							{(() => {
-								tableRef.current = table;
-								return null;
-							})()}
-							<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
-								options={categoryOptions}
-								values={
-									categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
-								}
-								placeholder="Filter by category"
-								selectedValueFormater={(value) => (
-									<ExpenseCategoryBadge
-										value={value as ExpenseWithMonthlyCLPPriceType["category"]}
-									/>
-								)}
-								onChange={(cat) => {
-									const nextValues = cat.map(
-										(c) =>
-											c.value as ExpenseWithMonthlyCLPPriceType["category"],
-									);
-									setCategoryFilter(nextValues);
-									table
-										.getColumn("category")
-										?.setFilterValue(
-											nextValues.length ? nextValues : undefined,
-										);
+			<DataTable
+				columns={columns}
+				data={!error && data.length > 0 ? data : []}
+				loading={isLoading}
+				enableRowSelection
+				onSelectionChange={setSelectedRows}
+				toolbarSkeleton={
+					<div className="flex items-center gap-4 flex-wrap">
+						<Skeleton className="h-9 w-64" />
+						<Skeleton className="h-9 w-40" />
+					</div>
+				}
+				initialState={{
+					pagination: { pageIndex: 0, pageSize: 1000 },
+					sorting: [{ id: "last_modified", desc: false }],
+					columnFilters: [
+						...(categoryFilter.length
+							? [{ id: "category", value: categoryFilter }]
+							: []),
+						...(typeFilter && typeFilter !== "All types"
+							? [{ id: "type", value: String(typeFilter) }]
+							: []),
+					],
+				}}
+				toolbar={(table) => (
+					<div className="flex items-center gap-x-4 gap-y-1 flex-wrap">
+						{(() => {
+							tableRef.current = table;
+							return null;
+						})()}
+						<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
+							options={categoryOptions}
+							values={
+								categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
+							}
+							placeholder="Filter by category"
+							selectedValueFormater={(value) => (
+								<ExpenseCategoryBadge
+									value={value as ExpenseWithMonthlyCLPPriceType["category"]}
+								/>
+							)}
+							onChange={(cat) => {
+								const nextValues = cat.map(
+									(c) => c.value as ExpenseWithMonthlyCLPPriceType["category"],
+								);
+								setCategoryFilter(nextValues);
+								table
+									.getColumn("category")
+									?.setFilterValue(nextValues.length ? nextValues : undefined);
+							}}
+							loading={isLoading}
+						/>
+						<Combobox
+							options={typeOptions}
+							value={typeFilter}
+							onChange={(value) => {
+								setTypeFilter(value);
+								const column = table.getColumn("type");
+								if (!column) return;
+								const nextValue = `${value}`;
+								column.setFilterValue(
+									nextValue === "All types" ? undefined : nextValue,
+								);
+							}}
+							loading={isLoading}
+						/>
+						{showFilteredTotal ? (
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								disabled={isLoading}
+								onClick={() => {
+									setCategoryFilter([]);
+									setTypeFilter("All types");
+									table.getColumn("category")?.setFilterValue(undefined);
+									table.getColumn("type")?.setFilterValue(undefined);
 								}}
-								loading={isLoading}
-							/>
-							<Combobox
-								options={typeOptions}
-								value={typeFilter}
-								onChange={(value) => {
-									setTypeFilter(value);
-									const column = table.getColumn("type");
-									if (!column) return;
-									const nextValue = `${value}`;
-									column.setFilterValue(
-										nextValue === "All types" ? undefined : nextValue,
-									);
-								}}
-								loading={isLoading}
-							/>
-							{showFilteredTotal ? (
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									disabled={isLoading}
-									onClick={() => {
-										setCategoryFilter([]);
-										setTypeFilter("All types");
-										table.getColumn("category")?.setFilterValue(undefined);
-										table.getColumn("type")?.setFilterValue(undefined);
-									}}
-								>
-									Clear filters
-								</Button>
-							) : null}
-						</div>
-					)}
-				/>
-			</div>
+							>
+								Clear filters
+							</Button>
+						) : null}
+					</div>
+				)}
+			/>
 		</>
 	);
 }

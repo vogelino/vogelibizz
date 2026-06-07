@@ -14,16 +14,12 @@ export const PageLayout: React.FC<
 	const pathname = useLocation().pathname;
 	return (
 		<>
-			<div className="layout pt-25.25">
-				<Menu
-					currentPage={pathname.replace(/^\//, "")}
-					initialSettings={settings}
-				/>
-				<div className="content min-h-[calc(100vh-101px-83px)]">
-					<div>{children}</div>
-				</div>
-				<Footer />
-			</div>
+			<Menu
+				currentPage={pathname.replace(/^\//, "")}
+				initialSettings={settings}
+			/>
+			{children}
+			<Footer />
 			{modal}
 		</>
 	);

@@ -8,11 +8,11 @@ const year = new Date().getFullYear();
 
 function Footer() {
 	return (
-		<footer className="pt-6 pb-5 border-t border-border bg-background relative">
+		<footer className="sticky left-0 pt-6 pb-5 border-t border-border bg-background">
 			<section
 				className={cn(
 					`px-6 flex justify-between gap-4 flex-wrap uppercase items-center`,
-					`tracking-wide text-muted-foreground`,
+					`tracking-wide text-muted-foreground relative`,
 				)}
 			>
 				<span>{year}</span>

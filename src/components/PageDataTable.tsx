@@ -118,7 +118,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	useResourceActions(selectionActions);
 
 	return (
-		<div className="w-full mb-6">
+		<div className="grow">
 			{(loading || data?.length > 0) && (
 				<DataTable
 					columns={columns}
