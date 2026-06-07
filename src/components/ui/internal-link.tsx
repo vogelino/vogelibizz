@@ -1,12 +1,12 @@
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, type LinkProps } from "@tanstack/react-router";
+import { Link, type LinkProps, type ToOptions } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/utility/classNames";
 
 function InternalLink(
 	props: Omit<LinkProps, "to"> & {
-		to: LinkProps["to"];
+		to: ToOptions["to"];
 		params?: LinkProps["params"];
 		className?: string;
 		children?: React.ReactNode;

@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -9,6 +14,8 @@ export const Route = createFileRoute("/_resource/expenses/create")({
 });
 
 function ExpenseCreatePageRoute() {
+	const childMatches = useChildMatches();
+	if (childMatches.length > 0) return <Outlet />;
 	return (
 		<FormPageLayout
 			title="Create Expense"

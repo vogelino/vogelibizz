@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
@@ -12,7 +17,9 @@ export const Route = createFileRoute("/_resource/projects/create")({
 });
 
 function ProjectCreatePageRoute() {
+	const childMatches = useChildMatches();
 	const clients = Route.useLoaderData();
+	if (childMatches.length > 0) return <Outlet />;
 	return (
 		<FormPageLayout
 			title="Create Project"

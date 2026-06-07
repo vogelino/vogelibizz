@@ -32,7 +32,7 @@ export const clientTableColumns: ColumnsType<ClientType>[] = [
 				<InternalLink
 					to="/clients/edit/$id/modal"
 					params={{ id: String(id) }}
-					className="text-base -ml-3 bg-transparent"
+					className="text-base -ml-3 bg-transparent whitespace-nowrap"
 					mask={{
 						to: "/clients/edit/$id",
 						params: { id: String(id) },

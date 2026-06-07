@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -9,21 +14,23 @@ import { parseId } from "@/utility/resourceUtil";
 export const Route = createFileRoute("/_resource/expenses/edit/$id")({
 	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		const expense = await context.queryClient.ensureQueryData(
-			expenseQueryOptions(parsedId),
-		);
-		return { expense };
+		if (import.meta.env.SSR) {
+			const expense = await context.queryClient.ensureQueryData(
+				expenseQueryOptions(parsedId),
+			);
+			return { expense };
+		}
+		void context.queryClient.prefetchQuery(expenseQueryOptions(parsedId));
+		return {};
 	},
 	component: ExpenseEditPageRoute,
-	pendingComponent: ExpenseEditPagePending,
-	pendingMs: 0,
-	pendingMinMs: 200,
 });
 
 function ExpenseEditPageRoute() {
+	const childMatches = useChildMatches();
 	const { id } = Route.useParams();
 	const { expense } = Route.useLoaderData();
-	const isPending = useRouterState({ select: (state) => state.isLoading });
+	if (childMatches.length > 0) return <Outlet />;
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
 
@@ -50,25 +57,7 @@ function ExpenseEditPageRoute() {
 				id={parsedId}
 				formId={`expense-edit-form-${parsedId}`}
 				initialData={expense}
-				loading={isPending}
 			/>
-		</FormPageLayout>
-	);
-}
-
-function ExpenseEditPagePending() {
-	const { id } = Route.useParams();
-	const parsedId = parseId(id);
-	if (!parsedId) return null;
-	const formId = `expense-edit-form-${parsedId}`;
-	return (
-		<FormPageLayout
-			id={parsedId}
-			title="Edit expense"
-			allLink="/expenses"
-			footerButtons={null}
-		>
-			<ExpenseEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

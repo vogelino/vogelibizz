@@ -1,3 +1,4 @@
+import { useRouteContext, useRouter } from "@tanstack/react-router";
 import {
 	Check,
 	Laptop,
@@ -5,7 +6,6 @@ import {
 	MoonIcon,
 	SunIcon,
 } from "lucide-react";
-import { useRouteContext, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,

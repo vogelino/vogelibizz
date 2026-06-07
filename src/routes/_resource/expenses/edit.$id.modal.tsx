@@ -1,8 +1,4 @@
-import {
-	createFileRoute,
-	useNavigate,
-	useRouterState,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ExpenseEdit from "@/components/ExpenseEdit";
 import PageHeaderTitle from "@/components/PageHeaderTitle";
@@ -13,24 +9,16 @@ import { expenseQueryOptions } from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/expenses/edit/$id/modal")({
-	loader: async ({ context, params }) => {
+	loader: ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		const expense = await context.queryClient.ensureQueryData(
-			expenseQueryOptions(parsedId),
-		);
-		return { expense };
+		void context.queryClient.prefetchQuery(expenseQueryOptions(parsedId));
 	},
 	component: ExpenseEditModal,
-	pendingComponent: ExpenseEditModalPending,
-	pendingMs: 0,
-	pendingMinMs: 200,
 });
 
 function ExpenseEditModal() {
 	const { id } = Route.useParams();
-	const { expense } = Route.useLoaderData();
 	const navigate = useNavigate();
-	const isPending = useRouterState({ select: (state) => state.isLoading });
 	const parsedId = parseId(id);
 	if (!parsedId) return <ExpensesPage />;
 	const formId = `expense-edit-form-${parsedId}`;
@@ -59,34 +47,7 @@ function ExpenseEditModal() {
 					</>
 				}
 			>
-				<ExpenseEdit
-					id={parsedId}
-					formId={formId}
-					initialData={expense}
-					loading={isPending}
-				/>
-			</ResponsiveModal>
-		</>
-	);
-}
-
-function ExpenseEditModalPending() {
-	const { id } = Route.useParams();
-	const navigate = useNavigate();
-	const parsedId = parseId(id);
-	if (!parsedId) return <ExpensesPage />;
-	const formId = `expense-edit-form-${parsedId}`;
-
-	return (
-		<>
-			<ExpensesPage />
-			<ResponsiveModal
-				open
-				title={<PageHeaderTitle name="Edit expense" id={parsedId} />}
-				onClose={() => navigate({ to: "/expenses" })}
-				footer={null}
-			>
-				<ExpenseEdit id={parsedId} formId={formId} loading />
+				<ExpenseEdit id={parsedId} formId={formId} />
 			</ResponsiveModal>
 		</>
 	);

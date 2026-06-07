@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import FormPageLayout from "@/components/FormPageLayout";
 import ProjectEdit from "@/components/ProjectEdit";
@@ -12,22 +17,25 @@ import { parseId } from "@/utility/resourceUtil";
 export const Route = createFileRoute("/_resource/projects/edit/$id")({
 	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		const [project, clients] = await Promise.all([
-			context.queryClient.ensureQueryData(projectQueryOptions(parsedId)),
-			context.queryClient.ensureQueryData(clientsQueryOptions()),
-		]);
-		return { project, clients };
+		if (import.meta.env.SSR) {
+			const [project, clients] = await Promise.all([
+				context.queryClient.ensureQueryData(projectQueryOptions(parsedId)),
+				context.queryClient.ensureQueryData(clientsQueryOptions()),
+			]);
+			return { project, clients };
+		}
+		void context.queryClient.prefetchQuery(projectQueryOptions(parsedId));
+		void context.queryClient.prefetchQuery(clientsQueryOptions());
+		return {};
 	},
 	component: ProjectEditPageRoute,
-	pendingComponent: ProjectEditPagePending,
-	pendingMs: 0,
-	pendingMinMs: 200,
 });
 
 function ProjectEditPageRoute() {
+	const childMatches = useChildMatches();
 	const { id } = Route.useParams();
-	const { clients, project } = Route.useLoaderData();
-	const isPending = useRouterState({ select: (state) => state.isLoading });
+	const { project, clients } = Route.useLoaderData();
+	if (childMatches.length > 0) return <Outlet />;
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
 	const formId = `project-edit-form-${parsedId}`;
@@ -56,25 +64,7 @@ function ProjectEditPageRoute() {
 				formId={formId}
 				initialData={project}
 				initialClients={clients}
-				loading={isPending}
 			/>
-		</FormPageLayout>
-	);
-}
-
-function ProjectEditPagePending() {
-	const { id } = Route.useParams();
-	const parsedId = parseId(id);
-	if (!parsedId) return null;
-	const formId = `project-edit-form-${parsedId}`;
-	return (
-		<FormPageLayout
-			id={parsedId}
-			title="Edit project"
-			allLink="/projects"
-			footerButtons={null}
-		>
-			<ProjectEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

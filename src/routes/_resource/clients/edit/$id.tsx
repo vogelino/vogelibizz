@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
@@ -12,22 +17,25 @@ import { parseId } from "@/utility/resourceUtil";
 export const Route = createFileRoute("/_resource/clients/edit/$id")({
 	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		const [client, projects] = await Promise.all([
-			context.queryClient.ensureQueryData(clientQueryOptions(parsedId)),
-			context.queryClient.ensureQueryData(projectsQueryOptions()),
-		]);
-		return { client, projects };
+		if (import.meta.env.SSR) {
+			const [client, projects] = await Promise.all([
+				context.queryClient.ensureQueryData(clientQueryOptions(parsedId)),
+				context.queryClient.ensureQueryData(projectsQueryOptions()),
+			]);
+			return { client, projects };
+		}
+		void context.queryClient.prefetchQuery(clientQueryOptions(parsedId));
+		void context.queryClient.prefetchQuery(projectsQueryOptions());
+		return {};
 	},
 	component: ClientEditPageRoute,
-	pendingComponent: ClientEditPagePending,
-	pendingMs: 0,
-	pendingMinMs: 200,
 });
 
 function ClientEditPageRoute() {
+	const childMatches = useChildMatches();
 	const { id } = Route.useParams();
 	const { client, projects } = Route.useLoaderData();
-	const isPending = useRouterState({ select: (state) => state.isLoading });
+	if (childMatches.length > 0) return <Outlet />;
 	const parsedId = parseId(id);
 	if (!parsedId) return null;
 	const formId = `client-edit-form-${parsedId}`;
@@ -56,25 +64,7 @@ function ClientEditPageRoute() {
 				formId={formId}
 				initialData={client}
 				initialProjects={projects}
-				loading={isPending}
 			/>
-		</FormPageLayout>
-	);
-}
-
-function ClientEditPagePending() {
-	const { id } = Route.useParams();
-	const parsedId = parseId(id);
-	if (!parsedId) return null;
-	const formId = `client-edit-form-${parsedId}`;
-	return (
-		<FormPageLayout
-			id={parsedId}
-			title="Edit client"
-			allLink="/clients"
-			footerButtons={null}
-		>
-			<ClientEdit id={parsedId} formId={formId} loading />
 		</FormPageLayout>
 	);
 }

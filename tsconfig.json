@@ -18,7 +18,8 @@
 			"@/*": ["./src/*"],
 			"$/*": ["./*"]
 		},
-		"incremental": true
+		"incremental": true,
+		"types": ["bun-types"]
 	},
 	"include": [
 		"vite-env.d.ts",
