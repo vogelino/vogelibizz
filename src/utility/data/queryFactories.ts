@@ -5,6 +5,7 @@ import {
 import { queryOptions } from "@tanstack/react-query";
 import {
 	type ClientType,
+	type CurrencyIdType,
 	clientSelectSchema,
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
@@ -33,6 +34,9 @@ const queryKeys = mergeQueryKeys(
 		detail: (id: string | number) => [String(id)],
 	}),
 	createQueryKeys("settings", {
+		current: null,
+	}),
+	createQueryKeys("exchangeRates", {
 		current: null,
 	}),
 );
@@ -174,6 +178,25 @@ export const settingsQuery = {
 		}),
 };
 
+export const exchangeRatesQuery = {
+	current: () =>
+		queryOptions({
+			...queryKeys.exchangeRates.current,
+			staleTime: 6 * 60 * 60 * 1000,
+			queryFn: async (): Promise<Record<CurrencyIdType, number>> => {
+				if (import.meta.env.SSR) {
+					const { getExchangeRatesRecord } = await import(
+						"@/server/api/currencies/getExchangeRates"
+					);
+					return getExchangeRatesRecord();
+				}
+				const res = await apiFetch("/api/exchange-rates");
+				if (!res.ok) throw new Error("Failed to fetch exchange rates");
+				return res.json();
+			},
+		}),
+};
+
 export const sessionQuery = {
 	current: (signal?: AbortSignal) =>
 		queryOptions({
@@ -198,6 +221,7 @@ export const queryFactories = {
 	...resourceQueryFactories,
 	settings: settingsQuery,
 	session: sessionQuery,
+	exchangeRates: exchangeRatesQuery,
 };
 
 export const projectsQueryOptions = projectsQuery.list;
@@ -208,3 +232,4 @@ export const expensesQueryOptions = expensesQuery.list;
 export const expenseQueryOptions = expensesQuery.detail;
 export const settingsQueryOptions = settingsQuery.current;
 export const sessionQueryOptions = sessionQuery.current;
+export const exchangeRatesQueryOptions = exchangeRatesQuery.current;

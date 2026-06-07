@@ -1,4 +1,4 @@
-import { formatISO, isToday, subMinutes } from "date-fns";
+import { differenceInHours, formatISO, subMinutes } from "date-fns";
 import { inArray, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import db from "@/db";
@@ -18,13 +18,16 @@ const OpenExchangeRatesJsonSchema = z.object({
 type OpenExchangeRatesReturnType = z.infer<typeof OpenExchangeRatesJsonSchema>;
 export type RatesMapType = Map<CurrencyIdType, number>;
 
-async function getExchangeRates(): Promise<RatesMapType> {
+export async function getExchangeRates(): Promise<RatesMapType> {
 	console.log("Fetching exchange rates from DB");
 	const dbCurrencies = await db.query.currencies.findMany();
 	console.log(`Found ${dbCurrencies.length} currencies in DB`);
 	const lastUpdated = dbCurrencies[0]?.last_modified;
 
-	if (!lastUpdated || !isToday(lastUpdated)) {
+	if (
+		!lastUpdated ||
+		differenceInHours(new Date(), new Date(lastUpdated)) > 6
+	) {
 		console.log("Updating exchange rates");
 		const updatedRates = await fetchOpenExchangeRates();
 		if (!updatedRates) return currencyToRatesMap(dbCurrencies);
