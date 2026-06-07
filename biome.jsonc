@@ -19,9 +19,9 @@
 			"src/**/*.ts",
 			"src/**/*.tsx",
 			"src/**/*.json",
-			"src/**/*.css"
-		],
-		"experimentalScannerIgnores": ["src/routeTree.gen.ts"]
+			"src/**/*.css",
+			"!src/routeTree.gen.ts"
+		]
 	},
 	"css": {
 		"parser": {
