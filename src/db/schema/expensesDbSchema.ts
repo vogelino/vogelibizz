@@ -86,21 +86,21 @@ export const expenseEditSchema = expenseSelectSchema
 		created_at: true,
 		last_modified: true,
 	})
-	.merge(
-		z.object({
-			last_modified: z
-				.string()
-				.optional()
-				.default(() => getNowInUTC()),
-		}),
+	.extend(
+		z
+			.object({
+				last_modified: z
+					.string()
+					.optional()
+					.default(() => getNowInUTC()),
+			})
+			.partial().shape,
 	);
 export type ExpenseEditType = z.infer<typeof expenseEditSchema>;
 
-export const expenseWithMonthlyCLPPriceSchema = z
-	.object({
-		clpMonthlyPrice: z.number(),
-	})
-	.merge(expenseSelectSchema);
+export const expenseWithMonthlyCLPPriceSchema = expenseSelectSchema.extend({
+	clpMonthlyPrice: z.number(),
+});
 
 export type ExpenseWithMonthlyCLPPriceType = z.infer<
 	typeof expenseWithMonthlyCLPPriceSchema

@@ -38,16 +38,14 @@ export const projects = sqliteTable("projects", {
 });
 
 const projectPureSchema = createSelectSchema(projects);
-export const projectSelectSchema = projectPureSchema.merge(
-	z.object({
-		clients: z.object({ id: z.number(), name: z.string() }).array().optional(),
-	}),
-);
+export const projectSelectSchema = projectPureSchema.extend({
+	clients: z.object({ id: z.number(), name: z.string() }).array().optional(),
+});
 export type ProjectType = z.infer<typeof projectSelectSchema>;
 
-export const projectInsertSchema = projectSelectSchema
-	.partial()
-	.merge(z.object({ name: z.string() }));
+export const projectInsertSchema = projectSelectSchema.partial().extend({
+	name: z.string(),
+});
 export type ProjectInsertType = z.infer<typeof projectInsertSchema>;
 
 export const projectEditSchema = projectSelectSchema
@@ -55,7 +53,7 @@ export const projectEditSchema = projectSelectSchema
 		created_at: true,
 		last_modified: true,
 	})
-	.merge(
+	.extend(
 		z
 			.object({
 				last_modified: z
@@ -63,9 +61,11 @@ export const projectEditSchema = projectSelectSchema
 					.optional()
 					.default(() => getNowInUTC()),
 			})
-			.partial(),
+			.partial().shape,
 	)
-	.merge(z.object({ id: z.number() }));
+	.extend({
+		id: z.number(),
+	});
 export type ProjectEditType = z.infer<typeof projectEditSchema>;
 
 export const projectsRelations = relations(projects, ({ many }) => ({

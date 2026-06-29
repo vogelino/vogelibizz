@@ -2,7 +2,7 @@ import { ZodError, z } from "zod";
 
 const emailListSchema = z.string().transform((val) => {
 	const emails = val.split(",");
-	const emailArray = z.array(z.string().email()).parse(emails);
+	const emailArray = z.array(z.email()).parse(emails);
 	return emailArray;
 });
 
@@ -11,19 +11,17 @@ const PublicEnvSchema = z.object({
 	VITE_PUBLIC_OPENEXCHANGERATES_API_KEY: z.string(),
 });
 
-const ServerEnvSchema = PublicEnvSchema.merge(
-	z.object({
-		// Node envs
-		NODE_ENV: z.string().default("development"),
+const ServerEnvSchema = PublicEnvSchema.extend({
+	// Node envs
+	NODE_ENV: z.string().default("development"),
 
-		// Auth
-		AUTH_URL: z.string().optional(),
-		AUTH_SECRET: z.string(),
-		AUTH_GITHUB_ID: z.string(),
-		AUTH_GITHUB_SECRET: z.string(),
-		AUTH_ADMIN_EMAILS: emailListSchema,
-	}),
-);
+	// Auth
+	AUTH_URL: z.string().optional(),
+	AUTH_SECRET: z.string(),
+	AUTH_GITHUB_ID: z.string(),
+	AUTH_GITHUB_SECRET: z.string(),
+	AUTH_ADMIN_EMAILS: emailListSchema,
+});
 
 export type EnvSchema = z.infer<typeof ServerEnvSchema>;
 

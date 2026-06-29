@@ -24,16 +24,14 @@ export const clients = sqliteTable("clients", {
 });
 
 const clientPureSchema = createSelectSchema(clients);
-export const clientSelectSchema = clientPureSchema.merge(
-	z.object({
-		projects: z.object({ id: z.number(), name: z.string() }).array().optional(),
-	}),
-);
+export const clientSelectSchema = clientPureSchema.extend({
+	projects: z.object({ id: z.number(), name: z.string() }).array().optional(),
+});
 export type ClientType = z.infer<typeof clientSelectSchema>;
 
-export const clientInsertSchema = clientSelectSchema
-	.partial()
-	.merge(z.object({ name: z.string() }));
+export const clientInsertSchema = clientSelectSchema.partial().extend({
+	name: z.string(),
+});
 export type ClientInsertType = z.infer<typeof clientInsertSchema>;
 
 export const clientEditSchema = clientInsertSchema
@@ -42,7 +40,7 @@ export const clientEditSchema = clientInsertSchema
 		created_at: true,
 		last_modified: true,
 	})
-	.merge(
+	.extend(
 		z
 			.object({
 				last_modified: z
@@ -50,9 +48,11 @@ export const clientEditSchema = clientInsertSchema
 					.optional()
 					.default(() => getNowInUTC()),
 			})
-			.partial(),
+			.partial().shape,
 	)
-	.merge(z.object({ id: z.number() }));
+	.extend({
+		id: z.number(),
+	});
 export type ClientEditType = z.infer<typeof clientEditSchema>;
 
 export const clientsRelations = relations(clients, ({ many }) => ({

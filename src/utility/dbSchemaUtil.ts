@@ -9,12 +9,14 @@ export function createEditSchema<T>(schema: T) {
 			created_at: true,
 			last_modified: true,
 		})
-		.merge(
-			z.object({
-				last_modified: z
-					.string()
-					.optional()
-					.default(() => new Date().toISOString()),
-			}),
+		.extend(
+			z
+				.object({
+					last_modified: z
+						.string()
+						.optional()
+						.default(() => new Date().toISOString()),
+				})
+				.partial().shape,
 		);
 }

@@ -76,13 +76,15 @@ export const exchangeRateEditSchema = exchangeRateSelectSchema
 		created_at: true,
 		last_modified: true,
 	})
-	.merge(
-		z.object({
-			last_modified: z
-				.string()
-				.optional()
-				.default(() => getNowInUTC()),
-		}),
+	.extend(
+		z
+			.object({
+				last_modified: z
+					.string()
+					.optional()
+					.default(() => getNowInUTC()),
+			})
+			.partial().shape,
 	);
 export type ExchangeRateEditType = z.infer<typeof exchangeRateEditSchema>;
 
