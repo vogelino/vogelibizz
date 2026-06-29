@@ -6,4 +6,4 @@ pre-commit:
       run: bunx @biomejs/biome check --write {staged_files}
       stage_fixed: true
     typecheck:
-      run: tsc --noEmit
+      run: bunx tsc --noEmit
