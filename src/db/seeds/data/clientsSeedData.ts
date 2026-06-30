@@ -3,6 +3,8 @@ import type { ClientInsertType } from "@/db/schema";
 const allClients: ClientInsertType[] = [
 	{
 		name: "CityLAB",
+		clientNumber: "0070",
+		language: "de-DE",
 		legalName: "Technologiestiftung Berlin",
 		addressLine1: "Grunewaldstraße 61-62",
 		addressLine2: "10825 Berlin",
@@ -11,6 +13,8 @@ const allClients: ClientInsertType[] = [
 	},
 	{
 		name: "BoldGeo",
+		clientNumber: "0098",
+		language: "de-DE",
 		legalName: "Bold Geo zHd. Alsino Skowronnek",
 		addressLine1: "Seumestr. 8",
 		addressLine2: "10245 Berlin",
@@ -19,6 +23,8 @@ const allClients: ClientInsertType[] = [
 	},
 	{
 		name: "Media Impact Monitoring",
+		clientNumber: "0112",
+		language: "de-DE",
 		legalName: "David Pomerenke Softwaredienstleistungen",
 		addressLine1: "Römerstr. 60",
 		addressLine2: "70180 Stuttgart",
@@ -27,6 +33,8 @@ const allClients: ClientInsertType[] = [
 	},
 	{
 		name: "Les Coulisses",
+		clientNumber: "0130",
+		language: "fr-CH",
 		legalName: "Les Coulisses, Atelier Expo",
 	},
 ];

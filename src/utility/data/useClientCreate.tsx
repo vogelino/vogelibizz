@@ -37,6 +37,8 @@ function createOptimisticDataEntry(
 		...newData.map((client) => ({
 			...client,
 			id: (oldData?.at(-1)?.id ?? 99998) + 1,
+			clientNumber: client.clientNumber ?? null,
+			language: client.language ?? "de-DE",
 			taxId: client.taxId ?? "",
 			name: client.name ?? "",
 			legalName: client.legalName ?? "",

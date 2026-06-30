@@ -34,6 +34,7 @@ import { Route as ApiExpensesIdRouteImport } from './routes/api/expenses/$id'
 import { Route as ApiClientsIdRouteImport } from './routes/api/clients/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ResourceProjectsCreateRouteImport } from './routes/_resource/projects/create'
+import { Route as ResourceInvoicesCreateRouteImport } from './routes/_resource/invoices/create'
 import { Route as ResourceInvoicesIdRouteImport } from './routes/_resource/invoices/$id'
 import { Route as ResourceExpensesCreateRouteImport } from './routes/_resource/expenses/create'
 import { Route as ResourceClientsCreateRouteImport } from './routes/_resource/clients/create'
@@ -171,6 +172,11 @@ const ResourceProjectsCreateRoute = ResourceProjectsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => ResourceProjectsRoute,
 } as any)
+const ResourceInvoicesCreateRoute = ResourceInvoicesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => ResourceInvoicesRoute,
+} as any)
 const ResourceInvoicesIdRoute = ResourceInvoicesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
   '/invoices/$id': typeof ResourceInvoicesIdRoute
+  '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
   '/invoices/$id': typeof ResourceInvoicesIdRoute
+  '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
@@ -330,6 +338,7 @@ export interface FileRoutesById {
   '/_resource/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/_resource/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
   '/_resource/invoices/$id': typeof ResourceInvoicesIdRoute
+  '/_resource/invoices/create': typeof ResourceInvoicesCreateRoute
   '/_resource/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
@@ -370,6 +379,7 @@ export interface FileRouteTypes {
     | '/clients/create'
     | '/expenses/create'
     | '/invoices/$id'
+    | '/invoices/create'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/clients/create'
     | '/expenses/create'
     | '/invoices/$id'
+    | '/invoices/create'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/_resource/clients/create'
     | '/_resource/expenses/create'
     | '/_resource/invoices/$id'
+    | '/_resource/invoices/create'
     | '/_resource/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
@@ -656,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceProjectsCreateRouteImport
       parentRoute: typeof ResourceProjectsRoute
     }
+    '/_resource/invoices/create': {
+      id: '/_resource/invoices/create'
+      path: '/create'
+      fullPath: '/invoices/create'
+      preLoaderRoute: typeof ResourceInvoicesCreateRouteImport
+      parentRoute: typeof ResourceInvoicesRoute
+    }
     '/_resource/invoices/$id': {
       id: '/_resource/invoices/$id'
       path: '/$id'
@@ -830,11 +849,13 @@ const ResourceExpensesRouteWithChildren =
 
 interface ResourceInvoicesRouteChildren {
   ResourceInvoicesIdRoute: typeof ResourceInvoicesIdRoute
+  ResourceInvoicesCreateRoute: typeof ResourceInvoicesCreateRoute
   ResourceInvoicesIndexRoute: typeof ResourceInvoicesIndexRoute
 }
 
 const ResourceInvoicesRouteChildren: ResourceInvoicesRouteChildren = {
   ResourceInvoicesIdRoute: ResourceInvoicesIdRoute,
+  ResourceInvoicesCreateRoute: ResourceInvoicesCreateRoute,
   ResourceInvoicesIndexRoute: ResourceInvoicesIndexRoute,
 }
 

@@ -42,6 +42,7 @@ function createOptimisticDataEntry(
 			last_modified: getNowInUTC(),
 			name: project.name ?? "Project",
 			description: project.description ?? "",
+			hourlyRate: project.hourlyRate ?? 50,
 			status: project.status ?? "todo",
 			content: project.content ?? "",
 		})),

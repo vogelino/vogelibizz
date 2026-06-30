@@ -3,6 +3,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
+import { clients } from "./clientsDbSchema";
 import { currencyEnum } from "./currenciesDbSchema";
 import { projectsToInvoices } from "./projectsToInvoicesDbSchema";
 
@@ -21,16 +22,20 @@ export type InvoiceLineItemType = z.infer<typeof invoiceLineItemSchema>;
 const invoiceProjectSchema = z.object({
 	id: z.number(),
 	name: z.string(),
+	hourlyRate: z.number().nullable().optional(),
 });
 
 const invoiceClientSchema = z.object({
 	id: z.number(),
 	name: z.string(),
+	clientNumber: z.string().nullable().optional(),
+	language: z.string().nullable().optional(),
 	legalName: z.string().nullable().optional(),
 	addressLine1: z.string().nullable().optional(),
 	addressLine2: z.string().nullable().optional(),
 	addressLine3: z.string().nullable().optional(),
 	taxId: z.string().nullable().optional(),
+	svgLogoString: z.string().nullable().optional(),
 });
 
 export const invoices = sqliteTable("invoices", {
@@ -45,6 +50,9 @@ export const invoices = sqliteTable("invoices", {
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
 	name: text("name").notNull().unique(),
+	clientId: integer("client_id").references(() => clients.id, {
+		onDelete: "set null",
+	}),
 	invoiceNumber: integer("invoice_number").notNull().default(1),
 	clientNumber: text("client_number").notNull().default("0001"),
 	subject: text("subject").notNull().default(""),

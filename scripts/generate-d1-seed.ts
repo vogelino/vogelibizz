@@ -141,6 +141,8 @@ clientSeeds.forEach((client, index) => {
 			[
 				"id",
 				"name",
+				"client_number",
+				"language",
 				"legal_name",
 				"address_line_1",
 				"address_line_2",
@@ -154,6 +156,8 @@ clientSeeds.forEach((client, index) => {
 			[
 				String(id),
 				sqlString(client.name),
+				sqlString(client.clientNumber),
+				sqlString(client.language),
 				sqlString(client.legalName),
 				sqlString(client.addressLine1),
 				sqlString(client.addressLine2),
@@ -169,46 +173,49 @@ clientSeeds.forEach((client, index) => {
 });
 
 invoicesSeedData.forEach((invoice, index) => {
-	const id = index + 1;
-	sqlLines.push(
-		insertRow(
-			"invoices",
-			[
-				"id",
-				"name",
-				"date",
-				"invoice_number",
-				"client_number",
-				"subject",
-				"introduction",
-				"foot_note",
-				"currency",
-				"language",
-				"hourly_rate",
-				"invoice_location",
-				"rows",
-				"created_at",
-				"last_modified",
-			],
-			[
-				String(id),
-				sqlString(invoice.name),
-				sqlString(invoice.date),
-				String(invoice.invoiceNumber),
-				sqlString(invoice.clientNumber),
-				sqlString(invoice.subject),
-				sqlString(invoice.introduction),
-				sqlString(invoice.footNote),
-				sqlString(invoice.currency),
-				sqlString(invoice.language),
-				String(invoice.hourlyRate),
-				sqlString(invoice.invoiceLocation),
-				sqlString(JSON.stringify(invoice.rows)),
-				sqlString(now),
-				sqlString(now),
-			],
-		),
-	);
+const id = index + 1;
+const clientId = clientSeeds.findIndex((client) => client.name === invoice.clientName) + 1;
+sqlLines.push(
+insertRow(
+"invoices",
+[
+"id",
+"name",
+"date",
+"client_id",
+"invoice_number",
+"client_number",
+"subject",
+"introduction",
+"foot_note",
+"currency",
+"language",
+"hourly_rate",
+"invoice_location",
+"rows",
+"created_at",
+"last_modified",
+],
+[
+String(id),
+sqlString(invoice.name),
+sqlString(invoice.date),
+String(clientId || 0),
+String(invoice.invoiceNumber),
+sqlString(invoice.clientNumber),
+sqlString(invoice.subject),
+sqlString(invoice.introduction),
+sqlString(invoice.footNote),
+sqlString(invoice.currency),
+sqlString(invoice.language),
+String(invoice.hourlyRate),
+sqlString(invoice.invoiceLocation),
+sqlString(JSON.stringify(invoice.rows)),
+sqlString(now),
+sqlString(now),
+],
+),
+);
 });
 
 quotesSeedData.forEach((quote, index) => {
@@ -237,6 +244,7 @@ projectsSeedData.forEach((project, index) => {
 				"id",
 				"name",
 				"description",
+				"hourly_rate",
 				"status",
 				"content",
 				"created_at",
@@ -246,6 +254,7 @@ projectsSeedData.forEach((project, index) => {
 				String(id),
 				sqlString(project.name),
 				sqlString(project.description),
+				String(project.hourlyRate),
 				sqlString(project.status),
 				sqlString(project.content),
 				sqlString(now),

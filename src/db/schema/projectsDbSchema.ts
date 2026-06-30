@@ -31,6 +31,7 @@ export const projects = sqliteTable("projects", {
 		.$defaultFn(() => getNowInUTC())
 		.notNull(),
 	description: text("description"),
+	hourlyRate: integer("hourly_rate").notNull().default(50),
 	status: text("status", { enum: projectStatusEnumValues })
 		.default("todo")
 		.notNull(),

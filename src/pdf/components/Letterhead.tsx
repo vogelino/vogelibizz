@@ -25,6 +25,7 @@ export const Letterhead = ({
 	clientAddressLine3,
 	clientTaxNumber,
 	clientNumber,
+	clientLogoString,
 	invoiceNumber,
 	invoiceLocation,
 	invoiceDate,
@@ -50,6 +51,7 @@ export const Letterhead = ({
 	clientAddressLine3: string;
 	clientTaxNumber: string;
 	clientNumber: string;
+	clientLogoString?: string;
 	invoiceNumber: number;
 	invoiceLocation: string;
 	invoiceDate: Date;
@@ -65,7 +67,7 @@ export const Letterhead = ({
 			</View>
 			<View style={[styles.letterheadColumn, styles.logo]}>
 				<View style={[styles.logoInner, styles.clientLogo]}>
-					<Html>{SVGS.clientLogoString}</Html>
+					<Html>{clientLogoString || SVGS.clientLogoString}</Html>
 				</View>
 			</View>
 		</View>

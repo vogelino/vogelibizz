@@ -31,6 +31,7 @@ export type InvoicePdfDataType = {
 		clientAddressLine3: string;
 		clientTaxNumber: string;
 		clientNumber: string;
+		clientLogoString: string;
 		invoiceNumber: number;
 		invoiceLocation: string;
 		invoiceDate: Date;
@@ -96,7 +97,8 @@ export function buildInvoicePdfData(
 			clientAddressLine2: client?.addressLine2 || "",
 			clientAddressLine3: client?.addressLine3 || "",
 			clientTaxNumber: client?.taxId || "",
-			clientNumber: invoice.clientNumber,
+			clientNumber: client?.clientNumber || invoice.clientNumber,
+			clientLogoString: client?.svgLogoString || "",
 			invoiceNumber: invoice.invoiceNumber,
 			invoiceLocation: invoice.invoiceLocation,
 			invoiceDate: Number.isNaN(invoiceDate.getTime())

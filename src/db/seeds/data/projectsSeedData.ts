@@ -5,11 +5,18 @@ function randomItemFromArray<T>(arr: readonly T[]): T {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 
+type InvoiceSeedData = InvoiceInsertType & {
+	clientName: string;
+};
+
 function createInvoiceSeedData({
 	name,
 	date,
 	invoiceNumber,
 	clientNumber,
+	clientName,
+	language,
+	hourlyRate,
 	subject,
 	introduction,
 	rows,
@@ -18,21 +25,25 @@ function createInvoiceSeedData({
 	date: string;
 	invoiceNumber: number;
 	clientNumber: string;
+	clientName: string;
+	language: InvoiceInsertType["language"];
+	hourlyRate: number;
 	subject: string;
 	introduction: string;
 	rows: InvoiceInsertType["rows"];
-}): InvoiceInsertType {
+}): InvoiceSeedData {
 	return {
 		name,
 		date,
 		invoiceNumber,
 		clientNumber,
+		clientName,
 		subject,
 		introduction,
 		footNote: "Steuerschuldnerschaft des Leistungsempfängers (Reverse Charge).",
 		currency: "EUR",
-		language: "de-DE",
-		hourlyRate: 50,
+		language,
+		hourlyRate,
 		invoiceLocation: "Santiago",
 		rows,
 	};
@@ -42,6 +53,7 @@ const projectsSeedData = [
 	{
 		name: "Project 1",
 		description: "Project 1 description",
+		hourlyRate: 72,
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 1 content",
 		clients: [clientSeeds[0], clientSeeds[1]],
@@ -51,6 +63,9 @@ const projectsSeedData = [
 				date: "2022-01-01",
 				invoiceNumber: 1001,
 				clientNumber: "0070",
+				clientName: clientSeeds[0].name,
+				language: clientSeeds[0].language ?? "de-DE",
+				hourlyRate: 72,
 				subject: "Programming service for Project 1 - January 2022",
 				introduction:
 					"Dear client,\nI am pleased to present my invoice for the programming services delivered for Project 1 in January 2022. Below you will find the detailed breakdown of the work completed.",
@@ -64,6 +79,9 @@ const projectsSeedData = [
 				date: "2022-02-01",
 				invoiceNumber: 1002,
 				clientNumber: "0070",
+				clientName: clientSeeds[0].name,
+				language: clientSeeds[0].language ?? "de-DE",
+				hourlyRate: 72,
 				subject: "Programming service for Project 1 - February 2022",
 				introduction:
 					"Dear client,\nPlease find attached the invoice covering the February 2022 programming work for Project 1, including implementation and product support.",
@@ -79,6 +97,7 @@ const projectsSeedData = [
 	{
 		name: "Project 2",
 		description: "Project 2 description",
+		hourlyRate: 65,
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 2 content",
 		clients: [clientSeeds[2]],
@@ -88,6 +107,9 @@ const projectsSeedData = [
 				date: "2022-03-01",
 				invoiceNumber: 1003,
 				clientNumber: "0112",
+				clientName: clientSeeds[2].name,
+				language: clientSeeds[2].language ?? "de-DE",
+				hourlyRate: 65,
 				subject: "Programming service for Project 2 - March 2022",
 				introduction:
 					"Dear client,\nThis invoice summarizes the software development work delivered for Project 2 during March 2022.",
@@ -105,6 +127,7 @@ const projectsSeedData = [
 	{
 		name: "Project 3",
 		description: "Project 3 description",
+		hourlyRate: 80,
 		status: randomItemFromArray(projectStatusEnum.enumValues),
 		content: "Project 3 content",
 		clients: [clientSeeds[0], clientSeeds[2]],
@@ -114,6 +137,9 @@ const projectsSeedData = [
 				date: "2022-04-01",
 				invoiceNumber: 1004,
 				clientNumber: "0098",
+				clientName: clientSeeds[1].name,
+				language: clientSeeds[1].language ?? "de-DE",
+				hourlyRate: 80,
 				subject: "Programming service for Project 3 - April 2022",
 				introduction:
 					"Dear client,\nI am pleased to submit this invoice for the implementation work completed on Project 3 during April 2022.",
@@ -127,6 +153,9 @@ const projectsSeedData = [
 				date: "2022-05-01",
 				invoiceNumber: 1005,
 				clientNumber: "0098",
+				clientName: clientSeeds[1].name,
+				language: clientSeeds[1].language ?? "de-DE",
+				hourlyRate: 80,
 				subject: "Programming service for Project 3 - May 2022",
 				introduction:
 					"Dear client,\nPlease find my invoice for the May 2022 development work, covering implementation, refinements, and support for Project 3.",

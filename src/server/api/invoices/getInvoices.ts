@@ -5,7 +5,6 @@ import {
 	type InvoiceType,
 	invoices,
 	projects,
-	projectsToClients,
 	projectsToInvoices,
 } from "@/db/schema";
 
@@ -15,8 +14,7 @@ export async function getInvoices(): Promise<InvoiceType[]> {
 		.from(invoices)
 		.leftJoin(projectsToInvoices, eq(invoices.id, projectsToInvoices.invoiceId))
 		.leftJoin(projects, eq(projectsToInvoices.projectId, projects.id))
-		.leftJoin(projectsToClients, eq(projects.id, projectsToClients.projectId))
-		.leftJoin(clients, eq(projectsToClients.clientId, clients.id));
+		.leftJoin(clients, eq(invoices.clientId, clients.id));
 
 	const invoiceMap = new Map<number, InvoiceType>();
 
@@ -30,17 +28,21 @@ export async function getInvoices(): Promise<InvoiceType[]> {
 				? appendUnique(nextProjects, {
 						id: row.projects.id,
 						name: row.projects.name,
+						hourlyRate: row.projects.hourlyRate,
 					})
 				: nextProjects,
 			clients: row.clients
 				? appendUnique(nextClients, {
 						id: row.clients.id,
 						name: row.clients.name,
+						clientNumber: row.clients.clientNumber,
+						language: row.clients.language,
 						legalName: row.clients.legalName,
 						addressLine1: row.clients.addressLine1,
 						addressLine2: row.clients.addressLine2,
 						addressLine3: row.clients.addressLine3,
 						taxId: row.clients.taxId,
+						svgLogoString: row.clients.svgLogoString,
 					})
 				: nextClients,
 		};

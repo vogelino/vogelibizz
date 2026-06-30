@@ -15,6 +15,20 @@
 			"when": 1782771705111,
 			"tag": "0001_tranquil_tarot",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1782796383971,
+			"tag": "0002_rare_golden_guardian",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1782797429608,
+			"tag": "0003_swift_nitro",
+			"breakpoints": true
 		}
 	]
 }

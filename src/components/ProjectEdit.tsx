@@ -56,6 +56,7 @@ export default function ProjectEdit({
 		defaultValues: {
 			name: project?.name ?? "",
 			description: project?.description ?? "",
+			hourlyRate: project?.hourlyRate ?? 50,
 		},
 		onSubmit: async ({ value }) => {
 			navigate({ to: "/projects" });
@@ -77,6 +78,7 @@ export default function ProjectEdit({
 		setProjectClients(project.clients || []);
 		form.setFieldValue("name", project.name ?? "");
 		form.setFieldValue("description", project.description ?? "");
+		form.setFieldValue("hourlyRate", project.hourlyRate ?? 50);
 	}, [project, form.setFieldValue]);
 
 	const clientsOptions = useComboboxOptions<ClientType>({
@@ -188,6 +190,30 @@ export default function ProjectEdit({
 						</div>
 					)}
 				</FormInputWrapper>
+				<form.Field name="hourlyRate">
+					{(field) => (
+						<FormInputWrapper
+							label="Hourly rate"
+							loading={isLoading}
+							loadingChildren={<Skeleton className="h-9 w-full" />}
+						>
+							{!isLoading && (
+								<input
+									type="number"
+									min={0}
+									step={1}
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) =>
+										field.handleChange(Number(e.target.value || 0))
+									}
+									className="form-input"
+								/>
+							)}
+						</FormInputWrapper>
+					)}
+				</form.Field>
 				<FormInputCombobox
 					onChange={(val) => setStatus(val as ProjectType["status"])}
 					value={status}

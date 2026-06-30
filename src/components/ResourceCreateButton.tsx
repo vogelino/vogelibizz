@@ -6,18 +6,24 @@ import type { RoutedResource } from "@/utility/routedResources";
 function ResourceCreateButton({ resource }: { resource: RoutedResource }) {
 	const createRoute = getCreateRoute(resource);
 	const maskRoute = getCreateMaskRoute(resource);
-	if (!createRoute || !maskRoute) return null;
+	if (!createRoute) return null;
 	return (
 		<Button variant="outline" asChild>
-			<Link
-				{...createRoute}
-				mask={{
-					...maskRoute,
-					unmaskOnReload: true,
-				}}
-			>
-				Create {resource.toLocaleLowerCase().replace(/s$/, "")}
-			</Link>
+			{maskRoute ? (
+				<Link
+					{...createRoute}
+					mask={{
+						...maskRoute,
+						unmaskOnReload: true,
+					}}
+				>
+					Create {resource.toLocaleLowerCase().replace(/s$/, "")}
+				</Link>
+			) : (
+				<Link {...createRoute}>
+					Create {resource.toLocaleLowerCase().replace(/s$/, "")}
+				</Link>
+			)}
 		</Button>
 	);
 }
@@ -31,7 +37,7 @@ function getCreateRoute(resource: RoutedResource) {
 		case "projects":
 			return linkOptions({ to: "/projects/create/modal" });
 		case "invoices":
-			return null;
+			return linkOptions({ to: "/invoices/create" });
 		default: {
 			const _exhaustive: never = resource;
 			throw new Error(`Unhandled resource ${_exhaustive}`);

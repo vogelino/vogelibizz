@@ -5,9 +5,19 @@ import { z } from "zod";
 import { getNowInUTC } from "@/utility/timeUtil";
 import { projectsToClients } from "./projectsToClientsDbSchema";
 
+const clientLanguageEnumValues = ["en-US", "es-CL", "fr-CH", "de-DE"] as const;
+
+export const clientLanguageEnum = {
+	enumValues: clientLanguageEnumValues,
+};
+
 export const clients = sqliteTable("clients", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	name: text("name").notNull().unique(),
+	clientNumber: text("client_number"),
+	language: text("language", { enum: clientLanguageEnumValues })
+		.notNull()
+		.default("de-DE"),
 	legalName: text("legal_name"),
 	addressLine1: text("address_line_1"),
 	addressLine2: text("address_line_2"),
