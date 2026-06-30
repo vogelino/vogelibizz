@@ -9,6 +9,8 @@ import {
 	clientSelectSchema,
 	type ExpenseWithMonthlyCLPPriceType,
 	expenseWithMonthlyCLPPriceSchema,
+	type InvoiceType,
+	invoiceSelectSchema,
 	type ProjectType,
 	projectSelectSchema,
 	type ResourceType,
@@ -30,6 +32,10 @@ const queryKeys = mergeQueryKeys(
 		detail: (id: string | number) => [String(id)],
 	}),
 	createQueryKeys("expenses", {
+		list: null,
+		detail: (id: string | number) => [String(id)],
+	}),
+	createQueryKeys("invoices", {
 		list: null,
 		detail: (id: string | number) => [String(id)],
 	}),
@@ -158,6 +164,45 @@ export const expensesQuery = {
 		}),
 };
 
+export const invoicesQuery = {
+	list: () =>
+		queryOptions({
+			...queryKeys.invoices.list,
+			queryFn: async () => {
+				if (import.meta.env.SSR) {
+					const { getInvoices } = await import(
+						"@/server/api/invoices/getInvoices"
+					);
+					return getInvoices();
+				}
+				return createQueryFunction<InvoiceType[]>({
+					resourceName: "invoices",
+					action: "queryAll",
+					outputZodSchema: invoiceSelectSchema.array(),
+				})();
+			},
+		}),
+	detail: (id: string | number) =>
+		queryOptions({
+			...queryKeys.invoices.detail(id),
+			queryFn: async () => {
+				const parsedId = parseId(id);
+				if (import.meta.env.SSR) {
+					const { getInvoice } = await import(
+						"@/server/api/invoices/getInvoice"
+					);
+					return getInvoice(parsedId);
+				}
+				return createQueryFunction<InvoiceType>({
+					resourceName: "invoices",
+					action: "querySingle",
+					outputZodSchema: invoiceSelectSchema,
+					id: parsedId,
+				})();
+			},
+		}),
+};
+
 export const settingsQuery = {
 	current: () =>
 		queryOptions({
@@ -214,6 +259,7 @@ export const resourceQueryFactories = {
 	projects: projectsQuery,
 	clients: clientsQuery,
 	expenses: expensesQuery,
+	invoices: invoicesQuery,
 	settings: settingsQuery,
 };
 
@@ -230,6 +276,8 @@ export const clientsQueryOptions = clientsQuery.list;
 export const clientQueryOptions = clientsQuery.detail;
 export const expensesQueryOptions = expensesQuery.list;
 export const expenseQueryOptions = expensesQuery.detail;
+export const invoicesQueryOptions = invoicesQuery.list;
+export const invoiceQueryOptions = invoicesQuery.detail;
 export const settingsQueryOptions = settingsQuery.current;
 export const sessionQueryOptions = sessionQuery.current;
 export const exchangeRatesQueryOptions = exchangeRatesQuery.current;

@@ -16,20 +16,25 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSettingsRouteImport } from './routes/api/settings'
 import { Route as ApiProjectsRouteImport } from './routes/api/projects'
 import { Route as ApiPdfRouteImport } from './routes/api/pdf'
+import { Route as ApiInvoicesRouteImport } from './routes/api/invoices'
 import { Route as ApiExpensesRouteImport } from './routes/api/expenses'
 import { Route as ApiExchangeRatesRouteImport } from './routes/api/exchange-rates'
 import { Route as ApiClientsRouteImport } from './routes/api/clients'
 import { Route as ResourceProjectsRouteImport } from './routes/_resource/projects'
+import { Route as ResourceInvoicesRouteImport } from './routes/_resource/invoices'
 import { Route as ResourceExpensesRouteImport } from './routes/_resource/expenses'
 import { Route as ResourceClientsRouteImport } from './routes/_resource/clients'
 import { Route as ResourceProjectsIndexRouteImport } from './routes/_resource/projects/index'
+import { Route as ResourceInvoicesIndexRouteImport } from './routes/_resource/invoices/index'
 import { Route as ResourceExpensesIndexRouteImport } from './routes/_resource/expenses/index'
 import { Route as ResourceClientsIndexRouteImport } from './routes/_resource/clients/index'
 import { Route as ApiProjectsIdRouteImport } from './routes/api/projects/$id'
+import { Route as ApiInvoicesIdRouteImport } from './routes/api/invoices/$id'
 import { Route as ApiExpensesIdRouteImport } from './routes/api/expenses/$id'
 import { Route as ApiClientsIdRouteImport } from './routes/api/clients/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ResourceProjectsCreateRouteImport } from './routes/_resource/projects/create'
+import { Route as ResourceInvoicesIdRouteImport } from './routes/_resource/invoices/$id'
 import { Route as ResourceExpensesCreateRouteImport } from './routes/_resource/expenses/create'
 import { Route as ResourceClientsCreateRouteImport } from './routes/_resource/clients/create'
 import { Route as ResourceProjectsEditIdRouteImport } from './routes/_resource/projects/edit/$id'
@@ -76,6 +81,11 @@ const ApiPdfRoute = ApiPdfRouteImport.update({
   path: '/api/pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInvoicesRoute = ApiInvoicesRouteImport.update({
+  id: '/api/invoices',
+  path: '/api/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiExpensesRoute = ApiExpensesRouteImport.update({
   id: '/api/expenses',
   path: '/api/expenses',
@@ -96,6 +106,11 @@ const ResourceProjectsRoute = ResourceProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => ResourceRoute,
 } as any)
+const ResourceInvoicesRoute = ResourceInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => ResourceRoute,
+} as any)
 const ResourceExpensesRoute = ResourceExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
@@ -111,6 +126,11 @@ const ResourceProjectsIndexRoute = ResourceProjectsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ResourceProjectsRoute,
 } as any)
+const ResourceInvoicesIndexRoute = ResourceInvoicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ResourceInvoicesRoute,
+} as any)
 const ResourceExpensesIndexRoute = ResourceExpensesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -125,6 +145,11 @@ const ApiProjectsIdRoute = ApiProjectsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiProjectsRoute,
+} as any)
+const ApiInvoicesIdRoute = ApiInvoicesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiInvoicesRoute,
 } as any)
 const ApiExpensesIdRoute = ApiExpensesIdRouteImport.update({
   id: '/$id',
@@ -145,6 +170,11 @@ const ResourceProjectsCreateRoute = ResourceProjectsCreateRouteImport.update({
   id: '/create',
   path: '/create',
   getParentRoute: () => ResourceProjectsRoute,
+} as any)
+const ResourceInvoicesIdRoute = ResourceInvoicesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ResourceInvoicesRoute,
 } as any)
 const ResourceExpensesCreateRoute = ResourceExpensesCreateRouteImport.update({
   id: '/create',
@@ -214,22 +244,27 @@ export interface FileRoutesByFullPath {
   '/pdf': typeof PdfRoute
   '/clients': typeof ResourceClientsRouteWithChildren
   '/expenses': typeof ResourceExpensesRouteWithChildren
+  '/invoices': typeof ResourceInvoicesRouteWithChildren
   '/projects': typeof ResourceProjectsRouteWithChildren
   '/api/clients': typeof ApiClientsRouteWithChildren
   '/api/exchange-rates': typeof ApiExchangeRatesRoute
   '/api/expenses': typeof ApiExpensesRouteWithChildren
+  '/api/invoices': typeof ApiInvoicesRouteWithChildren
   '/api/pdf': typeof ApiPdfRoute
   '/api/projects': typeof ApiProjectsRouteWithChildren
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/clients/': typeof ResourceClientsIndexRoute
   '/expenses/': typeof ResourceExpensesIndexRoute
+  '/invoices/': typeof ResourceInvoicesIndexRoute
   '/projects/': typeof ResourceProjectsIndexRoute
   '/clients/create/modal': typeof ResourceClientsCreateModalRoute
   '/clients/edit/$id': typeof ResourceClientsEditIdRouteWithChildren
@@ -248,18 +283,22 @@ export interface FileRoutesByTo {
   '/api/clients': typeof ApiClientsRouteWithChildren
   '/api/exchange-rates': typeof ApiExchangeRatesRoute
   '/api/expenses': typeof ApiExpensesRouteWithChildren
+  '/api/invoices': typeof ApiInvoicesRouteWithChildren
   '/api/pdf': typeof ApiPdfRoute
   '/api/projects': typeof ApiProjectsRouteWithChildren
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/clients': typeof ResourceClientsIndexRoute
   '/expenses': typeof ResourceExpensesIndexRoute
+  '/invoices': typeof ResourceInvoicesIndexRoute
   '/projects': typeof ResourceProjectsIndexRoute
   '/clients/create/modal': typeof ResourceClientsCreateModalRoute
   '/clients/edit/$id': typeof ResourceClientsEditIdRouteWithChildren
@@ -279,22 +318,27 @@ export interface FileRoutesById {
   '/pdf': typeof PdfRoute
   '/_resource/clients': typeof ResourceClientsRouteWithChildren
   '/_resource/expenses': typeof ResourceExpensesRouteWithChildren
+  '/_resource/invoices': typeof ResourceInvoicesRouteWithChildren
   '/_resource/projects': typeof ResourceProjectsRouteWithChildren
   '/api/clients': typeof ApiClientsRouteWithChildren
   '/api/exchange-rates': typeof ApiExchangeRatesRoute
   '/api/expenses': typeof ApiExpensesRouteWithChildren
+  '/api/invoices': typeof ApiInvoicesRouteWithChildren
   '/api/pdf': typeof ApiPdfRoute
   '/api/projects': typeof ApiProjectsRouteWithChildren
   '/api/settings': typeof ApiSettingsRoute
   '/_resource/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/_resource/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/_resource/invoices/$id': typeof ResourceInvoicesIdRoute
   '/_resource/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/_resource/clients/': typeof ResourceClientsIndexRoute
   '/_resource/expenses/': typeof ResourceExpensesIndexRoute
+  '/_resource/invoices/': typeof ResourceInvoicesIndexRoute
   '/_resource/projects/': typeof ResourceProjectsIndexRoute
   '/_resource/clients/create/modal': typeof ResourceClientsCreateModalRoute
   '/_resource/clients/edit/$id': typeof ResourceClientsEditIdRouteWithChildren
@@ -314,22 +358,27 @@ export interface FileRouteTypes {
     | '/pdf'
     | '/clients'
     | '/expenses'
+    | '/invoices'
     | '/projects'
     | '/api/clients'
     | '/api/exchange-rates'
     | '/api/expenses'
+    | '/api/invoices'
     | '/api/pdf'
     | '/api/projects'
     | '/api/settings'
     | '/clients/create'
     | '/expenses/create'
+    | '/invoices/$id'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
     | '/api/expenses/$id'
+    | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/clients/'
     | '/expenses/'
+    | '/invoices/'
     | '/projects/'
     | '/clients/create/modal'
     | '/clients/edit/$id'
@@ -348,18 +397,22 @@ export interface FileRouteTypes {
     | '/api/clients'
     | '/api/exchange-rates'
     | '/api/expenses'
+    | '/api/invoices'
     | '/api/pdf'
     | '/api/projects'
     | '/api/settings'
     | '/clients/create'
     | '/expenses/create'
+    | '/invoices/$id'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
     | '/api/expenses/$id'
+    | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/clients'
     | '/expenses'
+    | '/invoices'
     | '/projects'
     | '/clients/create/modal'
     | '/clients/edit/$id'
@@ -378,22 +431,27 @@ export interface FileRouteTypes {
     | '/pdf'
     | '/_resource/clients'
     | '/_resource/expenses'
+    | '/_resource/invoices'
     | '/_resource/projects'
     | '/api/clients'
     | '/api/exchange-rates'
     | '/api/expenses'
+    | '/api/invoices'
     | '/api/pdf'
     | '/api/projects'
     | '/api/settings'
     | '/_resource/clients/create'
     | '/_resource/expenses/create'
+    | '/_resource/invoices/$id'
     | '/_resource/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
     | '/api/expenses/$id'
+    | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/_resource/clients/'
     | '/_resource/expenses/'
+    | '/_resource/invoices/'
     | '/_resource/projects/'
     | '/_resource/clients/create/modal'
     | '/_resource/clients/edit/$id'
@@ -414,6 +472,7 @@ export interface RootRouteChildren {
   ApiClientsRoute: typeof ApiClientsRouteWithChildren
   ApiExchangeRatesRoute: typeof ApiExchangeRatesRoute
   ApiExpensesRoute: typeof ApiExpensesRouteWithChildren
+  ApiInvoicesRoute: typeof ApiInvoicesRouteWithChildren
   ApiPdfRoute: typeof ApiPdfRoute
   ApiProjectsRoute: typeof ApiProjectsRouteWithChildren
   ApiSettingsRoute: typeof ApiSettingsRoute
@@ -471,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPdfRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/invoices': {
+      id: '/api/invoices'
+      path: '/api/invoices'
+      fullPath: '/api/invoices'
+      preLoaderRoute: typeof ApiInvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/expenses': {
       id: '/api/expenses'
       path: '/api/expenses'
@@ -499,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceProjectsRouteImport
       parentRoute: typeof ResourceRoute
     }
+    '/_resource/invoices': {
+      id: '/_resource/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof ResourceInvoicesRouteImport
+      parentRoute: typeof ResourceRoute
+    }
     '/_resource/expenses': {
       id: '/_resource/expenses'
       path: '/expenses'
@@ -520,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceProjectsIndexRouteImport
       parentRoute: typeof ResourceProjectsRoute
     }
+    '/_resource/invoices/': {
+      id: '/_resource/invoices/'
+      path: '/'
+      fullPath: '/invoices/'
+      preLoaderRoute: typeof ResourceInvoicesIndexRouteImport
+      parentRoute: typeof ResourceInvoicesRoute
+    }
     '/_resource/expenses/': {
       id: '/_resource/expenses/'
       path: '/'
@@ -540,6 +620,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/projects/$id'
       preLoaderRoute: typeof ApiProjectsIdRouteImport
       parentRoute: typeof ApiProjectsRoute
+    }
+    '/api/invoices/$id': {
+      id: '/api/invoices/$id'
+      path: '/$id'
+      fullPath: '/api/invoices/$id'
+      preLoaderRoute: typeof ApiInvoicesIdRouteImport
+      parentRoute: typeof ApiInvoicesRoute
     }
     '/api/expenses/$id': {
       id: '/api/expenses/$id'
@@ -568,6 +655,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/projects/create'
       preLoaderRoute: typeof ResourceProjectsCreateRouteImport
       parentRoute: typeof ResourceProjectsRoute
+    }
+    '/_resource/invoices/$id': {
+      id: '/_resource/invoices/$id'
+      path: '/$id'
+      fullPath: '/invoices/$id'
+      preLoaderRoute: typeof ResourceInvoicesIdRouteImport
+      parentRoute: typeof ResourceInvoicesRoute
     }
     '/_resource/expenses/create': {
       id: '/_resource/expenses/create'
@@ -734,6 +828,19 @@ const ResourceExpensesRouteChildren: ResourceExpensesRouteChildren = {
 const ResourceExpensesRouteWithChildren =
   ResourceExpensesRoute._addFileChildren(ResourceExpensesRouteChildren)
 
+interface ResourceInvoicesRouteChildren {
+  ResourceInvoicesIdRoute: typeof ResourceInvoicesIdRoute
+  ResourceInvoicesIndexRoute: typeof ResourceInvoicesIndexRoute
+}
+
+const ResourceInvoicesRouteChildren: ResourceInvoicesRouteChildren = {
+  ResourceInvoicesIdRoute: ResourceInvoicesIdRoute,
+  ResourceInvoicesIndexRoute: ResourceInvoicesIndexRoute,
+}
+
+const ResourceInvoicesRouteWithChildren =
+  ResourceInvoicesRoute._addFileChildren(ResourceInvoicesRouteChildren)
+
 interface ResourceProjectsCreateRouteChildren {
   ResourceProjectsCreateModalRoute: typeof ResourceProjectsCreateModalRoute
 }
@@ -780,12 +887,14 @@ const ResourceProjectsRouteWithChildren =
 interface ResourceRouteChildren {
   ResourceClientsRoute: typeof ResourceClientsRouteWithChildren
   ResourceExpensesRoute: typeof ResourceExpensesRouteWithChildren
+  ResourceInvoicesRoute: typeof ResourceInvoicesRouteWithChildren
   ResourceProjectsRoute: typeof ResourceProjectsRouteWithChildren
 }
 
 const ResourceRouteChildren: ResourceRouteChildren = {
   ResourceClientsRoute: ResourceClientsRouteWithChildren,
   ResourceExpensesRoute: ResourceExpensesRouteWithChildren,
+  ResourceInvoicesRoute: ResourceInvoicesRouteWithChildren,
   ResourceProjectsRoute: ResourceProjectsRouteWithChildren,
 }
 
@@ -817,6 +926,18 @@ const ApiExpensesRouteWithChildren = ApiExpensesRoute._addFileChildren(
   ApiExpensesRouteChildren,
 )
 
+interface ApiInvoicesRouteChildren {
+  ApiInvoicesIdRoute: typeof ApiInvoicesIdRoute
+}
+
+const ApiInvoicesRouteChildren: ApiInvoicesRouteChildren = {
+  ApiInvoicesIdRoute: ApiInvoicesIdRoute,
+}
+
+const ApiInvoicesRouteWithChildren = ApiInvoicesRoute._addFileChildren(
+  ApiInvoicesRouteChildren,
+)
+
 interface ApiProjectsRouteChildren {
   ApiProjectsIdRoute: typeof ApiProjectsIdRoute
 }
@@ -837,6 +958,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiClientsRoute: ApiClientsRouteWithChildren,
   ApiExchangeRatesRoute: ApiExchangeRatesRoute,
   ApiExpensesRoute: ApiExpensesRouteWithChildren,
+  ApiInvoicesRoute: ApiInvoicesRouteWithChildren,
   ApiPdfRoute: ApiPdfRoute,
   ApiProjectsRoute: ApiProjectsRouteWithChildren,
   ApiSettingsRoute: ApiSettingsRoute,

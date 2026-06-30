@@ -1,4 +1,8 @@
-import clientsSeedData from "../src/db/seeds/data/clientsSeedData";
+import clientSeeds from "../src/db/seeds/data/clientsSeedData";
+import expensesSeedData from "../src/db/seeds/data/expensesSeedData";
+import invoicesSeedData from "../src/db/seeds/data/invoicesSeedData";
+import projectsSeedData from "../src/db/seeds/data/projectsSeedData";
+import quotesSeedData from "../src/db/seeds/data/quotesSeedData";
 import settingsSeedData from "../src/db/seeds/data/settingsSeedData";
 
 const currencyEnumValues = [
@@ -44,137 +48,16 @@ const currencyEnumValues = [
 	"ARS",
 ] as const;
 
-const expenseCategoryEnumValues = [
-	"Essentials",
-	"Home",
-	"Domain",
-	"Health & Wellbeing",
-	"Entertainment",
-	"Charity",
-	"Present",
-	"Services",
-	"Hardware",
-	"Software",
-	"Hobby",
-	"Savings",
-	"Transport",
-	"Travel",
-	"Administrative",
-] as const;
-
-const expenseTypeEnumValues = ["Personal", "Freelance"] as const;
-
-const expenseRateEnumValues = [
-	"Monthly",
-	"Daily",
-	"Hourly",
-	"Weekly",
-	"Yearly",
-	"Quarterly",
-	"Semester",
-	"Bi-Weekly",
-	"Bi-Monthly",
-	"Bi-Yearly",
-	"Tri-Yearly",
-	"One-time",
-] as const;
-
-const projectStatusEnumValues = [
-	"todo",
-	"active",
-	"paused",
-	"done",
-	"cancelled",
-	"negotiating",
-	"waiting_for_feedback",
-] as const;
-
 const now = "2000-01-01T00:00:00.000Z";
-
-const projectsSeedData = [
-	{
-		name: "Project 1",
-		description: "Project 1 description",
-		status: projectStatusEnumValues[0],
-		content: "Project 1 content",
-		clients: [clientsSeedData[0], clientsSeedData[1]],
-		invoices: [
-			{ name: "Invoice 1", date: "2022-01-01" },
-			{ name: "Invoice 2", date: "2022-02-01" },
-		],
-		quotes: [{ name: "Quote 1", date: "2022-01-01" }],
-	},
-	{
-		name: "Project 2",
-		description: "Project 2 description",
-		status: projectStatusEnumValues[1],
-		content: "Project 2 content",
-		clients: [clientsSeedData[2]],
-		invoices: [{ name: "Invoice 3", date: "2022-03-01" }],
-		quotes: [
-			{ name: "Quote 2", date: "2022-02-01" },
-			{ name: "Quote 3", date: "2022-03-01" },
-		],
-	},
-	{
-		name: "Project 3",
-		description: "Project 3 description",
-		status: projectStatusEnumValues[2],
-		content: "Project 3 content",
-		clients: [clientsSeedData[0], clientsSeedData[2]],
-		invoices: [
-			{ name: "Invoice 4", date: "2022-01-01" },
-			{ name: "Invoice 5", date: "2022-02-01" },
-		],
-		quotes: [
-			{ name: "Quote 4", date: "2022-04-01" },
-			{ name: "Quote 5", date: "2022-05-01" },
-		],
-	},
-];
-
-const invoicesSeedData = Array.from(
-	new Map(
-		projectsSeedData.flatMap((project) =>
-			project.invoices.map((invoice) => [invoice.name, invoice] as const),
-		),
-	).values(),
-);
-
-const quotesSeedData = Array.from(
-	new Map(
-		projectsSeedData.flatMap((project) =>
-			project.quotes.map((quote) => [quote.name, quote] as const),
-		),
-	).values(),
-);
-
-const expensesSeedData = Array.from({ length: 50 }, (_, index) => {
-	const category =
-		expenseCategoryEnumValues[index % expenseCategoryEnumValues.length];
-	const type = expenseTypeEnumValues[index % expenseTypeEnumValues.length];
-	const rate = expenseRateEnumValues[index % expenseRateEnumValues.length];
-	const currency =
-		currencyEnumValues[index % currencyEnumValues.length];
-	return {
-		name: `Expense ${index + 1}`,
-		category,
-		type,
-		rate,
-		originalPrice: 1000 + index * 10,
-		originalCurrency: currency,
-	};
-});
+const seedOutputPath = new URL("../src/db/seeds/seed-full.sql", import.meta.url);
 
 function sqlString(value: string | null | undefined) {
 	if (value === null || value === undefined) return "NULL";
 	return `'${value.replace(/'/g, "''")}'`;
 }
 
-function insertRow(table: string, columns: string[], values: Array<string>) {
-	return `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${values.join(
-		", ",
-	)});`;
+function insertRow(table: string, columns: string[], values: string[]) {
+	return `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${values.join(", ")});`;
 }
 
 const sqlLines: string[] = [];
@@ -250,7 +133,7 @@ sqlLines.push(
 	),
 );
 
-clientsSeedData.forEach((client, index) => {
+clientSeeds.forEach((client, index) => {
 	const id = index + 1;
 	sqlLines.push(
 		insertRow(
@@ -290,11 +173,37 @@ invoicesSeedData.forEach((invoice, index) => {
 	sqlLines.push(
 		insertRow(
 			"invoices",
-			["id", "name", "date", "created_at", "last_modified"],
+			[
+				"id",
+				"name",
+				"date",
+				"invoice_number",
+				"client_number",
+				"subject",
+				"introduction",
+				"foot_note",
+				"currency",
+				"language",
+				"hourly_rate",
+				"invoice_location",
+				"rows",
+				"created_at",
+				"last_modified",
+			],
 			[
 				String(id),
 				sqlString(invoice.name),
 				sqlString(invoice.date),
+				String(invoice.invoiceNumber),
+				sqlString(invoice.clientNumber),
+				sqlString(invoice.subject),
+				sqlString(invoice.introduction),
+				sqlString(invoice.footNote),
+				sqlString(invoice.currency),
+				sqlString(invoice.language),
+				String(invoice.hourlyRate),
+				sqlString(invoice.invoiceLocation),
+				sqlString(JSON.stringify(invoice.rows)),
 				sqlString(now),
 				sqlString(now),
 			],
@@ -381,7 +290,7 @@ projectsSeedData.forEach((project, projectIndex) => {
 	const projectId = projectIndex + 1;
 
 	project.clients.forEach((client) => {
-		const clientId = clientsSeedData.findIndex((c) => c.name === client.name) + 1;
+		const clientId = clientSeeds.findIndex((item) => item.name === client.name) + 1;
 		sqlLines.push(
 			insertRow(
 				"projects_to_clients",
@@ -392,9 +301,8 @@ projectsSeedData.forEach((project, projectIndex) => {
 	});
 
 	project.invoices.forEach((invoice) => {
-		const invoiceId = invoicesSeedData.findIndex(
-			(i) => i.name === invoice.name,
-		) + 1;
+		const invoiceId =
+			invoicesSeedData.findIndex((item) => item.name === invoice.name) + 1;
 		sqlLines.push(
 			insertRow(
 				"projects_to_invoices",
@@ -405,7 +313,7 @@ projectsSeedData.forEach((project, projectIndex) => {
 	});
 
 	project.quotes.forEach((quote) => {
-		const quoteId = quotesSeedData.findIndex((q) => q.name === quote.name) + 1;
+		const quoteId = quotesSeedData.findIndex((item) => item.name === quote.name) + 1;
 		sqlLines.push(
 			insertRow(
 				"projects_to_quotes",
@@ -418,9 +326,5 @@ projectsSeedData.forEach((project, projectIndex) => {
 
 sqlLines.push("PRAGMA foreign_keys=ON;");
 
-const sql = `${sqlLines.join("\n")}\n`;
-
-await Bun.write(
-	"/Users/lucasvogel/repos/vogelibizz/src/db/seeds/seed-full.sql",
-	sql,
-);
+await Bun.write(seedOutputPath, `${sqlLines.join("\n")}\n`);
+console.log(`Generated ${seedOutputPath.pathname}`);

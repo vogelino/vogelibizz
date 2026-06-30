@@ -66,6 +66,8 @@ function getListRoute(resource: RoutedResource) {
 			return linkOptions({ to: "/expenses" });
 		case "projects":
 			return linkOptions({ to: "/projects" });
+		case "invoices":
+			return linkOptions({ to: "/invoices" });
 		default: {
 			const _exhaustive: never = resource;
 			throw new Error(`Unhandled resource ${_exhaustive}`);

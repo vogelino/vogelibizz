@@ -6,9 +6,10 @@ import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { ProjectType, ResourceType } from "@/db/schema";
+import type { ResourceType } from "@/db/schema";
 import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
+import useInvoiceDelete from "@/utility/data/useInvoiceDelete";
 import useProjectDelete from "@/utility/data/useProjectDelete";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
@@ -30,6 +31,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	const clientDeleteMutation = useClientDelete();
 	const projectDeleteMutation = useProjectDelete();
 	const expenseDeleteMutation = useExpenseDelete();
+	const invoiceDeleteMutation = useInvoiceDelete();
 	const deleteAction = useCallback(
 		(id: number) => {
 			switch (resource) {
@@ -39,6 +41,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 					return projectDeleteMutation.mutate(id);
 				case "expenses":
 					return expenseDeleteMutation.mutate(id);
+				case "invoices":
+					return invoiceDeleteMutation.mutate(id);
 			}
 		},
 		[
@@ -46,10 +50,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 			clientDeleteMutation,
 			projectDeleteMutation,
 			expenseDeleteMutation,
+			invoiceDeleteMutation,
 		],
 	);
 	const deleteColumn = getDeleteColumn<DataType>(deleteAction);
-	const lastModifiedColumn = useLastModifiedColumn<ProjectType>();
+	const lastModifiedColumn = useLastModifiedColumn<DataType>();
 	const selectionColumn = useMemo(
 		() =>
 			({

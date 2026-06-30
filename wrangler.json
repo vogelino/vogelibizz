@@ -14,7 +14,8 @@
 		{
 			"binding": "DB",
 			"database_id": "3e20bfb2-6c46-4e83-8760-957d3b91ae84",
-			"database_name": "vogelibizz"
+			"database_name": "vogelibizz",
+			"migrations_dir": "src/db/migrations/d1"
 		}
 	]
 }

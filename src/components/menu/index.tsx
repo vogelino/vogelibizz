@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, type ToOptions } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Menu as MenuIcon, X } from "lucide-react";
 import { useState } from "react";
 import BizzLogo from "@/components/BizzLogo";
@@ -18,10 +18,12 @@ import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
 import HeaderMenuLink from "./HeaderMenuLink";
 
+type MenuRoute = "/projects" | "/clients" | "/expenses" | "/invoices";
+
 type MenuLinkType = {
 	key: string;
 	label: string;
-	route: ToOptions["to"];
+	route: MenuRoute;
 };
 
 export const Menu = ({
@@ -56,6 +58,11 @@ export const Menu = ({
 			key: "expenses",
 			label: "Expenses",
 			route: "/expenses",
+		},
+		{
+			key: "invoices",
+			label: "Invoices",
+			route: "/invoices",
 		},
 	];
 

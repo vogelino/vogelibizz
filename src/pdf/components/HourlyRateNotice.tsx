@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
-import { COLORS, CONFIG } from "../variables";
+import { COLORS, CONFIG, LABELS } from "../variables";
 
 export const HourlyRateNotice = ({
 	lang = "en-US",
 	hourlyRate = 50,
 	currency = "EUR",
 }: {
-	lang?: string;
+	lang?: keyof typeof LABELS;
 	hourlyRate?: number;
 	currency?: string;
 }) => {
@@ -18,7 +18,7 @@ export const HourlyRateNotice = ({
 		<View style={styles.wrapper}>
 			<View style={styles.inner}>
 				<Text style={styles.description}>
-					Zugrunde liegender Stundensatz für die Preisberechnung
+					{LABELS[lang].hourlyRateNoticeLabel}
 				</Text>
 				<Text style={styles.hourlyRate}>
 					{currencyFormatter.format(hourlyRate)}

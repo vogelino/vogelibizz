@@ -8,6 +8,13 @@
 			"when": 1770672481370,
 			"tag": "0000_third_bullseye",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1782771705111,
+			"tag": "0001_tranquil_tarot",
+			"breakpoints": true
 		}
 	]
 }

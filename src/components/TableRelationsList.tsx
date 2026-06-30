@@ -81,6 +81,8 @@ function getEditLink(resource: RoutedResource, id: number, modal: boolean) {
 			return modal
 				? linkOptions({ to: "/projects/edit/$id/modal", params })
 				: linkOptions({ to: "/projects/edit/$id", params });
+		case "invoices":
+			return linkOptions({ to: "/invoices/$id", params });
 		default: {
 			const _exhaustive: never = resource;
 			throw new Error(`Unhandled resource ${_exhaustive}`);

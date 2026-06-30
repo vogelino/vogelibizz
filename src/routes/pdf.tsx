@@ -1,115 +1,68 @@
-import { Document, Font, Page, StyleSheet, View } from "@react-pdf/renderer";
-import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect } from "react";
-import ClientOnly from "@/components/ClientOnly";
-import { Footer } from "@/pdf/components/Footer";
-import { FootNote } from "@/pdf/components/FootNote";
-import { HourlyRateNotice } from "@/pdf/components/HourlyRateNotice";
-import { Introduction } from "@/pdf/components/Introduction";
-import { Letterhead } from "@/pdf/components/Letterhead";
-import { Table } from "@/pdf/components/Table";
-import { CONFIG, CONTENT } from "@/pdf/variables";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { z } from "zod";
+import type { InvoiceType, SettingsType } from "@/db/schema";
+import { InvoicePdfPreview } from "@/features/invoices/InvoicePdfPreview";
+import { buildInvoicePdfData } from "@/features/invoices/invoicePdfData";
+import { parseId } from "@/utility/resourceUtil";
 
-const PDFViewer = lazy(async () => {
-	const mod = await import("@react-pdf/renderer");
-	return { default: mod.PDFViewer };
+const pdfSearchSchema = z.object({
+	invoiceId: z.union([z.string(), z.number()]).optional(),
 });
 
 export const Route = createFileRoute("/pdf")({
-	component: InvoiceDocument,
+	validateSearch: pdfSearchSchema,
+	beforeLoad: async () => {
+		if (!import.meta.env.SSR) return;
+		const [{ getStartContext }, { getSession }, { authConfig }, envModule] =
+			await Promise.all([
+				import("@tanstack/start-storage-context"),
+				import("start-authjs"),
+				import("@/utils/auth"),
+				import("@/env"),
+			]);
+		const request = getStartContext({ throwIfNotFound: false })?.request;
+		if (!request) return;
+		const session = await getSession(request, authConfig);
+		const email = session?.user?.email;
+		const authenticated =
+			!!email && envModule.default.server.AUTH_ADMIN_EMAILS.includes(email);
+		if (!authenticated) throw redirect({ to: "/login" });
+	},
+	loaderDeps: ({ search }) => ({ invoiceId: search.invoiceId }),
+	loader: async ({ deps }) => {
+		if (!deps.invoiceId) {
+			return { invoice: null, settings: null };
+		}
+		const invoiceId = parseId(deps.invoiceId);
+		const [{ getInvoice }, { getSettings }] = await Promise.all([
+			import("@/server/api/invoices/getInvoice.js"),
+			import("@/server/api/settings/getSettings.js"),
+		]);
+		const [invoice, settings] = await Promise.all([
+			getInvoice(invoiceId),
+			getSettings(),
+		]);
+		return { invoice, settings };
+	},
+	component: PdfRouteComponent,
 });
 
-function InvoiceDocument() {
-	useEffect(() => {
-		Font.register({
-			family: "Inter",
-			fonts: [
-				{ src: "/fonts/Inter-Regular.ttf" },
-				{ src: "/fonts/Inter-Bold.ttf", fontWeight: 700 },
-				{ src: "/fonts/Inter-Italic.ttf", fontStyle: "italic" },
-				{
-					src: "/fonts/Inter-BoldItalic.ttf",
-					fontStyle: "italic",
-					fontWeight: 700,
-				},
-			],
-		});
-		Font.register({
-			family: "IBM Plex Mono",
-			src: "/fonts/IBMPlexMono-Regular.ttf",
-		});
-	}, []);
+function PdfRouteComponent() {
+	const { invoice, settings } = Route.useLoaderData() as {
+		invoice: InvoiceType | null;
+		settings: SettingsType | null;
+	};
+	if (!invoice || !settings) {
+		return (
+			<div className="flex h-screen items-center justify-center p-6 text-center text-muted-foreground">
+				Provide an invoiceId search param to preview an invoice PDF.
+			</div>
+		);
+	}
 
 	return (
-		<ClientOnly fallback={<p>Loading...</p>}>
-			<Suspense fallback={<p>Loading...</p>}>
-				<PDFViewer className="w-screen h-screen">
-					<Document>
-						<Page size="A4" style={styles.page}>
-							<View style={styles.content}>
-								<Letterhead {...CONTENT} lang={CONFIG.lang} />
-								<Introduction
-									titlePrefix="Invoice"
-									subject="Programming service for the data2resilience project - August 2024"
-									introduction={`Dear Mr. Skowronnek,\nI am pleased to present you my invoice for the programming service of the "data2resilience" application. Below you will find the details and costs of the service. If you have any questions, please feel free to contact me.`}
-								/>
-								<Table
-									hourlyRate={CONFIG.hourlyRate}
-									lang={CONFIG.lang}
-									currency={CONFIG.currency}
-									rows={[
-										{
-											description: "Programming",
-											hoursCount: 10,
-										},
-										{
-											description:
-												"I am pleased to present you my invoice for the programming service of the data2resilience application. Below you will find the details and costs of the service. If you have any questions, please feel free to contact me",
-											hoursCount: 5,
-										},
-										{
-											description: "Web development",
-											hoursCount: 5,
-										},
-									]}
-								/>
-								<HourlyRateNotice {...CONFIG} />
-							</View>
-							<View style={styles.footer}>
-								<FootNote>
-									Steuerschuldnerschaft des Leistungsempfängers (Reverse
-									Charge).
-								</FootNote>
-								<Footer {...CONTENT} />
-							</View>
-						</Page>
-					</Document>
-				</PDFViewer>
-			</Suspense>
-		</ClientOnly>
+		<div className="h-screen w-screen bg-background">
+			<InvoicePdfPreview data={buildInvoicePdfData(invoice, settings)} />
+		</div>
 	);
 }
-
-const styles = StyleSheet.create({
-	page: {
-		backgroundColor: "#fff",
-		fontFamily: "Inter",
-		paddingLeft: CONFIG.pageInlinePadding,
-		paddingRight: CONFIG.pageInlinePadding,
-		paddingTop: CONFIG.pageBlockPadding,
-		paddingBottom: CONFIG.pageBlockPadding * 0.75,
-		fontSize: 10,
-		lineHeight: 1.2,
-		height: "100%",
-	},
-	content: {
-		flexGrow: 1,
-		gap: 16,
-	},
-	footer: {
-		flexDirection: "column",
-		gap: 16,
-		flexGrow: 0,
-		flexShrink: 0,
-	},
-});
