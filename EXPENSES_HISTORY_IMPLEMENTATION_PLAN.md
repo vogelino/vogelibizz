@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **None — PR 2 complete; PR 3 not started**
+Current effort: **PR 3 implementation complete; stacked submission blocked by repository enablement**
 
 ## How to use and maintain this plan
 
@@ -42,14 +42,14 @@ The recurring-expenses overview will compare configured monthly costs with histo
 
 ### Imported months and transactions
 
-- [ ] **R10** — Expenses History is organized by transaction month and booked date, not by a user-facing import object.
-- [ ] **R11** — The latest imported month opens by default, with previous/next navigation and a month picker.
-- [ ] **R12** — Each transaction retains immutable bank description and bank amount values.
+- [x] **R10** — Expenses History is organized by transaction month and booked date, not by a user-facing import object.
+- [x] **R11** — The latest imported month opens by default, with previous/next navigation and a month picker.
+- [x] **R12** — Each transaction retains immutable bank description and bank amount values.
 - [ ] **R13** — Each transaction also has an editable display description and effective amount, initially copied from the bank values. Editing either affects only that transaction.
 - [ ] **R14** — Effective amounts accept values greater than or equal to CHF 0 and drive all calculations. This is the manual mechanism for discounts, refunds, compensation, or exclusion.
 - [ ] **R15** — There is no separate ignored state. Every imported debit contributes through its effective amount.
 - [ ] **R16** — Transactions support independently editable Category and Type fields. Unmatched transactions initially display these as **Unclassified**.
-- [ ] **R17** — The immutable bank values remain available as secondary transaction details for traceability.
+- [x] **R17** — The immutable bank values remain available as secondary transaction details for traceability.
 
 ### Recurring-expense association
 
@@ -74,13 +74,13 @@ The recurring-expenses overview will compare configured monthly costs with histo
 
 ### Navigation and presentation
 
-- [ ] **R33** — Expenses has two subpages: **Recurring expenses** at the existing `/expenses` route and **Expenses History** at `/expenses/history`.
-- [ ] **R34** — Existing recurring-expense create/edit routes and manually configured expense behavior continue to work.
+- [x] **R33** — Expenses has two subpages: **Recurring expenses** at the existing `/expenses` route and **Expenses History** at `/expenses/history`.
+- [x] **R34** — Existing recurring-expense create/edit routes and manually configured expense behavior continue to work.
 - [ ] **R35** — The recurring table preserves its existing columns and adds real monthly average and configured-versus-real difference. It also renders the synthetic Other row.
 - [ ] **R36** — The recurring page shows both the living-cost estimate and observed monthly average.
 - [ ] **R37** — Expenses History shows booked date, editable description, editable effective amount, recurring-expense association or Other, Category, Type, and access to original bank details.
 - [ ] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
-- [ ] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
+- [x] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
 
 ### Development seed data
 
@@ -148,7 +148,7 @@ Each effort should be a separately reviewable PR. A PR should leave the applicat
 
 ### PR 1 — Persistence and calculation foundations
 
-Status: **Done**
+Status: **Blocked**
 Branch/PR: `codex/expenses-history-pr1-foundations`
 Requirements: R7, R10–R17, R19–R21, R23–R32
 
@@ -210,8 +210,8 @@ Known limitations/follow-ups: PR 2 intentionally adds no upload/history UI, read
 
 ### PR 3 — Expenses History shell, month navigation, and upload flow
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr3-history-ui`
 Depends on: PR 2
 Requirements: R10–R13, R17, R33–R34, R37, R39
 
@@ -226,16 +226,16 @@ Scope:
 
 Acceptance checklist:
 
-- [ ] Existing `/expenses`, create, edit, and modal routes still behave correctly.
-- [ ] `/expenses/history` defaults to the latest imported month.
-- [ ] Month navigation reflects imported months rather than filling calendar gaps.
-- [ ] Upload warnings and replacement consequences are clear before confirmation.
-- [ ] Successful upload/replacement refreshes month navigation and displayed transactions.
-- [ ] Original descriptions and amounts are accessible but visually secondary.
-- [ ] Loading, empty, error, and mobile layouts are usable.
+- [x] Existing `/expenses`, create, edit, and modal routes still behave correctly.
+- [x] `/expenses/history` defaults to the latest imported month.
+- [x] Month navigation reflects imported months rather than filling calendar gaps.
+- [x] Upload warnings and replacement consequences are clear before confirmation.
+- [x] Successful upload/replacement refreshes month navigation and displayed transactions.
+- [x] Original descriptions and amounts are accessible but visually secondary.
+- [x] Loading, empty, error, and mobile layouts are usable.
 
-Verification performed: _TBD_
-Known limitations/follow-ups: _TBD_
+Verification performed: `bun test` (31 tests, 84 assertions, including authenticated read-contract coverage); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (TypeScript, Biome, client and SSR production bundles); `bun run db:generate` (no schema changes); `bun run db:init:local` plus a repeated `bun run db:seed:local` and Wrangler queries (exactly one `2026-06` seeded month for the execution date, four transactions, two valid associations); `git diff --check`; full PR 3 diff, stack, sensitive-data, accessibility, invalidation, replacement-safety, existing-expense preservation, responsive-layout, and scope reviews. Browser verification confirmed `/expenses`, create, edit, and `/expenses/history` preserve the administrator authentication redirect, both new read APIs return 401 without authentication, and no browser console warnings/errors occurred.
+Known limitations/follow-ups: PR 3 intentionally keeps the history table read-only: editable transaction values, manual association/detachment, Other-only filtering, and monthly matched/Other summaries remain PR 4; recurring overview averages and totals remain PR 5; automatic matching remains a non-goal. No migration was added. An authenticated browser session was unavailable, so seeded table rendering, CSV selection, replacement-modal interaction, and responsive authenticated layouts were reviewed in code and production output but not manually exercised end to end; PR 6 retains the full authenticated accessibility and small-screen audit. The successful build retains the existing mixed static/dynamic import, bundle-size, and React PDF/fontkit warnings; none originates in the PR 3 history paths. Publication is blocked: `gh stack submit --auto` reports that stacked PRs are not enabled for `vogelino/vogelibizz`; GitHub's internal stack endpoint returns 404 despite administrator permission and normal pull requests being enabled. No PRs or remote stack were created, and `gh pr create` was not used.
 
 ### PR 4 — Transaction review, editing, and manual association
 
@@ -333,11 +333,11 @@ Update the Status and Verified in columns as PRs progress.
 
 | Requirement group | Primary PR(s) | Status | Verified in |
 | --- | --- | --- | --- |
-| R1–R9: CSV import | PR 2, PR 3 | In progress | PR 2 parser, preview/commit contracts, authenticated API, atomic replacement, validation, raw-data, and rollback tests; PR 3 presentation remains |
-| R10–R17: month and transaction history | PR 1, PR 3, PR 4 | In progress | PR 1 schema, migration, validation, and constraint tests; UI/API behavior remains in PR 3–4 |
+| R1–R9: CSV import | PR 2, PR 3 | Done | PR 2 parser, preview/commit contracts, authenticated API, atomic replacement, validation, raw-data, and rollback tests; PR 3 preview, warning, error, confirmation, refresh, and empty-history presentation |
+| R10–R17: month and transaction history | PR 1, PR 3, PR 4 | In progress | PR 1 schema, migration, validation, and constraint tests; PR 3 authenticated month reads, imported-month navigation, read-only table, and bank-value traceability; editing/classification remains PR 4 |
 | R18–R23: manual association | PR 1, PR 4 | In progress | PR 1 nullable association and `ON DELETE SET NULL` tests; mutation behavior remains in PR 4 |
 | R24–R32: calculations and Other | PR 1, PR 5 | In progress | PR 1 domain calculation tests; query and presentation integration remains in PR 5 |
-| R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | Planned | — |
+| R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | In progress | PR 3 subnavigation, history route, read-only transaction presentation, and replacement modal; transaction review and recurring overview integration remain PR 4–5 |
 | R40–R42: local development history seed | PR 2, PR 3 | Done | PR 2 in-memory repeated-seed regression and repeated Wrangler local seed verification |
 | Cross-cutting hardening | PR 6 | Planned | — |
 
@@ -371,6 +371,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D8 | Persist bank dates as ISO `YYYY-MM-DD` calendar dates and require source order to be unique within each imported month. | Normalized dates support month/date organization, while stable unique order preserves deterministic source ordering and catches duplicate rows during import construction. | R10, R17; PR 1–3 | Accepted |
 | 2026-07-16 | D9 | Seed synthetic history only through the local/full seed: create the immediately previous calendar month dynamically and reserve the current month for CSV import. Do not add imported history to the remote seed. | Development starts with history available for review while still exercising the primary current-month import workflow; dynamic dates prevent committed seed data from becoming stale. | R40–R42; PR 2–3 | Accepted |
 | 2026-07-16 | D10 | Treat a zero `Credit/Debit Amount` as an actionable validation error rather than a debit or skipped credit. Preview and commit both parse the source independently, and commit persists only the sanitized basename as source metadata. | Zero is neither a negative debit nor a positive credit under R6; reparsing avoids retaining server-side import drafts or raw CSV while keeping commit authoritative. | R1, R6, R8–R9; PR 2–3 | Accepted |
+| 2026-07-16 | D11 | Keep source filenames out of the PR 3 read APIs and UI; expose only month metadata plus the parsed immutable and effective transaction values needed for history review. | The filename is not required for transaction-month navigation or traceability and may itself contain sensitive information; the raw CSV remains unpersisted under R8. | R8, R10, R17; PR 3 | Accepted |
 
 ## Open questions and discovered work
 
@@ -394,3 +395,6 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | Planning change | Added R40–R42 and D9: local/full seeding must dynamically create synthetic history for the previous calendar month while leaving the current month available for CSV import; remote seeding remains history-free. Assigned implementation and seed verification to PR 2, with UI consumption covered by PR 3. | Reviewed the configured seed paths (`db:seed:local` → `seed-full.sql`, separate remote `seed.sql`) and updated PR 2 scope, acceptance, and traceability. | Implement the revised seed contract when PR 2 begins. |
 | 2026-07-16 | PR 2 | Started bank CSV parser, preview/atomic import API, and revised local seed work on `codex/expenses-history-pr2-import`. Adopted PR 1 into a `main`-based `gh stack` stack and created PR 2 directly above it. | Read the complete living plan; confirmed the clean PR 1 tree and reviewed its commits/diff, history schema/migration/tests, seed paths, API conventions, and stack topology. | Implement parser/contracts, atomic replacement, local previous-month seed, and focused regressions without beginning PR 3. |
 | 2026-07-16 | PR 2 | Completed server-side CSV preview/commit APIs, actionable validation, credit warnings, D1-batch atomic replacement, raw-source protections, synthetic fixtures, and idempotent previous-month local history seeding. Recorded D10 and O3; no migration, UI, matching, or PR 3 work was added. | 28 tests/77 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated real Wrangler local seed with exact previous/current-month queries; `git diff --check`; full PR 2 diff review. | Submit the stacked PR above PR 1; do not begin PR 3 until review decisions are resolved. |
+| 2026-07-16 | PR 3 | Started Expenses History shell, imported-month navigation, read APIs, and upload preview/commit UI on `codex/expenses-history-pr3-history-ui`, directly above PR 2. Confirmed the worktree was clean and the local stack topology was `main` → PR 1 → PR 2 before creating PR 3; GitHub PR objects were not yet published. | Read the complete living plan and repository instruction files; verified local branches and commits with `gh stack view`. | Inspect PR 2 contracts and the existing UI/API/test/seed conventions before implementing PR 3 only. |
+| 2026-07-16 | PR 3 | Completed the Expenses subnavigation, authenticated month-list/detail APIs and query hooks, imported-month navigation, read-only transaction table with secondary bank details, and preview/import/replacement UI. Recorded D11; no PR 4 editing/association/summary work, PR 5 overview work, or automatic matching was added. | 31 tests/84 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated real Wrangler local seed and exact data queries; unauthenticated browser/HTTP route checks; `git diff --check`; full PR 3 diff and boundary review. | Submit the stack with PR 3 targeting PR 2; PR 4 must resolve O2 before adding transaction mutations. |
+| 2026-07-16 | PR 3 | Stacked publication blocked after the verified PR 3 commit: `gh stack submit --auto` stopped because stacked PRs are not enabled for `vogelino/vogelibizz`. Confirmed administrator permission, enabled normal pull requests, a 404 from GitHub's internal stack endpoint, no existing GitHub PR objects, and no exposed CLI/API enablement setting. | Re-ran `gh stack view`; inspected repository permission and stack capability without using `gh pr create` or creating remote PRs. | Enable GitHub stacked PRs for the repository/account, then rerun `gh stack submit --auto` and record all three PR links and bases. Do not begin PR 4. |

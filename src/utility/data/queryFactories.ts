@@ -18,8 +18,14 @@ import {
 	settingsSelectSchema,
 } from "@/db/schema";
 import type { Session } from "@/providers/SessionProvider";
+import {
+	type ExpenseHistoryMonthDetail,
+	type ExpenseHistoryMonthSummary,
+	expenseHistoryMonthDetailSchema,
+	expenseHistoryMonthsSchema,
+} from "@/utility/expenseHistoryContracts";
 import { parseId } from "@/utility/resourceUtil";
-import { apiFetch } from "../dataHookUtil";
+import { apiFetch, apiGetJson } from "../dataHookUtil";
 import createQueryFunction from "./createQueryFunction";
 
 const queryKeys = mergeQueryKeys(
@@ -44,6 +50,10 @@ const queryKeys = mergeQueryKeys(
 	}),
 	createQueryKeys("exchangeRates", {
 		current: null,
+	}),
+	createQueryKeys("expenseHistory", {
+		months: null,
+		month: (month: string) => [month],
 	}),
 );
 
@@ -242,6 +252,44 @@ export const exchangeRatesQuery = {
 		}),
 };
 
+export const expenseHistoryQuery = {
+	months: () =>
+		queryOptions({
+			...queryKeys.expenseHistory.months,
+			queryFn: async (): Promise<ExpenseHistoryMonthSummary[]> => {
+				if (import.meta.env.SSR) {
+					const { getExpenseHistoryMonths } = await import(
+						"@/server/expenseHistory/getExpenseHistory"
+					);
+					return getExpenseHistoryMonths();
+				}
+				return expenseHistoryMonthsSchema.parse(
+					await apiGetJson("/api/expense-history/months"),
+				);
+			},
+		}),
+	month: (month: string) =>
+		queryOptions({
+			...queryKeys.expenseHistory.month(month),
+			queryFn: async (): Promise<ExpenseHistoryMonthDetail> => {
+				if (import.meta.env.SSR) {
+					const { getExpenseHistoryMonth } = await import(
+						"@/server/expenseHistory/getExpenseHistory"
+					);
+					const result = await getExpenseHistoryMonth(month);
+					if (!result)
+						throw new Error(`No expense history exists for ${month}.`);
+					return result;
+				}
+				return expenseHistoryMonthDetailSchema.parse(
+					await apiGetJson(
+						`/api/expense-history/months/${encodeURIComponent(month)}`,
+					),
+				);
+			},
+		}),
+};
+
 export const sessionQuery = {
 	current: (signal?: AbortSignal) =>
 		queryOptions({
@@ -268,6 +316,7 @@ export const queryFactories = {
 	settings: settingsQuery,
 	session: sessionQuery,
 	exchangeRates: exchangeRatesQuery,
+	expenseHistory: expenseHistoryQuery,
 };
 
 export const projectsQueryOptions = projectsQuery.list;
@@ -281,3 +330,5 @@ export const invoiceQueryOptions = invoicesQuery.detail;
 export const settingsQueryOptions = settingsQuery.current;
 export const sessionQueryOptions = sessionQuery.current;
 export const exchangeRatesQueryOptions = exchangeRatesQuery.current;
+export const expenseHistoryMonthsQueryOptions = expenseHistoryQuery.months;
+export const expenseHistoryMonthQueryOptions = expenseHistoryQuery.month;
