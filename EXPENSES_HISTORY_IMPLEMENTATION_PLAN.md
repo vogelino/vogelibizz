@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **PR 5 complete; PR 6 not started**
+Current effort: **PR 6 complete; rollout ready for stacked review**
 
 ## How to use and maintain this plan
 
@@ -299,8 +299,8 @@ Known limitations/follow-ups: No migration is required. An authenticated browser
 
 ### PR 6 — Hardening, accessibility, performance, and release readiness
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr6-hardening` — https://github.com/vogelino/vogelibizz/pull/7
 Depends on: PR 5
 Requirements: All, especially R9, R32, R34, R39
 
@@ -316,16 +316,16 @@ Scope:
 
 Acceptance checklist:
 
-- [ ] Full build, type checking, formatting/linting, and automated tests pass.
-- [ ] Manual happy path: import multiple months, review Other, match rows, create an expense, edit effective amounts, and observe recalculated totals.
-- [ ] Manual destructive path: replace a month and delete a referenced recurring expense.
-- [ ] Invalid files and server failures preserve existing month data.
-- [ ] Sensitive source data is not logged or stored as a raw file.
-- [ ] Keyboard and small-screen workflows are usable.
-- [ ] Requirement traceability and change logs below are current.
+- [x] Full build, type checking, formatting/linting, and automated tests pass.
+- [x] Manual happy path: import multiple months, review Other, match rows, create an expense, edit effective amounts, and observe recalculated totals.
+- [x] Manual destructive path: replace a month and delete a referenced recurring expense.
+- [x] Invalid files and server failures preserve existing month data.
+- [x] Sensitive source data is not logged or stored as a raw file.
+- [x] Keyboard and small-screen workflows are usable.
+- [x] Requirement traceability and change logs below are current.
 
-Verification performed: _TBD_
-Known limitations/follow-ups: _TBD_
+Verification performed: `bun run test` (47 tests, 125 assertions, including a two-month review/deletion/replacement integration scenario, native database-proxy receiver regression, raw-source/no-console coverage, atomic rollback, D13 conflicts, no-import calculations, and migration query-plan assertions); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (client and SSR production bundles); `bun run db:generate` (no additional schema changes); migration `0005_cynical_hellcat.sql` applied to the populated local D1 database; repeated `bun run db:init:local` / `bun run db:seed:local` restored exactly one synthetic `2026-06` month with four transactions, two matches, CHF 196.05 observed, and CHF 81.65 Other; real `EXPLAIN QUERY PLAN` plus the automated query-plan regression confirm month lookup uses `expense_months_month_unique`, association lookup uses `expense_transactions_expense_idx`, and ordered month reads use `expense_transactions_month_booked_order_idx` without a temporary B-tree; `git diff --check`; focused sensitive-data/logging, D12/D13, non-goal, migration, and full PR 6 diff reviews. Manual local scenarios used synthetic June/July data through the real UI and authenticated endpoints with a temporary development-only authentication bypass that was removed and verified absent from the final diff: new-month preview/import with a skipped-credit warning; Other review; description/effective-amount/classification editing; manual association; atomic create-and-associate; recurring-overview recalculation; invalid multi-month rejection with the prior dataset unchanged; failed server write with the prior dataset unchanged; confirmed replacement; and referenced-expense deletion moving CHF 84.50 from Matched to Other while the observed average remained identical. Clean desktop and 390×844 browser passes verified row-specific accessible names, native keyboard controls, disclosure focus styles, explicit safe-default replacement focus/trigger restoration, contained focusable table scrolling (390 px page width, no page overflow, 342 px viewport over a 1,070 px table), responsive recurring/history pages, and no browser console warnings/errors.
+Known limitations/follow-ups: GitHub's native Stack object remains unavailable, so D12 still governs publication and D13 is unchanged. The production build succeeds with the pre-existing mixed static/dynamic import, large-chunk, React PDF/fontkit, and Wrangler log-path warnings; none originates in the expense-history implementation, and redesigning application-wide bundling/PDF dependencies is explicitly deferred outside this rollout. The existing full-seed generator still randomizes unrelated recurring seed rows; O3 remains explicitly deferred outside expense-history scope, while the committed/generated history seed itself is deterministic in shape, synthetic, idempotent, and date-relative. Existing exchange-rate refresh diagnostics may log currency codes/counts, but the expense-history import/read/mutation paths log neither bank values nor raw CSV and persist no raw file. No automatic matching, new non-goal, or rollout expansion was added.
 
 ## Requirement traceability
 
@@ -339,7 +339,7 @@ Update the Status and Verified in columns as PRs progress.
 | R24–R32: calculations and Other | PR 1, PR 5 | Done | PR 1 domain calculation tests; PR 5 authenticated aggregate query, target-currency normalization, synthetic Other integration, totals, filters/charts, no-import rendering, and invalidation coverage |
 | R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | Done | PR 3 subnavigation, history route, read-only transaction presentation, and replacement modal; PR 4 transaction review; PR 5 recurring averages, differences, Other, living-cost estimate, and observed average |
 | R40–R42: local development history seed | PR 2, PR 3 | Done | PR 2 in-memory repeated-seed regression and repeated Wrangler local seed verification |
-| Cross-cutting hardening | PR 6 | Planned | — |
+| Cross-cutting hardening | PR 6 | Done | PR 6 multi-month/destructive integration, real D1 atomic-batch manual scenarios, migration/query-plan checks, raw-source/no-log review, operator documentation, accessibility/focus/keyboard audit, 390×844 responsive browser pass, full automated/build verification, and resolved/deferred PR 1–5 limitations |
 
 ## Non-goals for this rollout
 
@@ -383,7 +383,7 @@ Record implementation discoveries here immediately. Each entry must be resolved,
 | --- | --- | --- | --- | --- |
 | O1 | Planning | Confirm whether nullable Category/Type rendered as Unclassified needs new enum values or presentation-only labels. | PR 1 | Resolved: keep database/domain values nullable and treat Unclassified as a presentation-only label; no enum expansion. |
 | O2 | Planning | Select the API concurrency strategy for inline transaction edits, such as last-write-wins or `last_modified` conflict detection. | PR 4 | Resolved by D13: optimistic `lastModified` preconditions, 409 conflicts, refetch-on-conflict, and atomic token-claim create/associate tests. |
-| O3 | PR 2 | The existing full-seed generator randomizes unrelated recurring seed rows whenever it runs. | Existing tooling | Resolved for PR 2: generator and committed SQL both implement the history contract, but unrelated generated recurring rows were kept out of this diff. Redesigning deterministic recurring seed generation is outside expense-history scope. |
+| O3 | PR 2 | The existing full-seed generator randomizes unrelated recurring seed rows whenever it runs. | Existing tooling | Explicitly deferred at PR 6: generator and committed SQL both implement the history contract, and the history seed is synthetic, date-relative, and idempotent; redesigning unrelated randomized recurring rows remains outside expense-history scope. |
 
 ## Progress log
 
@@ -407,3 +407,6 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 5 | Started recurring-overview real averages, synthetic Other, and calculation-aware totals on `codex/expenses-history-pr5-recurring-overview`, directly above PR 4. Confirmed the worktree was clean, PRs 1–4 remained intact, all four GitHub draft PRs had the required chained bases, and the local stack topology was correct before creating PR 5. | Read the complete living plan and repository instructions; verified branch ancestry, GitHub PR metadata, and `gh stack view`. | Inspect PRs 1–4 contracts plus the complete existing recurring overview and tests, then implement PR 5 only without changing D13 or beginning PR 6 hardening. |
 | 2026-07-16 | PR 5 | Completed recurring-overview averages, configured-minus-real differences, the synthetic non-CRUD Other row, living-cost and observed summaries, deliberate Mixed filtering/chart behavior, and every required calculation invalidation. Added an authenticated target-currency summary query that reuses PR 1's calculation contract; no migration, D13 change, automatic matching, import/history redesign, or PR 6 hardening was added. | 44 tests/111 assertions; TypeScript; Biome; production build; clean schema generation; repeated local migration/seed plus exact aggregate query; unauthenticated browser/API auth checks; `git diff --check`; full PR 5 boundary/calculation/CRUD/invalidation review. | Commit and publish PR 5 through D12 with PR 4 as its base, record the draft PR link, and leave PR 6 unstarted. |
 | 2026-07-16 | PR 5 | Published draft PR #6 through D12 after `gh stack push`; PR 5 targets PR 4's `codex/expenses-history-pr4-transaction-review` branch. GitHub's private-preview Stack object remains unavailable, and `gh pr create` was not used. | Verified PR #6 is open and draft with the exact PR 5 head and PR 4 base; rechecked the five-branch local `gh stack view` topology. | PR 5 is ready for review. Leave PR 6 unstarted until review decisions are resolved. |
+| 2026-07-16 | PR 6 | Started hardening, accessibility, performance, documentation, regression, and release-readiness work on `codex/expenses-history-pr6-hardening`, directly above PR 5. Confirmed the worktree was clean, every local PR 1–5 head matched GitHub, all five PRs were open drafts with the required chained bases, and the local `gh stack` topology was intact before creating PR 6. | Read the complete living plan and repository instructions; verified branch ancestry, GitHub PR metadata, and `gh stack view`. | Audit the complete PR 1–5 implementation and resolve or explicitly defer every PR 6 limitation and acceptance item without changing D12, D13, or rollout non-goals. |
+| 2026-07-16 | PR 6 | Completed the defined hardening effort. Fixed the real D1 raw-batch incompatibility found by the manual import/create scenario by using native bound D1 statements while preserving atomic replacement and D13 create/associate semantics; added a composite ordered-month index and query-plan regression; added multi-month destructive/recalculation and no-log coverage; hardened upload, row controls, modal focus, keyboard interaction, and small-screen table scrolling; and documented the CSV/privacy/recovery contract. No requirement or PR boundary changed, D12/D13 remain intact, and automatic matching/non-goals were not expanded. | 47 tests/125 assertions; TypeScript; Biome; client/SSR production build; clean schema regeneration; populated migration plus repeated real local seed; exact aggregate and `EXPLAIN QUERY PLAN` checks; synthetic desktop/mobile manual happy, invalid, failed-write, replacement, and deletion scenarios; clean 390×844 browser console/layout pass; sensitive-data and full-diff review; `git diff --check`. | Commit and publish PR 6 through D12 with PR 5 as its base, record the draft PR link, and leave the worktree clean. |
+| 2026-07-16 | PR 6 | Published draft PR #7 through D12 after `gh stack push`; PR 6 targets PR 5's `codex/expenses-history-pr5-recurring-overview` branch. GitHub's private-preview Stack object remains unavailable, the local six-branch topology is intact, and `gh pr create` was not used. | Verified PR #7 is open and draft with the exact PR 6 head and PR 5 base; final remote six-PR metadata and clean-tree verification follow this publication-record commit. | PR 6 and the complete expenses-history rollout are ready for stacked review. |

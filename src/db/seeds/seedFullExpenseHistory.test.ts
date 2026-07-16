@@ -8,6 +8,7 @@ const migrationNames = [
 	"0002_rare_golden_guardian.sql",
 	"0003_swift_nitro.sql",
 	"0004_abnormal_betty_brant.sql",
+	"0005_cynical_hellcat.sql",
 ];
 const migrationSql = (
 	await Promise.all(

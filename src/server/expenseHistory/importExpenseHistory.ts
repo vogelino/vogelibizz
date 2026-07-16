@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import db from "@/db";
+import type { D1PreparedStatement } from "@/db/d1Types";
 import type {
 	ExpenseHistoryImportCommitRequest,
 	ExpenseHistoryImportCommitResult,
@@ -61,47 +62,60 @@ export const d1ExpenseHistoryImportPersistence: ExpenseHistoryImportPersistence 
 		},
 		async writeMonthAtomically(dataset, replaceExistingMonth) {
 			const timestamp = new Date().toISOString();
-			const statements = [];
+			const client = db.$client;
+			const statements: D1PreparedStatement[] = [];
 			if (replaceExistingMonth) {
 				statements.push(
-					db.run(
-						sql`delete from expense_months where month = ${dataset.month}`,
-					),
+					client
+						.prepare("delete from expense_months where month = ?")
+						.bind(dataset.month),
 				);
 			}
 			statements.push(
-				db.run(sql`
+				client
+					.prepare(`
 				insert into expense_months (
 					month, source_filename, imported_at, last_modified,
 					imported_debit_count, skipped_credit_count
-				) values (
-					${dataset.month}, ${dataset.sourceFilename}, ${timestamp}, ${timestamp},
-					${dataset.debits.length}, ${dataset.skippedCreditCount}
-				)
-			`),
+				) values (?, ?, ?, ?, ?, ?)
+			`)
+					.bind(
+						dataset.month,
+						dataset.sourceFilename,
+						timestamp,
+						timestamp,
+						dataset.debits.length,
+						dataset.skippedCreditCount,
+					),
 			);
 			for (const debit of dataset.debits) {
 				statements.push(
-					db.run(sql`
+					client
+						.prepare(`
 					insert into expense_transactions (
 						expense_month_id, expense_id, booked_at, value_date,
 						original_description, description, original_amount, amount,
 						category, type, source_order, created_at, last_modified
 					)
 					select
-						id, null, ${debit.bookedAt}, ${debit.valueDate},
-						${debit.description}, ${debit.description}, ${debit.amount}, ${debit.amount},
-						null, null, ${debit.sourceOrder}, ${timestamp}, ${timestamp}
-					from expense_months where month = ${dataset.month}
-				`),
+						id, null, ?, ?, ?, ?, ?, ?, null, null, ?, ?, ?
+					from expense_months where month = ?
+				`)
+						.bind(
+							debit.bookedAt,
+							debit.valueDate,
+							debit.description,
+							debit.description,
+							debit.amount,
+							debit.amount,
+							debit.sourceOrder,
+							timestamp,
+							timestamp,
+							dataset.month,
+						),
 				);
 			}
-			await db.batch(
-				statements as [
-					(typeof statements)[number],
-					...(typeof statements)[number][],
-				],
-			);
+			await client.batch(statements);
 		},
 	};
 
