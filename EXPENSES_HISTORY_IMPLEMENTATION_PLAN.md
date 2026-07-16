@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **PR 3 implementation complete; stacked submission blocked by repository enablement**
+Current effort: **PR 3 published and complete; begin PR 4**
 
 ## How to use and maintain this plan
 
@@ -148,8 +148,8 @@ Each effort should be a separately reviewable PR. A PR should leave the applicat
 
 ### PR 1 — Persistence and calculation foundations
 
-Status: **Blocked**
-Branch/PR: `codex/expenses-history-pr1-foundations`
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr1-foundations` — https://github.com/vogelino/vogelibizz/pull/2
 Requirements: R7, R10–R17, R19–R21, R23–R32
 
 Scope:
@@ -176,7 +176,7 @@ Known limitations/follow-ups: PR 1 intentionally exposes no history/import APIs 
 ### PR 2 — Bank CSV parser and atomic month import API
 
 Status: **Done**
-Branch/PR: `codex/expenses-history-pr2-import`
+Branch/PR: `codex/expenses-history-pr2-import` — https://github.com/vogelino/vogelibizz/pull/3
 Depends on: PR 1
 Requirements: R1–R9, R12–R15, R39
 
@@ -211,7 +211,7 @@ Known limitations/follow-ups: PR 2 intentionally adds no upload/history UI, read
 ### PR 3 — Expenses History shell, month navigation, and upload flow
 
 Status: **Done**
-Branch/PR: `codex/expenses-history-pr3-history-ui`
+Branch/PR: `codex/expenses-history-pr3-history-ui` — https://github.com/vogelino/vogelibizz/pull/4
 Depends on: PR 2
 Requirements: R10–R13, R17, R33–R34, R37, R39
 
@@ -235,7 +235,7 @@ Acceptance checklist:
 - [x] Loading, empty, error, and mobile layouts are usable.
 
 Verification performed: `bun test` (31 tests, 84 assertions, including authenticated read-contract coverage); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (TypeScript, Biome, client and SSR production bundles); `bun run db:generate` (no schema changes); `bun run db:init:local` plus a repeated `bun run db:seed:local` and Wrangler queries (exactly one `2026-06` seeded month for the execution date, four transactions, two valid associations); `git diff --check`; full PR 3 diff, stack, sensitive-data, accessibility, invalidation, replacement-safety, existing-expense preservation, responsive-layout, and scope reviews. Browser verification confirmed `/expenses`, create, edit, and `/expenses/history` preserve the administrator authentication redirect, both new read APIs return 401 without authentication, and no browser console warnings/errors occurred.
-Known limitations/follow-ups: PR 3 intentionally keeps the history table read-only: editable transaction values, manual association/detachment, Other-only filtering, and monthly matched/Other summaries remain PR 4; recurring overview averages and totals remain PR 5; automatic matching remains a non-goal. No migration was added. An authenticated browser session was unavailable, so seeded table rendering, CSV selection, replacement-modal interaction, and responsive authenticated layouts were reviewed in code and production output but not manually exercised end to end; PR 6 retains the full authenticated accessibility and small-screen audit. The successful build retains the existing mixed static/dynamic import, bundle-size, and React PDF/fontkit warnings; none originates in the PR 3 history paths. Publication is blocked: `gh stack submit --auto` reports that stacked PRs are not enabled for `vogelino/vogelibizz`; GitHub's internal stack endpoint returns 404 despite administrator permission and normal pull requests being enabled. No PRs or remote stack were created, and `gh pr create` was not used.
+Known limitations/follow-ups: PR 3 intentionally keeps the history table read-only: editable transaction values, manual association/detachment, Other-only filtering, and monthly matched/Other summaries remain PR 4; recurring overview averages and totals remain PR 5; automatic matching remains a non-goal. No migration was added. An authenticated browser session was unavailable, so seeded table rendering, CSV selection, replacement-modal interaction, and responsive authenticated layouts were reviewed in code and production output but not manually exercised end to end; PR 6 retains the full authenticated accessibility and small-screen audit. The successful build retains the existing mixed static/dynamic import, bundle-size, and React PDF/fontkit warnings; none originates in the PR 3 history paths. GitHub's native Stack object remains unavailable because the repository is not enrolled in the private preview. Per D12, the three branches were pushed with `gh stack push` and draft PRs were created through GitHub's API with the verified chain PR 1 #2 → PR 2 #3 → PR 3 #4; `gh pr create` was not used.
 
 ### PR 4 — Transaction review, editing, and manual association
 
@@ -372,6 +372,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D9 | Seed synthetic history only through the local/full seed: create the immediately previous calendar month dynamically and reserve the current month for CSV import. Do not add imported history to the remote seed. | Development starts with history available for review while still exercising the primary current-month import workflow; dynamic dates prevent committed seed data from becoming stale. | R40–R42; PR 2–3 | Accepted |
 | 2026-07-16 | D10 | Treat a zero `Credit/Debit Amount` as an actionable validation error rather than a debit or skipped credit. Preview and commit both parse the source independently, and commit persists only the sanitized basename as source metadata. | Zero is neither a negative debit nor a positive credit under R6; reparsing avoids retaining server-side import drafts or raw CSV while keeping commit authoritative. | R1, R6, R8–R9; PR 2–3 | Accepted |
 | 2026-07-16 | D11 | Keep source filenames out of the PR 3 read APIs and UI; expose only month metadata plus the parsed immutable and effective transaction values needed for history review. | The filename is not required for transaction-month navigation or traceability and may itself contain sensitive information; the raw CSV remains unpersisted under R8. | R8, R10, R17; PR 3 | Accepted |
+| 2026-07-16 | D12 | While GitHub Stacked PRs remains unavailable for this repository, preserve the local `gh stack` topology, push with `gh stack push`, and create draft chained PRs through GitHub's API with each PR targeting the branch immediately below it. Do not use `gh pr create`. | The user explicitly authorized local stacking plus ordinary chained PR publication so PR 4 can proceed without the private-preview GitHub Stack object. | PR publication workflow; PR 1–4 | Accepted |
 
 ## Open questions and discovered work
 
@@ -398,3 +399,4 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 3 | Started Expenses History shell, imported-month navigation, read APIs, and upload preview/commit UI on `codex/expenses-history-pr3-history-ui`, directly above PR 2. Confirmed the worktree was clean and the local stack topology was `main` → PR 1 → PR 2 before creating PR 3; GitHub PR objects were not yet published. | Read the complete living plan and repository instruction files; verified local branches and commits with `gh stack view`. | Inspect PR 2 contracts and the existing UI/API/test/seed conventions before implementing PR 3 only. |
 | 2026-07-16 | PR 3 | Completed the Expenses subnavigation, authenticated month-list/detail APIs and query hooks, imported-month navigation, read-only transaction table with secondary bank details, and preview/import/replacement UI. Recorded D11; no PR 4 editing/association/summary work, PR 5 overview work, or automatic matching was added. | 31 tests/84 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated real Wrangler local seed and exact data queries; unauthenticated browser/HTTP route checks; `git diff --check`; full PR 3 diff and boundary review. | Submit the stack with PR 3 targeting PR 2; PR 4 must resolve O2 before adding transaction mutations. |
 | 2026-07-16 | PR 3 | Stacked publication blocked after the verified PR 3 commit: `gh stack submit --auto` stopped because stacked PRs are not enabled for `vogelino/vogelibizz`. Confirmed administrator permission, enabled normal pull requests, a 404 from GitHub's internal stack endpoint, no existing GitHub PR objects, and no exposed CLI/API enablement setting. | Re-ran `gh stack view`; inspected repository permission and stack capability without using `gh pr create` or creating remote PRs. | Enable GitHub stacked PRs for the repository/account, then rerun `gh stack submit --auto` and record all three PR links and bases. Do not begin PR 4. |
+| 2026-07-16 | PR 3 | Publication blocker resolved through D12 after explicit user authorization. Pushed the intact local stack and created draft chained PRs through GitHub's API: PR 1 #2 targets `main`, PR 2 #3 targets PR 1, and PR 3 #4 targets PR 2. | `gh stack view --json`; `gh stack push`; GitHub PR metadata verified for all three heads, bases, links, draft state, and open state. | Commit the publication record on PR 3, then create PR 4 directly above it. |
