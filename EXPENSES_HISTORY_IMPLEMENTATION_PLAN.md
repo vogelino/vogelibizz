@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **PR 5 complete; PR 6 not started**
+Current effort: **PR 6 hardening, accessibility, performance, and release readiness**
 
 ## How to use and maintain this plan
 
@@ -299,8 +299,8 @@ Known limitations/follow-ups: No migration is required. An authenticated browser
 
 ### PR 6 — Hardening, accessibility, performance, and release readiness
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **In progress**
+Branch/PR: `codex/expenses-history-pr6-hardening`
 Depends on: PR 5
 Requirements: All, especially R9, R32, R34, R39
 
@@ -407,3 +407,4 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 5 | Started recurring-overview real averages, synthetic Other, and calculation-aware totals on `codex/expenses-history-pr5-recurring-overview`, directly above PR 4. Confirmed the worktree was clean, PRs 1–4 remained intact, all four GitHub draft PRs had the required chained bases, and the local stack topology was correct before creating PR 5. | Read the complete living plan and repository instructions; verified branch ancestry, GitHub PR metadata, and `gh stack view`. | Inspect PRs 1–4 contracts plus the complete existing recurring overview and tests, then implement PR 5 only without changing D13 or beginning PR 6 hardening. |
 | 2026-07-16 | PR 5 | Completed recurring-overview averages, configured-minus-real differences, the synthetic non-CRUD Other row, living-cost and observed summaries, deliberate Mixed filtering/chart behavior, and every required calculation invalidation. Added an authenticated target-currency summary query that reuses PR 1's calculation contract; no migration, D13 change, automatic matching, import/history redesign, or PR 6 hardening was added. | 44 tests/111 assertions; TypeScript; Biome; production build; clean schema generation; repeated local migration/seed plus exact aggregate query; unauthenticated browser/API auth checks; `git diff --check`; full PR 5 boundary/calculation/CRUD/invalidation review. | Commit and publish PR 5 through D12 with PR 4 as its base, record the draft PR link, and leave PR 6 unstarted. |
 | 2026-07-16 | PR 5 | Published draft PR #6 through D12 after `gh stack push`; PR 5 targets PR 4's `codex/expenses-history-pr4-transaction-review` branch. GitHub's private-preview Stack object remains unavailable, and `gh pr create` was not used. | Verified PR #6 is open and draft with the exact PR 5 head and PR 4 base; rechecked the five-branch local `gh stack view` topology. | PR 5 is ready for review. Leave PR 6 unstarted until review decisions are resolved. |
+| 2026-07-16 | PR 6 | Started hardening, accessibility, performance, documentation, regression, and release-readiness work on `codex/expenses-history-pr6-hardening`, directly above PR 5. Confirmed the worktree was clean, every local PR 1–5 head matched GitHub, all five PRs were open drafts with the required chained bases, and the local `gh stack` topology was intact before creating PR 6. | Read the complete living plan and repository instructions; verified branch ancestry, GitHub PR metadata, and `gh stack view`. | Audit the complete PR 1–5 implementation and resolve or explicitly defer every PR 6 limitation and acceptance item without changing D12, D13, or rollout non-goals. |
