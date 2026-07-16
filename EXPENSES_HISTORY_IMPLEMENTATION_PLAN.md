@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **PR 3 published and complete; begin PR 4**
+Current effort: **PR 4 complete; PR 5 not started**
 
 ## How to use and maintain this plan
 
@@ -45,20 +45,20 @@ The recurring-expenses overview will compare configured monthly costs with histo
 - [x] **R10** — Expenses History is organized by transaction month and booked date, not by a user-facing import object.
 - [x] **R11** — The latest imported month opens by default, with previous/next navigation and a month picker.
 - [x] **R12** — Each transaction retains immutable bank description and bank amount values.
-- [ ] **R13** — Each transaction also has an editable display description and effective amount, initially copied from the bank values. Editing either affects only that transaction.
-- [ ] **R14** — Effective amounts accept values greater than or equal to CHF 0 and drive all calculations. This is the manual mechanism for discounts, refunds, compensation, or exclusion.
-- [ ] **R15** — There is no separate ignored state. Every imported debit contributes through its effective amount.
-- [ ] **R16** — Transactions support independently editable Category and Type fields. Unmatched transactions initially display these as **Unclassified**.
+- [x] **R13** — Each transaction also has an editable display description and effective amount, initially copied from the bank values. Editing either affects only that transaction.
+- [x] **R14** — Effective amounts accept values greater than or equal to CHF 0 and drive all calculations. This is the manual mechanism for discounts, refunds, compensation, or exclusion.
+- [x] **R15** — There is no separate ignored state. Every imported debit contributes through its effective amount.
+- [x] **R16** — Transactions support independently editable Category and Type fields. Unmatched transactions initially display these as **Unclassified**.
 - [x] **R17** — The immutable bank values remain available as secondary transaction details for traceability.
 
 ### Recurring-expense association
 
-- [ ] **R18** — Association is manual only; there are no automatic suggestions or matching rules in this scope.
-- [ ] **R19** — A transaction can reference zero or one recurring expense. A recurring expense can be referenced by many transactions.
-- [ ] **R20** — An unmatched transaction belongs to Other expenses immediately.
-- [ ] **R21** — Associating a transaction copies the recurring expense's current Category and Type onto the transaction. Those copied historical values remain independently editable and do not track later recurring-expense edits.
-- [ ] **R22** — Users can create a recurring expense from an unmatched transaction. The form is prefilled with its editable description, effective CHF amount, Monthly billing frequency, Category, and Type; after creation, the originating transaction is associated atomically.
-- [ ] **R23** — Deleting a recurring expense is a true deletion. Its historical transactions remain and become unmatched, causing their effective amounts to move into Other expenses.
+- [x] **R18** — Association is manual only; there are no automatic suggestions or matching rules in this scope.
+- [x] **R19** — A transaction can reference zero or one recurring expense. A recurring expense can be referenced by many transactions.
+- [x] **R20** — An unmatched transaction belongs to Other expenses immediately.
+- [x] **R21** — Associating a transaction copies the recurring expense's current Category and Type onto the transaction. Those copied historical values remain independently editable and do not track later recurring-expense edits.
+- [x] **R22** — Users can create a recurring expense from an unmatched transaction. The form is prefilled with its editable description, effective CHF amount, Monthly billing frequency, Category, and Type; after creation, the originating transaction is associated atomically.
+- [x] **R23** — Deleting a recurring expense is a true deletion. Its historical transactions remain and become unmatched, causing their effective amounts to move into Other expenses.
 
 ### Averages, Other expenses, and totals
 
@@ -78,8 +78,8 @@ The recurring-expenses overview will compare configured monthly costs with histo
 - [x] **R34** — Existing recurring-expense create/edit routes and manually configured expense behavior continue to work.
 - [ ] **R35** — The recurring table preserves its existing columns and adds real monthly average and configured-versus-real difference. It also renders the synthetic Other row.
 - [ ] **R36** — The recurring page shows both the living-cost estimate and observed monthly average.
-- [ ] **R37** — Expenses History shows booked date, editable description, editable effective amount, recurring-expense association or Other, Category, Type, and access to original bank details.
-- [ ] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
+- [x] **R37** — Expenses History shows booked date, editable description, editable effective amount, recurring-expense association or Other, Category, Type, and access to original bank details.
+- [x] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
 - [x] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
 
 ### Development seed data
@@ -239,8 +239,8 @@ Known limitations/follow-ups: PR 3 intentionally keeps the history table read-on
 
 ### PR 4 — Transaction review, editing, and manual association
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr4-transaction-review`
 Depends on: PR 3
 Requirements: R13–R23, R37–R38
 
@@ -256,17 +256,17 @@ Scope:
 
 Acceptance checklist:
 
-- [ ] Bank description and amount cannot be edited through UI or API.
-- [ ] Effective amount accepts CHF 0 but rejects negative or invalid values.
-- [ ] Matching is manual and one transaction has at most one association.
-- [ ] Matching copies Category and Type once; later edits on either side remain independent.
-- [ ] Detaching or deleting an expense moves the transaction to Other without losing edits.
-- [ ] Creating a recurring expense from a row prefills agreed fields and associates only after successful creation.
-- [ ] Other-only filtering and monthly summaries react to edits without a full reload.
-- [ ] Mutation error and concurrent-update behavior is deliberate and tested.
+- [x] Bank description and amount cannot be edited through UI or API.
+- [x] Effective amount accepts CHF 0 but rejects negative or invalid values.
+- [x] Matching is manual and one transaction has at most one association.
+- [x] Matching copies Category and Type once; later edits on either side remain independent.
+- [x] Detaching or deleting an expense moves the transaction to Other without losing edits.
+- [x] Creating a recurring expense from a row prefills agreed fields and associates only after successful creation.
+- [x] Other-only filtering and monthly summaries react to edits without a full reload.
+- [x] Mutation error and concurrent-update behavior is deliberate and tested.
 
-Verification performed: _TBD_
-Known limitations/follow-ups: _TBD_
+Verification performed: `bun test` (38 tests, 98 assertions, including strict immutable-field rejection, CHF 0/invalid amounts, 409/404 mutation behavior, snapshot independence, detachment preservation, deletion `SET NULL`, and atomic conflict-without-orphan coverage); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (client and SSR production bundles); `bun run db:generate` (no schema changes); `bun run db:init:local` followed by a second `bun run db:seed:local` and exact Wrangler queries (one `2026-06` month, four transactions, two associations); `git diff --check`; unauthenticated HTTP checks (both mutation endpoints return 401); desktop and 390×844 browser checks (history route preserves administrator redirect, no console warnings/errors); full PR 4 diff review against PR 3 for stack scope, replacement/import preservation, immutable-bank-field protection, sensitive-data exposure, accessibility, concurrency, atomic creation/association, query invalidation, expense deletion, and PR 5 scope exclusion.
+Known limitations/follow-ups: No migration is required. An authenticated browser session was unavailable, so the seeded inline edit, CHF 0, classification, association/detachment, recurring-expense creation, Other-only filter, summary refresh, error toast, and keyboard interactions were verified through compiled UI contracts, API/database tests, and responsive code review rather than an authenticated end-to-end session. The production build retains the existing mixed static/dynamic import, large-chunk, and React PDF/fontkit warnings. GitHub's native Stack object remains unavailable; D12 applies to PR 4 publication. PR 5 must consume the established invalidation behavior but must not reinterpret D13 or introduce automatic matching.
 
 ### PR 5 — Real averages and Other on the recurring overview
 
@@ -334,8 +334,8 @@ Update the Status and Verified in columns as PRs progress.
 | Requirement group | Primary PR(s) | Status | Verified in |
 | --- | --- | --- | --- |
 | R1–R9: CSV import | PR 2, PR 3 | Done | PR 2 parser, preview/commit contracts, authenticated API, atomic replacement, validation, raw-data, and rollback tests; PR 3 preview, warning, error, confirmation, refresh, and empty-history presentation |
-| R10–R17: month and transaction history | PR 1, PR 3, PR 4 | In progress | PR 1 schema, migration, validation, and constraint tests; PR 3 authenticated month reads, imported-month navigation, read-only table, and bank-value traceability; editing/classification remains PR 4 |
-| R18–R23: manual association | PR 1, PR 4 | In progress | PR 1 nullable association and `ON DELETE SET NULL` tests; mutation behavior remains in PR 4 |
+| R10–R17: month and transaction history | PR 1, PR 3, PR 4 | Done | PR 1 schema, migration, validation, and constraints; PR 3 reads/navigation/traceability; PR 4 strict editable-field mutations, CHF 0 validation, classification UI/API, concurrency, and reactive summaries |
+| R18–R23: manual association | PR 1, PR 4 | Done | PR 1 nullable association and `ON DELETE SET NULL`; PR 4 manual search, one-association mutation contract, snapshot copying, detachment/deletion preservation, and atomic create-associate coverage |
 | R24–R32: calculations and Other | PR 1, PR 5 | In progress | PR 1 domain calculation tests; query and presentation integration remains in PR 5 |
 | R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | In progress | PR 3 subnavigation, history route, read-only transaction presentation, and replacement modal; transaction review and recurring overview integration remain PR 4–5 |
 | R40–R42: local development history seed | PR 2, PR 3 | Done | PR 2 in-memory repeated-seed regression and repeated Wrangler local seed verification |
@@ -373,6 +373,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D10 | Treat a zero `Credit/Debit Amount` as an actionable validation error rather than a debit or skipped credit. Preview and commit both parse the source independently, and commit persists only the sanitized basename as source metadata. | Zero is neither a negative debit nor a positive credit under R6; reparsing avoids retaining server-side import drafts or raw CSV while keeping commit authoritative. | R1, R6, R8–R9; PR 2–3 | Accepted |
 | 2026-07-16 | D11 | Keep source filenames out of the PR 3 read APIs and UI; expose only month metadata plus the parsed immutable and effective transaction values needed for history review. | The filename is not required for transaction-month navigation or traceability and may itself contain sensitive information; the raw CSV remains unpersisted under R8. | R8, R10, R17; PR 3 | Accepted |
 | 2026-07-16 | D12 | While GitHub Stacked PRs remains unavailable for this repository, preserve the local `gh stack` topology, push with `gh stack push`, and create draft chained PRs through GitHub's API with each PR targeting the branch immediately below it. Do not use `gh pr create`. | The user explicitly authorized local stacking plus ordinary chained PR publication so PR 4 can proceed without the private-preview GitHub Stack object. | PR publication workflow; PR 1–4 | Accepted |
+| 2026-07-16 | D13 | Transaction mutations use optimistic concurrency with the read contract's opaque `lastModified` token. Every mutation must submit the token it read; the server updates only when it still matches, returns the updated transaction and a new token on success, returns 409 with a safe reload instruction on mismatch, 404 when the transaction or selected recurring expense no longer exists, and 400 for invalid or immutable fields. Clients invalidate/refetch affected history queries after success or conflict. Atomic create-and-associate first claims the token and conditionally creates/associates within one D1 batch, so a conflict cannot leave an unassociated recurring expense. | Prevent silent lost updates during inline review while keeping the API explicit and testable. | O2; R13–R23, R37–R38; PR 4 | Accepted |
 
 ## Open questions and discovered work
 
@@ -381,7 +382,7 @@ Record implementation discoveries here immediately. Each entry must be resolved,
 | ID | Discovered in | Question or work | Owner | Resolution/status |
 | --- | --- | --- | --- | --- |
 | O1 | Planning | Confirm whether nullable Category/Type rendered as Unclassified needs new enum values or presentation-only labels. | PR 1 | Resolved: keep database/domain values nullable and treat Unclassified as a presentation-only label; no enum expansion. |
-| O2 | Planning | Select the API concurrency strategy for inline transaction edits, such as last-write-wins or `last_modified` conflict detection. | PR 4 | Planned decision |
+| O2 | Planning | Select the API concurrency strategy for inline transaction edits, such as last-write-wins or `last_modified` conflict detection. | PR 4 | Resolved by D13: optimistic `lastModified` preconditions, 409 conflicts, refetch-on-conflict, and atomic token-claim create/associate tests. |
 | O3 | PR 2 | The existing full-seed generator randomizes unrelated recurring seed rows whenever it runs. | Existing tooling | Resolved for PR 2: generator and committed SQL both implement the history contract, but unrelated generated recurring rows were kept out of this diff. Redesigning deterministic recurring seed generation is outside expense-history scope. |
 
 ## Progress log
@@ -400,3 +401,5 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 3 | Completed the Expenses subnavigation, authenticated month-list/detail APIs and query hooks, imported-month navigation, read-only transaction table with secondary bank details, and preview/import/replacement UI. Recorded D11; no PR 4 editing/association/summary work, PR 5 overview work, or automatic matching was added. | 31 tests/84 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated real Wrangler local seed and exact data queries; unauthenticated browser/HTTP route checks; `git diff --check`; full PR 3 diff and boundary review. | Submit the stack with PR 3 targeting PR 2; PR 4 must resolve O2 before adding transaction mutations. |
 | 2026-07-16 | PR 3 | Stacked publication blocked after the verified PR 3 commit: `gh stack submit --auto` stopped because stacked PRs are not enabled for `vogelino/vogelibizz`. Confirmed administrator permission, enabled normal pull requests, a 404 from GitHub's internal stack endpoint, no existing GitHub PR objects, and no exposed CLI/API enablement setting. | Re-ran `gh stack view`; inspected repository permission and stack capability without using `gh pr create` or creating remote PRs. | Enable GitHub stacked PRs for the repository/account, then rerun `gh stack submit --auto` and record all three PR links and bases. Do not begin PR 4. |
 | 2026-07-16 | PR 3 | Publication blocker resolved through D12 after explicit user authorization. Pushed the intact local stack and created draft chained PRs through GitHub's API: PR 1 #2 targets `main`, PR 2 #3 targets PR 1, and PR 3 #4 targets PR 2. | `gh stack view --json`; `gh stack push`; GitHub PR metadata verified for all three heads, bases, links, draft state, and open state. | Commit the publication record on PR 3, then create PR 4 directly above it. |
+| 2026-07-16 | PR 4 | Started transaction review, editing, and manual association on `codex/expenses-history-pr4-transaction-review`, directly above the updated PR 3 commit. Resolved O2 through D13 before mutation implementation. | Clean tree; complete plan reread; verified local/GitHub PR 1–3 chain; reviewed PR 1 schema/FKs, PR 2 replacement/seed behavior, PR 3 reads/upload invalidation/history UI/routes, existing expense CRUD/forms/query hooks, and relevant tests. | Implement PR 4 mutation contracts, atomic create/associate, reactive review UI, and focused regressions only. |
+| 2026-07-16 | PR 4 | Completed transaction review/editing and manual association only. Added strict optimistic mutations, immutable bank-field protection, CHF 0 support, classification edits, manual search/detach, one-time classification snapshots, atomic Monthly/CHF recurring creation, Other filtering, monthly total/matched/Other summaries, and history invalidation after transaction mutations and recurring-expense deletion. No PR 5 averages/synthetic row or automatic matching was added. | 38 tests/98 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated local migration/seed and exact queries; unauthenticated endpoint/browser auth checks; desktop/mobile console review; `git diff --check`; full PR 4 boundary/security/accessibility/concurrency/atomicity/invalidation review. | Commit and publish PR 4 through D12, verify its base is PR 3, record the link, and do not begin PR 5. |

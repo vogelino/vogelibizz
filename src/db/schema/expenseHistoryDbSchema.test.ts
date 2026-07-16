@@ -173,6 +173,99 @@ describe("expense history migration constraints", () => {
 		}
 	});
 
+	test("association snapshots classifications once and detachment preserves transaction edits", () => {
+		const database = createMigratedDatabase();
+		try {
+			const month = insertMonth(database);
+			insertTransaction(database, {
+				expenseMonthId: month.id,
+				expenseId: null,
+			});
+			database
+				.query(`UPDATE expense_transactions SET expense_id = 42,
+				category = (SELECT category FROM expenses WHERE id = 42),
+				type = (SELECT type FROM expenses WHERE id = 42),
+				description = 'Historical edit', amount = 0 WHERE expense_month_id = ?`)
+				.run(month.id);
+			database
+				.query(
+					"UPDATE expenses SET category = 'Home', type = 'Freelance' WHERE id = 42",
+				)
+				.run();
+			database
+				.query(
+					"UPDATE expense_transactions SET expense_id = NULL WHERE expense_month_id = ?",
+				)
+				.run(month.id);
+			expect(
+				database
+					.query(
+						"SELECT expense_id, category, type, description, amount FROM expense_transactions",
+					)
+					.get(),
+			).toEqual({
+				expense_id: null,
+				category: "Software",
+				type: "Personal",
+				description: "Historical edit",
+				amount: 0,
+			});
+		} finally {
+			database.close();
+		}
+	});
+
+	test("atomic create-and-associate token claim creates nothing after a concurrent update", () => {
+		const database = createMigratedDatabase();
+		try {
+			const month = insertMonth(database);
+			insertTransaction(database, {
+				expenseMonthId: month.id,
+				expenseId: null,
+			});
+			database
+				.query(
+					"UPDATE expense_transactions SET last_modified = 'concurrent' WHERE expense_month_id = ?",
+				)
+				.run(month.id);
+			database.exec("BEGIN");
+			try {
+				database
+					.query(
+						"UPDATE expense_transactions SET last_modified = 'claimed' WHERE expense_month_id = ? AND last_modified = ? AND expense_id IS NULL",
+					)
+					.run(month.id, timestamp);
+				database
+					.query(`INSERT INTO expenses (name, category, type, rate, original_price, original_currency, created_at, last_modified)
+					SELECT 'Conditional expense', 'Software', 'Personal', 'Monthly', 0, 'CHF', ?, ?
+					WHERE EXISTS (SELECT 1 FROM expense_transactions WHERE expense_month_id = ? AND last_modified = 'claimed')`)
+					.run(timestamp, timestamp, month.id);
+				database
+					.query(`UPDATE expense_transactions SET expense_id = (SELECT id FROM expenses WHERE name = 'Conditional expense'), last_modified = 'final'
+					WHERE expense_month_id = ? AND last_modified = 'claimed'`)
+					.run(month.id);
+				database.exec("COMMIT");
+			} catch (error) {
+				database.exec("ROLLBACK");
+				throw error;
+			}
+			expect(
+				database
+					.query(
+						"SELECT count(*) AS count FROM expenses WHERE name = 'Conditional expense'",
+					)
+					.get(),
+			).toEqual({ count: 0 });
+			expect(
+				database
+					.query("SELECT expense_id, last_modified FROM expense_transactions")
+					.get(),
+			).toEqual({ expense_id: null, last_modified: "concurrent" });
+		} finally {
+			database.close();
+		}
+	});
+
 	test("enforces non-negative effective amounts and stable source order", () => {
 		const database = createMigratedDatabase();
 		try {

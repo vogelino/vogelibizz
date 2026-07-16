@@ -120,6 +120,9 @@ function createMutationHook<DataType, SchemaData>({
 				queryClient.invalidateQueries({
 					queryKey: resourceQueries.list().queryKey,
 				});
+				if (resourceName === "expenses" && action === "delete") {
+					queryClient.invalidateQueries({ queryKey: ["expenseHistory"] });
+				}
 				const parsedVariables = inputZodSchema.safeParse(variables);
 				if (parsedVariables.success) {
 					const candidates = Array.isArray(parsedVariables.data)
