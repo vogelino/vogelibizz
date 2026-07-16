@@ -10,6 +10,7 @@
 		"dev": "vite dev",
 		"build": "bun run check && vite build",
 		"preview": "vite preview",
+		"test": "bun test",
 		"cf-typegen": "wrangler types",
 		"deploy": "bun run build && wrangler deploy",
 		"check": "tsc --noEmit && bunx @biomejs/biome check --write src",
