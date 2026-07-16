@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **None — PR 1 complete; PR 2 not started**
+Current effort: **None — PR 2 complete; PR 3 not started**
 
 ## How to use and maintain this plan
 
@@ -30,15 +30,15 @@ The recurring-expenses overview will compare configured monthly costs with histo
 
 ### Import and source data
 
-- [ ] **R1** — An import covers exactly one calendar month, inferred from `Booked At`.
-- [ ] **R2** — A CSV containing transactions from more than one month is rejected.
-- [ ] **R3** — There is at most one active dataset per calendar month. Re-importing that month requires explicit confirmation and replaces all of its transactions, edits, and associations atomically. Imports are never merged.
-- [ ] **R4** — CSV files use the attached bank format with semicolon-delimited columns: `IBAN`, `Booked At`, `Text`, `Credit/Debit Amount`, `Balance`, and `Valuta Date`.
-- [ ] **R5** — Rows with only `Text` are continuation lines and are appended to the preceding transaction description. Orphan continuation rows are rejected.
-- [ ] **R6** — Only negative debit rows are imported. Positive rows are skipped, and the user sees a warning and skipped-row count before committing the import.
-- [ ] **R7** — Imported amounts are expressed in CHF. No multi-currency bank-import support is required in this scope.
-- [ ] **R8** — The original CSV file is not retained; parsed transaction data is sufficient.
-- [ ] **R9** — The import reports actionable validation errors for missing headers, invalid dates or amounts, empty usable content, continuation errors, and multi-month content.
+- [x] **R1** — An import covers exactly one calendar month, inferred from `Booked At`.
+- [x] **R2** — A CSV containing transactions from more than one month is rejected.
+- [x] **R3** — There is at most one active dataset per calendar month. Re-importing that month requires explicit confirmation and replaces all of its transactions, edits, and associations atomically. Imports are never merged.
+- [x] **R4** — CSV files use the attached bank format with semicolon-delimited columns: `IBAN`, `Booked At`, `Text`, `Credit/Debit Amount`, `Balance`, and `Valuta Date`.
+- [x] **R5** — Rows with only `Text` are continuation lines and are appended to the preceding transaction description. Orphan continuation rows are rejected.
+- [x] **R6** — Only negative debit rows are imported. Positive rows are skipped, and the user sees a warning and skipped-row count before committing the import.
+- [x] **R7** — Imported amounts are expressed in CHF. No multi-currency bank-import support is required in this scope.
+- [x] **R8** — The original CSV file is not retained; parsed transaction data is sufficient.
+- [x] **R9** — The import reports actionable validation errors for missing headers, invalid dates or amounts, empty usable content, continuation errors, and multi-month content.
 
 ### Imported months and transactions
 
@@ -84,9 +84,9 @@ The recurring-expenses overview will compare configured monthly costs with histo
 
 ### Development seed data
 
-- [ ] **R40** — The local/full development seed creates one synthetic imported expense dataset for the calendar month immediately preceding the date when the seed is executed.
-- [ ] **R41** — The local/full development seed leaves the current calendar month without an imported dataset so the current-month CSV import flow can be exercised normally.
-- [ ] **R42** — Seeded history uses synthetic descriptions and amounts only, includes representative transactions and valid recurring-expense associations, and contains no personal bank data.
+- [x] **R40** — The local/full development seed creates one synthetic imported expense dataset for the calendar month immediately preceding the date when the seed is executed.
+- [x] **R41** — The local/full development seed leaves the current calendar month without an imported dataset so the current-month CSV import flow can be exercised normally.
+- [x] **R42** — Seeded history uses synthetic descriptions and amounts only, includes representative transactions and valid recurring-expense associations, and contains no personal bank data.
 
 ## Calculation contract
 
@@ -175,8 +175,8 @@ Known limitations/follow-ups: PR 1 intentionally exposes no history/import APIs 
 
 ### PR 2 — Bank CSV parser and atomic month import API
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr2-import`
 Depends on: PR 1
 Requirements: R1–R9, R12–R15, R39
 
@@ -193,20 +193,20 @@ Scope:
 
 Acceptance checklist:
 
-- [ ] The supplied CSV format parses correctly, including continuation lines.
-- [ ] Positive rows are skipped and reported before commit.
-- [ ] Multi-month and malformed files are rejected with actionable errors.
-- [ ] A new month imports without replacement acknowledgement.
-- [ ] An existing month cannot change without explicit replacement acknowledgement.
-- [ ] Confirmed replacement deletes the previous month's edits and associations and commits the new rows atomically.
-- [ ] The raw CSV is not persisted or logged.
-- [ ] Parser and API tests cover success, warnings, validation failures, and replacement rollback.
-- [ ] `db:init:local` and repeated `db:seed:local` runs produce exactly one seeded previous month with valid synthetic transactions and associations.
-- [ ] The current calendar month remains absent after local seeding and can be imported through the normal CSV workflow without replacement confirmation.
-- [ ] Neither generated seed SQL nor parser fixtures contain personal bank data.
+- [x] The supplied CSV format parses correctly, including continuation lines.
+- [x] Positive rows are skipped and reported before commit.
+- [x] Multi-month and malformed files are rejected with actionable errors.
+- [x] A new month imports without replacement acknowledgement.
+- [x] An existing month cannot change without explicit replacement acknowledgement.
+- [x] Confirmed replacement deletes the previous month's edits and associations and commits the new rows atomically.
+- [x] The raw CSV is not persisted or logged.
+- [x] Parser and API tests cover success, warnings, validation failures, and replacement rollback.
+- [x] `db:init:local` and repeated `db:seed:local` runs produce exactly one seeded previous month with valid synthetic transactions and associations.
+- [x] The current calendar month remains absent after local seeding and can be imported through the normal CSV workflow without replacement confirmation.
+- [x] Neither generated seed SQL nor parser fixtures contain personal bank data.
 
-Verification performed: _TBD_
-Known limitations/follow-ups: _TBD_
+Verification performed: `bun test` (28 tests, 77 assertions, including all PR 1 database/calculation tests); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (TypeScript, Biome, client and SSR production bundles); `bun run db:generate` (no schema changes); `bun run db:init:local` followed by a second `bun run db:seed:local` and Wrangler queries (exactly one `2026-06` month for the execution date, four transactions, current month `2026-07` absent); `bun run db:seed:generate` to verify the generator emits the revised history contract, followed by removal of unrelated randomized recurring-seed churn from the committed SQL; `git diff --check`; focused diff and sensitive-data/logging review.
+Known limitations/follow-ups: PR 2 intentionally adds no upload/history UI, read API, transaction editing, association UI, or automatic matching. PR 3 must call preview before commit and present `replacementRequired`, warnings, and the replacement consequences; server commit independently reparses and enforces acknowledgement. Supported dates are `DD.MM.YYYY` and ISO `YYYY-MM-DD`; CHF amounts accept dot or comma decimals and apostrophe/space thousands separators. Zero amounts are rejected per D10. The existing full-seed generator randomizes unrelated recurring seed rows on each generation; PR 2 did not broaden scope to redesign it and kept those unrelated rows unchanged in committed SQL. The successful build retains existing mixed-import, bundle-size, and React PDF/fontkit warnings; none originates in PR 2.
 
 ### PR 3 — Expenses History shell, month navigation, and upload flow
 
@@ -333,12 +333,12 @@ Update the Status and Verified in columns as PRs progress.
 
 | Requirement group | Primary PR(s) | Status | Verified in |
 | --- | --- | --- | --- |
-| R1–R9: CSV import | PR 2, PR 3 | Planned | — |
+| R1–R9: CSV import | PR 2, PR 3 | In progress | PR 2 parser, preview/commit contracts, authenticated API, atomic replacement, validation, raw-data, and rollback tests; PR 3 presentation remains |
 | R10–R17: month and transaction history | PR 1, PR 3, PR 4 | In progress | PR 1 schema, migration, validation, and constraint tests; UI/API behavior remains in PR 3–4 |
 | R18–R23: manual association | PR 1, PR 4 | In progress | PR 1 nullable association and `ON DELETE SET NULL` tests; mutation behavior remains in PR 4 |
 | R24–R32: calculations and Other | PR 1, PR 5 | In progress | PR 1 domain calculation tests; query and presentation integration remains in PR 5 |
 | R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | Planned | — |
-| R40–R42: local development history seed | PR 2, PR 3 | Planned | — |
+| R40–R42: local development history seed | PR 2, PR 3 | Done | PR 2 in-memory repeated-seed regression and repeated Wrangler local seed verification |
 | Cross-cutting hardening | PR 6 | Planned | — |
 
 ## Non-goals for this rollout
@@ -370,6 +370,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D7 | With no imported months, recurring real averages, Other, living-cost estimate, and observed monthly average are `null`; the configured recurring total remains separately available. | Every composite actual value depends on the unavailable Other average, and `null` prevents a misleading zero or configured-only living-cost estimate. | R29, R32; PR 1, 5 | Accepted |
 | 2026-07-16 | D8 | Persist bank dates as ISO `YYYY-MM-DD` calendar dates and require source order to be unique within each imported month. | Normalized dates support month/date organization, while stable unique order preserves deterministic source ordering and catches duplicate rows during import construction. | R10, R17; PR 1–3 | Accepted |
 | 2026-07-16 | D9 | Seed synthetic history only through the local/full seed: create the immediately previous calendar month dynamically and reserve the current month for CSV import. Do not add imported history to the remote seed. | Development starts with history available for review while still exercising the primary current-month import workflow; dynamic dates prevent committed seed data from becoming stale. | R40–R42; PR 2–3 | Accepted |
+| 2026-07-16 | D10 | Treat a zero `Credit/Debit Amount` as an actionable validation error rather than a debit or skipped credit. Preview and commit both parse the source independently, and commit persists only the sanitized basename as source metadata. | Zero is neither a negative debit nor a positive credit under R6; reparsing avoids retaining server-side import drafts or raw CSV while keeping commit authoritative. | R1, R6, R8–R9; PR 2–3 | Accepted |
 
 ## Open questions and discovered work
 
@@ -379,6 +380,7 @@ Record implementation discoveries here immediately. Each entry must be resolved,
 | --- | --- | --- | --- | --- |
 | O1 | Planning | Confirm whether nullable Category/Type rendered as Unclassified needs new enum values or presentation-only labels. | PR 1 | Resolved: keep database/domain values nullable and treat Unclassified as a presentation-only label; no enum expansion. |
 | O2 | Planning | Select the API concurrency strategy for inline transaction edits, such as last-write-wins or `last_modified` conflict detection. | PR 4 | Planned decision |
+| O3 | PR 2 | The existing full-seed generator randomizes unrelated recurring seed rows whenever it runs. | Existing tooling | Resolved for PR 2: generator and committed SQL both implement the history contract, but unrelated generated recurring rows were kept out of this diff. Redesigning deterministic recurring seed generation is outside expense-history scope. |
 
 ## Progress log
 
@@ -390,3 +392,5 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 1 | Started persistence and calculation foundations on `codex/expenses-history-pr1-foundations`; confirmed D1 migrations live under `src/db/migrations/d1` and resolved O1 as presentation-only Unclassified. | Read the full plan and reviewed repository instructions, working tree, expense schema/migrations/APIs/calculations, and existing test setup. | Add schemas, migration, calculation domain contract, and focused tests. |
 | 2026-07-16 | PR 1 | Completed persistence and calculation foundations without adding later-PR APIs or UI. Added imported-month/transaction persistence, validation and relations; explicit cascade/`SET NULL` behavior; JSON-safe calculation result types; and database/calculation regressions. Recorded D7–D8 and kept O1 presentation-only. | `bun run test` (11 tests/24 assertions); TypeScript; Biome; production build; populated local D1 migration; clean migration regeneration; `git diff --check`. | Review and merge PR 1; begin PR 2 only as a separate effort. |
 | 2026-07-16 | Planning change | Added R40–R42 and D9: local/full seeding must dynamically create synthetic history for the previous calendar month while leaving the current month available for CSV import; remote seeding remains history-free. Assigned implementation and seed verification to PR 2, with UI consumption covered by PR 3. | Reviewed the configured seed paths (`db:seed:local` → `seed-full.sql`, separate remote `seed.sql`) and updated PR 2 scope, acceptance, and traceability. | Implement the revised seed contract when PR 2 begins. |
+| 2026-07-16 | PR 2 | Started bank CSV parser, preview/atomic import API, and revised local seed work on `codex/expenses-history-pr2-import`. Adopted PR 1 into a `main`-based `gh stack` stack and created PR 2 directly above it. | Read the complete living plan; confirmed the clean PR 1 tree and reviewed its commits/diff, history schema/migration/tests, seed paths, API conventions, and stack topology. | Implement parser/contracts, atomic replacement, local previous-month seed, and focused regressions without beginning PR 3. |
+| 2026-07-16 | PR 2 | Completed server-side CSV preview/commit APIs, actionable validation, credit warnings, D1-batch atomic replacement, raw-source protections, synthetic fixtures, and idempotent previous-month local history seeding. Recorded D10 and O3; no migration, UI, matching, or PR 3 work was added. | 28 tests/77 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated real Wrangler local seed with exact previous/current-month queries; `git diff --check`; full PR 2 diff review. | Submit the stacked PR above PR 1; do not begin PR 3 until review decisions are resolved. |

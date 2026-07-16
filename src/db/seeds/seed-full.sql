@@ -1,4 +1,6 @@
 PRAGMA foreign_keys=OFF;
+DELETE FROM expense_transactions;
+DELETE FROM expense_months;
 DELETE FROM projects_to_clients;
 DELETE FROM projects_to_invoices;
 DELETE FROM projects_to_quotes;
@@ -133,4 +135,58 @@ INSERT INTO projects_to_invoices (project_id, invoice_id) VALUES (3, 4);
 INSERT INTO projects_to_invoices (project_id, invoice_id) VALUES (3, 5);
 INSERT INTO projects_to_quotes (project_id, quote_id) VALUES (3, 4);
 INSERT INTO projects_to_quotes (project_id, quote_id) VALUES (3, 5);
+INSERT INTO expense_months (
+	month, source_filename, imported_at, last_modified,
+	imported_debit_count, skipped_credit_count
+) VALUES (
+	strftime('%Y-%m', 'now', 'start of month', '-1 month'),
+	'synthetic-previous-month.csv',
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	4,
+	1
+);
+INSERT INTO expense_transactions (
+	expense_month_id, expense_id, booked_at, value_date,
+	original_description, description, original_amount, amount,
+	category, type, source_order, created_at, last_modified
+)
+SELECT id, 15, date('now', 'start of month', '-1 month', '+2 days'),
+	date('now', 'start of month', '-1 month', '+2 days'),
+	'Synthetic monthly workspace', 'Synthetic monthly workspace', 84.50, 84.50,
+	'Home', 'Personal', 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+FROM expense_months WHERE month = strftime('%Y-%m', 'now', 'start of month', '-1 month');
+INSERT INTO expense_transactions (
+	expense_month_id, expense_id, booked_at, value_date,
+	original_description, description, original_amount, amount,
+	category, type, source_order, created_at, last_modified
+)
+SELECT id, 18, date('now', 'start of month', '-1 month', '+8 days'),
+	date('now', 'start of month', '-1 month', '+8 days'),
+	'Synthetic software subscription', 'Synthetic software subscription', 29.90, 29.90,
+	'Hobby', 'Freelance', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+FROM expense_months WHERE month = strftime('%Y-%m', 'now', 'start of month', '-1 month');
+INSERT INTO expense_transactions (
+	expense_month_id, expense_id, booked_at, value_date,
+	original_description, description, original_amount, amount,
+	category, type, source_order, created_at, last_modified
+)
+SELECT id, NULL, date('now', 'start of month', '-1 month', '+14 days'),
+	date('now', 'start of month', '-1 month', '+15 days'),
+	'Synthetic neighborhood market', 'Synthetic neighborhood market', 63.25, 63.25,
+	NULL, NULL, 2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+FROM expense_months WHERE month = strftime('%Y-%m', 'now', 'start of month', '-1 month');
+INSERT INTO expense_transactions (
+	expense_month_id, expense_id, booked_at, value_date,
+	original_description, description, original_amount, amount,
+	category, type, source_order, created_at, last_modified
+)
+SELECT id, NULL, date('now', 'start of month', '-1 month', '+20 days'),
+	NULL, 'Synthetic train ticket', 'Synthetic train ticket', 18.40, 18.40,
+	'Transport', 'Personal', 3, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+FROM expense_months WHERE month = strftime('%Y-%m', 'now', 'start of month', '-1 month');
 PRAGMA foreign_keys=ON;
