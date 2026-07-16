@@ -82,6 +82,12 @@ The recurring-expenses overview will compare configured monthly costs with histo
 - [ ] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
 - [ ] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
 
+### Development seed data
+
+- [ ] **R40** — The local/full development seed creates one synthetic imported expense dataset for the calendar month immediately preceding the date when the seed is executed.
+- [ ] **R41** — The local/full development seed leaves the current calendar month without an imported dataset so the current-month CSV import flow can be exercised normally.
+- [ ] **R42** — Seeded history uses synthetic descriptions and amounts only, includes representative transactions and valid recurring-expense associations, and contains no personal bank data.
+
 ## Calculation contract
 
 Let `M` be the count of imported calendar months.
@@ -183,6 +189,7 @@ Scope:
 - Add atomic commit/replace behavior with explicit acknowledgement flags.
 - Ensure an unconfirmed or failed replacement cannot modify the existing month.
 - Add parser fixtures derived from anonymized/synthetic data rather than committing personal bank data.
+- Extend the local/full seed path (`db:seed:local` / `seed-full.sql`) with a synthetic previous-calendar-month dataset calculated at seed execution time. Keep the current calendar month unseeded for CSV import testing; do not add history data to the remote seed.
 
 Acceptance checklist:
 
@@ -194,6 +201,9 @@ Acceptance checklist:
 - [ ] Confirmed replacement deletes the previous month's edits and associations and commits the new rows atomically.
 - [ ] The raw CSV is not persisted or logged.
 - [ ] Parser and API tests cover success, warnings, validation failures, and replacement rollback.
+- [ ] `db:init:local` and repeated `db:seed:local` runs produce exactly one seeded previous month with valid synthetic transactions and associations.
+- [ ] The current calendar month remains absent after local seeding and can be imported through the normal CSV workflow without replacement confirmation.
+- [ ] Neither generated seed SQL nor parser fixtures contain personal bank data.
 
 Verification performed: _TBD_
 Known limitations/follow-ups: _TBD_
@@ -328,6 +338,7 @@ Update the Status and Verified in columns as PRs progress.
 | R18–R23: manual association | PR 1, PR 4 | In progress | PR 1 nullable association and `ON DELETE SET NULL` tests; mutation behavior remains in PR 4 |
 | R24–R32: calculations and Other | PR 1, PR 5 | In progress | PR 1 domain calculation tests; query and presentation integration remains in PR 5 |
 | R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | Planned | — |
+| R40–R42: local development history seed | PR 2, PR 3 | Planned | — |
 | Cross-cutting hardening | PR 6 | Planned | — |
 
 ## Non-goals for this rollout
@@ -358,6 +369,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D6 | Deleting a recurring expense detaches rather than deletes its transactions. | Historical bank data remains; allocation moves into Other. | R23, R31; PR 1, 4, 5 | Accepted |
 | 2026-07-16 | D7 | With no imported months, recurring real averages, Other, living-cost estimate, and observed monthly average are `null`; the configured recurring total remains separately available. | Every composite actual value depends on the unavailable Other average, and `null` prevents a misleading zero or configured-only living-cost estimate. | R29, R32; PR 1, 5 | Accepted |
 | 2026-07-16 | D8 | Persist bank dates as ISO `YYYY-MM-DD` calendar dates and require source order to be unique within each imported month. | Normalized dates support month/date organization, while stable unique order preserves deterministic source ordering and catches duplicate rows during import construction. | R10, R17; PR 1–3 | Accepted |
+| 2026-07-16 | D9 | Seed synthetic history only through the local/full seed: create the immediately previous calendar month dynamically and reserve the current month for CSV import. Do not add imported history to the remote seed. | Development starts with history available for review while still exercising the primary current-month import workflow; dynamic dates prevent committed seed data from becoming stale. | R40–R42; PR 2–3 | Accepted |
 
 ## Open questions and discovered work
 
@@ -377,3 +389,4 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | Planning | Initial multi-PR implementation plan created from the agreed requirements. | Repository structure and current expenses flow reviewed. | Begin PR 1 after approval. |
 | 2026-07-16 | PR 1 | Started persistence and calculation foundations on `codex/expenses-history-pr1-foundations`; confirmed D1 migrations live under `src/db/migrations/d1` and resolved O1 as presentation-only Unclassified. | Read the full plan and reviewed repository instructions, working tree, expense schema/migrations/APIs/calculations, and existing test setup. | Add schemas, migration, calculation domain contract, and focused tests. |
 | 2026-07-16 | PR 1 | Completed persistence and calculation foundations without adding later-PR APIs or UI. Added imported-month/transaction persistence, validation and relations; explicit cascade/`SET NULL` behavior; JSON-safe calculation result types; and database/calculation regressions. Recorded D7–D8 and kept O1 presentation-only. | `bun run test` (11 tests/24 assertions); TypeScript; Biome; production build; populated local D1 migration; clean migration regeneration; `git diff --check`. | Review and merge PR 1; begin PR 2 only as a separate effort. |
+| 2026-07-16 | Planning change | Added R40–R42 and D9: local/full seeding must dynamically create synthetic history for the previous calendar month while leaving the current month available for CSV import; remote seeding remains history-free. Assigned implementation and seed verification to PR 2, with UI consumption covered by PR 3. | Reviewed the configured seed paths (`db:seed:local` → `seed-full.sql`, separate remote `seed.sql`) and updated PR 2 scope, acceptance, and traceability. | Implement the revised seed contract when PR 2 begins. |
