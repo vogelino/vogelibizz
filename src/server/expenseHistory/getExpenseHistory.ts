@@ -44,6 +44,7 @@ export async function getExpenseHistoryMonth(
 			amount: expenseTransactions.amount,
 			originalDescription: expenseTransactions.originalDescription,
 			originalAmount: expenseTransactions.originalAmount,
+			lastModified: expenseTransactions.last_modified,
 			category: expenseTransactions.category,
 			type: expenseTransactions.type,
 			expenseId: expenses.id,
@@ -61,14 +62,30 @@ export async function getExpenseHistoryMonth(
 			asc(expenseTransactions.sourceOrder),
 		);
 
-	return {
-		month: monthRow,
-		transactions: rows.map(({ expenseId, expenseName, ...transaction }) => ({
+	const transactions = rows.map(
+		({ expenseId, expenseName, ...transaction }) => ({
 			...transaction,
 			expense:
 				expenseId !== null && expenseName !== null
 					? { id: expenseId, name: expenseName }
 					: null,
-		})),
+		}),
+	);
+	const total = transactions.reduce(
+		(sum, transaction) => sum + transaction.amount,
+		0,
+	);
+	const matched = transactions.reduce(
+		(sum, transaction) => sum + (transaction.expense ? transaction.amount : 0),
+		0,
+	);
+	const other = transactions.reduce(
+		(sum, transaction) => sum + (transaction.expense ? 0 : transaction.amount),
+		0,
+	);
+	return {
+		month: monthRow,
+		transactions,
+		summary: { total, matched, other },
 	};
 }

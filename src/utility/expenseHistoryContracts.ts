@@ -32,12 +32,52 @@ export const expenseHistoryTransactionSchema = z.object({
 			name: z.string().min(1),
 		})
 		.nullable(),
+	lastModified: z.string().min(1),
+});
+
+export const expenseHistoryMonthlySummarySchema = z.object({
+	total: z.number().finite().nonnegative(),
+	matched: z.number().finite().nonnegative(),
+	other: z.number().finite().nonnegative(),
 });
 
 export const expenseHistoryMonthDetailSchema = z.object({
 	month: expenseHistoryMonthSummarySchema,
 	transactions: z.array(expenseHistoryTransactionSchema),
+	summary: expenseHistoryMonthlySummarySchema,
 });
+
+export const expenseHistoryTransactionMutationSchema = z
+	.object({
+		lastModified: z.string().min(1),
+		description: z.string().trim().min(1).optional(),
+		amount: z.number().finite().nonnegative().optional(),
+		category: z.enum(expenseCategoryEnum.enumValues).nullable().optional(),
+		type: z.enum(expenseTypeEnum.enumValues).nullable().optional(),
+		expenseId: z.number().int().positive().nullable().optional(),
+	})
+	.strict()
+	.refine(
+		(value) => Object.keys(value).some((key) => key !== "lastModified"),
+		"At least one editable field is required.",
+	);
+
+export const expenseHistoryCreateExpenseSchema = z
+	.object({
+		lastModified: z.string().min(1),
+		name: z.string().trim().min(1),
+		originalPrice: z.number().finite().nonnegative(),
+		category: z.enum(expenseCategoryEnum.enumValues),
+		type: z.enum(expenseTypeEnum.enumValues),
+	})
+	.strict();
+
+export type ExpenseHistoryTransactionMutation = z.infer<
+	typeof expenseHistoryTransactionMutationSchema
+>;
+export type ExpenseHistoryCreateExpense = z.infer<
+	typeof expenseHistoryCreateExpenseSchema
+>;
 
 export type ExpenseHistoryMonthSummary = z.infer<
 	typeof expenseHistoryMonthSummarySchema

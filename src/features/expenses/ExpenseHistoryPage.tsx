@@ -14,13 +14,11 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
-	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -40,6 +38,7 @@ import {
 	expenseHistoryImportPreviewSchema,
 } from "@/utility/expenseHistoryImportContracts";
 import { formatCurrency, locale } from "@/utility/formatUtil";
+import { ExpenseHistoryTransactionRow } from "./ExpenseHistoryTransactionRow";
 
 type ImportSource = { csv: string; sourceFilename: string };
 
@@ -68,15 +67,6 @@ function formatMonth(month: string) {
 	}).format(new Date(Date.UTC(year, monthNumber - 1, 1)));
 }
 
-function formatDate(date: string) {
-	return new Intl.DateTimeFormat(locale, {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(new Date(`${date}T00:00:00Z`));
-}
-
 export default function ExpenseHistoryPage() {
 	const navigate = useNavigate({ from: Route.fullPath });
 	const search = Route.useSearch();
@@ -95,6 +85,7 @@ export default function ExpenseHistoryPage() {
 	);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [replaceOpen, setReplaceOpen] = useState(false);
+	const [otherOnly, setOtherOnly] = useState(false);
 
 	const previewMutation = useMutation({
 		mutationFn: async (input: ImportSource) =>
@@ -377,67 +368,65 @@ export default function ExpenseHistoryPage() {
 						{monthQuery.error.message}
 					</div>
 				) : monthQuery.data ? (
-					<div className="overflow-x-auto">
-						<Table className="min-w-[960px]">
-							<TableHeader>
-								<TableRow>
-									<TableHead className="w-32">Booked</TableHead>
-									<TableHead>Description</TableHead>
-									<TableHead className="w-36 text-right">Amount</TableHead>
-									<TableHead>Association</TableHead>
-									<TableHead>Category</TableHead>
-									<TableHead>Type</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{monthQuery.data.transactions.map((transaction) => (
-									<TableRow key={transaction.id}>
-										<TableCell>{formatDate(transaction.bookedAt)}</TableCell>
-										<TableCell>
-											<div className="font-medium">
-												{transaction.description}
-											</div>
-											<details className="mt-1 text-xs text-muted-foreground">
-												<summary className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-													Original bank details
-												</summary>
-												<div className="mt-1 max-w-xl whitespace-normal">
-													{transaction.originalDescription} ·{" "}
-													{formatCurrency(transaction.originalAmount, "CHF")}
-													{transaction.valueDate
-														? ` · Value date ${formatDate(transaction.valueDate)}`
-														: ""}
-												</div>
-											</details>
-										</TableCell>
-										<TableCell className="text-right font-mono">
-											{formatCurrency(transaction.amount, "CHF")}
-										</TableCell>
-										<TableCell>
-											{transaction.expense ? (
-												transaction.expense.name
-											) : (
-												<Badge variant="secondary">Other</Badge>
-											)}
-										</TableCell>
-										<TableCell>
-											{transaction.category ?? (
-												<span className="text-muted-foreground">
-													Unclassified
-												</span>
-											)}
-										</TableCell>
-										<TableCell>
-											{transaction.type ?? (
-												<span className="text-muted-foreground">
-													Unclassified
-												</span>
-											)}
-										</TableCell>
+					<div>
+						<div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-border bg-muted/30 p-3">
+							<div
+								className="flex flex-wrap gap-x-6 gap-y-1 text-sm"
+								aria-live="polite"
+							>
+								<span>
+									Total{" "}
+									<strong>
+										{formatCurrency(monthQuery.data.summary.total, "CHF")}
+									</strong>
+								</span>
+								<span>
+									Matched{" "}
+									<strong>
+										{formatCurrency(monthQuery.data.summary.matched, "CHF")}
+									</strong>
+								</span>
+								<span>
+									Other{" "}
+									<strong>
+										{formatCurrency(monthQuery.data.summary.other, "CHF")}
+									</strong>
+								</span>
+							</div>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									checked={otherOnly}
+									onChange={(event) => setOtherOnly(event.target.checked)}
+								/>
+								Other only
+							</label>
+						</div>
+						<div className="overflow-x-auto">
+							<Table className="min-w-[960px]">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="w-32">Booked</TableHead>
+										<TableHead>Description</TableHead>
+										<TableHead className="w-36 text-right">Amount</TableHead>
+										<TableHead>Association</TableHead>
+										<TableHead>Category</TableHead>
+										<TableHead>Type</TableHead>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+								</TableHeader>
+								<TableBody>
+									{monthQuery.data.transactions
+										.filter((transaction) => !otherOnly || !transaction.expense)
+										.map((transaction) => (
+											<ExpenseHistoryTransactionRow
+												key={transaction.id}
+												transaction={transaction}
+												month={monthQuery.data.month.month}
+											/>
+										))}
+								</TableBody>
+							</Table>
+						</div>
 					</div>
 				) : null}
 			</section>

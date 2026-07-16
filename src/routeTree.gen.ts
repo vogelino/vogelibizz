@@ -40,6 +40,7 @@ import { Route as ResourceInvoicesIdRouteImport } from './routes/_resource/invoi
 import { Route as ResourceExpensesHistoryRouteImport } from './routes/_resource/expenses/history'
 import { Route as ResourceExpensesCreateRouteImport } from './routes/_resource/expenses/create'
 import { Route as ResourceClientsCreateRouteImport } from './routes/_resource/clients/create'
+import { Route as ApiExpenseHistoryTransactionsIdRouteImport } from './routes/api/expense-history/transactions/$id'
 import { Route as ApiExpenseHistoryMonthsMonthRouteImport } from './routes/api/expense-history/months/$month'
 import { Route as ApiExpenseHistoryImportPreviewRouteImport } from './routes/api/expense-history/import/preview'
 import { Route as ApiExpenseHistoryImportCommitRouteImport } from './routes/api/expense-history/import/commit'
@@ -49,6 +50,7 @@ import { Route as ResourceExpensesEditIdRouteImport } from './routes/_resource/e
 import { Route as ResourceExpensesCreateModalRouteImport } from './routes/_resource/expenses/create.modal'
 import { Route as ResourceClientsEditIdRouteImport } from './routes/_resource/clients/edit/$id'
 import { Route as ResourceClientsCreateModalRouteImport } from './routes/_resource/clients/create.modal'
+import { Route as ApiExpenseHistoryTransactionsIdExpenseRouteImport } from './routes/api/expense-history/transactions/$id/expense'
 import { Route as ResourceProjectsEditIdModalRouteImport } from './routes/_resource/projects/edit.$id.modal'
 import { Route as ResourceExpensesEditIdModalRouteImport } from './routes/_resource/expenses/edit.$id.modal'
 import { Route as ResourceClientsEditIdModalRouteImport } from './routes/_resource/clients/edit.$id.modal'
@@ -207,6 +209,12 @@ const ResourceClientsCreateRoute = ResourceClientsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => ResourceClientsRoute,
 } as any)
+const ApiExpenseHistoryTransactionsIdRoute =
+  ApiExpenseHistoryTransactionsIdRouteImport.update({
+    id: '/api/expense-history/transactions/$id',
+    path: '/api/expense-history/transactions/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiExpenseHistoryMonthsMonthRoute =
   ApiExpenseHistoryMonthsMonthRouteImport.update({
     id: '/$month',
@@ -257,6 +265,12 @@ const ResourceClientsCreateModalRoute =
     id: '/modal',
     path: '/modal',
     getParentRoute: () => ResourceClientsCreateRoute,
+  } as any)
+const ApiExpenseHistoryTransactionsIdExpenseRoute =
+  ApiExpenseHistoryTransactionsIdExpenseRouteImport.update({
+    id: '/expense',
+    path: '/expense',
+    getParentRoute: () => ApiExpenseHistoryTransactionsIdRoute,
   } as any)
 const ResourceProjectsEditIdModalRoute =
   ResourceProjectsEditIdModalRouteImport.update({
@@ -317,9 +331,11 @@ export interface FileRoutesByFullPath {
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
+  '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
+  '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -357,9 +373,11 @@ export interface FileRoutesByTo {
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
+  '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
+  '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -403,9 +421,11 @@ export interface FileRoutesById {
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
+  '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/_resource/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/_resource/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/_resource/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
+  '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -449,9 +469,11 @@ export interface FileRouteTypes {
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
     | '/api/expense-history/months/$month'
+    | '/api/expense-history/transactions/$id'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
+    | '/api/expense-history/transactions/$id/expense'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -489,9 +511,11 @@ export interface FileRouteTypes {
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
     | '/api/expense-history/months/$month'
+    | '/api/expense-history/transactions/$id'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
+    | '/api/expense-history/transactions/$id/expense'
   id:
     | '__root__'
     | '/'
@@ -534,9 +558,11 @@ export interface FileRouteTypes {
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
     | '/api/expense-history/months/$month'
+    | '/api/expense-history/transactions/$id'
     | '/_resource/clients/edit/$id/modal'
     | '/_resource/expenses/edit/$id/modal'
     | '/_resource/projects/edit/$id/modal'
+    | '/api/expense-history/transactions/$id/expense'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -555,6 +581,7 @@ export interface RootRouteChildren {
   ApiExpenseHistoryMonthsRoute: typeof ApiExpenseHistoryMonthsRouteWithChildren
   ApiExpenseHistoryImportCommitRoute: typeof ApiExpenseHistoryImportCommitRoute
   ApiExpenseHistoryImportPreviewRoute: typeof ApiExpenseHistoryImportPreviewRoute
+  ApiExpenseHistoryTransactionsIdRoute: typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -776,6 +803,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceClientsCreateRouteImport
       parentRoute: typeof ResourceClientsRoute
     }
+    '/api/expense-history/transactions/$id': {
+      id: '/api/expense-history/transactions/$id'
+      path: '/api/expense-history/transactions/$id'
+      fullPath: '/api/expense-history/transactions/$id'
+      preLoaderRoute: typeof ApiExpenseHistoryTransactionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/expense-history/months/$month': {
       id: '/api/expense-history/months/$month'
       path: '/$month'
@@ -838,6 +872,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/create/modal'
       preLoaderRoute: typeof ResourceClientsCreateModalRouteImport
       parentRoute: typeof ResourceClientsCreateRoute
+    }
+    '/api/expense-history/transactions/$id/expense': {
+      id: '/api/expense-history/transactions/$id/expense'
+      path: '/expense'
+      fullPath: '/api/expense-history/transactions/$id/expense'
+      preLoaderRoute: typeof ApiExpenseHistoryTransactionsIdExpenseRouteImport
+      parentRoute: typeof ApiExpenseHistoryTransactionsIdRoute
     }
     '/_resource/projects/edit/$id/modal': {
       id: '/_resource/projects/edit/$id/modal'
@@ -1088,6 +1129,21 @@ const ApiExpenseHistoryMonthsRouteWithChildren =
     ApiExpenseHistoryMonthsRouteChildren,
   )
 
+interface ApiExpenseHistoryTransactionsIdRouteChildren {
+  ApiExpenseHistoryTransactionsIdExpenseRoute: typeof ApiExpenseHistoryTransactionsIdExpenseRoute
+}
+
+const ApiExpenseHistoryTransactionsIdRouteChildren: ApiExpenseHistoryTransactionsIdRouteChildren =
+  {
+    ApiExpenseHistoryTransactionsIdExpenseRoute:
+      ApiExpenseHistoryTransactionsIdExpenseRoute,
+  }
+
+const ApiExpenseHistoryTransactionsIdRouteWithChildren =
+  ApiExpenseHistoryTransactionsIdRoute._addFileChildren(
+    ApiExpenseHistoryTransactionsIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResourceRoute: ResourceRouteWithChildren,
@@ -1104,6 +1160,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiExpenseHistoryMonthsRoute: ApiExpenseHistoryMonthsRouteWithChildren,
   ApiExpenseHistoryImportCommitRoute: ApiExpenseHistoryImportCommitRoute,
   ApiExpenseHistoryImportPreviewRoute: ApiExpenseHistoryImportPreviewRoute,
+  ApiExpenseHistoryTransactionsIdRoute:
+    ApiExpenseHistoryTransactionsIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

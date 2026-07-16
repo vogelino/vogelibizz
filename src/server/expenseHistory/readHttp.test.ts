@@ -31,8 +31,10 @@ const detail: ExpenseHistoryMonthDetail = {
 			category: "Software",
 			type: "Freelance",
 			expense: { id: 4, name: "Synthetic recurring" },
+			lastModified: "2026-07-16T12:00:00.000Z",
 		},
 	],
+	summary: { total: 12.5, matched: 12.5, other: 0 },
 };
 
 function request() {
