@@ -63,6 +63,8 @@ function insertRow(table: string, columns: string[], values: string[]) {
 const sqlLines: string[] = [];
 
 sqlLines.push("PRAGMA foreign_keys=OFF;");
+sqlLines.push("DELETE FROM expense_transactions;");
+sqlLines.push("DELETE FROM expense_months;");
 sqlLines.push("DELETE FROM projects_to_clients;");
 sqlLines.push("DELETE FROM projects_to_invoices;");
 sqlLines.push("DELETE FROM projects_to_quotes;");
@@ -331,6 +333,74 @@ projectsSeedData.forEach((project, projectIndex) => {
 			),
 		);
 	});
+});
+
+sqlLines.push(`INSERT INTO expense_months (
+	month, source_filename, imported_at, last_modified,
+	imported_debit_count, skipped_credit_count
+) VALUES (
+	strftime('%Y-%m', 'now', 'start of month', '-1 month'),
+	'synthetic-previous-month.csv',
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	4,
+	1
+);`);
+
+const syntheticHistoryRows = [
+	{
+		expenseId: "1",
+		dayOffset: 2,
+		valueDayOffset: 2,
+		description: "Synthetic monthly workspace",
+		amount: 84.5,
+		category: expensesSeedData[0].category,
+		type: expensesSeedData[0].type,
+	},
+	{
+		expenseId: "2",
+		dayOffset: 8,
+		valueDayOffset: 8,
+		description: "Synthetic software subscription",
+		amount: 29.9,
+		category: expensesSeedData[1].category,
+		type: expensesSeedData[1].type,
+	},
+	{
+		expenseId: "NULL",
+		dayOffset: 14,
+		valueDayOffset: 15,
+		description: "Synthetic neighborhood market",
+		amount: 63.25,
+		category: null,
+		type: null,
+	},
+	{
+		expenseId: "NULL",
+		dayOffset: 20,
+		valueDayOffset: null,
+		description: "Synthetic train ticket",
+		amount: 18.4,
+		category: "Transport",
+		type: "Personal",
+	},
+];
+
+syntheticHistoryRows.forEach((transaction, sourceOrder) => {
+	const valueDate =
+		transaction.valueDayOffset === null
+			? "NULL"
+			: `date('now', 'start of month', '-1 month', '+${transaction.valueDayOffset} days')`;
+	sqlLines.push(`INSERT INTO expense_transactions (
+	expense_month_id, expense_id, booked_at, value_date,
+	original_description, description, original_amount, amount,
+	category, type, source_order, created_at, last_modified
+)
+SELECT id, ${transaction.expenseId}, date('now', 'start of month', '-1 month', '+${transaction.dayOffset} days'),
+	${valueDate}, ${sqlString(transaction.description)}, ${sqlString(transaction.description)}, ${transaction.amount}, ${transaction.amount},
+	${sqlString(transaction.category)}, ${sqlString(transaction.type)}, ${sourceOrder}, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+	strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+FROM expense_months WHERE month = strftime('%Y-%m', 'now', 'start of month', '-1 month');`);
 });
 
 sqlLines.push("PRAGMA foreign_keys=ON;");

@@ -38,6 +38,8 @@ import { Route as ResourceInvoicesCreateRouteImport } from './routes/_resource/i
 import { Route as ResourceInvoicesIdRouteImport } from './routes/_resource/invoices/$id'
 import { Route as ResourceExpensesCreateRouteImport } from './routes/_resource/expenses/create'
 import { Route as ResourceClientsCreateRouteImport } from './routes/_resource/clients/create'
+import { Route as ApiExpenseHistoryImportPreviewRouteImport } from './routes/api/expense-history/import/preview'
+import { Route as ApiExpenseHistoryImportCommitRouteImport } from './routes/api/expense-history/import/commit'
 import { Route as ResourceProjectsEditIdRouteImport } from './routes/_resource/projects/edit/$id'
 import { Route as ResourceProjectsCreateModalRouteImport } from './routes/_resource/projects/create.modal'
 import { Route as ResourceExpensesEditIdRouteImport } from './routes/_resource/expenses/edit/$id'
@@ -192,6 +194,18 @@ const ResourceClientsCreateRoute = ResourceClientsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => ResourceClientsRoute,
 } as any)
+const ApiExpenseHistoryImportPreviewRoute =
+  ApiExpenseHistoryImportPreviewRouteImport.update({
+    id: '/api/expense-history/import/preview',
+    path: '/api/expense-history/import/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiExpenseHistoryImportCommitRoute =
+  ApiExpenseHistoryImportCommitRouteImport.update({
+    id: '/api/expense-history/import/commit',
+    path: '/api/expense-history/import/commit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ResourceProjectsEditIdRoute = ResourceProjectsEditIdRouteImport.update({
   id: '/edit/$id',
   path: '/edit/$id',
@@ -279,6 +293,8 @@ export interface FileRoutesByFullPath {
   '/expenses/edit/$id': typeof ResourceExpensesEditIdRouteWithChildren
   '/projects/create/modal': typeof ResourceProjectsCreateModalRoute
   '/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
+  '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
+  '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -314,6 +330,8 @@ export interface FileRoutesByTo {
   '/expenses/edit/$id': typeof ResourceExpensesEditIdRouteWithChildren
   '/projects/create/modal': typeof ResourceProjectsCreateModalRoute
   '/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
+  '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
+  '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -355,6 +373,8 @@ export interface FileRoutesById {
   '/_resource/expenses/edit/$id': typeof ResourceExpensesEditIdRouteWithChildren
   '/_resource/projects/create/modal': typeof ResourceProjectsCreateModalRoute
   '/_resource/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
+  '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
+  '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
   '/_resource/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/_resource/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/_resource/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -396,6 +416,8 @@ export interface FileRouteTypes {
     | '/expenses/edit/$id'
     | '/projects/create/modal'
     | '/projects/edit/$id'
+    | '/api/expense-history/import/commit'
+    | '/api/expense-history/import/preview'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
@@ -431,6 +453,8 @@ export interface FileRouteTypes {
     | '/expenses/edit/$id'
     | '/projects/create/modal'
     | '/projects/edit/$id'
+    | '/api/expense-history/import/commit'
+    | '/api/expense-history/import/preview'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
@@ -471,6 +495,8 @@ export interface FileRouteTypes {
     | '/_resource/expenses/edit/$id'
     | '/_resource/projects/create/modal'
     | '/_resource/projects/edit/$id'
+    | '/api/expense-history/import/commit'
+    | '/api/expense-history/import/preview'
     | '/_resource/clients/edit/$id/modal'
     | '/_resource/expenses/edit/$id/modal'
     | '/_resource/projects/edit/$id/modal'
@@ -489,6 +515,8 @@ export interface RootRouteChildren {
   ApiProjectsRoute: typeof ApiProjectsRouteWithChildren
   ApiSettingsRoute: typeof ApiSettingsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiExpenseHistoryImportCommitRoute: typeof ApiExpenseHistoryImportCommitRoute
+  ApiExpenseHistoryImportPreviewRoute: typeof ApiExpenseHistoryImportPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -695,6 +723,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/create'
       preLoaderRoute: typeof ResourceClientsCreateRouteImport
       parentRoute: typeof ResourceClientsRoute
+    }
+    '/api/expense-history/import/preview': {
+      id: '/api/expense-history/import/preview'
+      path: '/api/expense-history/import/preview'
+      fullPath: '/api/expense-history/import/preview'
+      preLoaderRoute: typeof ApiExpenseHistoryImportPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/expense-history/import/commit': {
+      id: '/api/expense-history/import/commit'
+      path: '/api/expense-history/import/commit'
+      fullPath: '/api/expense-history/import/commit'
+      preLoaderRoute: typeof ApiExpenseHistoryImportCommitRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_resource/projects/edit/$id': {
       id: '/_resource/projects/edit/$id'
@@ -984,6 +1026,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProjectsRoute: ApiProjectsRouteWithChildren,
   ApiSettingsRoute: ApiSettingsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiExpenseHistoryImportCommitRoute: ApiExpenseHistoryImportCommitRoute,
+  ApiExpenseHistoryImportPreviewRoute: ApiExpenseHistoryImportPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
