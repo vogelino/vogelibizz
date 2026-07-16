@@ -36,9 +36,14 @@ export function getDb() {
 	return cachedDb;
 }
 
+export function getDbProxyProperty(database: object, prop: PropertyKey) {
+	const value = Reflect.get(database, prop, database);
+	return typeof value === "function" ? value.bind(database) : value;
+}
+
 export const db = new Proxy({} as SchemaDb, {
 	get(_target, prop) {
-		return (getDb() as unknown as Record<PropertyKey, unknown>)[prop];
+		return getDbProxyProperty(getDb(), prop);
 	},
 });
 

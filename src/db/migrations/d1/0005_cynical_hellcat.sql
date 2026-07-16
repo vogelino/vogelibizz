@@ -1,0 +1,1 @@
+CREATE INDEX `expense_transactions_month_booked_order_idx` ON `expense_transactions` (`expense_month_id`,`booked_at`,`source_order`);

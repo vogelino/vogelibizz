@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import db from "@/db";
 import { expenses, expenseTransactions } from "@/db/schema";
 import type {
@@ -117,19 +117,41 @@ export async function createAndAssociateExpense(
 	const claimedToken = nextToken(input.lastModified);
 	const finalToken = nextToken(claimedToken);
 	const createdAt = new Date().toISOString();
-	await db.batch([
-		db.run(sql`update expense_transactions
-			set last_modified = ${claimedToken}
-			where id = ${id} and last_modified = ${input.lastModified} and expense_id is null`),
-		db.run(sql`insert into expenses (
-			name, category, type, rate, original_price, original_currency, created_at, last_modified
-		) select ${input.name}, ${input.category}, ${input.type}, 'Monthly',
-			${input.originalPrice}, 'CHF', ${createdAt}, ${createdAt}
-		where exists (select 1 from expense_transactions where id = ${id} and last_modified = ${claimedToken})`),
-		db.run(sql`update expense_transactions
-			set expense_id = (select id from expenses where name = ${input.name}),
-				category = ${input.category}, type = ${input.type}, last_modified = ${finalToken}
-			where id = ${id} and last_modified = ${claimedToken}`),
+	const client = db.$client;
+	await client.batch([
+		client
+			.prepare(`update expense_transactions
+				set last_modified = ?
+				where id = ? and last_modified = ? and expense_id is null`)
+			.bind(claimedToken, id, input.lastModified),
+		client
+			.prepare(`insert into expenses (
+				name, category, type, rate, original_price, original_currency, created_at, last_modified
+			) select ?, ?, ?, 'Monthly', ?, 'CHF', ?, ?
+			where exists (select 1 from expense_transactions where id = ? and last_modified = ?)`)
+			.bind(
+				input.name,
+				input.category,
+				input.type,
+				input.originalPrice,
+				createdAt,
+				createdAt,
+				id,
+				claimedToken,
+			),
+		client
+			.prepare(`update expense_transactions
+				set expense_id = (select id from expenses where name = ?),
+					category = ?, type = ?, last_modified = ?
+				where id = ? and last_modified = ?`)
+			.bind(
+				input.name,
+				input.category,
+				input.type,
+				finalToken,
+				id,
+				claimedToken,
+			),
 	]);
 	const result = await readTransaction(id);
 	if (!result) throw new ExpenseHistoryNotFoundError("Transaction not found.");

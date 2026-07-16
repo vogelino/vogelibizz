@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
+	TableCaption,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -80,6 +81,8 @@ export default function ExpenseHistoryPage() {
 		monthIndex >= 0 ? selectedMonth : null,
 	);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const replacementTriggerRef = useRef<HTMLButtonElement>(null);
+	const replacementCancelRef = useRef<HTMLButtonElement>(null);
 	const [source, setSource] = useState<ImportSource | null>(null);
 	const [preview, setPreview] = useState<ExpenseHistoryImportPreview | null>(
 		null,
@@ -182,7 +185,10 @@ export default function ExpenseHistoryPage() {
 						<h2 id="import-heading" className="font-semibold">
 							Import a monthly bank CSV
 						</h2>
-						<p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+						<p
+							id="bank-csv-help"
+							className="mt-1 max-w-2xl text-sm text-muted-foreground"
+						>
 							Preview one calendar month before importing. Credit rows are
 							skipped; replacing a month removes its existing transaction edits
 							and associations.
@@ -194,6 +200,8 @@ export default function ExpenseHistoryPage() {
 							ref={fileInputRef}
 							type="file"
 							accept=".csv,text/csv,text/plain"
+							aria-describedby="bank-csv-help"
+							aria-invalid={Boolean(importError)}
 							onChange={selectFile}
 							className="max-w-full text-sm file:mr-3 file:h-9 file:border file:border-border file:bg-background file:px-3 file:text-foreground hover:file:bg-accent"
 						/>
@@ -226,6 +234,11 @@ export default function ExpenseHistoryPage() {
 								</p>
 							</div>
 							<Button
+								ref={
+									preview.replacementRequired
+										? replacementTriggerRef
+										: undefined
+								}
 								type="button"
 								variant={
 									preview.replacementRequired ? "destructive" : "default"
@@ -406,8 +419,17 @@ export default function ExpenseHistoryPage() {
 								Other only
 							</label>
 						</div>
-						<div className="overflow-x-auto">
+						<section
+							className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							aria-label="Monthly transactions; scroll horizontally on small screens"
+							// biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard users need to scroll the wide transaction table.
+							tabIndex={0}
+						>
 							<Table className="min-w-[960px]">
+								<TableCaption className="sr-only">
+									Editable monthly bank transactions. Original bank values
+									remain available within each description cell.
+								</TableCaption>
 								<TableHeader>
 									<TableRow>
 										<TableHead className="w-32">Booked</TableHead>
@@ -430,13 +452,22 @@ export default function ExpenseHistoryPage() {
 										))}
 								</TableBody>
 							</Table>
-						</div>
+						</section>
 					</div>
 				) : null}
 			</section>
 
 			<AlertDialog open={replaceOpen} onOpenChange={setReplaceOpen}>
-				<AlertDialogContent>
+				<AlertDialogContent
+					onOpenAutoFocus={(event) => {
+						event.preventDefault();
+						replacementCancelRef.current?.focus();
+					}}
+					onCloseAutoFocus={(event) => {
+						event.preventDefault();
+						replacementTriggerRef.current?.focus();
+					}}
+				>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
 							Replace {preview ? formatMonth(preview.month) : "this month"}?
@@ -449,7 +480,10 @@ export default function ExpenseHistoryPage() {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={commitMutation.isPending}>
+						<AlertDialogCancel
+							ref={replacementCancelRef}
+							disabled={commitMutation.isPending}
+						>
 							Keep existing month
 						</AlertDialogCancel>
 						<AlertDialogAction

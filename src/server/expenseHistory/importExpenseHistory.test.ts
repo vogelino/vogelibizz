@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { calculateExpenseHistorySummary } from "@/utility/expenseHistoryCalculations";
 import type { ExpenseHistoryImportCommitRequest } from "@/utility/expenseHistoryImportContracts";
 import {
 	commitExpenseHistoryImport,
@@ -16,6 +17,7 @@ const migrationNames = [
 	"0002_rare_golden_guardian.sql",
 	"0003_swift_nitro.sql",
 	"0004_abnormal_betty_brant.sql",
+	"0005_cynical_hellcat.sql",
 ];
 const migrationSql = (
 	await Promise.all(
@@ -27,6 +29,8 @@ const migrationSql = (
 const csv = `IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
 CH00;03.06.2026;Synthetic replacement;-42.50;1200.00;04.06.2026
 CH00;07.06.2026;Synthetic credit;10.00;1210.00;07.06.2026`;
+const mayCsv = `IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
+CH00;03.05.2026;Synthetic other;-18.00;1200.00;04.05.2026`;
 
 class SqliteImportPersistence implements ExpenseHistoryImportPersistence {
 	readonly database = new Database(":memory:");
@@ -217,15 +221,99 @@ describe("expense history import", () => {
 		};
 		const log = spyOn(console, "log").mockImplementation(() => undefined);
 		const error = spyOn(console, "error").mockImplementation(() => undefined);
+		const warn = spyOn(console, "warn").mockImplementation(() => undefined);
+		const info = spyOn(console, "info").mockImplementation(() => undefined);
+		const debug = spyOn(console, "debug").mockImplementation(() => undefined);
 		try {
 			await commitExpenseHistoryImport(request(), persistence);
 			expect(JSON.stringify(persisted)).not.toContain(csv);
 			expect(persisted?.sourceFilename).toBe("synthetic.csv");
 			expect(log).not.toHaveBeenCalled();
 			expect(error).not.toHaveBeenCalled();
+			expect(warn).not.toHaveBeenCalled();
+			expect(info).not.toHaveBeenCalled();
+			expect(debug).not.toHaveBeenCalled();
 		} finally {
 			log.mockRestore();
 			error.mockRestore();
+			warn.mockRestore();
+			info.mockRestore();
+			debug.mockRestore();
 		}
+	});
+
+	test("keeps multi-month totals coherent through review, deletion, and replacement", async () => {
+		const store = createStore();
+		await commitExpenseHistoryImport(request(), store);
+		await commitExpenseHistoryImport(
+			{ csv: mayCsv, sourceFilename: "may.csv", replaceExistingMonth: false },
+			store,
+		);
+		store.database.exec(`
+			INSERT INTO expenses (
+				id, created_at, last_modified, name, category, type, rate,
+				original_price, original_currency
+			) VALUES (42, 'now', 'now', 'Synthetic recurring', 'Software',
+				'Personal', 'Monthly', 30, 'CHF');
+			UPDATE expense_transactions
+			SET expense_id = 42, description = 'Reviewed recurring', amount = 30,
+				category = 'Software', type = 'Personal'
+			WHERE booked_at = '2026-06-03';
+		`);
+		const summaryInput = () => ({
+			importedMonths: store.database
+				.query("SELECT id FROM expense_months ORDER BY month")
+				.all() as { id: number }[],
+			configuredExpenses: store.database
+				.query(
+					"SELECT id AS expenseId, original_price AS monthlyAmount FROM expenses",
+				)
+				.all() as { expenseId: number; monthlyAmount: number }[],
+			transactions: store.database
+				.query(
+					"SELECT expense_month_id AS expenseMonthId, expense_id AS expenseId, amount FROM expense_transactions",
+				)
+				.all() as {
+				expenseMonthId: number;
+				expenseId: number | null;
+				amount: number;
+			}[],
+		});
+		const reviewed = calculateExpenseHistorySummary(summaryInput());
+		expect(reviewed.observedMonthlyAverage).toBe(24);
+		expect(reviewed.other?.monthlyAverage).toBe(9);
+
+		store.database.query("DELETE FROM expenses WHERE id = 42").run();
+		const deleted = calculateExpenseHistorySummary(summaryInput());
+		expect(deleted.observedMonthlyAverage).toBe(
+			reviewed.observedMonthlyAverage,
+		);
+		expect(deleted.other?.monthlyAverage).toBe(24);
+
+		await commitExpenseHistoryImport(request(true), store);
+		const months = store.database
+			.query(
+				`SELECT month, count(transaction_row.id) AS transactionCount
+				FROM expense_months month_row
+				LEFT JOIN expense_transactions transaction_row
+					ON transaction_row.expense_month_id = month_row.id
+				GROUP BY month_row.id ORDER BY month`,
+			)
+			.all();
+		expect(months).toEqual([
+			{ month: "2026-05", transactionCount: 1 },
+			{ month: "2026-06", transactionCount: 1 },
+		]);
+		expect(
+			store.database
+				.query(
+					"SELECT description, amount, expense_id FROM expense_transactions WHERE booked_at = '2026-06-03'",
+				)
+				.get(),
+		).toEqual({
+			description: "Synthetic replacement",
+			amount: 42.5,
+			expense_id: null,
+		});
 	});
 });

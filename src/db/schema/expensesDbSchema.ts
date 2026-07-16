@@ -153,6 +153,11 @@ export const expenseTransactions = sqliteTable(
 			table.sourceOrder,
 		),
 		index("expense_transactions_expense_month_idx").on(table.expenseMonthId),
+		index("expense_transactions_month_booked_order_idx").on(
+			table.expenseMonthId,
+			table.bookedAt,
+			table.sourceOrder,
+		),
 		index("expense_transactions_expense_idx").on(table.expenseId),
 		index("expense_transactions_booked_at_idx").on(table.bookedAt),
 		check(

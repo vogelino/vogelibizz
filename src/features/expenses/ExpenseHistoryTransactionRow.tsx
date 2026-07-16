@@ -132,7 +132,14 @@ export function ExpenseHistoryTransactionRow({
 		},
 	});
 	const pending = mutation.isPending || createMutation.isPending;
+	const rowLabel = `${formatDate(transaction.bookedAt)} ${transaction.description}`;
+	const canSave =
+		Boolean(description.trim()) &&
+		amount !== "" &&
+		Number.isFinite(Number(amount)) &&
+		Number(amount) >= 0;
 	const save = () =>
+		canSave &&
 		mutation.mutate({
 			lastModified: transaction.lastModified,
 			description: description.trim(),
@@ -159,17 +166,20 @@ export function ExpenseHistoryTransactionRow({
 	};
 
 	return (
-		<TableRow>
+		<TableRow aria-busy={pending}>
 			<TableCell>{formatDate(transaction.bookedAt)}</TableCell>
 			<TableCell className="min-w-64 align-top">
 				<label className="sr-only" htmlFor={`description-${transaction.id}`}>
-					Editable description
+					Editable description for {rowLabel}
 				</label>
 				<input
 					id={`description-${transaction.id}`}
 					className="form-input w-full"
 					value={description}
 					onChange={(e) => setDescription(e.target.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter" && !pending && canSave) save();
+					}}
 					disabled={pending}
 				/>
 				<details className="mt-1 text-xs text-muted-foreground">
@@ -187,7 +197,7 @@ export function ExpenseHistoryTransactionRow({
 			</TableCell>
 			<TableCell className="min-w-36 align-top">
 				<label className="sr-only" htmlFor={`amount-${transaction.id}`}>
-					Effective CHF amount
+					Effective CHF amount for {rowLabel}
 				</label>
 				<input
 					id={`amount-${transaction.id}`}
@@ -197,6 +207,9 @@ export function ExpenseHistoryTransactionRow({
 					className="form-input w-full text-right font-mono"
 					value={amount}
 					onChange={(e) => setAmount(e.target.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter" && !pending && canSave) save();
+					}}
 					disabled={pending}
 				/>
 			</TableCell>
@@ -209,6 +222,7 @@ export function ExpenseHistoryTransactionRow({
 							size="sm"
 							variant="outline"
 							disabled={pending}
+							aria-label={`Detach ${rowLabel} from ${transaction.expense.name}`}
 							onClick={() =>
 								mutation.mutate({
 									lastModified: transaction.lastModified,
@@ -228,7 +242,7 @@ export function ExpenseHistoryTransactionRow({
 							className="sr-only"
 							htmlFor={`association-${transaction.id}`}
 						>
-							Search recurring expenses
+							Search recurring expenses for {rowLabel}
 						</label>
 						<input
 							id={`association-${transaction.id}`}
@@ -237,6 +251,10 @@ export function ExpenseHistoryTransactionRow({
 							placeholder="Search recurring expenses"
 							value={association}
 							onChange={(e) => setAssociation(e.target.value)}
+							disabled={pending}
+							onKeyDown={(event) => {
+								if (event.key === "Enter" && !pending) associate();
+							}}
 						/>
 						<datalist id={`expense-options-${transaction.id}`}>
 							{expenses.map((expense) => (
@@ -247,6 +265,7 @@ export function ExpenseHistoryTransactionRow({
 							type="button"
 							size="sm"
 							disabled={pending}
+							aria-label={`Associate ${rowLabel}`}
 							onClick={associate}
 						>
 							Associate
@@ -259,7 +278,7 @@ export function ExpenseHistoryTransactionRow({
 						open={createOpen}
 						onToggle={(e) => setCreateOpen(e.currentTarget.open)}
 					>
-						<summary className="cursor-pointer text-sm underline">
+						<summary className="cursor-pointer text-sm underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
 							Create recurring expense
 						</summary>
 						<div className="mt-2 space-y-2 border border-border p-2 text-xs">
@@ -279,6 +298,7 @@ export function ExpenseHistoryTransactionRow({
 									Number(amount) < 0
 								}
 								onClick={() => createMutation.mutate()}
+								aria-label={`Create a recurring expense from ${rowLabel} and associate it`}
 							>
 								Create and associate
 							</Button>
@@ -288,7 +308,7 @@ export function ExpenseHistoryTransactionRow({
 			</TableCell>
 			<TableCell className="min-w-48 align-top">
 				<label className="sr-only" htmlFor={`category-${transaction.id}`}>
-					Category
+					Category for {rowLabel}
 				</label>
 				<select
 					id={`category-${transaction.id}`}
@@ -307,7 +327,7 @@ export function ExpenseHistoryTransactionRow({
 			</TableCell>
 			<TableCell className="min-w-40 align-top">
 				<label className="sr-only" htmlFor={`type-${transaction.id}`}>
-					Type
+					Type for {rowLabel}
 				</label>
 				<select
 					id={`type-${transaction.id}`}
@@ -327,14 +347,9 @@ export function ExpenseHistoryTransactionRow({
 					type="button"
 					size="sm"
 					className="mt-2 w-full"
-					disabled={
-						pending ||
-						!description.trim() ||
-						amount === "" ||
-						!Number.isFinite(Number(amount)) ||
-						Number(amount) < 0
-					}
+					disabled={pending || !canSave}
 					onClick={save}
+					aria-label={`Save edits for ${rowLabel}`}
 				>
 					{pending ? "Saving…" : "Save edits"}
 				</Button>

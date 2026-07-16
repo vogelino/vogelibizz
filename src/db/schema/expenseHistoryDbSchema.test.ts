@@ -19,8 +19,11 @@ const baseMigrationSql = (
 		),
 	)
 ).join("\n");
-const migrationSql = await Bun.file(
+const historyMigrationSql = await Bun.file(
 	new URL("0004_abnormal_betty_brant.sql", migrationDirectory),
+).text();
+const performanceMigrationSql = await Bun.file(
+	new URL("0005_cynical_hellcat.sql", migrationDirectory),
 ).text();
 const timestamp = "2026-07-16T12:00:00.000Z";
 
@@ -46,7 +49,8 @@ function createMigratedDatabase() {
 			25.5,
 			"CHF",
 		);
-	database.exec(migrationSql);
+	database.exec(historyMigrationSql);
+	database.exec(performanceMigrationSql);
 	return database;
 }
 
@@ -284,6 +288,40 @@ describe("expense history migration constraints", () => {
 					sourceOrder: 0,
 				}),
 			).toThrow();
+		} finally {
+			database.close();
+		}
+	});
+
+	test("uses indexes for month, ordered transaction, and association lookups", () => {
+		const database = createMigratedDatabase();
+		try {
+			const month = insertMonth(database);
+			insertTransaction(database, { expenseMonthId: month.id });
+			const monthPlan = database
+				.query(`EXPLAIN QUERY PLAN
+					SELECT transaction_row.id
+					FROM expense_transactions transaction_row
+					INNER JOIN expense_months month_row
+						ON transaction_row.expense_month_id = month_row.id
+					WHERE month_row.month = ?
+					ORDER BY transaction_row.booked_at, transaction_row.source_order`)
+				.all("2026-06") as { detail: string }[];
+			const associationPlan = database
+				.query(
+					"EXPLAIN QUERY PLAN SELECT id FROM expense_transactions WHERE expense_id = ?",
+				)
+				.all(42) as { detail: string }[];
+
+			expect(monthPlan.map(({ detail }) => detail).join("\n")).toContain(
+				"expense_transactions_month_booked_order_idx",
+			);
+			expect(monthPlan.map(({ detail }) => detail).join("\n")).not.toContain(
+				"TEMP B-TREE",
+			);
+			expect(associationPlan.map(({ detail }) => detail).join("\n")).toContain(
+				"expense_transactions_expense_idx",
+			);
 		} finally {
 			database.close();
 		}
