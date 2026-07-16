@@ -72,7 +72,7 @@ export async function fetchOpenExchangeRates(): Promise<OpenExchangeRatesReturnT
 	return parseOpenExchangeRatesResponse(rawJson);
 }
 
-function getValueInTargetCurrencyPerMonth({
+export function getValueInTargetCurrencyPerMonth({
 	value,
 	currency,
 	rates,
@@ -134,7 +134,7 @@ function getValueInTargetCurrencyPerMonth({
 	return monthlyPrice;
 }
 
-async function getTargetCurrency(): Promise<CurrencyIdType> {
+export async function getTargetCurrency(): Promise<CurrencyIdType> {
 	const currentSettings = await db.query.settings.findFirst({
 		columns: { targetCurrency: true },
 	});

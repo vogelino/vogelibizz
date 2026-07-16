@@ -2,10 +2,12 @@ import { describe, expect, test } from "bun:test";
 import type {
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
 import {
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
+	expenseOverviewSummarySchema,
 } from "@/utility/expenseHistoryContracts";
 import { createExpenseHistoryReadHandlers } from "./readHttp";
 
@@ -36,6 +38,15 @@ const detail: ExpenseHistoryMonthDetail = {
 	],
 	summary: { total: 12.5, matched: 12.5, other: 0 },
 };
+const overview: ExpenseOverviewSummary = {
+	currency: "CHF",
+	importedMonthCount: 1,
+	configuredMonthlyTotal: 30,
+	recurring: [{ expenseId: 4, total: 12.5, monthlyAverage: 12.5 }],
+	other: { total: 5, monthlyAverage: 5 },
+	livingCostEstimate: 35,
+	observedMonthlyAverage: 17.5,
+};
 
 function request() {
 	return new Request("https://example.test/api/expense-history/months");
@@ -47,10 +58,12 @@ describe("expense history read HTTP API", () => {
 			authorize: async () => false,
 			getMonths: async () => months,
 			getMonth: async () => detail,
+			getOverview: async () => overview,
 		});
 		const response = await handlers.months(request());
 		expect(response.status).toBe(401);
 		expect(await response.json()).toEqual({ error: "Unauthorized" });
+		expect((await handlers.overview(request())).status).toBe(401);
 	});
 
 	test("returns newest-first month summaries and the traceable row contract", async () => {
@@ -58,6 +71,7 @@ describe("expense history read HTTP API", () => {
 			authorize: async () => true,
 			getMonths: async () => months,
 			getMonth: async () => detail,
+			getOverview: async () => overview,
 		});
 		const monthsResponse = await handlers.months(request());
 		expect(
@@ -70,11 +84,25 @@ describe("expense history read HTTP API", () => {
 		).toEqual(detail);
 	});
 
+	test("returns the calculation summary contract", async () => {
+		const handlers = createExpenseHistoryReadHandlers({
+			authorize: async () => true,
+			getMonths: async () => months,
+			getMonth: async () => detail,
+			getOverview: async () => overview,
+		});
+		const response = await handlers.overview(request());
+		expect(expenseOverviewSummarySchema.parse(await response.json())).toEqual(
+			overview,
+		);
+	});
+
 	test("rejects malformed and missing selected months", async () => {
 		const handlers = createExpenseHistoryReadHandlers({
 			authorize: async () => true,
 			getMonths: async () => months,
 			getMonth: async () => null,
+			getOverview: async () => overview,
 		});
 		expect((await handlers.month(request(), "June")).status).toBe(400);
 		const missing = await handlers.month(request(), "2026-05");

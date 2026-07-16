@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-16
 Overall status: **In progress**
-Current effort: **PR 4 complete; PR 5 not started**
+Current effort: **PR 5 complete; PR 6 not started**
 
 ## How to use and maintain this plan
 
@@ -62,22 +62,22 @@ The recurring-expenses overview will compare configured monthly costs with histo
 
 ### Averages, Other expenses, and totals
 
-- [ ] **R24** — Averages use all imported months. Calendar months with no import are excluded from the divisor.
-- [ ] **R25** — Within an imported month, a recurring expense with no associated transactions contributes CHF 0 for that month.
-- [ ] **R26** — A recurring expense's real monthly average is the sum of its associated transactions' effective amounts across all imported months divided by the number of imported months.
-- [ ] **R27** — Other's monthly average is the sum of all unmatched transactions' effective amounts across all imported months divided by the number of imported months.
-- [ ] **R28** — Other has no manually configured amount. Its calculated average is its contribution to the living-cost estimate and is shown as both its monthly and real-average value. Its difference is not applicable, and Category and Type display **Mixed**.
-- [ ] **R29** — The living-cost estimate is the sum of configured monthly recurring-expense amounts plus the Other average.
-- [ ] **R30** — The observed monthly average is the sum of every imported transaction's effective amount divided by the number of imported months.
-- [ ] **R31** — Deleting a recurring expense changes its own and Other's allocation but does not change the observed total.
-- [ ] **R32** — With no imported months, actual averages and Other render as unavailable/empty rather than dividing by zero.
+- [x] **R24** — Averages use all imported months. Calendar months with no import are excluded from the divisor.
+- [x] **R25** — Within an imported month, a recurring expense with no associated transactions contributes CHF 0 for that month.
+- [x] **R26** — A recurring expense's real monthly average is the sum of its associated transactions' effective amounts across all imported months divided by the number of imported months.
+- [x] **R27** — Other's monthly average is the sum of all unmatched transactions' effective amounts across all imported months divided by the number of imported months.
+- [x] **R28** — Other has no manually configured amount. Its calculated average is its contribution to the living-cost estimate and is shown as both its monthly and real-average value. Its difference is not applicable, and Category and Type display **Mixed**.
+- [x] **R29** — The living-cost estimate is the sum of configured monthly recurring-expense amounts plus the Other average.
+- [x] **R30** — The observed monthly average is the sum of every imported transaction's effective amount divided by the number of imported months.
+- [x] **R31** — Deleting a recurring expense changes its own and Other's allocation but does not change the observed total.
+- [x] **R32** — With no imported months, actual averages and Other render as unavailable/empty rather than dividing by zero.
 
 ### Navigation and presentation
 
 - [x] **R33** — Expenses has two subpages: **Recurring expenses** at the existing `/expenses` route and **Expenses History** at `/expenses/history`.
 - [x] **R34** — Existing recurring-expense create/edit routes and manually configured expense behavior continue to work.
-- [ ] **R35** — The recurring table preserves its existing columns and adds real monthly average and configured-versus-real difference. It also renders the synthetic Other row.
-- [ ] **R36** — The recurring page shows both the living-cost estimate and observed monthly average.
+- [x] **R35** — The recurring table preserves its existing columns and adds real monthly average and configured-versus-real difference. It also renders the synthetic Other row.
+- [x] **R36** — The recurring page shows both the living-cost estimate and observed monthly average.
 - [x] **R37** — Expenses History shows booked date, editable description, editable effective amount, recurring-expense association or Other, Category, Type, and access to original bank details.
 - [x] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
 - [x] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
@@ -270,8 +270,8 @@ Known limitations/follow-ups: No migration is required. An authenticated browser
 
 ### PR 5 — Real averages and Other on the recurring overview
 
-Status: **Planned**
-Branch/PR: _TBD_
+Status: **Done**
+Branch/PR: `codex/expenses-history-pr5-recurring-overview` — https://github.com/vogelino/vogelibizz/pull/6
 Depends on: PR 4
 Requirements: R24–R36
 
@@ -286,16 +286,16 @@ Scope:
 
 Acceptance checklist:
 
-- [ ] Every recurring row displays the correct configured amount, real average, and difference.
-- [ ] Other cannot be edited, selected, or deleted as a normal recurring expense.
-- [ ] Other displays automatic values, no meaningful difference, and Mixed Category/Type.
-- [ ] Living-cost and observed totals follow the calculation contract.
-- [ ] No-import behavior is clear and does not display misleading zero averages.
-- [ ] Transaction edits, matching, month replacement, and expense deletion refresh all affected totals.
-- [ ] Existing category/type filters and charts handle Other intentionally.
+- [x] Every recurring row displays the correct configured amount, real average, and difference.
+- [x] Other cannot be edited, selected, or deleted as a normal recurring expense.
+- [x] Other displays automatic values, no meaningful difference, and Mixed Category/Type.
+- [x] Living-cost and observed totals follow the calculation contract.
+- [x] No-import behavior is clear and does not display misleading zero averages.
+- [x] Transaction edits, matching, month replacement, and expense deletion refresh all affected totals.
+- [x] Existing category/type filters and charts handle Other intentionally.
 
-Verification performed: _TBD_
-Known limitations/follow-ups: _TBD_
+Verification performed: `bun test` (44 tests, 111 assertions, including existing multi-month/calendar-gap/zero-spend/deletion-redistribution calculations plus overview row, Mixed filter/chart, no-import, target-currency normalization, and authenticated summary-contract coverage); `bunx tsc --noEmit --incremental false`; `bunx @biomejs/biome check src package.json`; `bun run build` (client and SSR production bundles); `bun run db:generate` (no schema changes); `bun run db:init:local` followed by a second `bun run db:seed:local` and an exact Wrangler aggregate query (one `2026-06` month, four transactions, two matched, CHF 196.05 observed total, CHF 81.65 Other total); `git diff --check`; unauthenticated browser route and HTTP checks (`/expenses` preserves the administrator login redirect with no console warnings/errors, and the overview API returns 401); full PR 5 diff review for calculation currency, synthetic-row CRUD isolation, filtering/sorting/selection/deletion, chart/totals behavior, invalidation coverage, D13 preservation, and PR 6 scope exclusion.
+Known limitations/follow-ups: No migration is required. An authenticated browser session remained unavailable, so signed-in recurring-row rendering, filter/chart interactions, mutations, and small-screen behavior were verified through production output, typed UI contracts, focused unit/API/database tests, and code review rather than an authenticated end-to-end session; PR 6 retains the full signed-in accessibility, keyboard, and responsive audit. The production build retains the existing mixed static/dynamic import, large-chunk, and React PDF/fontkit warnings. The summary converts imported CHF amounts into the configured target currency using the same exchange-rate and billing-cycle normalization as configured recurring expenses before presenting comparisons.
 
 ### PR 6 — Hardening, accessibility, performance, and release readiness
 
@@ -336,8 +336,8 @@ Update the Status and Verified in columns as PRs progress.
 | R1–R9: CSV import | PR 2, PR 3 | Done | PR 2 parser, preview/commit contracts, authenticated API, atomic replacement, validation, raw-data, and rollback tests; PR 3 preview, warning, error, confirmation, refresh, and empty-history presentation |
 | R10–R17: month and transaction history | PR 1, PR 3, PR 4 | Done | PR 1 schema, migration, validation, and constraints; PR 3 reads/navigation/traceability; PR 4 strict editable-field mutations, CHF 0 validation, classification UI/API, concurrency, and reactive summaries |
 | R18–R23: manual association | PR 1, PR 4 | Done | PR 1 nullable association and `ON DELETE SET NULL`; PR 4 manual search, one-association mutation contract, snapshot copying, detachment/deletion preservation, and atomic create-associate coverage |
-| R24–R32: calculations and Other | PR 1, PR 5 | In progress | PR 1 domain calculation tests; query and presentation integration remains in PR 5 |
-| R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | In progress | PR 3 subnavigation, history route, read-only transaction presentation, and replacement modal; transaction review and recurring overview integration remain PR 4–5 |
+| R24–R32: calculations and Other | PR 1, PR 5 | Done | PR 1 domain calculation tests; PR 5 authenticated aggregate query, target-currency normalization, synthetic Other integration, totals, filters/charts, no-import rendering, and invalidation coverage |
+| R33–R39: navigation and presentation | PR 3, PR 4, PR 5 | Done | PR 3 subnavigation, history route, read-only transaction presentation, and replacement modal; PR 4 transaction review; PR 5 recurring averages, differences, Other, living-cost estimate, and observed average |
 | R40–R42: local development history seed | PR 2, PR 3 | Done | PR 2 in-memory repeated-seed regression and repeated Wrangler local seed verification |
 | Cross-cutting hardening | PR 6 | Planned | — |
 
@@ -372,7 +372,7 @@ Add new entries; do not remove historical entries.
 | 2026-07-16 | D9 | Seed synthetic history only through the local/full seed: create the immediately previous calendar month dynamically and reserve the current month for CSV import. Do not add imported history to the remote seed. | Development starts with history available for review while still exercising the primary current-month import workflow; dynamic dates prevent committed seed data from becoming stale. | R40–R42; PR 2–3 | Accepted |
 | 2026-07-16 | D10 | Treat a zero `Credit/Debit Amount` as an actionable validation error rather than a debit or skipped credit. Preview and commit both parse the source independently, and commit persists only the sanitized basename as source metadata. | Zero is neither a negative debit nor a positive credit under R6; reparsing avoids retaining server-side import drafts or raw CSV while keeping commit authoritative. | R1, R6, R8–R9; PR 2–3 | Accepted |
 | 2026-07-16 | D11 | Keep source filenames out of the PR 3 read APIs and UI; expose only month metadata plus the parsed immutable and effective transaction values needed for history review. | The filename is not required for transaction-month navigation or traceability and may itself contain sensitive information; the raw CSV remains unpersisted under R8. | R8, R10, R17; PR 3 | Accepted |
-| 2026-07-16 | D12 | While GitHub Stacked PRs remains unavailable for this repository, preserve the local `gh stack` topology, push with `gh stack push`, and create draft chained PRs through GitHub's API with each PR targeting the branch immediately below it. Do not use `gh pr create`. | The user explicitly authorized local stacking plus ordinary chained PR publication so PR 4 can proceed without the private-preview GitHub Stack object. | PR publication workflow; PR 1–4 | Accepted |
+| 2026-07-16 | D12 | While GitHub Stacked PRs remains unavailable for this repository, preserve the local `gh stack` topology, push with `gh stack push`, and create draft chained PRs through GitHub's API with each PR targeting the branch immediately below it. Do not use `gh pr create`. | The user explicitly authorized local stacking plus ordinary chained PR publication so PR 4 can proceed without the private-preview GitHub Stack object. | PR publication workflow; PR 1–5 | Accepted |
 | 2026-07-16 | D13 | Transaction mutations use optimistic concurrency with the read contract's opaque `lastModified` token. Every mutation must submit the token it read; the server updates only when it still matches, returns the updated transaction and a new token on success, returns 409 with a safe reload instruction on mismatch, 404 when the transaction or selected recurring expense no longer exists, and 400 for invalid or immutable fields. Clients invalidate/refetch affected history queries after success or conflict. Atomic create-and-associate first claims the token and conditionally creates/associates within one D1 batch, so a conflict cannot leave an unassociated recurring expense. | Prevent silent lost updates during inline review while keeping the API explicit and testable. | O2; R13–R23, R37–R38; PR 4 | Accepted |
 
 ## Open questions and discovered work
@@ -404,3 +404,6 @@ Add a brief entry whenever an effort starts, changes materially, becomes blocked
 | 2026-07-16 | PR 4 | Started transaction review, editing, and manual association on `codex/expenses-history-pr4-transaction-review`, directly above the updated PR 3 commit. Resolved O2 through D13 before mutation implementation. | Clean tree; complete plan reread; verified local/GitHub PR 1–3 chain; reviewed PR 1 schema/FKs, PR 2 replacement/seed behavior, PR 3 reads/upload invalidation/history UI/routes, existing expense CRUD/forms/query hooks, and relevant tests. | Implement PR 4 mutation contracts, atomic create/associate, reactive review UI, and focused regressions only. |
 | 2026-07-16 | PR 4 | Completed transaction review/editing and manual association only. Added strict optimistic mutations, immutable bank-field protection, CHF 0 support, classification edits, manual search/detach, one-time classification snapshots, atomic Monthly/CHF recurring creation, Other filtering, monthly total/matched/Other summaries, and history invalidation after transaction mutations and recurring-expense deletion. No PR 5 averages/synthetic row or automatic matching was added. | 38 tests/98 assertions; TypeScript; Biome; production build; clean migration regeneration; repeated local migration/seed and exact queries; unauthenticated endpoint/browser auth checks; desktop/mobile console review; `git diff --check`; full PR 4 boundary/security/accessibility/concurrency/atomicity/invalidation review. | Commit and publish PR 4 through D12, verify its base is PR 3, record the link, and do not begin PR 5. |
 | 2026-07-16 | PR 4 | Published draft PR #5 through D12 after `gh stack push`; PR 4 targets PR 3's branch. GitHub's private-preview Stack object remains unavailable, so `gh stack submit --auto` was not used and `gh pr create` was never used. | Verified all four GitHub PR heads, bases, open/draft states, and links plus the local `gh stack view` topology. | PR 4 is ready for review. Do not begin PR 5 until review decisions are resolved. |
+| 2026-07-16 | PR 5 | Started recurring-overview real averages, synthetic Other, and calculation-aware totals on `codex/expenses-history-pr5-recurring-overview`, directly above PR 4. Confirmed the worktree was clean, PRs 1–4 remained intact, all four GitHub draft PRs had the required chained bases, and the local stack topology was correct before creating PR 5. | Read the complete living plan and repository instructions; verified branch ancestry, GitHub PR metadata, and `gh stack view`. | Inspect PRs 1–4 contracts plus the complete existing recurring overview and tests, then implement PR 5 only without changing D13 or beginning PR 6 hardening. |
+| 2026-07-16 | PR 5 | Completed recurring-overview averages, configured-minus-real differences, the synthetic non-CRUD Other row, living-cost and observed summaries, deliberate Mixed filtering/chart behavior, and every required calculation invalidation. Added an authenticated target-currency summary query that reuses PR 1's calculation contract; no migration, D13 change, automatic matching, import/history redesign, or PR 6 hardening was added. | 44 tests/111 assertions; TypeScript; Biome; production build; clean schema generation; repeated local migration/seed plus exact aggregate query; unauthenticated browser/API auth checks; `git diff --check`; full PR 5 boundary/calculation/CRUD/invalidation review. | Commit and publish PR 5 through D12 with PR 4 as its base, record the draft PR link, and leave PR 6 unstarted. |
+| 2026-07-16 | PR 5 | Published draft PR #6 through D12 after `gh stack push`; PR 5 targets PR 4's `codex/expenses-history-pr4-transaction-review` branch. GitHub's private-preview Stack object remains unavailable, and `gh pr create` was not used. | Verified PR #6 is open and draft with the exact PR 5 head and PR 4 base; rechecked the five-branch local `gh stack view` topology. | PR 5 is ready for review. Leave PR 6 unstarted until review decisions are resolved. |

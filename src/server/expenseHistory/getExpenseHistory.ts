@@ -1,9 +1,16 @@
 import { asc, desc, eq } from "drizzle-orm";
 import db from "@/db";
 import { expenseMonths, expenses, expenseTransactions } from "@/db/schema";
+import {
+	getExchangeRates,
+	getTargetCurrency,
+	getValueInTargetCurrencyPerMonth,
+} from "@/utility/expenseFetchUtil";
+import { calculateExpenseHistorySummary } from "@/utility/expenseHistoryCalculations";
 import type {
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
 
 export async function getExpenseHistoryMonths(): Promise<
@@ -87,5 +94,54 @@ export async function getExpenseHistoryMonth(
 		month: monthRow,
 		transactions,
 		summary: { total, matched, other },
+	};
+}
+
+export async function getExpenseOverviewSummary(): Promise<ExpenseOverviewSummary> {
+	const [configuredExpenses, importedMonths, transactions, rates, currency] =
+		await Promise.all([
+			db.query.expenses.findMany(),
+			db.select({ id: expenseMonths.id }).from(expenseMonths),
+			db
+				.select({
+					expenseMonthId: expenseTransactions.expenseMonthId,
+					expenseId: expenseTransactions.expenseId,
+					amount: expenseTransactions.amount,
+				})
+				.from(expenseTransactions),
+			getExchangeRates(),
+			getTargetCurrency(),
+		]);
+
+	const toTargetMonthlyAmount = (
+		value: number,
+		originalCurrency: (typeof configuredExpenses)[number]["originalCurrency"],
+		billingRate: (typeof configuredExpenses)[number]["rate"],
+	) =>
+		getValueInTargetCurrencyPerMonth({
+			value,
+			currency: originalCurrency,
+			billingRate,
+			rates,
+			targetCurrency: currency,
+		}) ?? value;
+
+	return {
+		currency,
+		...calculateExpenseHistorySummary({
+			importedMonths,
+			configuredExpenses: configuredExpenses.map((expense) => ({
+				expenseId: expense.id,
+				monthlyAmount: toTargetMonthlyAmount(
+					expense.originalPrice,
+					expense.originalCurrency,
+					expense.rate,
+				),
+			})),
+			transactions: transactions.map((transaction) => ({
+				...transaction,
+				amount: toTargetMonthlyAmount(transaction.amount, "CHF", "Monthly"),
+			})),
+		}),
 	};
 }

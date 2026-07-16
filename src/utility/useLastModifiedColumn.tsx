@@ -12,8 +12,10 @@ export function useLastModifiedColumn<
 		size: 100,
 		header: "Last modified",
 		sortingFn: "datetime",
+		sortUndefined: "last",
 		cell: function render({ getValue }) {
-			const value = getValue<string>();
+			const value = getValue<string | null>();
+			if (!value) return <span>–</span>;
 			const formattedDateWithTime = formatRelative(
 				parseISO(value),
 				getNowInUTC(),

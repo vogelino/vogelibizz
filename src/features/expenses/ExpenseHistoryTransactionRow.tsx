@@ -13,6 +13,7 @@ import {
 } from "@/db/schema";
 import {
 	expenseHistoryMonthQueryOptions,
+	expenseOverviewSummaryQueryOptions,
 	expensesQueryOptions,
 } from "@/utility/data/queryOptions";
 import useExpenses from "@/utility/data/useExpenses";
@@ -80,6 +81,9 @@ export function ExpenseHistoryTransactionRow({
 		const invalidations = [
 			queryClient.invalidateQueries({
 				queryKey: expenseHistoryMonthQueryOptions(month).queryKey,
+			}),
+			queryClient.invalidateQueries({
+				queryKey: expenseOverviewSummaryQueryOptions().queryKey,
 			}),
 		];
 		if (created)

@@ -27,6 +27,7 @@ import { Route } from "@/routes/_resource/expenses/history";
 import {
 	expenseHistoryMonthQueryOptions,
 	expenseHistoryMonthsQueryOptions,
+	expenseOverviewSummaryQueryOptions,
 } from "@/utility/data/queryOptions";
 import useExpenseHistoryMonth from "@/utility/data/useExpenseHistoryMonth";
 import useExpenseHistoryMonths from "@/utility/data/useExpenseHistoryMonths";
@@ -116,6 +117,9 @@ export default function ExpenseHistoryPage() {
 				}),
 				queryClient.invalidateQueries({
 					queryKey: expenseHistoryMonthQueryOptions(result.month).queryKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
 				}),
 			]);
 			await navigate({

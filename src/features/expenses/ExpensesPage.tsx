@@ -17,12 +17,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-	type ExpenseWithMonthlyCLPPriceType,
-	expenseCategoryEnum,
-	expenseTypeEnum,
-} from "@/db/schema";
+import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
+import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
 import useExpenses from "@/utility/data/useExpenses";
 import useSettings from "@/utility/data/useSettings";
 import {
@@ -34,8 +31,19 @@ import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { getExpensesTableColumns } from "./columns";
+import {
+	createExpenseOverviewRows,
+	type ExpenseOverviewCategory,
+	type ExpenseOverviewRow,
+	type ExpenseOverviewType,
+	filterExpenseOverviewRows,
+	limitChartSeries,
+	mixedClassification,
+	totalMonthlyAmount,
+	totalsByClassification,
+} from "./expenseOverviewRows";
 
-type TypeFilterType = ExpenseWithMonthlyCLPPriceType["type"] | "All types";
+type TypeFilterType = ExpenseOverviewType | "All types";
 
 export default function ExpensesPage({
 	loading = false,
@@ -43,28 +51,30 @@ export default function ExpensesPage({
 	loading?: boolean;
 }) {
 	const deleteMutation = useExpenseDelete();
-	const deleteColumn = getDeleteColumn<ExpenseWithMonthlyCLPPriceType>((id) =>
-		deleteMutation.mutate(id),
+	const deleteColumn = getDeleteColumn<ExpenseOverviewRow>(
+		(id) => deleteMutation.mutate(id),
+		(row) => row.kind === "recurring",
 	);
-	const lastModifiedColumn =
-		useLastModifiedColumn<ExpenseWithMonthlyCLPPriceType>();
+	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
 	const [categoryFilter, setCategoryFilter] = useState<
-		ExpenseWithMonthlyCLPPriceType["category"][]
+		ExpenseOverviewCategory[]
 	>([]);
 	const [typeFilter, setTypeFilter] = useState<string | number | undefined>(
 		"All types",
 	);
-	const [selectedRows, setSelectedRows] = useState<
-		ExpenseWithMonthlyCLPPriceType[]
-	>([]);
-	const tableRef = useRef<TanstackTable<ExpenseWithMonthlyCLPPriceType> | null>(
-		null,
-	);
+	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
+	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
 
 	const { data = [], error, isPending } = useExpenses();
+	const overviewQuery = useExpenseOverviewSummary();
 	const settingsQuery = useSettings();
-	const targetCurrency = settingsQuery.data?.targetCurrency ?? "CLP";
-	const isLoading = loading || isPending;
+	const targetCurrency =
+		overviewQuery.data?.currency ?? settingsQuery.data?.targetCurrency ?? "CLP";
+	const isLoading = loading || isPending || overviewQuery.isPending;
+	const rows = useMemo(
+		() => createExpenseOverviewRows(data, overviewQuery.data),
+		[data, overviewQuery.data],
+	);
 
 	const selectionColumn = useMemo(
 		() =>
@@ -82,17 +92,20 @@ export default function ExpensesPage({
 						aria-label="Select all rows"
 					/>
 				),
-				cell: ({ row }) => (
-					<Checkbox
-						checked={row.getIsSelected()}
-						onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))}
-						aria-label="Select row"
-					/>
-				),
+				cell: ({ row }) =>
+					row.original.kind === "recurring" ? (
+						<Checkbox
+							checked={row.getIsSelected()}
+							onCheckedChange={(checked) =>
+								row.toggleSelected(Boolean(checked))
+							}
+							aria-label={`Select ${row.original.name}`}
+						/>
+					) : null,
 				size: 36,
 				enableSorting: false,
 				enableHiding: false,
-			}) as ColumnDef<ExpenseWithMonthlyCLPPriceType, unknown>,
+			}) as ColumnDef<ExpenseOverviewRow, unknown>,
 		[],
 	);
 
@@ -104,12 +117,14 @@ export default function ExpensesPage({
 				lastModifiedColumn,
 				deleteColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
-			] as ColumnDef<ExpenseWithMonthlyCLPPriceType, any>[],
+			] as ColumnDef<ExpenseOverviewRow, any>[],
 		[targetCurrency, selectionColumn, deleteColumn, lastModifiedColumn],
 	);
 
 	const {
-		totalLabel,
+		configuredTotalLabel,
+		livingCostLabel,
+		observedAverageLabel,
 		filteredLabel,
 		showFilteredTotal,
 		categorySeries,
@@ -117,64 +132,82 @@ export default function ExpensesPage({
 	} = useMemo(() => {
 		const hasCategoryFilter = categoryFilter.length > 0;
 		const hasTypeFilter = typeFilter !== "All types";
-		const filteredData =
-			hasCategoryFilter || hasTypeFilter
-				? data.filter((expense) => {
-						if (
-							hasCategoryFilter &&
-							!categoryFilter.includes(expense.category)
-						) {
-							return false;
-						}
-						if (hasTypeFilter && expense.type !== typeFilter) {
-							return false;
-						}
-						return true;
-					})
-				: data;
-
-		const total = getTotalPerMonthValue(data);
-		const filtered = getTotalPerMonthValue(filteredData);
+		const filteredData = filterExpenseOverviewRows(
+			rows,
+			categoryFilter,
+			(typeFilter ?? "All types") as TypeFilterType,
+		);
+		const filtered = totalMonthlyAmount(filteredData);
 
 		const categoryTotals = categoryFilter.length
-			? getTotalsByKeys(
+			? totalsByClassification(
 					filteredData,
-					categoryFilter,
 					(expense) => expense.category,
+					categoryFilter,
 				)
-			: getTotalsByKey(filteredData, (expense) => expense.category);
-		const topCategories = categoryTotals.slice(0, 4);
+			: totalsByClassification(filteredData, (expense) => expense.category);
+		const topCategories = limitChartSeries(categoryTotals);
 
 		const typeTotals =
 			typeFilter && typeFilter !== "All types"
-				? getTotalsByKeys(
-						filteredData,
-						[String(typeFilter)],
-						(expense) => expense.type,
-					)
-				: getTotalsByKey(filteredData, (expense) => expense.type);
+				? totalsByClassification(filteredData, (expense) => expense.type, [
+						String(typeFilter),
+					])
+				: totalsByClassification(filteredData, (expense) => expense.type);
 
 		return {
-			totalLabel: total ? formatCurrency(total, targetCurrency) : "–",
-			filteredLabel: filtered ? formatCurrency(filtered, targetCurrency) : "–",
+			configuredTotalLabel: formatCurrency(
+				overviewQuery.data?.configuredMonthlyTotal ??
+					data.reduce((total, expense) => total + expense.clpMonthlyPrice, 0),
+				targetCurrency,
+			),
+			livingCostLabel:
+				overviewQuery.data?.livingCostEstimate === null || !overviewQuery.data
+					? "–"
+					: formatCurrency(
+							overviewQuery.data.livingCostEstimate,
+							targetCurrency,
+						),
+			observedAverageLabel:
+				overviewQuery.data?.observedMonthlyAverage === null ||
+				!overviewQuery.data
+					? "–"
+					: formatCurrency(
+							overviewQuery.data.observedMonthlyAverage,
+							targetCurrency,
+						),
+			filteredLabel: formatCurrency(filtered, targetCurrency),
 			showFilteredTotal: hasCategoryFilter || hasTypeFilter,
 			categorySeries: topCategories,
 			typeSeries: typeTotals,
 		};
-	}, [categoryFilter, data, targetCurrency, typeFilter]);
+	}, [
+		categoryFilter,
+		data,
+		overviewQuery.data,
+		rows,
+		targetCurrency,
+		typeFilter,
+	]);
 
 	const categoryOptions = useComboboxOptions({
-		optionValues: expenseCategoryEnum.enumValues,
+		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
 		renderer: (cat) => (
 			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
 		),
 	});
 
 	const typeOptions = useComboboxOptions({
-		optionValues: ["All types", ...expenseTypeEnum.enumValues],
+		optionValues: [
+			"All types",
+			...expenseTypeEnum.enumValues,
+			mixedClassification,
+		],
 		renderer: (type) => (
 			<>
-				{mapTypeToIcon(type as TypeFilterType, 24)}
+				{type === mixedClassification
+					? null
+					: mapTypeToIcon(type as Exclude<TypeFilterType, "Mixed">, 24)}
 				<span>{type}</span>
 			</>
 		),
@@ -190,7 +223,7 @@ export default function ExpensesPage({
 				disabled={isLoading}
 				onClick={() => {
 					for (const row of selectedRows) {
-						deleteMutation.mutate(row.id);
+						if (row.kind === "recurring") deleteMutation.mutate(row.id);
 					}
 					setSelectedRows([]);
 					tableRef.current?.resetRowSelection();
@@ -206,8 +239,8 @@ export default function ExpensesPage({
 			<div className="px-6 md:px-10 sticky left-0">
 				<div className="p-4 bg-muted my-4">
 					<div className="flex flex-wrap items-start justify-between gap-6">
-						{showFilteredTotal ? (
-							<div className="flex flex-wrap gap-6">
+						<div className="flex flex-wrap gap-6">
+							{showFilteredTotal ? (
 								<div className="flex flex-col">
 									<span className="text-sm text-muted-foreground">
 										Filtered total
@@ -220,33 +253,44 @@ export default function ExpensesPage({
 										)}
 									</span>
 								</div>
-								<div className="flex flex-col">
-									<span className="text-sm text-muted-foreground">
-										Monthly total
-									</span>
-									<span className="text-lg">
-										{isLoading ? (
-											<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
-										) : (
-											totalLabel
-										)}
-									</span>
-								</div>
-							</div>
-						) : (
+							) : null}
 							<div className="flex flex-col">
 								<span className="text-sm text-muted-foreground">
-									Monthly total
+									Configured recurring total
 								</span>
 								<span className="text-lg">
 									{isLoading ? (
 										<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
 									) : (
-										totalLabel
+										configuredTotalLabel
 									)}
 								</span>
 							</div>
-						)}
+							<div className="flex flex-col">
+								<span className="text-sm text-muted-foreground">
+									Living-cost estimate
+								</span>
+								<span className="text-lg">
+									{isLoading ? (
+										<Skeleton className="h-6 w-24" />
+									) : (
+										livingCostLabel
+									)}
+								</span>
+							</div>
+							<div className="flex flex-col">
+								<span className="text-sm text-muted-foreground">
+									Observed monthly average
+								</span>
+								<span className="text-lg">
+									{isLoading ? (
+										<Skeleton className="h-6 w-24" />
+									) : (
+										observedAverageLabel
+									)}
+								</span>
+							</div>
+						</div>
 						<div className="flex items-start gap-4">
 							<MiniPieChart
 								title="By category"
@@ -254,9 +298,10 @@ export default function ExpensesPage({
 								colorForLabel={getCategoryStrokeColor}
 								loading={isLoading}
 								onSegmentClick={(label) => {
-									const nextCategory = expenseCategoryEnum.enumValues.find(
-										(value) => value === label,
-									);
+									const nextCategory = [
+										...expenseCategoryEnum.enumValues,
+										mixedClassification,
+									].find((value) => value === label);
 									if (!nextCategory) return;
 									setCategoryFilter([nextCategory]);
 									tableRef.current
@@ -274,9 +319,10 @@ export default function ExpensesPage({
 								colorForLabel={getTypeStrokeColor}
 								loading={isLoading}
 								onSegmentClick={(label) => {
-									const nextType = expenseTypeEnum.enumValues.find(
-										(value) => value === label,
-									);
+									const nextType = [
+										...expenseTypeEnum.enumValues,
+										mixedClassification,
+									].find((value) => value === label);
 									if (!nextType) return;
 									setTypeFilter(nextType);
 									tableRef.current?.getColumn("type")?.setFilterValue(nextType);
@@ -292,9 +338,9 @@ export default function ExpensesPage({
 			</div>
 			<DataTable
 				columns={columns}
-				data={!error && data.length > 0 ? data : []}
+				data={!error && rows.length > 0 ? rows : []}
 				loading={isLoading}
-				enableRowSelection
+				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}
 				toolbarSkeleton={
 					<div className="flex items-center gap-4 flex-wrap">
@@ -320,20 +366,24 @@ export default function ExpensesPage({
 							tableRef.current = table;
 							return null;
 						})()}
-						<MultiValueInput<ExpenseWithMonthlyCLPPriceType["category"]>
+						<MultiValueInput<ExpenseOverviewCategory>
 							options={categoryOptions}
-							values={
-								categoryFilter as ExpenseWithMonthlyCLPPriceType["category"][]
-							}
+							values={categoryFilter}
 							placeholder="Filter by category"
-							selectedValueFormater={(value) => (
-								<ExpenseCategoryBadge
-									value={value as ExpenseWithMonthlyCLPPriceType["category"]}
-								/>
-							)}
+							selectedValueFormater={(value) =>
+								value === mixedClassification ? (
+									<PillText pillColorClass="bg-muted-foreground">
+										Mixed
+									</PillText>
+								) : (
+									<ExpenseCategoryBadge
+										value={value as Exclude<ExpenseOverviewCategory, "Mixed">}
+									/>
+								)
+							}
 							onChange={(cat) => {
 								const nextValues = cat.map(
-									(c) => c.value as ExpenseWithMonthlyCLPPriceType["category"],
+									(c) => c.value as ExpenseOverviewCategory,
 								);
 								setCategoryFilter(nextValues);
 								table
@@ -377,48 +427,6 @@ export default function ExpensesPage({
 			/>
 		</>
 	);
-}
-
-function getTotalPerMonthValue(data: ExpenseWithMonthlyCLPPriceType[]) {
-	return data.reduce((a, b) => {
-		const monthlyPrice = b.clpMonthlyPrice;
-		return a + (monthlyPrice ?? 0);
-	}, 0);
-}
-
-function getTotalsByKey(
-	data: ExpenseWithMonthlyCLPPriceType[],
-	getKey: (expense: ExpenseWithMonthlyCLPPriceType) => string,
-) {
-	const totals = new Map<string, number>();
-	for (const expense of data) {
-		const key = getKey(expense);
-		const next = (totals.get(key) ?? 0) + (expense.clpMonthlyPrice ?? 0);
-		totals.set(key, next);
-	}
-	return [...totals.entries()]
-		.map(([label, value]) => ({ label, value }))
-		.sort((a, b) => b.value - a.value);
-}
-
-function getTotalsByKeys(
-	data: ExpenseWithMonthlyCLPPriceType[],
-	keys: string[],
-	getKey: (expense: ExpenseWithMonthlyCLPPriceType) => string,
-) {
-	const totals = new Map<string, number>();
-	for (const key of keys) {
-		totals.set(key, 0);
-	}
-	for (const expense of data) {
-		const key = getKey(expense);
-		if (!totals.has(key)) continue;
-		const next = (totals.get(key) ?? 0) + (expense.clpMonthlyPrice ?? 0);
-		totals.set(key, next);
-	}
-	return [...totals.entries()]
-		.map(([label, value]) => ({ label, value }))
-		.sort((a, b) => b.value - a.value);
 }
 
 function MiniPieChart({
