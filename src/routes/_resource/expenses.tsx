@@ -1,6 +1,7 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import ResourcePageLayout from "@/components/ResourcePageLayout";
 import ExpensesPage from "@/features/expenses/ExpensesPage";
+import { ExpensesSubnavigation } from "@/features/expenses/ExpensesSubnavigation";
 
 export const Route = createFileRoute("/_resource/expenses")({
 	component: ExpensesLayout,
@@ -8,8 +9,15 @@ export const Route = createFileRoute("/_resource/expenses")({
 });
 
 function ExpensesLayout() {
+	const isHistory = useLocation({
+		select: (location) => location.pathname.startsWith("/expenses/history"),
+	});
 	return (
-		<ResourcePageLayout resource="expenses">
+		<ResourcePageLayout
+			resource="expenses"
+			showCreate={!isHistory}
+			headerContent={<ExpensesSubnavigation />}
+		>
 			<Outlet />
 		</ResourcePageLayout>
 	);

@@ -26,9 +26,13 @@ export function useResourceActions(actions: ReactNode | null) {
 function ResourcePageLayout({
 	resource,
 	children,
+	showCreate = true,
+	headerContent,
 }: {
 	resource: RoutedResource;
 	children: ReactNode;
+	showCreate?: boolean;
+	headerContent?: ReactNode;
 }) {
 	const [actions, setActions] = useState<ReactNode | null>(null);
 
@@ -41,9 +45,10 @@ function ResourcePageLayout({
 					</h1>
 					<div className="flex items-center gap-2">
 						{actions}
-						<ResourceCreateButton resource={resource} />
+						{showCreate && <ResourceCreateButton resource={resource} />}
 					</div>
 				</div>
+				{headerContent}
 			</div>
 
 			{children}

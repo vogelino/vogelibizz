@@ -31,13 +31,16 @@ import { Route as ResourceClientsIndexRouteImport } from './routes/_resource/cli
 import { Route as ApiProjectsIdRouteImport } from './routes/api/projects/$id'
 import { Route as ApiInvoicesIdRouteImport } from './routes/api/invoices/$id'
 import { Route as ApiExpensesIdRouteImport } from './routes/api/expenses/$id'
+import { Route as ApiExpenseHistoryMonthsRouteImport } from './routes/api/expense-history/months'
 import { Route as ApiClientsIdRouteImport } from './routes/api/clients/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ResourceProjectsCreateRouteImport } from './routes/_resource/projects/create'
 import { Route as ResourceInvoicesCreateRouteImport } from './routes/_resource/invoices/create'
 import { Route as ResourceInvoicesIdRouteImport } from './routes/_resource/invoices/$id'
+import { Route as ResourceExpensesHistoryRouteImport } from './routes/_resource/expenses/history'
 import { Route as ResourceExpensesCreateRouteImport } from './routes/_resource/expenses/create'
 import { Route as ResourceClientsCreateRouteImport } from './routes/_resource/clients/create'
+import { Route as ApiExpenseHistoryMonthsMonthRouteImport } from './routes/api/expense-history/months/$month'
 import { Route as ApiExpenseHistoryImportPreviewRouteImport } from './routes/api/expense-history/import/preview'
 import { Route as ApiExpenseHistoryImportCommitRouteImport } from './routes/api/expense-history/import/commit'
 import { Route as ResourceProjectsEditIdRouteImport } from './routes/_resource/projects/edit/$id'
@@ -159,6 +162,11 @@ const ApiExpensesIdRoute = ApiExpensesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiExpensesRoute,
 } as any)
+const ApiExpenseHistoryMonthsRoute = ApiExpenseHistoryMonthsRouteImport.update({
+  id: '/api/expense-history/months',
+  path: '/api/expense-history/months',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiClientsIdRoute = ApiClientsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -184,6 +192,11 @@ const ResourceInvoicesIdRoute = ResourceInvoicesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ResourceInvoicesRoute,
 } as any)
+const ResourceExpensesHistoryRoute = ResourceExpensesHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => ResourceExpensesRoute,
+} as any)
 const ResourceExpensesCreateRoute = ResourceExpensesCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -194,6 +207,12 @@ const ResourceClientsCreateRoute = ResourceClientsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => ResourceClientsRoute,
 } as any)
+const ApiExpenseHistoryMonthsMonthRoute =
+  ApiExpenseHistoryMonthsMonthRouteImport.update({
+    id: '/$month',
+    path: '/$month',
+    getParentRoute: () => ApiExpenseHistoryMonthsRoute,
+  } as any)
 const ApiExpenseHistoryImportPreviewRoute =
   ApiExpenseHistoryImportPreviewRouteImport.update({
     id: '/api/expense-history/import/preview',
@@ -275,11 +294,13 @@ export interface FileRoutesByFullPath {
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/expenses/history': typeof ResourceExpensesHistoryRoute
   '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
@@ -295,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
+  '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -312,11 +334,13 @@ export interface FileRoutesByTo {
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/expenses/history': typeof ResourceExpensesHistoryRoute
   '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
@@ -332,6 +356,7 @@ export interface FileRoutesByTo {
   '/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
+  '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -355,11 +380,13 @@ export interface FileRoutesById {
   '/api/settings': typeof ApiSettingsRoute
   '/_resource/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/_resource/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
+  '/_resource/expenses/history': typeof ResourceExpensesHistoryRoute
   '/_resource/invoices/$id': typeof ResourceInvoicesIdRoute
   '/_resource/invoices/create': typeof ResourceInvoicesCreateRoute
   '/_resource/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
@@ -375,6 +402,7 @@ export interface FileRoutesById {
   '/_resource/projects/edit/$id': typeof ResourceProjectsEditIdRouteWithChildren
   '/api/expense-history/import/commit': typeof ApiExpenseHistoryImportCommitRoute
   '/api/expense-history/import/preview': typeof ApiExpenseHistoryImportPreviewRoute
+  '/api/expense-history/months/$month': typeof ApiExpenseHistoryMonthsMonthRoute
   '/_resource/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/_resource/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/_resource/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
@@ -398,11 +426,13 @@ export interface FileRouteTypes {
     | '/api/settings'
     | '/clients/create'
     | '/expenses/create'
+    | '/expenses/history'
     | '/invoices/$id'
     | '/invoices/create'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/expense-history/months'
     | '/api/expenses/$id'
     | '/api/invoices/$id'
     | '/api/projects/$id'
@@ -418,6 +448,7 @@ export interface FileRouteTypes {
     | '/projects/edit/$id'
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
+    | '/api/expense-history/months/$month'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
@@ -435,11 +466,13 @@ export interface FileRouteTypes {
     | '/api/settings'
     | '/clients/create'
     | '/expenses/create'
+    | '/expenses/history'
     | '/invoices/$id'
     | '/invoices/create'
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/expense-history/months'
     | '/api/expenses/$id'
     | '/api/invoices/$id'
     | '/api/projects/$id'
@@ -455,6 +488,7 @@ export interface FileRouteTypes {
     | '/projects/edit/$id'
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
+    | '/api/expense-history/months/$month'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
     | '/projects/edit/$id/modal'
@@ -477,11 +511,13 @@ export interface FileRouteTypes {
     | '/api/settings'
     | '/_resource/clients/create'
     | '/_resource/expenses/create'
+    | '/_resource/expenses/history'
     | '/_resource/invoices/$id'
     | '/_resource/invoices/create'
     | '/_resource/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/expense-history/months'
     | '/api/expenses/$id'
     | '/api/invoices/$id'
     | '/api/projects/$id'
@@ -497,6 +533,7 @@ export interface FileRouteTypes {
     | '/_resource/projects/edit/$id'
     | '/api/expense-history/import/commit'
     | '/api/expense-history/import/preview'
+    | '/api/expense-history/months/$month'
     | '/_resource/clients/edit/$id/modal'
     | '/_resource/expenses/edit/$id/modal'
     | '/_resource/projects/edit/$id/modal'
@@ -515,6 +552,7 @@ export interface RootRouteChildren {
   ApiProjectsRoute: typeof ApiProjectsRouteWithChildren
   ApiSettingsRoute: typeof ApiSettingsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiExpenseHistoryMonthsRoute: typeof ApiExpenseHistoryMonthsRouteWithChildren
   ApiExpenseHistoryImportCommitRoute: typeof ApiExpenseHistoryImportCommitRoute
   ApiExpenseHistoryImportPreviewRoute: typeof ApiExpenseHistoryImportPreviewRoute
 }
@@ -675,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiExpensesIdRouteImport
       parentRoute: typeof ApiExpensesRoute
     }
+    '/api/expense-history/months': {
+      id: '/api/expense-history/months'
+      path: '/api/expense-history/months'
+      fullPath: '/api/expense-history/months'
+      preLoaderRoute: typeof ApiExpenseHistoryMonthsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/clients/$id': {
       id: '/api/clients/$id'
       path: '/$id'
@@ -710,6 +755,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceInvoicesIdRouteImport
       parentRoute: typeof ResourceInvoicesRoute
     }
+    '/_resource/expenses/history': {
+      id: '/_resource/expenses/history'
+      path: '/history'
+      fullPath: '/expenses/history'
+      preLoaderRoute: typeof ResourceExpensesHistoryRouteImport
+      parentRoute: typeof ResourceExpensesRoute
+    }
     '/_resource/expenses/create': {
       id: '/_resource/expenses/create'
       path: '/create'
@@ -723,6 +775,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/create'
       preLoaderRoute: typeof ResourceClientsCreateRouteImport
       parentRoute: typeof ResourceClientsRoute
+    }
+    '/api/expense-history/months/$month': {
+      id: '/api/expense-history/months/$month'
+      path: '/$month'
+      fullPath: '/api/expense-history/months/$month'
+      preLoaderRoute: typeof ApiExpenseHistoryMonthsMonthRouteImport
+      parentRoute: typeof ApiExpenseHistoryMonthsRoute
     }
     '/api/expense-history/import/preview': {
       id: '/api/expense-history/import/preview'
@@ -876,12 +935,14 @@ const ResourceExpensesEditIdRouteWithChildren =
 
 interface ResourceExpensesRouteChildren {
   ResourceExpensesCreateRoute: typeof ResourceExpensesCreateRouteWithChildren
+  ResourceExpensesHistoryRoute: typeof ResourceExpensesHistoryRoute
   ResourceExpensesIndexRoute: typeof ResourceExpensesIndexRoute
   ResourceExpensesEditIdRoute: typeof ResourceExpensesEditIdRouteWithChildren
 }
 
 const ResourceExpensesRouteChildren: ResourceExpensesRouteChildren = {
   ResourceExpensesCreateRoute: ResourceExpensesCreateRouteWithChildren,
+  ResourceExpensesHistoryRoute: ResourceExpensesHistoryRoute,
   ResourceExpensesIndexRoute: ResourceExpensesIndexRoute,
   ResourceExpensesEditIdRoute: ResourceExpensesEditIdRouteWithChildren,
 }
@@ -1013,6 +1074,20 @@ const ApiProjectsRouteWithChildren = ApiProjectsRoute._addFileChildren(
   ApiProjectsRouteChildren,
 )
 
+interface ApiExpenseHistoryMonthsRouteChildren {
+  ApiExpenseHistoryMonthsMonthRoute: typeof ApiExpenseHistoryMonthsMonthRoute
+}
+
+const ApiExpenseHistoryMonthsRouteChildren: ApiExpenseHistoryMonthsRouteChildren =
+  {
+    ApiExpenseHistoryMonthsMonthRoute: ApiExpenseHistoryMonthsMonthRoute,
+  }
+
+const ApiExpenseHistoryMonthsRouteWithChildren =
+  ApiExpenseHistoryMonthsRoute._addFileChildren(
+    ApiExpenseHistoryMonthsRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResourceRoute: ResourceRouteWithChildren,
@@ -1026,6 +1101,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProjectsRoute: ApiProjectsRouteWithChildren,
   ApiSettingsRoute: ApiSettingsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiExpenseHistoryMonthsRoute: ApiExpenseHistoryMonthsRouteWithChildren,
   ApiExpenseHistoryImportCommitRoute: ApiExpenseHistoryImportCommitRoute,
   ApiExpenseHistoryImportPreviewRoute: ApiExpenseHistoryImportPreviewRoute,
 }
