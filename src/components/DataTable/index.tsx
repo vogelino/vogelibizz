@@ -9,6 +9,7 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	type PaginationState,
+	type Row,
 	type RowSelectionState,
 	type SortingState,
 	type Table as TanstackTable,
@@ -42,7 +43,7 @@ type DataTableProps<TData> = {
 	loading?: boolean;
 	skeletonRows?: number;
 	toolbarSkeleton?: ReactNode;
-	enableRowSelection?: boolean;
+	enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
 	onSelectionChange?: (rows: TData[]) => void;
 };
 

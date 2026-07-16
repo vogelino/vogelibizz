@@ -4,12 +4,14 @@ import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts"
 import {
 	getExpenseHistoryMonth,
 	getExpenseHistoryMonths,
+	getExpenseOverviewSummary,
 } from "./getExpenseHistory";
 
 type ReadHttpDependencies = {
 	authorize: (request: Request) => Promise<boolean>;
 	getMonths: typeof getExpenseHistoryMonths;
 	getMonth: typeof getExpenseHistoryMonth;
+	getOverview: typeof getExpenseOverviewSummary;
 };
 
 export function createExpenseHistoryReadHandlers(
@@ -17,6 +19,7 @@ export function createExpenseHistoryReadHandlers(
 		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
 		getMonths: getExpenseHistoryMonths,
 		getMonth: getExpenseHistoryMonth,
+		getOverview: getExpenseOverviewSummary,
 	},
 ) {
 	return {
@@ -25,6 +28,12 @@ export function createExpenseHistoryReadHandlers(
 				return json({ error: "Unauthorized" }, { status: 401 });
 			}
 			return json(await dependencies.getMonths());
+		},
+		overview: async (request: Request) => {
+			if (!(await dependencies.authorize(request))) {
+				return json({ error: "Unauthorized" }, { status: 401 });
+			}
+			return json(await dependencies.getOverview());
 		},
 		month: async (request: Request, monthParam: string) => {
 			if (!(await dependencies.authorize(request))) {
@@ -52,3 +61,4 @@ export function createExpenseHistoryReadHandlers(
 const readHandlers = createExpenseHistoryReadHandlers();
 export const getExpenseHistoryMonthsHandler = readHandlers.months;
 export const getExpenseHistoryMonthHandler = readHandlers.month;
+export const getExpenseOverviewSummaryHandler = readHandlers.overview;

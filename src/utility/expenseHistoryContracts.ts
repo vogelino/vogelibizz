@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
+import {
+	currencyEnum,
+	expenseCategoryEnum,
+	expenseTypeEnum,
+} from "@/db/schema";
 
 export const expenseHistoryMonthKeySchema = z
 	.string()
@@ -47,6 +51,27 @@ export const expenseHistoryMonthDetailSchema = z.object({
 	summary: expenseHistoryMonthlySummarySchema,
 });
 
+export const expenseOverviewSummarySchema = z.object({
+	currency: z.enum(currencyEnum.enumValues),
+	importedMonthCount: z.number().int().nonnegative(),
+	configuredMonthlyTotal: z.number().finite().nonnegative(),
+	recurring: z.array(
+		z.object({
+			expenseId: z.number().int().positive(),
+			total: z.number().finite().nonnegative(),
+			monthlyAverage: z.number().finite().nonnegative().nullable(),
+		}),
+	),
+	other: z
+		.object({
+			total: z.number().finite().nonnegative(),
+			monthlyAverage: z.number().finite().nonnegative(),
+		})
+		.nullable(),
+	livingCostEstimate: z.number().finite().nonnegative().nullable(),
+	observedMonthlyAverage: z.number().finite().nonnegative().nullable(),
+});
+
 export const expenseHistoryTransactionMutationSchema = z
 	.object({
 		lastModified: z.string().min(1),
@@ -87,4 +112,7 @@ export type ExpenseHistoryMonthDetail = z.infer<
 >;
 export type ExpenseHistoryTransaction = z.infer<
 	typeof expenseHistoryTransactionSchema
+>;
+export type ExpenseOverviewSummary = z.infer<
+	typeof expenseOverviewSummarySchema
 >;

@@ -21,8 +21,10 @@ import type { Session } from "@/providers/SessionProvider";
 import {
 	type ExpenseHistoryMonthDetail,
 	type ExpenseHistoryMonthSummary,
+	type ExpenseOverviewSummary,
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
+	expenseOverviewSummarySchema,
 } from "@/utility/expenseHistoryContracts";
 import { parseId } from "@/utility/resourceUtil";
 import { apiFetch, apiGetJson } from "../dataHookUtil";
@@ -54,6 +56,7 @@ const queryKeys = mergeQueryKeys(
 	createQueryKeys("expenseHistory", {
 		months: null,
 		month: (month: string) => [month],
+		overview: null,
 	}),
 );
 
@@ -253,6 +256,21 @@ export const exchangeRatesQuery = {
 };
 
 export const expenseHistoryQuery = {
+	overview: () =>
+		queryOptions({
+			...queryKeys.expenseHistory.overview,
+			queryFn: async (): Promise<ExpenseOverviewSummary> => {
+				if (import.meta.env.SSR) {
+					const { getExpenseOverviewSummary } = await import(
+						"@/server/expenseHistory/getExpenseHistory"
+					);
+					return getExpenseOverviewSummary();
+				}
+				return expenseOverviewSummarySchema.parse(
+					await apiGetJson("/api/expense-history/overview"),
+				);
+			},
+		}),
 	months: () =>
 		queryOptions({
 			...queryKeys.expenseHistory.months,
@@ -332,3 +350,4 @@ export const sessionQueryOptions = sessionQuery.current;
 export const exchangeRatesQueryOptions = exchangeRatesQuery.current;
 export const expenseHistoryMonthsQueryOptions = expenseHistoryQuery.months;
 export const expenseHistoryMonthQueryOptions = expenseHistoryQuery.month;
+export const expenseOverviewSummaryQueryOptions = expenseHistoryQuery.overview;

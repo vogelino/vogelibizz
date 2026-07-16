@@ -4,7 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type CurrencyIdType, settingsSelectSchema } from "@/db/schema";
 import env from "@/env";
 import { apiFetch, handleFetchResponse } from "@/utility/dataHookUtil";
-import { expensesQuery, settingsQuery } from "./queryFactories";
+import {
+	expenseHistoryQuery,
+	expensesQuery,
+	settingsQuery,
+} from "./queryFactories";
 
 function useSettingsUpdate() {
 	const queryClient = useQueryClient();
@@ -29,6 +33,9 @@ function useSettingsUpdate() {
 			queryClient.setQueryData(settingsQuery.current().queryKey, settings);
 			queryClient.invalidateQueries({
 				queryKey: expensesQuery.list().queryKey,
+			});
+			queryClient.invalidateQueries({
+				queryKey: expenseHistoryQuery.overview().queryKey,
 			});
 		},
 	});

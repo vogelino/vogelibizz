@@ -17,6 +17,7 @@ import { parseId } from "./resourceUtil";
 
 export function getDeleteColumn<ColumnType = unknown>(
 	deleteAction: (id: number) => void = () => undefined,
+	canDelete: (row: ColumnType) => boolean = () => true,
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 ): ColumnDef<ColumnType, any> {
 	return {
@@ -25,7 +26,8 @@ export function getDeleteColumn<ColumnType = unknown>(
 		header: " ",
 		size: 50,
 		enableSorting: false,
-		cell: function render({ getValue }) {
+		cell: function render({ getValue, row }) {
+			if (!canDelete(row.original)) return null;
 			const id = parseId(getValue<ColumnType>());
 			return (
 				<AlertDialog>

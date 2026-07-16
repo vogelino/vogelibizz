@@ -11,7 +11,7 @@ import {
 	verbToPresentParticiple,
 } from "../resourceUtil";
 import type { ActionType } from "./createQueryFunction";
-import { resourceQueryFactories } from "./queryFactories";
+import { expenseHistoryQuery, resourceQueryFactories } from "./queryFactories";
 
 function createMutationHook<DataType, SchemaData>({
 	resourceName,
@@ -120,6 +120,11 @@ function createMutationHook<DataType, SchemaData>({
 				queryClient.invalidateQueries({
 					queryKey: resourceQueries.list().queryKey,
 				});
+				if (resourceName === "expenses") {
+					queryClient.invalidateQueries({
+						queryKey: expenseHistoryQuery.overview().queryKey,
+					});
+				}
 				if (resourceName === "expenses" && action === "delete") {
 					queryClient.invalidateQueries({ queryKey: ["expenseHistory"] });
 				}
