@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ExpenseHistoryMonthDetail } from "@/utility/expenseHistoryContracts";
 import type { ExpenseHistoryImportPreview } from "@/utility/expenseHistoryImportContracts";
 import { formatCurrency, locale } from "@/utility/formatUtil";
@@ -168,19 +169,30 @@ export function ExpenseHistoryImportPanel({
 	);
 }
 
-export function ExpenseHistoryMonthNavigation({
-	months,
-	selectedMonth,
-	older,
-	newer,
-	onChooseMonth,
-}: {
-	months: readonly { month: string }[];
-	selectedMonth: string | null;
-	older: string | null;
-	newer: string | null;
-	onChooseMonth: (month: string) => void;
-}) {
+type ExpenseHistoryMonthNavigationProps =
+	| { loading: true }
+	| {
+			loading: false;
+			months: readonly { month: string }[];
+			selectedMonth: string | null;
+			older: string | null;
+			newer: string | null;
+			onChooseMonth: (month: string) => void;
+	  };
+
+export function ExpenseHistoryMonthNavigation(
+	props: ExpenseHistoryMonthNavigationProps,
+) {
+	if (props.loading) {
+		return (
+			<div className="flex items-center gap-x-2 flex-wrap gap-y-1">
+				<Skeleton className="size-9" />
+				<Skeleton className="h-9.5 w-48" />
+				<Skeleton className="size-9" />
+			</div>
+		);
+	}
+	const { months, selectedMonth, older, newer, onChooseMonth } = props;
 	if (months.length === 0) return null;
 	return (
 		<div className="flex items-center gap-x-2 flex-wrap gap-y-1">
@@ -206,6 +218,7 @@ export function ExpenseHistoryMonthNavigation({
 					value: month,
 					label: formatExpenseHistoryMonth(month),
 				}))}
+				className="w-48"
 			/>
 			<Button
 				type="button"
@@ -222,15 +235,31 @@ export function ExpenseHistoryMonthNavigation({
 	);
 }
 
-export function ExpenseHistorySummaryToolbar({
-	summary,
-	otherOnly,
-	onOtherOnlyChange,
-}: {
-	summary: ExpenseHistoryMonthDetail["summary"];
-	otherOnly: boolean;
-	onOtherOnlyChange: (checked: boolean) => void;
-}) {
+type ExpenseHistorySummaryToolbarProps =
+	| { loading: true }
+	| {
+			loading: false;
+			summary: ExpenseHistoryMonthDetail["summary"];
+			otherOnly: boolean;
+			onOtherOnlyChange: (checked: boolean) => void;
+	  };
+
+export function ExpenseHistorySummaryToolbar(
+	props: ExpenseHistorySummaryToolbarProps,
+) {
+	if (props.loading) {
+		return (
+			<div className="flex flex-wrap items-center justify-between gap-3 bg-muted/30 p-3 px-6 lg:px-10">
+				<div className="flex flex-wrap gap-x-6 gap-y-1">
+					<Skeleton className="h-5 w-28" />
+					<Skeleton className="h-5 w-32" />
+					<Skeleton className="h-5 w-28" />
+				</div>
+				<Skeleton className="h-5 w-22" />
+			</div>
+		);
+	}
+	const { summary, otherOnly, onOtherOnlyChange } = props;
 	return (
 		<div className="flex flex-wrap items-center justify-between gap-3 bg-muted/30 p-3 px-6 lg:px-10">
 			<div

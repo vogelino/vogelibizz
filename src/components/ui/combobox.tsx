@@ -67,7 +67,7 @@ export function Combobox<TData>({
 		[options, normalizedValue],
 	);
 	if (loading) {
-		return <Skeleton className={cn("h-9 w-full", className)} />;
+		return <Skeleton className={cn("h-9.5 w-full", className)} />;
 	}
 	return (
 		<Popover open={open} onOpenChange={setOpen}>

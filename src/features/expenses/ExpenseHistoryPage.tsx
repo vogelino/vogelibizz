@@ -7,7 +7,6 @@ import { type ChangeEvent, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
 	expenseHistoryMonthQueryOptions,
@@ -189,9 +188,14 @@ export default function ExpenseHistoryPage() {
 	const chooseMonth = (month: string) =>
 		navigate({ search: { month }, replace: true });
 	const columns = useMemo(
-		() => (selectedMonth ? getExpenseHistoryColumns(selectedMonth) : []),
+		() => getExpenseHistoryColumns(selectedMonth ?? ""),
 		[selectedMonth],
 	);
+	const historyLoading =
+		monthsQuery.isPending || (monthIndex >= 0 && monthQuery.isPending);
+	const historyError = monthsQuery.error ?? monthQuery.error;
+	const transactions =
+		!historyError && monthQuery.data ? monthQuery.data.transactions : [];
 	const selectionActions = useMemo(() => {
 		if (selectedRows.length === 0) return null;
 		return (
@@ -237,30 +241,14 @@ export default function ExpenseHistoryPage() {
 					Expense history
 				</h2>
 
-				{monthsQuery.isPending ? (
-					<output
-						className="space-y-3 py-6 px-6 lg:px-10 sticky left-0"
-						aria-label="Loading expense history"
-					>
-						<Skeleton className="h-10 w-full" />
-						<Skeleton className="h-16 w-full" />
-						<Skeleton className="h-16 w-full" />
-					</output>
-				) : monthsQuery.error ? (
-					<div
-						role="alert"
-						className="py-8 text-sm px-6 lg:px-10 sticky left-0"
-					>
-						Expense history could not be loaded. {monthsQuery.error.message}
-					</div>
-				) : months.length === 0 ? (
+				{!monthsQuery.isPending && !monthsQuery.error && months.length === 0 ? (
 					<div className="py-12 text-center px-6 lg:px-10 sticky left-0">
 						<h3 className="font-semibold">No imported expense history</h3>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Choose a bank export above to preview your first import.
 						</p>
 					</div>
-				) : monthIndex < 0 ? (
+				) : !monthsQuery.isPending && !monthsQuery.error && monthIndex < 0 ? (
 					<output
 						className="block py-12 text-center px-6 lg:px-10 sticky left-0"
 						aria-label="This month is not available"
@@ -270,28 +258,12 @@ export default function ExpenseHistoryPage() {
 							Choose one of the imported months to continue.
 						</p>
 					</output>
-				) : monthQuery.isPending ? (
-					<output
-						className="space-y-3 py-6 px-6 lg:px-10 sticky left-0"
-						aria-label="Loading monthly transactions"
-					>
-						<Skeleton className="h-10 w-full" />
-						<Skeleton className="h-16 w-full" />
-						<Skeleton className="h-16 w-full" />
-					</output>
-				) : monthQuery.error ? (
-					<div
-						role="alert"
-						className="py-8 text-sm px-6 lg:px-10 sticky left-0"
-					>
-						Transactions for {selectedMonth} could not be loaded.{" "}
-						{monthQuery.error.message}
-					</div>
-				) : monthQuery.data ? (
+				) : (
 					<DataTable
-						key={monthQuery.data.month.month}
+						key={selectedMonth ?? "expense-history"}
 						columns={columns}
-						data={monthQuery.data.transactions}
+						data={transactions}
+						loading={historyLoading}
 						getRowId={(transaction) => String(transaction.id)}
 						enableRowSelection
 						onSelectionChange={setSelectedRows}
@@ -306,6 +278,15 @@ export default function ExpenseHistoryPage() {
 							header: "top-26",
 							toolbar: "pb-0",
 						}}
+						toolbarSkeleton={
+							<>
+								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+									<ExpenseFilter loading />
+									<ExpenseHistoryMonthNavigation loading />
+								</div>
+								<ExpenseHistorySummaryToolbar loading />
+							</>
+						}
 						caption={
 							<span className="sr-only">
 								Monthly bank transactions. Open a description to edit the
@@ -313,7 +294,9 @@ export default function ExpenseHistoryPage() {
 								description cell.
 							</span>
 						}
-						emptyMessage={otherOnly ? "No Other transactions." : undefined}
+						emptyMessage={
+							otherOnly && !historyError ? "No Other transactions." : undefined
+						}
 						toolbar={(table) => (
 							<>
 								{(() => {
@@ -321,11 +304,9 @@ export default function ExpenseHistoryPage() {
 									return null;
 								})()}
 								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
-									<ExpenseFilter
-										isLoading={monthQuery.isPending}
-										table={table}
-									/>
+									<ExpenseFilter loading={false} table={table} />
 									<ExpenseHistoryMonthNavigation
+										loading={false}
 										months={months}
 										selectedMonth={monthIndex >= 0 ? selectedMonth : null}
 										older={navigation.older}
@@ -333,20 +314,23 @@ export default function ExpenseHistoryPage() {
 										onChooseMonth={chooseMonth}
 									/>
 								</div>
-								<ExpenseHistorySummaryToolbar
-									summary={monthQuery.data.summary}
-									otherOnly={otherOnly}
-									onOtherOnlyChange={(next) => {
-										setOtherOnly(next);
-										table
-											.getColumn("association")
-											?.setFilterValue(next || undefined);
-									}}
-								/>
+								{monthQuery.data ? (
+									<ExpenseHistorySummaryToolbar
+										loading={false}
+										summary={monthQuery.data.summary}
+										otherOnly={otherOnly}
+										onOtherOnlyChange={(next) => {
+											setOtherOnly(next);
+											table
+												.getColumn("association")
+												?.setFilterValue(next || undefined);
+										}}
+									/>
+								) : null}
 							</>
 						)}
 					/>
-				) : null}
+				)}
 			</section>
 
 			<ExpenseHistoryReplacementDialog

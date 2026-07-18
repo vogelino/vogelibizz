@@ -260,9 +260,8 @@ export default function ExpensesPage({
 				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}
 				toolbarSkeleton={
-					<div className="flex items-center gap-4 flex-wrap">
-						<Skeleton className="h-9 w-64" />
-						<Skeleton className="h-9 w-40" />
+					<div className="px-6 lg:px-10 sticky left-0 pt-3">
+						<ExpenseFilter loading showMixedClassification />
 					</div>
 				}
 				initialState={{
@@ -287,7 +286,7 @@ export default function ExpensesPage({
 							return null;
 						})()}
 						<ExpenseFilter
-							isLoading={isLoading}
+							loading={false}
 							table={table}
 							showMixedClassification
 						/>

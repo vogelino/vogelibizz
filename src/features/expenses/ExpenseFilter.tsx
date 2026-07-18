@@ -34,17 +34,20 @@ function MixedCategoryLabel() {
 
 type TypeFilterType = ExpenseOverviewType | "All types";
 
-type ExpenseFilterProps<TData> = {
-	table: TanstackTable<TData>;
-	isLoading: boolean;
-	showMixedClassification?: boolean;
-};
+type ExpenseFilterProps<TData> =
+	| {
+			loading: true;
+			table?: never;
+			showMixedClassification?: boolean;
+	  }
+	| {
+			loading: false;
+			table: TanstackTable<TData>;
+			showMixedClassification?: boolean;
+	  };
 
-export function ExpenseFilter<TData>({
-	table,
-	isLoading,
-	showMixedClassification = false,
-}: ExpenseFilterProps<TData>) {
+export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
+	const { loading, showMixedClassification = false } = props;
 	const [categoryFilter, setCategoryFilter] = useState<
 		ExpenseOverviewCategory[]
 	>([]);
@@ -76,56 +79,73 @@ export function ExpenseFilter<TData>({
 		const hasTypeFilter = typeFilter !== "All types";
 		return hasCategoryFilter || hasTypeFilter;
 	}, [categoryFilter, typeFilter]);
+	const categoryInput = (
+		<MultiValueInput<ExpenseOverviewCategory>
+			options={categoryOptions}
+			values={categoryFilter}
+			placeholder="Filter by category"
+			selectedValueFormater={(value) =>
+				value === mixedClassification ? (
+					<MixedCategoryLabel />
+				) : (
+					<ExpenseCategoryBadge
+						value={value as Exclude<ExpenseOverviewCategory, "Mixed">}
+					/>
+				)
+			}
+			onChange={
+				loading
+					? undefined
+					: (cat) => {
+							const nextValues = cat.map(
+								(c) => c.value as ExpenseOverviewCategory,
+							);
+							setCategoryFilter(nextValues);
+							props.table
+								.getColumn("category")
+								?.setFilterValue(nextValues.length ? nextValues : undefined);
+						}
+			}
+			loading={loading}
+			className="w-64"
+		/>
+	);
+	const typeInput = (
+		<Combobox
+			options={typeOptions}
+			value={typeFilter}
+			onChange={
+				loading
+					? undefined
+					: (value: TypeFilterType) => {
+							setTypeFilter(value);
+							const column = props.table.getColumn("type");
+							if (!column) return;
+							const nextValue = `${value}`;
+							column.setFilterValue(
+								nextValue === "All types" ? undefined : nextValue,
+							);
+						}
+			}
+			loading={loading}
+			className="w-40"
+		/>
+	);
 
 	return (
 		<div className="flex items-center gap-x-4 gap-y-1 flex-wrap">
-			<MultiValueInput<ExpenseOverviewCategory>
-				options={categoryOptions}
-				values={categoryFilter}
-				placeholder="Filter by category"
-				selectedValueFormater={(value) =>
-					value === mixedClassification ? (
-						<MixedCategoryLabel />
-					) : (
-						<ExpenseCategoryBadge
-							value={value as Exclude<ExpenseOverviewCategory, "Mixed">}
-						/>
-					)
-				}
-				onChange={(cat) => {
-					const nextValues = cat.map((c) => c.value as ExpenseOverviewCategory);
-					setCategoryFilter(nextValues);
-					table
-						.getColumn("category")
-						?.setFilterValue(nextValues.length ? nextValues : undefined);
-				}}
-				loading={isLoading}
-			/>
-			<Combobox
-				options={typeOptions}
-				value={typeFilter}
-				onChange={(value: TypeFilterType) => {
-					setTypeFilter(value);
-					const column = table.getColumn("type");
-					if (!column) return;
-					const nextValue = `${value}`;
-					column.setFilterValue(
-						nextValue === "All types" ? undefined : nextValue,
-					);
-				}}
-				loading={isLoading}
-			/>
-			{showFilteredTotal ? (
+			{categoryInput}
+			{typeInput}
+			{!loading && showFilteredTotal ? (
 				<Button
 					type="button"
 					variant="outline"
 					size="sm"
-					disabled={isLoading}
 					onClick={() => {
 						setCategoryFilter([]);
 						setTypeFilter("All types");
-						table.getColumn("category")?.setFilterValue(undefined);
-						table.getColumn("type")?.setFilterValue(undefined);
+						props.table.getColumn("category")?.setFilterValue(undefined);
+						props.table.getColumn("type")?.setFilterValue(undefined);
 					}}
 				>
 					Clear filters

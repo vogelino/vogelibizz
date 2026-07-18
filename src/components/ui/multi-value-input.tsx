@@ -97,13 +97,13 @@ export function MultiValueInput<OptionValueType extends string = string>({
 				<div
 					className={cn(
 						buttonVariants({ variant: "ghost" }),
-						"w-full h-9",
+						"w-full h-9.5",
 						"bg-background dark:bg-card",
 						"p-0",
 						className,
 					)}
 				>
-					<Skeleton className="h-9 w-full" />
+					<Skeleton className="h-9.5 w-full" />
 				</div>
 			</div>
 		);
