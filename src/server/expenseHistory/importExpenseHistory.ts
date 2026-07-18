@@ -8,33 +8,34 @@ import type {
 	ExpenseHistoryImportRequest,
 } from "@/utility/expenseHistoryImportContracts";
 import {
-	BankCsvValidationError,
-	type ParsedBankCsv,
-	parseBankCsv,
-} from "./bankCsvParser";
+	BankImportValidationError,
+	type ParsedBankImport,
+	type ParsedBankImportMonth,
+} from "./bankImportParser";
+import { parseBankXlsx } from "./bankXlsxParser";
 
-export type ExpenseHistoryImportDataset = ParsedBankCsv & {
+export type ExpenseHistoryImportDataset = ParsedBankImportMonth & {
 	sourceFilename: string;
 };
 
 export interface ExpenseHistoryImportPersistence {
 	monthExists(month: string): Promise<boolean>;
-	writeMonthAtomically(
-		dataset: ExpenseHistoryImportDataset,
-		replaceExistingMonth: boolean,
+	writeMonthsAtomically(
+		datasets: ExpenseHistoryImportDataset[],
+		replaceExistingMonths: string[],
 	): Promise<void>;
 }
 
 export class ExpenseHistoryReplacementRequiredError extends Error {
 	readonly code = "EXPENSE_HISTORY_REPLACEMENT_REQUIRED";
-	readonly month: string;
+	readonly months: string[];
 
-	constructor(month: string) {
+	constructor(months: string[]) {
 		super(
-			`Expense history for ${month} already exists. Confirm replacement to overwrite its transactions, edits, and associations.`,
+			`Expense history for ${months.join(", ")} already exists. Confirm replacement to overwrite the existing transactions, edits, and associations for all included months.`,
 		);
 		this.name = "ExpenseHistoryReplacementRequiredError";
-		this.month = month;
+		this.months = months;
 	}
 }
 
@@ -45,7 +46,7 @@ function safeSourceFilename(sourceFilename: string) {
 		.at(-1)
 		?.trim();
 	if (!normalized) {
-		throw new BankCsvValidationError("Source filename must not be empty.");
+		throw new BankImportValidationError("Source filename must not be empty.");
 	}
 	return normalized.slice(0, 255);
 }
@@ -60,76 +61,80 @@ export const d1ExpenseHistoryImportPersistence: ExpenseHistoryImportPersistence 
 		`);
 			return result?.exists === 1;
 		},
-		async writeMonthAtomically(dataset, replaceExistingMonth) {
+		async writeMonthsAtomically(datasets, replaceExistingMonths) {
 			const timestamp = new Date().toISOString();
 			const client = db.$client;
 			const statements: D1PreparedStatement[] = [];
-			if (replaceExistingMonth) {
+			for (const month of replaceExistingMonths) {
 				statements.push(
 					client
 						.prepare("delete from expense_months where month = ?")
-						.bind(dataset.month),
+						.bind(month),
 				);
 			}
-			statements.push(
-				client
-					.prepare(`
+			for (const dataset of datasets) {
+				statements.push(
+					client
+						.prepare(`
 				insert into expense_months (
 					month, source_filename, imported_at, last_modified,
 					imported_debit_count, skipped_credit_count
 				) values (?, ?, ?, ?, ?, ?)
 			`)
-					.bind(
-						dataset.month,
-						dataset.sourceFilename,
-						timestamp,
-						timestamp,
-						dataset.debits.length,
-						dataset.skippedCreditCount,
-					),
-			);
-			for (const debit of dataset.debits) {
-				statements.push(
-					client
-						.prepare(`
+						.bind(
+							dataset.month,
+							dataset.sourceFilename,
+							timestamp,
+							timestamp,
+							dataset.debits.length,
+							dataset.skippedCreditCount,
+						),
+				);
+				for (const debit of dataset.debits) {
+					statements.push(
+						client
+							.prepare(`
 					insert into expense_transactions (
 						expense_month_id, expense_id, booked_at, value_date,
 						original_description, description, original_amount, amount,
 						category, type, source_order, created_at, last_modified
 					)
 					select
-						id, null, ?, ?, ?, ?, ?, ?, null, null, ?, ?, ?
+						id, null, ?, ?, ?, ?, ?, ?, ?, null, ?, ?, ?
 					from expense_months where month = ?
 				`)
-						.bind(
-							debit.bookedAt,
-							debit.valueDate,
-							debit.description,
-							debit.description,
-							debit.amount,
-							debit.amount,
-							debit.sourceOrder,
-							timestamp,
-							timestamp,
-							dataset.month,
-						),
-				);
+							.bind(
+								debit.bookedAt,
+								debit.valueDate,
+								debit.description,
+								debit.description,
+								debit.amount,
+								debit.amount,
+								debit.category,
+								debit.sourceOrder,
+								timestamp,
+								timestamp,
+								dataset.month,
+							),
+					);
+				}
 			}
 			await client.batch(statements);
 		},
 	};
 
 function previewFromParsed(
-	parsed: ParsedBankCsv,
-	replacementRequired: boolean,
+	parsed: ParsedBankImport,
+	replacementMonths: string[],
 ): ExpenseHistoryImportPreview {
 	return {
-		month: parsed.month,
-		debitCount: parsed.debits.length,
+		months: parsed.months.map(({ month }) => month),
+		debitCount: parsed.debitCount,
 		skippedCreditCount: parsed.skippedCreditCount,
 		totalDebitAmount: parsed.totalDebitAmount,
 		warnings: parsed.warnings,
-		replacementRequired,
+		replacementRequired: replacementMonths.length > 0,
+		replacementMonths,
 	};
 }
 
@@ -137,25 +142,43 @@ export async function previewExpenseHistoryImport(
 	request: ExpenseHistoryImportRequest,
 	persistence: ExpenseHistoryImportPersistence = d1ExpenseHistoryImportPersistence,
 ): Promise<ExpenseHistoryImportPreview> {
-	const parsed = parseBankCsv(request.csv);
-	return previewFromParsed(parsed, await persistence.monthExists(parsed.month));
+	const parsed = parseBankXlsx(request.workbookBase64);
+	const existence = await Promise.all(
+		parsed.months.map(async ({ month }) => ({
+			month,
+			exists: await persistence.monthExists(month),
+		})),
+	);
+	return previewFromParsed(
+		parsed,
+		existence.filter(({ exists }) => exists).map(({ month }) => month),
+	);
 }
 
 export async function commitExpenseHistoryImport(
 	request: ExpenseHistoryImportCommitRequest,
 	persistence: ExpenseHistoryImportPersistence = d1ExpenseHistoryImportPersistence,
 ): Promise<ExpenseHistoryImportCommitResult> {
-	const parsed = parseBankCsv(request.csv);
-	const existed = await persistence.monthExists(parsed.month);
-	if (existed && !request.replaceExistingMonth) {
-		throw new ExpenseHistoryReplacementRequiredError(parsed.month);
+	const parsed = parseBankXlsx(request.workbookBase64);
+	const existence = await Promise.all(
+		parsed.months.map(async ({ month }) => ({
+			month,
+			exists: await persistence.monthExists(month),
+		})),
+	);
+	const replacementMonths = existence
+		.filter(({ exists }) => exists)
+		.map(({ month }) => month);
+	if (replacementMonths.length > 0 && !request.replaceExistingMonths) {
+		throw new ExpenseHistoryReplacementRequiredError(replacementMonths);
 	}
-	await persistence.writeMonthAtomically(
-		{ ...parsed, sourceFilename: safeSourceFilename(request.sourceFilename) },
-		existed && request.replaceExistingMonth,
+	const sourceFilename = safeSourceFilename(request.sourceFilename);
+	await persistence.writeMonthsAtomically(
+		parsed.months.map((month) => ({ ...month, sourceFilename })),
+		request.replaceExistingMonths ? replacementMonths : [],
 	);
 	return {
-		...previewFromParsed(parsed, existed),
-		replacedExistingMonth: existed,
+		...previewFromParsed(parsed, replacementMonths),
+		replacedExistingMonths: replacementMonths,
 	};
 }

@@ -5,7 +5,7 @@ import {
 	expenseHistoryImportCommitRequestSchema,
 	expenseHistoryImportRequestSchema,
 } from "@/utility/expenseHistoryImportContracts";
-import { BankCsvValidationError } from "./bankCsvParser";
+import { BankImportValidationError } from "./bankImportParser";
 import {
 	commitExpenseHistoryImport,
 	ExpenseHistoryReplacementRequiredError,
@@ -15,11 +15,11 @@ import {
 export function importErrorResponse(error: unknown) {
 	if (error instanceof ExpenseHistoryReplacementRequiredError) {
 		return json(
-			{ error: error.message, code: error.code, month: error.month },
+			{ error: error.message, code: error.code, months: error.months },
 			{ status: 409 },
 		);
 	}
-	if (error instanceof BankCsvValidationError) {
+	if (error instanceof BankImportValidationError) {
 		return json({ error: error.message, code: error.code }, { status: 400 });
 	}
 	if (error instanceof z.ZodError) {

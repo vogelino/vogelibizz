@@ -62,7 +62,7 @@ function insertMonth(database: Database, month = "2026-06") {
 				imported_debit_count, skipped_credit_count
 			) VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
 		)
-		.get(month, "expenses.csv", timestamp, timestamp, 1, 0) as { id: number };
+		.get(month, "expenses.xlsx", timestamp, timestamp, 1, 0) as { id: number };
 }
 
 function insertTransaction(
@@ -332,7 +332,7 @@ describe("expense history validation schemas", () => {
 	test("accepts nullable classification and distinct original and effective values", () => {
 		const month = expenseMonthInsertSchema.parse({
 			month: "2026-06",
-			sourceFilename: "expenses.csv",
+			sourceFilename: "expenses.xlsx",
 			importedDebitCount: 1,
 		});
 		const transaction = expenseTransactionInsertSchema.parse({
@@ -360,7 +360,7 @@ describe("expense history validation schemas", () => {
 		expect(() =>
 			expenseMonthInsertSchema.parse({
 				month: "2026-13",
-				sourceFilename: "expenses.csv",
+				sourceFilename: "expenses.xlsx",
 				importedDebitCount: 1,
 			}),
 		).toThrow();

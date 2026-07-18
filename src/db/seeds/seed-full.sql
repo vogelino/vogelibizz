@@ -140,7 +140,7 @@ INSERT INTO expense_months (
 	imported_debit_count, skipped_credit_count
 ) VALUES (
 	strftime('%Y-%m', 'now', 'start of month', '-1 month'),
-	'synthetic-previous-month.csv',
+	'synthetic-previous-month.xlsx',
 	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
 	strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
 	4,

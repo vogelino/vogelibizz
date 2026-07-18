@@ -1,0 +1,14 @@
+@layer base {
+	::-moz-selection,
+	::selection {
+		background: var(--selection-bg);
+		color: var(--selection-text);
+	}
+
+	html,
+	body {
+		scroll-behavior: smooth;
+		line-height: 1.2em;
+		@apply text-foreground bg-background overflow-auto w-screen h-screen flex flex-col;
+	}
+}

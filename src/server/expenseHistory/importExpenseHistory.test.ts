@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { utils, write } from "xlsx";
 import { calculateExpenseHistorySummary } from "@/utility/expenseHistoryCalculations";
 import type { ExpenseHistoryImportCommitRequest } from "@/utility/expenseHistoryImportContracts";
 import {
@@ -26,11 +27,72 @@ const migrationSql = (
 		),
 	)
 ).join("\n");
-const csv = `IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
-CH00;03.06.2026;Synthetic replacement;-42.50;1200.00;04.06.2026
-CH00;07.06.2026;Synthetic credit;10.00;1210.00;07.06.2026`;
-const mayCsv = `IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
-CH00;03.05.2026;Synthetic other;-18.00;1200.00;04.05.2026`;
+type WorkbookTransaction = {
+	date: string;
+	description: string;
+	amount: number;
+	category?: string;
+};
+
+function workbookRequest(
+	transactions: WorkbookTransaction[],
+	replaceExistingMonths = false,
+	sourceFilename = "synthetic.xlsx",
+): ExpenseHistoryImportCommitRequest {
+	const workbook = utils.book_new();
+	utils.book_append_sheet(
+		workbook,
+		utils.aoa_to_sheet([
+			["Finanzassistent - Transaktionen"],
+			[],
+			[
+				"Datum",
+				"Gegenpartei",
+				"Betrag",
+				"Währung",
+				"Konto",
+				"Kategorie",
+				"Kontoinhaber",
+				"Buchungstext",
+			],
+			...transactions.map(({ date, description, amount, category }) => [
+				new Date(`${date}T00:00:00Z`),
+				description,
+				amount,
+				"CHF",
+				"Private account",
+				category ?? "Allgemeines",
+				"Test User",
+				description,
+			]),
+		]),
+		"Transactions",
+	);
+	return {
+		workbookBase64: write(workbook, { type: "base64", bookType: "xlsx" }),
+		sourceFilename,
+		replaceExistingMonths,
+	};
+}
+
+function request(replaceExistingMonths = false) {
+	return workbookRequest(
+		[
+			{
+				date: "2026-06-03",
+				description: "Synthetic replacement",
+				amount: -42.5,
+			},
+			{
+				date: "2026-06-07",
+				description: "Synthetic credit",
+				amount: 10,
+				category: "Weitere Einnahmen",
+			},
+		],
+		replaceExistingMonths,
+	);
+}
 
 class SqliteImportPersistence implements ExpenseHistoryImportPersistence {
 	readonly database = new Database(":memory:");
@@ -49,53 +111,57 @@ class SqliteImportPersistence implements ExpenseHistoryImportPersistence {
 		);
 	}
 
-	async writeMonthAtomically(
-		dataset: ExpenseHistoryImportDataset,
-		replaceExistingMonth: boolean,
+	async writeMonthsAtomically(
+		datasets: ExpenseHistoryImportDataset[],
+		replaceExistingMonths: string[],
 	) {
 		const write = this.database.transaction(() => {
-			if (replaceExistingMonth) {
+			for (const month of replaceExistingMonths) {
 				this.database
 					.query("DELETE FROM expense_months WHERE month = ?")
-					.run(dataset.month);
+					.run(month);
 			}
-			const month = this.database
-				.query(
-					`INSERT INTO expense_months (
+			for (const dataset of datasets) {
+				const month = this.database
+					.query(
+						`INSERT INTO expense_months (
 						month, source_filename, imported_at, last_modified,
 						imported_debit_count, skipped_credit_count
 					) VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
-				)
-				.get(
-					dataset.month,
-					dataset.sourceFilename,
-					"2026-07-16T12:00:00.000Z",
-					"2026-07-16T12:00:00.000Z",
-					dataset.debits.length,
-					dataset.skippedCreditCount,
-				) as { id: number };
-			if (this.failAfterMonthInsert) throw new Error("Synthetic write failure");
-			for (const debit of dataset.debits) {
-				this.database
-					.query(
-						`INSERT INTO expense_transactions (
+					)
+					.get(
+						dataset.month,
+						dataset.sourceFilename,
+						"2026-07-16T12:00:00.000Z",
+						"2026-07-16T12:00:00.000Z",
+						dataset.debits.length,
+						dataset.skippedCreditCount,
+					) as { id: number };
+				if (this.failAfterMonthInsert)
+					throw new Error("Synthetic write failure");
+				for (const debit of dataset.debits) {
+					this.database
+						.query(
+							`INSERT INTO expense_transactions (
 							expense_month_id, booked_at, value_date,
 							original_description, description, original_amount, amount,
-							source_order, created_at, last_modified
-						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-					)
-					.run(
-						month.id,
-						debit.bookedAt,
-						debit.valueDate,
-						debit.description,
-						debit.description,
-						debit.amount,
-						debit.amount,
-						debit.sourceOrder,
-						"2026-07-16T12:00:00.000Z",
-						"2026-07-16T12:00:00.000Z",
-					);
+							category, source_order, created_at, last_modified
+						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+						)
+						.run(
+							month.id,
+							debit.bookedAt,
+							debit.valueDate,
+							debit.description,
+							debit.description,
+							debit.amount,
+							debit.amount,
+							debit.category,
+							debit.sourceOrder,
+							"2026-07-16T12:00:00.000Z",
+							"2026-07-16T12:00:00.000Z",
+						);
+				}
 			}
 		});
 		write();
@@ -111,7 +177,7 @@ class SqliteImportPersistence implements ExpenseHistoryImportPersistence {
 			INSERT INTO expense_months (
 				id, month, source_filename, imported_at, last_modified,
 				imported_debit_count, skipped_credit_count
-			) VALUES (5, '2026-06', 'old.csv', 'old', 'old', 1, 0);
+			) VALUES (5, '2026-06', 'old.xlsx', 'old', 'old', 1, 0);
 			INSERT INTO expense_transactions (
 				expense_month_id, expense_id, booked_at, original_description,
 				description, original_amount, amount, category, type, source_order,
@@ -144,22 +210,12 @@ function createStore() {
 	stores.push(store);
 	return store;
 }
-function request(
-	replaceExistingMonth = false,
-): ExpenseHistoryImportCommitRequest {
-	return {
-		csv,
-		sourceFilename: "C:\\private\\synthetic.csv",
-		replaceExistingMonth,
-	};
-}
-
 describe("expense history import", () => {
 	test("previews and imports a new month", async () => {
 		const store = createStore();
 		const preview = await previewExpenseHistoryImport(request(), store);
 		expect(preview).toEqual({
-			month: "2026-06",
+			months: ["2026-06"],
 			debitCount: 1,
 			skippedCreditCount: 1,
 			totalDebitAmount: 42.5,
@@ -167,10 +223,39 @@ describe("expense history import", () => {
 				"1 positive credit row was skipped; only negative debits will be imported.",
 			],
 			replacementRequired: false,
+			replacementMonths: [],
 		});
 		const result = await commitExpenseHistoryImport(request(), store);
-		expect(result.replacedExistingMonth).toBe(false);
+		expect(result.replacedExistingMonths).toEqual([]);
 		expect(store.storedSnapshot().transactions).toHaveLength(1);
+	});
+
+	test("imports a Finanzassistent workbook with its translated category", async () => {
+		const store = createStore();
+		const diningRequest = workbookRequest([
+			{
+				date: "2026-07-17",
+				description: "Synthetic restaurant",
+				amount: -25,
+				category: "Gastronomie",
+			},
+		]);
+		const preview = await previewExpenseHistoryImport(diningRequest, store);
+		expect(preview).toMatchObject({
+			months: ["2026-07"],
+			debitCount: 1,
+			totalDebitAmount: 25,
+		});
+		await commitExpenseHistoryImport(diningRequest, store);
+		expect(
+			store.database
+				.query("SELECT description, amount, category FROM expense_transactions")
+				.get(),
+		).toEqual({
+			description: "Synthetic restaurant",
+			amount: 25,
+			category: "Dining",
+		});
 	});
 
 	test("rejects an unacknowledged replacement without changing edits or associations", async () => {
@@ -188,7 +273,7 @@ describe("expense history import", () => {
 		store.seedEditedMonth();
 		const result = await commitExpenseHistoryImport(request(true), store);
 		const stored = store.storedSnapshot();
-		expect(result.replacedExistingMonth).toBe(true);
+		expect(result.replacedExistingMonths).toEqual(["2026-06"]);
 		expect(stored.months).toHaveLength(1);
 		expect(stored.transactions).toHaveLength(1);
 		expect(stored.transactions[0]).toMatchObject({
@@ -198,6 +283,56 @@ describe("expense history import", () => {
 			original_amount: 42.5,
 			amount: 42.5,
 		});
+	});
+
+	test("previews and atomically replaces every existing month in a multi-month workbook", async () => {
+		const store = createStore();
+		store.seedEditedMonth();
+		const multiMonthRequest = workbookRequest(
+			[
+				{
+					date: "2026-06-03",
+					description: "June replacement",
+					amount: -21,
+				},
+				{
+					date: "2026-07-02",
+					description: "July import",
+					amount: -31,
+				},
+			],
+			false,
+			"multi.xlsx",
+		);
+		const preview = await previewExpenseHistoryImport(multiMonthRequest, store);
+		expect(preview).toMatchObject({
+			months: ["2026-06", "2026-07"],
+			debitCount: 2,
+			totalDebitAmount: 52,
+			replacementRequired: true,
+			replacementMonths: ["2026-06"],
+		});
+		expect(
+			commitExpenseHistoryImport(multiMonthRequest, store),
+		).rejects.toBeInstanceOf(ExpenseHistoryReplacementRequiredError);
+
+		const result = await commitExpenseHistoryImport(
+			{ ...multiMonthRequest, replaceExistingMonths: true },
+			store,
+		);
+		expect(result.replacedExistingMonths).toEqual(["2026-06"]);
+		expect(
+			store.database
+				.query(
+					`SELECT month, description FROM expense_months
+					JOIN expense_transactions ON expense_months.id = expense_month_id
+					ORDER BY month`,
+				)
+				.all(),
+		).toEqual([
+			{ month: "2026-06", description: "June replacement" },
+			{ month: "2026-07", description: "July import" },
+		]);
 	});
 
 	test("rolls back a failed replacement and preserves the old dataset", async () => {
@@ -211,12 +346,12 @@ describe("expense history import", () => {
 		expect(store.storedSnapshot()).toEqual(before);
 	});
 
-	test("does not pass raw CSV to persistence or write it to logs", async () => {
+	test("does not pass raw workbook data to persistence or write it to logs", async () => {
 		let persisted: ExpenseHistoryImportDataset | undefined;
 		const persistence: ExpenseHistoryImportPersistence = {
 			monthExists: async () => false,
-			writeMonthAtomically: async (dataset) => {
-				persisted = dataset;
+			writeMonthsAtomically: async (datasets) => {
+				persisted = datasets[0];
 			},
 		};
 		const log = spyOn(console, "log").mockImplementation(() => undefined);
@@ -225,9 +360,10 @@ describe("expense history import", () => {
 		const info = spyOn(console, "info").mockImplementation(() => undefined);
 		const debug = spyOn(console, "debug").mockImplementation(() => undefined);
 		try {
-			await commitExpenseHistoryImport(request(), persistence);
-			expect(JSON.stringify(persisted)).not.toContain(csv);
-			expect(persisted?.sourceFilename).toBe("synthetic.csv");
+			const source = request();
+			await commitExpenseHistoryImport(source, persistence);
+			expect(JSON.stringify(persisted)).not.toContain(source.workbookBase64);
+			expect(persisted?.sourceFilename).toBe("synthetic.xlsx");
 			expect(log).not.toHaveBeenCalled();
 			expect(error).not.toHaveBeenCalled();
 			expect(warn).not.toHaveBeenCalled();
@@ -246,7 +382,13 @@ describe("expense history import", () => {
 		const store = createStore();
 		await commitExpenseHistoryImport(request(), store);
 		await commitExpenseHistoryImport(
-			{ csv: mayCsv, sourceFilename: "may.csv", replaceExistingMonth: false },
+			workbookRequest([
+				{
+					date: "2026-05-03",
+					description: "Synthetic other",
+					amount: -18,
+				},
+			]),
 			store,
 		);
 		store.database.exec(`

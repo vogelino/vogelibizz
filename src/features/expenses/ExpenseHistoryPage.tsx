@@ -28,11 +28,26 @@ import {
 } from "./ExpenseHistoryPresentation";
 import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
-type ImportSource = { csv: string; sourceFilename: string };
+type ImportSource = {
+	workbookBase64: string;
+	sourceFilename: string;
+};
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+	const bytes = new Uint8Array(buffer);
+	const chunkSize = 32_768;
+	let binary = "";
+	for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+		binary += String.fromCharCode(
+			...bytes.subarray(offset, offset + chunkSize),
+		);
+	}
+	return btoa(binary);
+}
 
 async function postImport<Output>(
 	path: "preview" | "commit",
-	body: ImportSource & { replaceExistingMonth?: boolean },
+	body: ImportSource & { replaceExistingMonths?: boolean },
 ): Promise<Output> {
 	const response = await apiFetch(`/api/expense-history/import/${path}`, {
 		method: "POST",
@@ -77,12 +92,12 @@ export default function ExpenseHistoryPage() {
 	});
 
 	const commitMutation = useMutation({
-		mutationFn: async (replaceExistingMonth: boolean) => {
-			if (!source) throw new Error("Choose a CSV file first.");
+		mutationFn: async (replaceExistingMonths: boolean) => {
+			if (!source) throw new Error("Choose a bank export file first.");
 			return expenseHistoryImportCommitResultSchema.parse(
 				await postImport<ExpenseHistoryImportCommitResult>("commit", {
 					...source,
-					replaceExistingMonth,
+					replaceExistingMonths,
 				}),
 			);
 		},
@@ -91,21 +106,26 @@ export default function ExpenseHistoryPage() {
 			setPreview(null);
 			setSource(null);
 			if (fileInputRef.current) fileInputRef.current.value = "";
+			const selectedImportedMonth = result.months.at(-1);
 			await Promise.all([
 				queryClient.invalidateQueries({
 					queryKey: expenseHistoryMonthsQueryOptions().queryKey,
 				}),
-				queryClient.invalidateQueries({
-					queryKey: expenseHistoryMonthQueryOptions(result.month).queryKey,
-				}),
+				...result.months.map((month) =>
+					queryClient.invalidateQueries({
+						queryKey: expenseHistoryMonthQueryOptions(month).queryKey,
+					}),
+				),
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
 				}),
 			]);
-			await navigate({
-				search: { month: result.month },
-				replace: true,
-			});
+			if (selectedImportedMonth) {
+				await navigate({
+					search: { month: selectedImportedMonth },
+					replace: true,
+				});
+			}
 		},
 	});
 
@@ -128,7 +148,10 @@ export default function ExpenseHistoryPage() {
 			return;
 		}
 		try {
-			const nextSource = { csv: await file.text(), sourceFilename: file.name };
+			const nextSource: ImportSource = {
+				workbookBase64: arrayBufferToBase64(await file.arrayBuffer()),
+				sourceFilename: file.name,
+			};
 			setSource(nextSource);
 			previewMutation.mutate(nextSource);
 		} catch {
@@ -156,7 +179,7 @@ export default function ExpenseHistoryPage() {
 	);
 
 	return (
-		<div className="px-6 pb-12 md:px-10">
+		<>
 			<ExpenseHistoryImportPanel
 				fileInputRef={fileInputRef}
 				onSelectFile={selectFile}
@@ -169,7 +192,7 @@ export default function ExpenseHistoryPage() {
 				onReviewReplacement={() => setReplaceOpen(true)}
 			/>
 
-			<section aria-labelledby="history-heading">
+			<section aria-labelledby="history-heading" className="contents">
 				<h2 id="history-heading" className="sr-only">
 					Expense history
 				</h2>
@@ -185,7 +208,7 @@ export default function ExpenseHistoryPage() {
 
 				{monthsQuery.isPending ? (
 					<output
-						className="space-y-3 py-6"
+						className="space-y-3 py-6 px-6 lg:px-10 sticky left-0"
 						aria-label="Loading expense history"
 					>
 						<Skeleton className="h-10 w-full" />
@@ -193,18 +216,24 @@ export default function ExpenseHistoryPage() {
 						<Skeleton className="h-16 w-full" />
 					</output>
 				) : monthsQuery.error ? (
-					<div role="alert" className="py-8 text-sm">
+					<div
+						role="alert"
+						className="py-8 text-sm px-6 lg:px-10 sticky left-0"
+					>
 						Expense history could not be loaded. {monthsQuery.error.message}
 					</div>
 				) : months.length === 0 ? (
-					<div className="py-12 text-center">
+					<div className="py-12 text-center px-6 lg:px-10 sticky left-0">
 						<h3 className="font-semibold">No imported expense history</h3>
 						<p className="mt-1 text-sm text-muted-foreground">
-							Choose a monthly CSV above to preview your first import.
+							Choose a bank export above to preview your first import.
 						</p>
 					</div>
 				) : monthIndex < 0 ? (
-					<output className="block py-12 text-center">
+					<output
+						className="block py-12 text-center px-6 lg:px-10 sticky left-0"
+						aria-label="This month is not available"
+					>
 						<h3 className="font-semibold">This month is not available</h3>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Choose one of the imported months to continue.
@@ -212,7 +241,7 @@ export default function ExpenseHistoryPage() {
 					</output>
 				) : monthQuery.isPending ? (
 					<output
-						className="space-y-3 py-6"
+						className="space-y-3 py-6 px-6 lg:px-10 sticky left-0"
 						aria-label="Loading monthly transactions"
 					>
 						<Skeleton className="h-10 w-full" />
@@ -220,7 +249,10 @@ export default function ExpenseHistoryPage() {
 						<Skeleton className="h-16 w-full" />
 					</output>
 				) : monthQuery.error ? (
-					<div role="alert" className="py-8 text-sm">
+					<div
+						role="alert"
+						className="py-8 text-sm px-6 lg:px-10 sticky left-0"
+					>
 						Transactions for {selectedMonth} could not be loaded.{" "}
 						{monthQuery.error.message}
 					</div>
@@ -267,7 +299,7 @@ export default function ExpenseHistoryPage() {
 
 			<ExpenseHistoryReplacementDialog
 				open={replaceOpen}
-				month={preview?.month ?? null}
+				months={preview?.replacementMonths ?? []}
 				pending={commitMutation.isPending}
 				error={
 					commitMutation.error instanceof Error
@@ -279,6 +311,6 @@ export default function ExpenseHistoryPage() {
 				onOpenChange={setReplaceOpen}
 				onConfirm={() => commitMutation.mutate(true)}
 			/>
-		</div>
+		</>
 	);
 }

@@ -1,41 +1,43 @@
 # Expense history operations
 
-## Supported CSV contract
+## Supported import format
 
-Import exactly one CHF bank statement per calendar month from **Expenses →
-Expenses History**. The file must be semicolon-delimited and contain these exact
-headers:
+Import the Finanzassistent `.xlsx` export available from the bank. The importer
+finds its transaction table after the workbook's title and
+metadata rows. The table must include `Datum`, `Gegenpartei`, `Betrag`,
+`Währung`, `Kategorie`, and `Buchungstext`.
 
-```text
-IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
-```
+- Only CHF transactions are supported. Negative amounts are imported as
+  expenses; positive credits are skipped and reported in the preview.
+- `Datum` determines each transaction's calendar month. Native Excel dates and
+  supported text dates are normalized to `YYYY-MM-DD`.
+- `Gegenpartei` becomes the transaction description, with `Buchungstext` used
+  as a fallback.
+- German Finanzassistent categories are translated to English expense
+  categories and stored on the transaction. The complete supported list is:
+  `Allgemeines`, `Apotheke & Drogerie`, `Auto`, `Bargeldbezug`,
+  `Dienstleistungen`, `Gastronomie`, `Krankenversicherung`, `Lebensmittel`,
+  `Lohn`, `Miete & Hypothek`, `Möbel & Einrichtung`, `Persönliches`, `Reisen`,
+  `Shopping`, `Sparen & Anlegen`, `Steuern`, `Unterhaltung`,
+  `Weitere Einnahmen`, `Zahlungen`, `Ärzte & Pflegedienste`, and
+  `Öffentlicher Verkehr`. An unmapped category stops the import so it cannot
+  be silently lost.
 
-- `Booked At` determines the calendar month. Dates may use `DD.MM.YYYY` or
-  `YYYY-MM-DD`; every transaction row must belong to the same month.
-- Debit amounts must be negative. They are stored and displayed as positive CHF
-  expense magnitudes. Positive credit rows are skipped and reported in the
-  preview. Zero amounts are rejected.
-- Amounts may use a dot or comma decimal separator and apostrophes or spaces as
-  thousands separators.
-- A row containing only `Text` continues the preceding transaction description.
-  A continuation row without a preceding transaction is rejected.
-- Missing headers, invalid dates or amounts, empty/credit-only files, and files
-  spanning multiple booked months are rejected before anything is written.
-
-The preview shows the inferred month, debit count, total, skipped-credit count,
-warnings, and whether that month already exists. Review the preview before
+The preview shows all inferred months, debit count, total, skipped-credit count,
+warnings, and which months already exist. Review the preview before
 importing.
 
 ## Replacement and recovery
 
 Only one active dataset exists per calendar month. Imports are never merged. If
-the month exists, the confirmation dialog explains that replacement permanently
-removes that month's transaction edits and recurring-expense associations before
-the new rows are inserted.
+any included month exists, the confirmation dialog explains that replacement
+permanently removes all existing included months' transaction edits and
+recurring-expense associations before the new rows are inserted.
 
-Replacement is atomic: a validation or server failure leaves the existing month
-unchanged. If an import fails, keep the current dataset, correct or re-export the
-CSV, preview it again, and retry. There is no retained import draft or import
+The entire multi-month import is atomic: a validation or server failure leaves
+all existing months unchanged. If an import fails, keep the current datasets,
+correct or re-export the source file, preview it again, and retry. There is no
+retained import draft or import
 attempt history to recover; the previous active month remains the recovery point
 until a replacement succeeds.
 
@@ -45,8 +47,8 @@ spending.
 
 ## Privacy and troubleshooting
 
-The raw CSV is parsed in memory and is not retained or logged. Only parsed
-transactions and a sanitized source-file basename are stored. The history read
+The raw source file is parsed in memory and is not retained or logged. Only
+parsed transactions and a sanitized source-file basename are stored. The history read
 API and UI do not expose the source filename.
 
 For an actionable validation error, check the named row/header and re-preview the

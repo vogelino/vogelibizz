@@ -29,6 +29,13 @@ const expenseCategoryEnumValues = [
 	"Transport",
 	"Travel",
 	"Administrative",
+	"Dining",
+	"Groceries",
+	"Shopping",
+	"Cash Withdrawal",
+	"Taxes",
+	"Payments",
+	"Other Income",
 ] as const;
 
 export const expenseCategoryEnum = {

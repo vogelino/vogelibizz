@@ -1,0 +1,23 @@
+@utility text-balance {
+	text-wrap: balance;
+}
+
+@utility text-pretty {
+	text-wrap: pretty;
+}
+
+@utility text-stroke-muted {
+	-webkit-text-stroke-width: 5px;
+	-webkit-text-stroke-color: var(--stroke-muted);
+}
+
+@utility text-stroke-strong {
+	-webkit-text-stroke-width: 5px;
+	-webkit-text-stroke-color: var(--stroke-strong);
+}
+
+@utility focusable {
+	@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+	@apply focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+	@apply outline-none;
+}

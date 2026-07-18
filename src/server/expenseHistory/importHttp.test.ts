@@ -6,15 +6,18 @@ import type {
 import { ExpenseHistoryReplacementRequiredError } from "./importExpenseHistory";
 import { createExpenseHistoryImportHandlers } from "./importHttp";
 
-const csv = `IBAN;Booked At;Text;Credit/Debit Amount;Balance;Valuta Date
-CH00;03.06.2026;Synthetic debit;-12.50;100;03.06.2026`;
+const workbookRequest = {
+	workbookBase64: "synthetic-base64",
+	sourceFilename: "synthetic.xlsx",
+};
 const preview: ExpenseHistoryImportPreview = {
-	month: "2026-06",
+	months: ["2026-06"],
 	debitCount: 1,
 	skippedCreditCount: 0,
 	totalDebitAmount: 12.5,
 	warnings: [],
 	replacementRequired: false,
+	replacementMonths: [],
 };
 
 function post(body: unknown) {
@@ -32,12 +35,10 @@ describe("expense history import HTTP API", () => {
 			preview: async () => preview,
 			commit: async () => ({
 				...preview,
-				replacedExistingMonth: false,
+				replacedExistingMonths: [],
 			}),
 		});
-		const response = await handlers.preview(
-			post({ csv, sourceFilename: "synthetic.csv" }),
-		);
+		const response = await handlers.preview(post(workbookRequest));
 		expect(response.status).toBe(401);
 		expect(await response.json()).toEqual({ error: "Unauthorized" });
 	});
@@ -48,17 +49,22 @@ describe("expense history import HTTP API", () => {
 			preview: async () => preview,
 			commit: async () => ({
 				...preview,
-				replacedExistingMonth: false,
+				replacedExistingMonths: [],
 			}),
 		});
-		const response = await handlers.preview(
-			post({ csv, sourceFilename: "synthetic.csv" }),
-		);
+		const response = await handlers.preview(post(workbookRequest));
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual(preview);
-		const invalid = await handlers.preview(post({ sourceFilename: "x.csv" }));
+		const invalid = await handlers.preview(post({ sourceFilename: "x.xlsx" }));
 		expect(invalid.status).toBe(400);
 		expect(await invalid.json()).toMatchObject({
+			code: "INVALID_IMPORT_REQUEST",
+		});
+		const legacyCsv = await handlers.preview(
+			post({ csv: "legacy", sourceFilename: "legacy.csv" }),
+		);
+		expect(legacyCsv.status).toBe(400);
+		expect(await legacyCsv.json()).toMatchObject({
 			code: "INVALID_IMPORT_REQUEST",
 		});
 	});
@@ -66,18 +72,20 @@ describe("expense history import HTTP API", () => {
 	test("returns 409 for an unacknowledged replacement", async () => {
 		const handlers = createExpenseHistoryImportHandlers({
 			authorize: async () => true,
-			preview: async () => ({ ...preview, replacementRequired: true }),
+			preview: async () => ({
+				...preview,
+				replacementRequired: true,
+				replacementMonths: ["2026-06"],
+			}),
 			commit: async () => {
-				throw new ExpenseHistoryReplacementRequiredError("2026-06");
+				throw new ExpenseHistoryReplacementRequiredError(["2026-06"]);
 			},
 		});
-		const response = await handlers.commit(
-			post({ csv, sourceFilename: "synthetic.csv" }),
-		);
+		const response = await handlers.commit(post(workbookRequest));
 		expect(response.status).toBe(409);
 		expect(await response.json()).toMatchObject({
 			code: "EXPENSE_HISTORY_REPLACEMENT_REQUIRED",
-			month: "2026-06",
+			months: ["2026-06"],
 		});
 	});
 
@@ -86,21 +94,21 @@ describe("expense history import HTTP API", () => {
 		const result: ExpenseHistoryImportCommitResult = {
 			...preview,
 			replacementRequired: true,
-			replacedExistingMonth: true,
+			replacementMonths: ["2026-06"],
+			replacedExistingMonths: ["2026-06"],
 		};
 		const handlers = createExpenseHistoryImportHandlers({
 			authorize: async () => true,
 			preview: async () => preview,
 			commit: async (body) => {
-				acknowledged = body.replaceExistingMonth;
+				acknowledged = body.replaceExistingMonths;
 				return result;
 			},
 		});
 		const response = await handlers.commit(
 			post({
-				csv,
-				sourceFilename: "synthetic.csv",
-				replaceExistingMonth: true,
+				...workbookRequest,
+				replaceExistingMonths: true,
 			}),
 		);
 		expect(response.status).toBe(200);
