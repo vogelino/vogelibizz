@@ -3,9 +3,9 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ExpenseCategoryLabel } from "@/components/ExpenseCategoryBadge";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
-import { PillText } from "@/components/PillText";
 import CurrencyInput from "@/components/ui/currency-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,10 +18,7 @@ import {
 import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
-import {
-	categoryToOptionClass,
-	mapTypeToIcon,
-} from "@/utility/expensesIconUtil";
+import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import { getNowInUTC } from "@/utility/timeUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 
@@ -89,9 +86,7 @@ export default function ExpenseEdit({
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
-		renderer: (cat) => (
-			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-		),
+		renderer: (cat) => <ExpenseCategoryLabel value={cat} />,
 		accessorFn: (cat) => cat,
 	});
 

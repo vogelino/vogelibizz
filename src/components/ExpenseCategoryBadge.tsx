@@ -3,8 +3,21 @@ import type { ExpenseType } from "@/db/schema";
 import { cn } from "@/utility/classNames";
 import {
 	categoryToColorClass,
-	categoryToOptionClass,
+	mapCategoryToIcon,
 } from "@/utility/expensesIconUtil";
+
+export function ExpenseCategoryLabel({
+	value,
+}: {
+	value: ExpenseType["category"];
+}) {
+	return (
+		<span className="flex gap-2 items-center">
+			{mapCategoryToIcon(value)}
+			{value}
+		</span>
+	);
+}
 
 function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 	value,
@@ -15,17 +28,7 @@ function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 		<div className="bg-background w-fit">
 			<IconBadge
 				icon={null}
-				label={
-					<span className="flex gap-2 items-center">
-						<span
-							className={cn(
-								"size-2 inline-block",
-								categoryToOptionClass(value),
-							)}
-						/>
-						{value}
-					</span>
-				}
+				label={<ExpenseCategoryLabel value={value} />}
 				className={cn(categoryToColorClass(value), "m-0")}
 			/>
 		</div>

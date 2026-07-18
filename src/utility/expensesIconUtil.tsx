@@ -1,9 +1,31 @@
 import {
+	Banknote,
+	CarFront,
+	CircleDollarSign,
+	ClipboardList,
+	Code2,
+	Cpu,
+	CreditCard,
 	Ellipsis,
+	Film,
+	Gift,
+	Globe,
 	Handshake,
+	HeartHandshake,
+	HeartPulse,
+	House,
+	Landmark,
 	ListChecks,
 	type LucideIcon,
+	Package,
+	Palette,
+	PiggyBank,
+	Plane,
+	ShoppingBag,
+	ShoppingBasket,
 	User,
+	Utensils,
+	Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { ExpenseType } from "@/db/schema";
@@ -44,6 +66,20 @@ export const categoryToColorClass = (
 			return "bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-muted-foreground";
 		case "Administrative":
 			return "bg-sky-500/5 border-sky-500/20 text-sky-700 dark:text-muted-foreground";
+		case "Dining":
+			return "bg-rose-500/5 border-rose-500/20 text-rose-700 dark:text-rose-300";
+		case "Groceries":
+			return "bg-green-600/5 border-green-600/20 text-green-700 dark:text-green-300";
+		case "Shopping":
+			return "bg-fuchsia-500/5 border-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300";
+		case "Cash Withdrawal":
+			return "bg-slate-500/5 border-slate-500/20 text-slate-700 dark:text-slate-300";
+		case "Taxes":
+			return "bg-cyan-600/5 border-cyan-600/20 text-cyan-700 dark:text-cyan-300";
+		case "Payments":
+			return "bg-blue-600/5 border-blue-600/20 text-blue-700 dark:text-blue-300";
+		case "Other Income":
+			return "bg-emerald-600/5 border-emerald-600/20 text-emerald-700 dark:text-emerald-300";
 		default:
 			return "inherit";
 	}
@@ -85,9 +121,60 @@ export const categoryToOptionClass = <
 			return "bg-emerald-500";
 		case "Administrative":
 			return "bg-sky-500";
+		case "Dining":
+			return "bg-rose-500";
+		case "Groceries":
+			return "bg-green-600";
+		case "Shopping":
+			return "bg-fuchsia-500";
+		case "Cash Withdrawal":
+			return "bg-slate-500";
+		case "Taxes":
+			return "bg-cyan-600";
+		case "Payments":
+			return "bg-blue-600";
+		case "Other Income":
+			return "bg-emerald-600";
 		default:
 			return "bg-linear-to-r from-red-500 via-yellow-500 to-green-500";
 	}
+};
+
+const categoryToIconMap = {
+	Essentials: { Icon: Package, className: "text-purple-500" },
+	Home: { Icon: House, className: "text-gray-500" },
+	Domain: { Icon: Globe, className: "text-green-500" },
+	"Health & Wellbeing": { Icon: HeartPulse, className: "text-orange-500" },
+	Entertainment: { Icon: Film, className: "text-yellow-500" },
+	Charity: { Icon: HeartHandshake, className: "text-red-500" },
+	Present: { Icon: Gift, className: "text-teal-500" },
+	Services: { Icon: Wrench, className: "text-amber-500" },
+	Hardware: { Icon: Cpu, className: "text-pink-500" },
+	Software: { Icon: Code2, className: "text-violet-500" },
+	Hobby: { Icon: Palette, className: "text-indigo-500" },
+	Savings: { Icon: PiggyBank, className: "text-lime-500" },
+	Transport: { Icon: CarFront, className: "text-blue-500" },
+	Travel: { Icon: Plane, className: "text-emerald-500" },
+	Administrative: { Icon: ClipboardList, className: "text-sky-500" },
+	Dining: { Icon: Utensils, className: "text-rose-500" },
+	Groceries: { Icon: ShoppingBasket, className: "text-green-600" },
+	Shopping: { Icon: ShoppingBag, className: "text-fuchsia-500" },
+	"Cash Withdrawal": { Icon: Banknote, className: "text-slate-500" },
+	Taxes: { Icon: Landmark, className: "text-cyan-600" },
+	Payments: { Icon: CreditCard, className: "text-blue-600" },
+	"Other Income": { Icon: CircleDollarSign, className: "text-emerald-600" },
+} satisfies Record<
+	ExpenseType["category"],
+	{ Icon: LucideIcon; className: TailwindColorType }
+>;
+
+export const mapCategoryToIcon = (
+	category: ExpenseType["category"],
+	size = 16,
+): ReactNode => {
+	const iconConfig = categoryToIconMap[category];
+	const { Icon, className } = iconConfig;
+	return <Icon size={size} className={className} aria-hidden="true" />;
 };
 
 export const typeToColorClass = <CatType extends string = ExpenseType["type"]>(

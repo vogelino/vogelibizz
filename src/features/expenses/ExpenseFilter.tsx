@@ -1,15 +1,13 @@
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
-import { PillText } from "@/components/PillText";
+import ExpenseCategoryBadge, {
+	ExpenseCategoryLabel,
+} from "@/components/ExpenseCategoryBadge";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
-import {
-	categoryToOptionClass,
-	mapTypeToIcon,
-} from "@/utility/expensesIconUtil";
+import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
 	type ExpenseOverviewCategory,
@@ -24,6 +22,15 @@ const OPTION_VALUES = [
 ] as const;
 
 export type ExpenseFilterValue = (typeof OPTION_VALUES)[number];
+
+function MixedCategoryLabel() {
+	return (
+		<span className="flex gap-2 items-center">
+			{mapTypeToIcon("Mixed")}
+			{mixedClassification}
+		</span>
+	);
+}
 
 type TypeFilterType = ExpenseOverviewType | "All types";
 
@@ -44,9 +51,12 @@ export function ExpenseFilter<TData>({
 	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
 	const categoryOptions = useComboboxOptions({
 		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
-		renderer: (cat) => (
-			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-		),
+		renderer: (cat) =>
+			cat === mixedClassification ? (
+				<MixedCategoryLabel />
+			) : (
+				<ExpenseCategoryLabel value={cat} />
+			),
 	});
 
 	const typeOptions = useComboboxOptions<ExpenseFilterValue>({
@@ -75,7 +85,7 @@ export function ExpenseFilter<TData>({
 				placeholder="Filter by category"
 				selectedValueFormater={(value) =>
 					value === mixedClassification ? (
-						<PillText pillColorClass="bg-muted-foreground">Mixed</PillText>
+						<MixedCategoryLabel />
 					) : (
 						<ExpenseCategoryBadge
 							value={value as Exclude<ExpenseOverviewCategory, "Mixed">}
