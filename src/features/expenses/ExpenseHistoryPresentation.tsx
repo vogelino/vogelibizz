@@ -219,7 +219,7 @@ export function ExpenseHistorySummaryToolbar({
 	onOtherOnlyChange: (checked: boolean) => void;
 }) {
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-3 border border-border bg-muted/30 p-3">
+		<div className="flex flex-wrap items-center justify-between gap-3 bg-muted/30 p-3">
 			<div
 				className="flex flex-wrap gap-x-6 gap-y-1 text-sm"
 				aria-live="polite"

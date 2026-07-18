@@ -36,7 +36,7 @@ export const projectTableColumns = [
 				<InternalLink
 					to="/projects/edit/$id/modal"
 					params={{ id: String(id) }}
-					className="text-base whitespace-nowrap"
+					className="text-base -ml-3 bg-transparent whitespace-nowrap"
 					mask={{
 						to: "/projects/edit/$id",
 						params: { id: String(id) },

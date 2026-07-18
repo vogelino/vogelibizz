@@ -34,7 +34,7 @@ export function getExpensesTableColumns(targetCurrency: CurrencyIdType) {
 					<InternalLink
 						to="/expenses/edit/$id/modal"
 						params={{ id: String(id) }}
-						className="text-base whitespace-nowrap"
+						className="text-base -ml-3 bg-transparent whitespace-nowrap"
 						mask={{
 							to: "/expenses/edit/$id",
 							params: { id: String(id) },

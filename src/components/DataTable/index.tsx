@@ -32,6 +32,24 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/utility/classNames";
 
+type ClassNames = {
+	table?: string;
+	container?: string;
+	toolbar?: string;
+	caption?: string;
+	header?: string;
+	head?: string;
+	body?: string;
+	row?: string;
+	cell?: string;
+	skeleton?: string;
+	pagination?: string;
+	paginationInfo?: string;
+	paginationButton?: string;
+	previousButton?: string;
+	nextButton?: string;
+};
+
 type DataTableProps<TData> = {
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	columns: ColumnDef<TData, any>[];
@@ -50,8 +68,7 @@ type DataTableProps<TData> = {
 	getRowId?: TableOptions<TData>["getRowId"];
 	caption?: ReactNode;
 	emptyMessage?: ReactNode;
-	tableClassName?: string;
-	containerClassName?: string;
+	classNames?: ClassNames;
 	containerAriaLabel?: string;
 };
 
@@ -68,8 +85,7 @@ export function DataTable<TData>({
 	getRowId,
 	caption,
 	emptyMessage = "No results.",
-	tableClassName,
-	containerClassName,
+	classNames = {},
 	containerAriaLabel,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
@@ -128,26 +144,36 @@ export function DataTable<TData>({
 	return (
 		<>
 			{toolbar ? (
-				<div className="sticky px-6 md:px-10 left-0 pb-6">
+				<div
+					className={cn(
+						"sticky left-0 top-16 z-20 bg-background pb-3",
+						classNames.toolbar,
+					)}
+				>
 					{loading ? (toolbarSkeleton ?? null) : toolbar(table)}
 				</div>
 			) : null}
 			<section
-				className={cn("rounded-md", containerClassName)}
+				className={cn("rounded-md", classNames.container)}
 				aria-label={containerAriaLabel}
 				tabIndex={containerAriaLabel ? 0 : undefined}
 			>
-				<Table className={tableClassName}>
-					{caption ? <TableCaption>{caption}</TableCaption> : null}
+				<Table className={classNames.table}>
+					{caption ? (
+						<TableCaption className={cn("sr-only", classNames.caption)}>
+							{caption}
+						</TableCaption>
+					) : null}
 					<TableHeader
 						className={cn(
 							"sticky top-16 bg-background z-10",
 							"[&_th:first-child]:pl-6 md:[&_th:first-child]:pl-10 [&_th:last-child]:pr-6 md:[&_th:last-child]:pr-10",
 							"shadow shadow-black/5",
+							classNames.header,
 						)}
 					>
 						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
+							<TableRow key={headerGroup.id} className={classNames.row}>
 								{headerGroup.headers.map((header) => {
 									const { column } = header;
 									const sort = column.getIsSorted();
@@ -167,6 +193,7 @@ export function DataTable<TData>({
 											key={header.id}
 											colSpan={header.colSpan}
 											style={{ width: `${header.getSize()}px` }}
+											className={classNames.head}
 										>
 											{column.getCanSort() ? (
 												<Button
@@ -195,17 +222,24 @@ export function DataTable<TData>({
 					<TableBody
 						className={cn(
 							"[&_td:first-child]:pl-6 md:[&_td:first-child]:pl-10 [&_td:last-child]:pr-6 md:[&_td:last-child]:pr-10",
+							classNames.body,
 						)}
 					>
 						{loading ? (
 							skeletonRowKeys.map((rowKey) => (
-								<TableRow key={rowKey} className="relative">
+								<TableRow
+									key={rowKey}
+									className={cn("relative", classNames.row)}
+								>
 									{table.getAllColumns().map((column) => (
 										<TableCell
 											key={`${rowKey}-${column.id}`}
 											style={{ width: `${column.getSize()}px` }}
+											className={classNames.cell}
 										>
-											<Skeleton className="h-5 w-full" />
+											<Skeleton
+												className={cn("h-5 w-full", classNames.skeleton)}
+											/>
 										</TableCell>
 									))}
 								</TableRow>
@@ -214,13 +248,14 @@ export function DataTable<TData>({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="relative"
+									className={cn("relative", classNames.row)}
 									data-state={row.getIsSelected() ? "selected" : undefined}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
 											key={cell.id}
 											style={{ width: `${cell.column.getSize()}px` }}
+											className={classNames.cell}
 										>
 											{flexRender(
 												cell.column.columnDef.cell,
@@ -231,10 +266,10 @@ export function DataTable<TData>({
 								</TableRow>
 							))
 						) : (
-							<TableRow>
+							<TableRow className={classNames.row}>
 								<TableCell
 									colSpan={table.getAllColumns().length}
-									className="h-24 text-center"
+									className={cn("h-24 text-center", classNames.cell)}
 								>
 									{emptyMessage}
 								</TableCell>
@@ -244,8 +279,18 @@ export function DataTable<TData>({
 				</Table>
 			</section>
 			{showPagination ? (
-				<div className="flex items-center justify-end space-x-2 py-4">
-					<div className="flex-1 text-sm text-muted-foreground">
+				<div
+					className={cn(
+						"flex items-center justify-end space-x-2 py-4",
+						classNames.pagination,
+					)}
+				>
+					<div
+						className={cn(
+							"flex-1 text-sm text-muted-foreground",
+							classNames.paginationInfo,
+						)}
+					>
 						Page {table.getState().pagination.pageIndex + 1} of{" "}
 						{table.getPageCount()}
 					</div>
@@ -254,6 +299,10 @@ export function DataTable<TData>({
 						size="sm"
 						onClick={() => table.previousPage()}
 						disabled={!table.getCanPreviousPage()}
+						className={cn(
+							classNames.paginationButton,
+							classNames.previousButton,
+						)}
 					>
 						Previous
 					</Button>
@@ -262,6 +311,7 @@ export function DataTable<TData>({
 						size="sm"
 						onClick={() => table.nextPage()}
 						disabled={!table.getCanNextPage()}
+						className={cn(classNames.paginationButton, classNames.nextButton)}
 					>
 						Next
 					</Button>

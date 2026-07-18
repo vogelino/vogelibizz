@@ -173,7 +173,7 @@ export default function ExpenseHistoryPage() {
 				<h2 id="history-heading" className="sr-only">
 					Expense history
 				</h2>
-				<div className="flex flex-col gap-3 border-b border-border py-4 md:flex-row md:items-center md:justify-between">
+				<div className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
 					<ExpenseHistoryMonthNavigation
 						months={months}
 						selectedMonth={monthIndex >= 0 ? selectedMonth : null}
@@ -236,9 +236,11 @@ export default function ExpenseHistoryPage() {
 								? [{ id: "association", value: true }]
 								: [],
 						}}
-						tableClassName="min-w-[960px]"
-						containerClassName="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-						containerAriaLabel="Monthly transactions; scroll horizontally on small screens"
+						classNames={{
+							table: "min-w-240",
+							header: "top-26",
+							toolbar: "pb-0",
+						}}
 						caption={
 							<span className="sr-only">
 								Monthly bank transactions. Open a description to edit the

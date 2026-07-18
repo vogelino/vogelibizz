@@ -28,7 +28,7 @@ export const invoiceTableColumns = [
 				<InternalLink
 					to="/invoices/$id"
 					params={{ id: String(id) }}
-					className="text-base whitespace-nowrap"
+					className="text-base -ml-3 bg-transparent whitespace-nowrap"
 					prefetchQuery={invoiceQueryOptions(id)}
 				>
 					{getValue<string>()}

@@ -23,8 +23,12 @@ export function getExpenseHistoryColumns(month: string) {
 	return [
 		columnHelper.accessor("bookedAt", {
 			header: "Booked",
-			size: 140,
-			cell: ({ getValue }) => formatDate(getValue()),
+			size: 180,
+			cell: ({ getValue }) => (
+				<span className="text-muted-foreground text-nowrap">
+					{formatDate(getValue())}
+				</span>
+			),
 		}),
 		columnHelper.accessor("description", {
 			header: "Description",
@@ -45,22 +49,10 @@ export function getExpenseHistoryColumns(month: string) {
 							prefetchQuery={expenseHistoryTransactionQueryOptions(
 								transaction.id,
 							)}
-							className="-ml-3 text-base"
+							className="text-base -ml-3 bg-transparent whitespace-nowrap"
 						>
 							{getValue()}
 						</InternalLink>
-						<details className="mt-1 text-xs text-muted-foreground">
-							<summary className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-								Original bank details
-							</summary>
-							<div className="mt-1 max-w-xl whitespace-normal">
-								{transaction.originalDescription} ·{" "}
-								{formatCurrency(transaction.originalAmount, "CHF")}
-								{transaction.valueDate
-									? ` · Value date ${formatDate(transaction.valueDate)}`
-									: ""}
-							</div>
-						</details>
 					</div>
 				);
 			},

@@ -310,8 +310,11 @@ export default function ExpensesPage({
 							: []),
 					],
 				}}
+				classNames={{
+					header: "top-30 pt-3",
+				}}
 				toolbar={(table) => (
-					<div className="flex items-center gap-x-4 gap-y-1 flex-wrap">
+					<div className="flex items-center gap-x-4 gap-y-1 flex-wrap px-6 lg:px-10 pt-3">
 						{(() => {
 							tableRef.current = table;
 							return null;
