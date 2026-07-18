@@ -2,7 +2,7 @@
 
 import { Link } from "@tanstack/react-router";
 import { Menu as MenuIcon, X } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import BizzLogo from "@/components/BizzLogo";
 import MenuUser from "@/components/MenuUser";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -16,6 +16,7 @@ import {
 import { cn } from "@/utility/classNames";
 import useSettings from "@/utility/data/useSettings";
 import useSettingsUpdate from "@/utility/data/useSettingsUpdate";
+import { ExpensesMenuItem } from "./ExpensesMenuItem";
 import HeaderMenuLink from "./HeaderMenuLink";
 
 type MenuRoute = "/projects" | "/clients" | "/expenses" | "/invoices";
@@ -53,11 +54,6 @@ export const Menu = ({
 			key: "clients",
 			label: "Clients",
 			route: "/clients",
-		},
-		{
-			key: "expenses",
-			label: "Expenses",
-			route: "/expenses",
 		},
 		{
 			key: "invoices",
@@ -122,15 +118,34 @@ export const Menu = ({
 					className={cn(`flex flex-col md:flex-row md:gap-4 items-center grow`)}
 					aria-label="Main menu items"
 				>
-					{menuItems.map((item) => (
-						<HeaderMenuLink
-							key={item.key}
-							to={item.route}
-							title={item.label ?? "-"}
-							active={currentPage.split("/")[0] === item.key}
-							onClick={() => setMobileOpen(false)}
-						/>
-					))}
+					{menuItems.map((item) => {
+						if (item.key === "invoices") {
+							return (
+								<Fragment key={item.key}>
+									<ExpensesMenuItem
+										currentPage={currentPage}
+										onNavigate={() => setMobileOpen(false)}
+									/>
+									<HeaderMenuLink
+										to={item.route}
+										title={item.label ?? "-"}
+										active={currentPage.split("/")[0] === item.key}
+										onClick={() => setMobileOpen(false)}
+									/>
+								</Fragment>
+							);
+						}
+
+						return (
+							<HeaderMenuLink
+								key={item.key}
+								to={item.route}
+								title={item.label ?? "-"}
+								active={currentPage.split("/")[0] === item.key}
+								onClick={() => setMobileOpen(false)}
+							/>
+						);
+					})}
 				</ul>
 				<ul
 					className={cn(
