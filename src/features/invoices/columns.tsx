@@ -54,32 +54,30 @@ export const invoiceTableColumns = [
 			);
 		},
 	}),
-	columnHelper.display({
+	columnHelper.accessor((row) => row.clients?.[0]?.name ?? "", {
 		id: "client",
 		size: 220,
 		header: "Client",
-		cell: ({ row }) => <span>{row.original.clients?.[0]?.name || "—"}</span>,
+		cell: ({ getValue }) => <span>{getValue() || "—"}</span>,
 	}),
-	columnHelper.display({
+	columnHelper.accessor((row) => row.projects?.[0]?.name ?? "", {
 		id: "project",
 		size: 220,
 		header: "Project",
-		cell: ({ row }) => <span>{row.original.projects?.[0]?.name || "—"}</span>,
+		cell: ({ getValue }) => <span>{getValue() || "—"}</span>,
 	}),
-	columnHelper.display({
+	columnHelper.accessor(getInvoiceHours, {
 		id: "hours",
 		size: 100,
 		header: "Hours",
-		cell: ({ row }) => <span>{getInvoiceHours(row.original)}</span>,
+		cell: ({ getValue }) => <span>{getValue()}</span>,
 	}),
-	columnHelper.display({
+	columnHelper.accessor(getInvoiceTotal, {
 		id: "total",
 		size: 140,
 		header: "Total",
-		cell: ({ row }) => (
-			<span>
-				{formatCurrency(getInvoiceTotal(row.original), row.original.currency)}
-			</span>
+		cell: ({ getValue, row }) => (
+			<span>{formatCurrency(getValue(), row.original.currency)}</span>
 		),
 	}),
 ];
