@@ -121,8 +121,11 @@ export function DataTable<TData>({
 	});
 
 	const selectedRows = useMemo(
-		() => table.getSelectedRowModel().rows.map((row) => row.original),
-		[table],
+		() =>
+			Object.values(rowSelection).some(Boolean)
+				? table.getSelectedRowModel().rows.map((row) => row.original)
+				: [],
+		[table, rowSelection],
 	);
 
 	useEffect(() => {
@@ -281,7 +284,7 @@ export function DataTable<TData>({
 			{showPagination ? (
 				<div
 					className={cn(
-						"flex items-center justify-end space-x-2 py-4",
+						"flex items-center justify-end space-x-2 py-4 px-6 lg:px-10 sticky left-0",
 						classNames.pagination,
 					)}
 				>

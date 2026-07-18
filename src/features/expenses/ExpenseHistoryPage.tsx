@@ -2,8 +2,11 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import type { Table as TanstackTable } from "@tanstack/react-table";
 import { type ChangeEvent, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
+import { useResourceActions } from "@/components/ResourcePageLayout";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
@@ -13,13 +16,16 @@ import {
 } from "@/utility/data/queryOptions";
 import useExpenseHistoryMonth from "@/utility/data/useExpenseHistoryMonth";
 import useExpenseHistoryMonths from "@/utility/data/useExpenseHistoryMonths";
+import useExpenseHistoryTransactionDelete from "@/utility/data/useExpenseHistoryTransactionDelete";
 import { apiFetch } from "@/utility/dataHookUtil";
+import type { ExpenseHistoryTransaction } from "@/utility/expenseHistoryContracts";
 import {
 	type ExpenseHistoryImportCommitResult,
 	type ExpenseHistoryImportPreview,
 	expenseHistoryImportCommitResultSchema,
 	expenseHistoryImportPreviewSchema,
 } from "@/utility/expenseHistoryImportContracts";
+import { ExpenseFilter } from "./ExpenseFilter";
 import {
 	ExpenseHistoryImportPanel,
 	ExpenseHistoryMonthNavigation,
@@ -82,6 +88,15 @@ export default function ExpenseHistoryPage() {
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [replaceOpen, setReplaceOpen] = useState(false);
 	const [otherOnly, setOtherOnly] = useState(false);
+	const [selectedRows, setSelectedRows] = useState<ExpenseHistoryTransaction[]>(
+		[],
+	);
+	const tableRef = useRef<TanstackTable<ExpenseHistoryTransaction> | null>(
+		null,
+	);
+	const deleteMutation = useExpenseHistoryTransactionDelete(
+		selectedMonth ?? "",
+	);
 
 	const previewMutation = useMutation({
 		mutationFn: async (input: ImportSource) =>
@@ -177,6 +192,31 @@ export default function ExpenseHistoryPage() {
 		() => (selectedMonth ? getExpenseHistoryColumns(selectedMonth) : []),
 		[selectedMonth],
 	);
+	const selectionActions = useMemo(() => {
+		if (selectedRows.length === 0) return null;
+		return (
+			<Button
+				type="button"
+				variant="destructive"
+				size="sm"
+				disabled={deleteMutation.isPending}
+				onClick={() => {
+					deleteMutation.mutate(
+						selectedRows.map(({ id }) => id),
+						{
+							onSuccess: () => {
+								setSelectedRows([]);
+								tableRef.current?.resetRowSelection();
+							},
+						},
+					);
+				}}
+			>
+				Delete selected ({selectedRows.length})
+			</Button>
+		);
+	}, [deleteMutation, selectedRows]);
+	useResourceActions(selectionActions);
 
 	return (
 		<>
@@ -196,15 +236,6 @@ export default function ExpenseHistoryPage() {
 				<h2 id="history-heading" className="sr-only">
 					Expense history
 				</h2>
-				<div className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
-					<ExpenseHistoryMonthNavigation
-						months={months}
-						selectedMonth={monthIndex >= 0 ? selectedMonth : null}
-						older={navigation.older}
-						newer={navigation.newer}
-						onChooseMonth={chooseMonth}
-					/>
-				</div>
 
 				{monthsQuery.isPending ? (
 					<output
@@ -262,6 +293,8 @@ export default function ExpenseHistoryPage() {
 						columns={columns}
 						data={monthQuery.data.transactions}
 						getRowId={(transaction) => String(transaction.id)}
+						enableRowSelection
+						onSelectionChange={setSelectedRows}
 						initialState={{
 							pagination: { pageIndex: 0, pageSize: 50 },
 							columnFilters: otherOnly
@@ -282,16 +315,35 @@ export default function ExpenseHistoryPage() {
 						}
 						emptyMessage={otherOnly ? "No Other transactions." : undefined}
 						toolbar={(table) => (
-							<ExpenseHistorySummaryToolbar
-								summary={monthQuery.data.summary}
-								otherOnly={otherOnly}
-								onOtherOnlyChange={(next) => {
-									setOtherOnly(next);
-									table
-										.getColumn("association")
-										?.setFilterValue(next || undefined);
-								}}
-							/>
+							<>
+								{(() => {
+									tableRef.current = table;
+									return null;
+								})()}
+								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+									<ExpenseFilter
+										isLoading={monthQuery.isPending}
+										table={table}
+									/>
+									<ExpenseHistoryMonthNavigation
+										months={months}
+										selectedMonth={monthIndex >= 0 ? selectedMonth : null}
+										older={navigation.older}
+										newer={navigation.newer}
+										onChooseMonth={chooseMonth}
+									/>
+								</div>
+								<ExpenseHistorySummaryToolbar
+									summary={monthQuery.data.summary}
+									otherOnly={otherOnly}
+									onOtherOnlyChange={(next) => {
+										setOtherOnly(next);
+										table
+											.getColumn("association")
+											?.setFilterValue(next || undefined);
+									}}
+								/>
+							</>
 						)}
 					/>
 				) : null}

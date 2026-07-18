@@ -1,4 +1,10 @@
-import { Handshake, ListChecks, type LucideIcon, User } from "lucide-react";
+import {
+	Ellipsis,
+	Handshake,
+	ListChecks,
+	type LucideIcon,
+	User,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import type { ExpenseType } from "@/db/schema";
 
@@ -106,16 +112,19 @@ const typeToOptionClass = <CatType extends string = ExpenseType["type"]>(
 			return lighter ? "text-red-500/75" : "text-red-500";
 		case "Personal":
 			return lighter ? "text-blue-500/75" : "text-blue-500";
+		case "Mixed":
+			return lighter ? "text-muted-foreground/75" : "text-muted-foreground";
 		default:
 			return "inherit";
 	}
 };
 
-type IconKeyType = ExpenseType["type"] | "All types";
+type IconKeyType = ExpenseType["type"] | "All types" | "Mixed";
 const typeToIconMap: Record<IconKeyType, LucideIcon> = {
 	"All types": ListChecks,
 	Freelance: Handshake,
 	Personal: User,
+	Mixed: Ellipsis,
 };
 
 export const mapTypeToIcon = (type: IconKeyType, size = 16): ReactNode => {

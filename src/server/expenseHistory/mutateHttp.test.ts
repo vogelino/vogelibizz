@@ -4,7 +4,10 @@ import {
 	ExpenseHistoryConflictError,
 	ExpenseHistoryNotFoundError,
 } from "./mutateExpenseHistory";
-import { createExpenseHistoryMutationHandlers } from "./mutateHttp";
+import {
+	createExpenseHistoryBatchDeleteHandler,
+	createExpenseHistoryMutationHandlers,
+} from "./mutateHttp";
 
 const transaction: ExpenseHistoryTransaction = {
 	id: 7,
@@ -37,6 +40,7 @@ describe("expense history mutation HTTP API", () => {
 			authorize: async () => false,
 			mutate: async () => transaction,
 			createAndAssociate: async () => transaction,
+			delete: async () => ({ id: 7 }),
 		});
 		expect((await handlers.patch(request({}), "7")).status).toBe(401);
 	});
@@ -50,6 +54,7 @@ describe("expense history mutation HTTP API", () => {
 				return transaction;
 			},
 			createAndAssociate: async () => transaction,
+			delete: async () => ({ id: 7 }),
 		});
 		const response = await handlers.patch(
 			request({ lastModified: "old-token", amount: 0, expenseId: 4 }),
@@ -68,6 +73,7 @@ describe("expense history mutation HTTP API", () => {
 			authorize: async () => true,
 			mutate: async () => transaction,
 			createAndAssociate: async () => transaction,
+			delete: async () => ({ id: 7 }),
 		});
 		for (const body of [
 			{ lastModified: "token", amount: -1 },
@@ -86,6 +92,7 @@ describe("expense history mutation HTTP API", () => {
 				throw new ExpenseHistoryConflictError("reload");
 			},
 			createAndAssociate: async () => transaction,
+			delete: async () => ({ id: 7 }),
 		});
 		expect(
 			(await conflict.patch(request({ lastModified: "old", amount: 1 }), "7"))
@@ -97,6 +104,7 @@ describe("expense history mutation HTTP API", () => {
 				throw new ExpenseHistoryNotFoundError("missing");
 			},
 			createAndAssociate: async () => transaction,
+			delete: async () => ({ id: 7 }),
 		});
 		expect(
 			(await missing.patch(request({ lastModified: "old", amount: 1 }), "7"))
@@ -113,6 +121,7 @@ describe("expense history mutation HTTP API", () => {
 				received = input;
 				return { ...transaction, expense: { id: 9, name: input.name } };
 			},
+			delete: async () => ({ id: 7 }),
 		});
 		const response = await handlers.createExpense(
 			request(
@@ -135,5 +144,86 @@ describe("expense history mutation HTTP API", () => {
 			category: "Software",
 			type: "Personal",
 		});
+	});
+
+	test("deletes a selected transaction without requiring a request body", async () => {
+		let deletedId: number | undefined;
+		const handlers = createExpenseHistoryMutationHandlers({
+			authorize: async () => true,
+			mutate: async () => transaction,
+			createAndAssociate: async () => transaction,
+			delete: async (id) => {
+				deletedId = id;
+				return { id };
+			},
+		});
+		const response = await handlers.delete(
+			new Request("https://example.test/api/expense-history/transactions/7", {
+				method: "DELETE",
+			}),
+			"7",
+		);
+		expect(response.status).toBe(200);
+		expect(deletedId).toBe(7);
+		expect(await response.json()).toEqual({ id: 7 });
+	});
+
+	test("deletes selected transactions in one batch request", async () => {
+		let deletedIds: number[] = [];
+		const handler = createExpenseHistoryBatchDeleteHandler({
+			authorize: async () => true,
+			deleteMany: async (ids) => {
+				deletedIds = ids;
+				return { ids };
+			},
+		});
+		const response = await handler(
+			new Request(
+				"https://example.test/api/expense-history/transactions/batch",
+				{
+					method: "DELETE",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ ids: [7, 8, 9] }),
+				},
+			),
+		);
+		expect(response.status).toBe(200);
+		expect(deletedIds).toEqual([7, 8, 9]);
+		expect(await response.json()).toEqual({ ids: [7, 8, 9] });
+	});
+
+	test("validates and authorizes batch deletion", async () => {
+		const unauthorized = createExpenseHistoryBatchDeleteHandler({
+			authorize: async () => false,
+			deleteMany: async (ids) => ({ ids }),
+		});
+		expect(
+			(
+				await unauthorized(
+					new Request(
+						"https://example.test/api/expense-history/transactions/batch",
+						{ method: "DELETE" },
+					),
+				)
+			).status,
+		).toBe(401);
+
+		const authorized = createExpenseHistoryBatchDeleteHandler({
+			authorize: async () => true,
+			deleteMany: async (ids) => ({ ids }),
+		});
+		for (const ids of [[], [7, 7], [0]]) {
+			const response = await authorized(
+				new Request(
+					"https://example.test/api/expense-history/transactions/batch",
+					{
+						method: "DELETE",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ ids }),
+					},
+				),
+			);
+			expect(response.status).toBe(400);
+		}
 	});
 });

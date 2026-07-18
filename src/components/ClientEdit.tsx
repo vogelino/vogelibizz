@@ -91,7 +91,7 @@ export default function ClientEdit({
 	const projectsOptions = useComboboxOptions<ProjectType>({
 		optionValues: projectsQuery.data ?? [],
 		renderer: (project) => project?.name || "",
-		accessorFn: ({ id }) => String(id),
+		accessorFn: ({ id }) => id,
 	});
 	const languageOptions = useMemo(
 		() =>

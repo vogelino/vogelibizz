@@ -20,23 +20,23 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utility/classNames";
 
-export type ComboboxProps = {
+export type ComboboxProps<TData> = {
 	id?: string;
 	options: {
 		label: ReactNode;
-		value: string | number;
+		value: TData;
 	}[];
-	onChange?: (value: string | number) => void;
-	value?: string | number;
+	onChange?: (value: TData) => void;
+	value?: TData;
 	className?: string;
-	selectedValueFormater?: (value: string | number) => ReactNode;
+	selectedValueFormater?: (value: TData) => ReactNode;
 	align?: PopoverContentProps["align"];
 	loading?: boolean;
 	disabled?: boolean;
 	"aria-label"?: string;
 	"aria-describedby"?: string;
 };
-export function Combobox({
+export function Combobox<TData>({
 	id,
 	options,
 	onChange = () => undefined,
@@ -50,9 +50,9 @@ export function Combobox({
 	disabled = false,
 	"aria-label": ariaLabel,
 	"aria-describedby": ariaDescribedBy,
-}: ComboboxProps) {
+}: ComboboxProps<TData>) {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState<string | number | undefined>(
+	const [value, setValue] = useState<TData | undefined>(
 		initialValue ?? options[0]?.value,
 	);
 

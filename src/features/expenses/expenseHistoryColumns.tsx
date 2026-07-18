@@ -1,6 +1,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
 import { expenseHistoryTransactionQueryOptions } from "@/utility/data/queryOptions";
@@ -21,6 +22,33 @@ function formatDate(date: string) {
 
 export function getExpenseHistoryColumns(month: string) {
 	return [
+		columnHelper.display({
+			id: "select",
+			header: ({ table }) => (
+				<Checkbox
+					checked={
+						table.getIsAllPageRowsSelected() ||
+						(table.getIsSomePageRowsSelected() && "indeterminate")
+					}
+					onCheckedChange={(checked) =>
+						table.toggleAllPageRowsSelected(Boolean(checked))
+					}
+					aria-label="Select all transactions"
+					className="mr-4"
+				/>
+			),
+			cell: ({ row }) => (
+				<Checkbox
+					checked={row.getIsSelected()}
+					onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))}
+					aria-label={`Select ${row.original.description}`}
+					className="mr-4"
+				/>
+			),
+			size: 36,
+			enableSorting: false,
+			enableHiding: false,
+		}),
 		columnHelper.accessor("bookedAt", {
 			header: "Booked",
 			size: 180,
@@ -36,7 +64,7 @@ export function getExpenseHistoryColumns(month: string) {
 			cell: ({ getValue, row }) => {
 				const transaction = row.original;
 				return (
-					<div className="min-w-64">
+					<div className="min-w-64 max-w-120 truncate">
 						<InternalLink
 							to="/expenses/history/edit/$id/modal"
 							params={{ id: String(transaction.id) }}

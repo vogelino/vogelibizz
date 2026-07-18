@@ -7,6 +7,8 @@ import {
 } from "@/utility/expenseHistoryContracts";
 import {
 	createAndAssociateExpense,
+	deleteExpenseHistoryTransaction,
+	deleteExpenseHistoryTransactions,
 	ExpenseHistoryConflictError,
 	ExpenseHistoryNotFoundError,
 	mutateExpenseHistoryTransaction,
@@ -16,6 +18,7 @@ type Dependencies = {
 	authorize: (request: Request) => Promise<boolean>;
 	mutate: typeof mutateExpenseHistoryTransaction;
 	createAndAssociate: typeof createAndAssociateExpense;
+	delete: typeof deleteExpenseHistoryTransaction;
 };
 
 export function createExpenseHistoryMutationHandlers(
@@ -23,10 +26,11 @@ export function createExpenseHistoryMutationHandlers(
 		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
 		mutate: mutateExpenseHistoryTransaction,
 		createAndAssociate: createAndAssociateExpense,
+		delete: deleteExpenseHistoryTransaction,
 	},
 ) {
 	const handle =
-		(kind: "mutate" | "create") =>
+		(kind: "mutate" | "create" | "delete") =>
 		async (request: Request, idParam: string) => {
 			if (!(await dependencies.authorize(request)))
 				return json({ error: "Unauthorized" }, { status: 401 });
@@ -34,17 +38,20 @@ export function createExpenseHistoryMutationHandlers(
 			if (!id.success)
 				return json({ error: "Invalid transaction id." }, { status: 400 });
 			try {
-				const body = await request.json();
 				const result =
-					kind === "mutate"
-						? await dependencies.mutate(
-								id.data,
-								expenseHistoryTransactionMutationSchema.parse(body),
-							)
-						: await dependencies.createAndAssociate(
-								id.data,
-								expenseHistoryCreateExpenseSchema.parse(body),
-							);
+					kind === "delete"
+						? await dependencies.delete(id.data)
+						: kind === "mutate"
+							? await dependencies.mutate(
+									id.data,
+									expenseHistoryTransactionMutationSchema.parse(
+										await request.json(),
+									),
+								)
+							: await dependencies.createAndAssociate(
+									id.data,
+									expenseHistoryCreateExpenseSchema.parse(await request.json()),
+								);
 				return json(result);
 			} catch (error) {
 				if (error instanceof SyntaxError)
@@ -67,9 +74,64 @@ export function createExpenseHistoryMutationHandlers(
 				return json({ error: "Transaction mutation failed." }, { status: 500 });
 			}
 		};
-	return { patch: handle("mutate"), createExpense: handle("create") };
+	return {
+		patch: handle("mutate"),
+		createExpense: handle("create"),
+		delete: handle("delete"),
+	};
 }
 
 const handlers = createExpenseHistoryMutationHandlers();
 export const patchExpenseHistoryTransactionHandler = handlers.patch;
 export const createExpenseFromTransactionHandler = handlers.createExpense;
+export const deleteExpenseHistoryTransactionHandler = handlers.delete;
+
+const batchDeleteSchema = z
+	.object({
+		ids: z.array(z.number().int().positive()).min(1).max(1_000),
+	})
+	.strict()
+	.refine(({ ids }) => new Set(ids).size === ids.length, {
+		message: "Transaction ids must be unique.",
+		path: ["ids"],
+	});
+
+export function createExpenseHistoryBatchDeleteHandler(
+	dependencies: {
+		authorize: (request: Request) => Promise<boolean>;
+		deleteMany: typeof deleteExpenseHistoryTransactions;
+	} = {
+		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
+		deleteMany: deleteExpenseHistoryTransactions,
+	},
+) {
+	return async (request: Request) => {
+		if (!(await dependencies.authorize(request))) {
+			return json({ error: "Unauthorized" }, { status: 401 });
+		}
+		try {
+			const { ids } = batchDeleteSchema.parse(await request.json());
+			return json(await dependencies.deleteMany(ids));
+		} catch (error) {
+			if (error instanceof SyntaxError) {
+				return json(
+					{ error: "Request body must be valid JSON." },
+					{ status: 400 },
+				);
+			}
+			if (error instanceof z.ZodError) {
+				return json(
+					{ error: error.issues[0]?.message ?? "Invalid body." },
+					{ status: 400 },
+				);
+			}
+			return json(
+				{ error: "Transactions could not be deleted." },
+				{ status: 500 },
+			);
+		}
+	};
+}
+
+export const batchDeleteExpenseHistoryTransactionsHandler =
+	createExpenseHistoryBatchDeleteHandler();

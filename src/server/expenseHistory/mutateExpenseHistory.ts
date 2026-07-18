@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import db from "@/db";
 import { expenses, expenseTransactions } from "@/db/schema";
 import type {
@@ -102,6 +102,25 @@ export async function mutateExpenseHistoryTransaction(
 	const result = await readTransaction(id);
 	if (!result) throw new ExpenseHistoryNotFoundError("Transaction not found.");
 	return result;
+}
+
+export async function deleteExpenseHistoryTransaction(id: number) {
+	const deleted = await db
+		.delete(expenseTransactions)
+		.where(eq(expenseTransactions.id, id))
+		.returning({ id: expenseTransactions.id });
+	if (deleted.length === 0) {
+		throw new ExpenseHistoryNotFoundError("Transaction not found.");
+	}
+	return deleted[0];
+}
+
+export async function deleteExpenseHistoryTransactions(ids: number[]) {
+	const deleted = await db
+		.delete(expenseTransactions)
+		.where(inArray(expenseTransactions.id, ids))
+		.returning({ id: expenseTransactions.id });
+	return { ids: deleted.map(({ id }) => id) };
 }
 
 export async function createAndAssociateExpense(

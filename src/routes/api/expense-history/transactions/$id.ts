@@ -15,6 +15,12 @@ export const Route = createFileRoute("/api/expense-history/transactions/$id")({
 				);
 				return patchExpenseHistoryTransactionHandler(request, params.id);
 			},
+			DELETE: async ({ request, params }) => {
+				const { deleteExpenseHistoryTransactionHandler } = await import(
+					"@/server/expenseHistory/mutateHttp"
+				);
+				return deleteExpenseHistoryTransactionHandler(request, params.id);
+			},
 		},
 	},
 });

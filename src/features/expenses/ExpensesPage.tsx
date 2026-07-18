@@ -3,13 +3,9 @@
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
-import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
-import { PillText } from "@/components/PillText";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Combobox } from "@/components/ui/combobox";
-import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Tooltip,
@@ -22,15 +18,11 @@ import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
 import useExpenses from "@/utility/data/useExpenses";
 import useSettings from "@/utility/data/useSettings";
-import {
-	categoryToOptionClass,
-	mapTypeToIcon,
-} from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
-import useComboboxOptions from "@/utility/useComboboxOptions";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { getExpensesTableColumns } from "./columns";
+import { ExpenseFilter, type ExpenseFilterValue } from "./ExpenseFilter";
 import { ExpensesOverviewPanel } from "./ExpensesOverviewPanel";
 import {
 	createExpenseOverviewRows,
@@ -60,9 +52,7 @@ export default function ExpensesPage({
 	const [categoryFilter, setCategoryFilter] = useState<
 		ExpenseOverviewCategory[]
 	>([]);
-	const [typeFilter, setTypeFilter] = useState<string | number | undefined>(
-		"All types",
-	);
+	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
 
@@ -191,29 +181,6 @@ export default function ExpensesPage({
 		typeFilter,
 	]);
 
-	const categoryOptions = useComboboxOptions({
-		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
-		renderer: (cat) => (
-			<PillText pillColorClass={categoryToOptionClass(cat)}>{cat}</PillText>
-		),
-	});
-
-	const typeOptions = useComboboxOptions({
-		optionValues: [
-			"All types",
-			...expenseTypeEnum.enumValues,
-			mixedClassification,
-		],
-		renderer: (type) => (
-			<>
-				{type === mixedClassification
-					? null
-					: mapTypeToIcon(type as Exclude<TypeFilterType, "Mixed">, 24)}
-				<span>{type}</span>
-			</>
-		),
-	});
-
 	const selectionActions = useMemo(() => {
 		if (selectedRows.length === 0) return null;
 		return (
@@ -314,67 +281,16 @@ export default function ExpensesPage({
 					header: "top-30 pt-3",
 				}}
 				toolbar={(table) => (
-					<div className="flex items-center gap-x-4 gap-y-1 flex-wrap px-6 lg:px-10 pt-3">
+					<div className="px-6 lg:px-10 sticky left-0 pt-3">
 						{(() => {
 							tableRef.current = table;
 							return null;
 						})()}
-						<MultiValueInput<ExpenseOverviewCategory>
-							options={categoryOptions}
-							values={categoryFilter}
-							placeholder="Filter by category"
-							selectedValueFormater={(value) =>
-								value === mixedClassification ? (
-									<PillText pillColorClass="bg-muted-foreground">
-										Mixed
-									</PillText>
-								) : (
-									<ExpenseCategoryBadge
-										value={value as Exclude<ExpenseOverviewCategory, "Mixed">}
-									/>
-								)
-							}
-							onChange={(cat) => {
-								const nextValues = cat.map(
-									(c) => c.value as ExpenseOverviewCategory,
-								);
-								setCategoryFilter(nextValues);
-								table
-									.getColumn("category")
-									?.setFilterValue(nextValues.length ? nextValues : undefined);
-							}}
-							loading={isLoading}
+						<ExpenseFilter
+							isLoading={isLoading}
+							table={table}
+							showMixedClassification
 						/>
-						<Combobox
-							options={typeOptions}
-							value={typeFilter}
-							onChange={(value) => {
-								setTypeFilter(value);
-								const column = table.getColumn("type");
-								if (!column) return;
-								const nextValue = `${value}`;
-								column.setFilterValue(
-									nextValue === "All types" ? undefined : nextValue,
-								);
-							}}
-							loading={isLoading}
-						/>
-						{showFilteredTotal ? (
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								disabled={isLoading}
-								onClick={() => {
-									setCategoryFilter([]);
-									setTypeFilter("All types");
-									table.getColumn("category")?.setFilterValue(undefined);
-									table.getColumn("type")?.setFilterValue(undefined);
-								}}
-							>
-								Clear filters
-							</Button>
-						) : null}
 					</div>
 				)}
 			/>

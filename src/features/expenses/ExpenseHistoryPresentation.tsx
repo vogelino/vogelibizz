@@ -183,7 +183,7 @@ export function ExpenseHistoryMonthNavigation({
 }) {
 	if (months.length === 0) return null;
 	return (
-		<div className="flex items-center gap-2 px-6 lg:px-10 sticky left-0">
+		<div className="flex items-center gap-x-2 flex-wrap gap-y-1">
 			<Button
 				type="button"
 				size="icon"

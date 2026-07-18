@@ -17,9 +17,7 @@ export function useResourceActions(actions: ReactNode | null) {
 	useEffect(() => {
 		if (!setActions) return;
 		setActions(actions);
-		return () => {
-			setActions(null);
-		};
+		return () => setActions(null);
 	}, [actions, setActions]);
 }
 
