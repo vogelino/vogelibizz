@@ -15,6 +15,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -289,16 +290,8 @@ export default function ExpenseHistoryPage() {
 
 			<section aria-labelledby="history-heading">
 				<div className="flex flex-col gap-3 border-b border-border py-4 md:flex-row md:items-center md:justify-between">
-					<div>
-						<h2 id="history-heading" className="font-semibold">
-							Monthly transactions
-						</h2>
-						<p className="text-sm text-muted-foreground">
-							Imported debits ordered by booked date.
-						</p>
-					</div>
 					{months.length > 0 && (
-						<div className="flex flex-wrap items-center gap-2">
+						<div className="flex items-center gap-2">
 							<Button
 								type="button"
 								size="icon"
@@ -308,25 +301,22 @@ export default function ExpenseHistoryPage() {
 									navigation.older && chooseMonth(navigation.older)
 								}
 								aria-label="Previous imported month"
+								className="shrink-0"
 							>
 								<ChevronLeft size={18} />
 							</Button>
 							<label className="sr-only" htmlFor="history-month">
 								Imported month
 							</label>
-							<select
+							<Combobox
 								id="history-month"
-								className="form-select h-9 min-w-44"
 								value={monthIndex >= 0 ? (selectedMonth ?? "") : ""}
-								onChange={(event) => chooseMonth(event.target.value)}
-							>
-								{monthIndex < 0 && <option value="">Missing month</option>}
-								{months.map(({ month }) => (
-									<option key={month} value={month}>
-										{formatMonth(month)}
-									</option>
-								))}
-							</select>
+								onChange={(val) => chooseMonth(`${val}`)}
+								options={months.map(({ month }) => ({
+									value: month,
+									label: formatMonth(month),
+								}))}
+							/>
 							<Button
 								type="button"
 								size="icon"
@@ -336,6 +326,7 @@ export default function ExpenseHistoryPage() {
 									navigation.newer && chooseMonth(navigation.newer)
 								}
 								aria-label="Next imported month"
+								className="shrink-0"
 							>
 								<ChevronRight size={18} />
 							</Button>
