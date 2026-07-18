@@ -22,6 +22,7 @@ function CurrencyInput({
 	onValueChange,
 	label = "Amount",
 	loading = false,
+	currencyReadOnly = false,
 }: PropsWithChildren<{
 	inputProps?: CurrencyInputProps;
 	currencyProps?: HTMLProps<HTMLInputElement>;
@@ -32,6 +33,7 @@ function CurrencyInput({
 	label?: string;
 	className?: string;
 	loading?: boolean;
+	currencyReadOnly?: boolean;
 }>) {
 	const options = useMemo(
 		() =>
@@ -68,8 +70,8 @@ function CurrencyInput({
 						<div className="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none text-muted-foreground opacity-80">
 							<Banknote />
 						</div>
-						{inputProps && <input type="hidden" {...inputProps} />}
 						<ReactCurrencyInput
+							{...inputProps}
 							className={cn(
 								"form-input dark:bg-card",
 								"ps-12 w-full font-mono border-r-0",
@@ -78,9 +80,9 @@ function CurrencyInput({
 							)}
 							placeholder="0.00"
 							required
-							defaultValue={value}
+							value={value}
 							onValueChange={(_value, _name, values) =>
-								values?.float && onValueChange(values?.float)
+								onValueChange(values?.float ?? 0)
 							}
 							intlConfig={{ locale }}
 							decimalScale={2}
@@ -89,15 +91,21 @@ function CurrencyInput({
 					{currencyProps && (
 						<input type="hidden" {...currencyProps} value={currency} />
 					)}
-					<Combobox
-						className={className}
-						options={options}
-						value={currency}
-						onChange={(currency) =>
-							onCurrencyChange(currency as ExpenseType["originalCurrency"])
-						}
-						selectedValueFormater={() => <span>{currency}</span>}
-					/>
+					{currencyReadOnly ? (
+						<div className="flex min-w-20 items-center justify-center border border-border bg-muted px-3 text-sm">
+							{currency}
+						</div>
+					) : (
+						<Combobox
+							className={className}
+							options={options}
+							value={currency}
+							onChange={(currency) =>
+								onCurrencyChange(currency as ExpenseType["originalCurrency"])
+							}
+							selectedValueFormater={() => <span>{currency}</span>}
+						/>
+					)}
 				</div>
 			)}
 		</FormInputWrapper>

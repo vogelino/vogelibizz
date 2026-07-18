@@ -51,6 +51,11 @@ export const expenseHistoryMonthDetailSchema = z.object({
 	summary: expenseHistoryMonthlySummarySchema,
 });
 
+export const expenseHistoryTransactionDetailSchema = z.object({
+	month: expenseHistoryMonthKeySchema,
+	transaction: expenseHistoryTransactionSchema,
+});
+
 export const expenseOverviewSummarySchema = z.object({
 	currency: z.enum(currencyEnum.enumValues),
 	importedMonthCount: z.number().int().nonnegative(),
@@ -112,6 +117,9 @@ export type ExpenseHistoryMonthDetail = z.infer<
 >;
 export type ExpenseHistoryTransaction = z.infer<
 	typeof expenseHistoryTransactionSchema
+>;
+export type ExpenseHistoryTransactionDetail = z.infer<
+	typeof expenseHistoryTransactionDetailSchema
 >;
 export type ExpenseOverviewSummary = z.infer<
 	typeof expenseOverviewSummarySchema

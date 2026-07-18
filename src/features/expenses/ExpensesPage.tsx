@@ -31,6 +31,7 @@ import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { getExpensesTableColumns } from "./columns";
+import { ExpensesOverviewPanel } from "./ExpensesOverviewPanel";
 import {
 	createExpenseOverviewRows,
 	type ExpenseOverviewCategory,
@@ -236,106 +237,55 @@ export default function ExpensesPage({
 	useResourceActions(selectionActions);
 	return (
 		<>
-			<div className="px-6 md:px-10 sticky left-0">
-				<div className="p-4 bg-muted my-4">
-					<div className="flex flex-wrap items-start justify-between gap-6">
-						<div className="flex flex-wrap gap-6">
-							{showFilteredTotal ? (
-								<div className="flex flex-col">
-									<span className="text-sm text-muted-foreground">
-										Filtered total
-									</span>
-									<span className="text-lg">
-										{isLoading ? (
-											<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
-										) : (
-											filteredLabel
-										)}
-									</span>
-								</div>
-							) : null}
-							<div className="flex flex-col">
-								<span className="text-sm text-muted-foreground">
-									Configured recurring total
-								</span>
-								<span className="text-lg">
-									{isLoading ? (
-										<Skeleton className="h-6 w-24 bg-accent-foreground/20 mt-1.5 mb-1" />
-									) : (
-										configuredTotalLabel
-									)}
-								</span>
-							</div>
-							<div className="flex flex-col">
-								<span className="text-sm text-muted-foreground">
-									Living-cost estimate
-								</span>
-								<span className="text-lg">
-									{isLoading ? (
-										<Skeleton className="h-6 w-24" />
-									) : (
-										livingCostLabel
-									)}
-								</span>
-							</div>
-							<div className="flex flex-col">
-								<span className="text-sm text-muted-foreground">
-									Observed monthly average
-								</span>
-								<span className="text-lg">
-									{isLoading ? (
-										<Skeleton className="h-6 w-24" />
-									) : (
-										observedAverageLabel
-									)}
-								</span>
-							</div>
-						</div>
-						<div className="flex items-start gap-4">
-							<MiniPieChart
-								title="By category"
-								series={categorySeries}
-								colorForLabel={getCategoryStrokeColor}
-								loading={isLoading}
-								onSegmentClick={(label) => {
-									const nextCategory = [
-										...expenseCategoryEnum.enumValues,
-										mixedClassification,
-									].find((value) => value === label);
-									if (!nextCategory) return;
-									setCategoryFilter([nextCategory]);
-									tableRef.current
-										?.getColumn("category")
-										?.setFilterValue([nextCategory]);
-									setTypeFilter("All types");
-									tableRef.current
-										?.getColumn("type")
-										?.setFilterValue(undefined);
-								}}
-							/>
-							<MiniPieChart
-								title="By type"
-								series={typeSeries}
-								colorForLabel={getTypeStrokeColor}
-								loading={isLoading}
-								onSegmentClick={(label) => {
-									const nextType = [
-										...expenseTypeEnum.enumValues,
-										mixedClassification,
-									].find((value) => value === label);
-									if (!nextType) return;
-									setTypeFilter(nextType);
-									tableRef.current?.getColumn("type")?.setFilterValue(nextType);
-									setCategoryFilter([]);
-									tableRef.current
-										?.getColumn("category")
-										?.setFilterValue(undefined);
-								}}
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
+			<ExpensesOverviewPanel
+				loading={isLoading}
+				filteredTotal={showFilteredTotal ? filteredLabel : null}
+				configuredTotal={configuredTotalLabel}
+				livingCost={livingCostLabel}
+				observedAverage={observedAverageLabel}
+				categoryChart={
+					<MiniPieChart
+						title="By category"
+						series={categorySeries}
+						colorForLabel={getCategoryStrokeColor}
+						loading={isLoading}
+						onSegmentClick={(label) => {
+							const nextCategory = [
+								...expenseCategoryEnum.enumValues,
+								mixedClassification,
+							].find((value) => value === label);
+							if (!nextCategory) return;
+							setCategoryFilter([nextCategory]);
+							tableRef.current
+								?.getColumn("category")
+								?.setFilterValue([nextCategory]);
+							setTypeFilter("All types");
+							tableRef.current?.getColumn("type")?.setFilterValue(undefined);
+						}}
+					/>
+				}
+				typeChart={
+					<MiniPieChart
+						title="By type"
+						series={typeSeries}
+						colorForLabel={getTypeStrokeColor}
+						loading={isLoading}
+						onSegmentClick={(label) => {
+							const nextType = [
+								...expenseTypeEnum.enumValues,
+								mixedClassification,
+							].find((value) => value === label);
+							if (!nextType) return;
+							setTypeFilter(nextType);
+							tableRef.current?.getColumn("type")?.setFilterValue(nextType);
+							setCategoryFilter([]);
+							tableRef.current
+								?.getColumn("category")
+								?.setFilterValue(undefined);
+						}}
+					/>
+				}
+			/>
 			<DataTable
 				columns={columns}
 				data={!error && rows.length > 0 ? rows : []}

@@ -10,8 +10,50 @@ import { calculateExpenseHistorySummary } from "@/utility/expenseHistoryCalculat
 import type {
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseHistoryTransactionDetail,
 	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
+
+export async function getExpenseHistoryTransaction(
+	id: number,
+): Promise<ExpenseHistoryTransactionDetail | null> {
+	const [row] = await db
+		.select({
+			month: expenseMonths.month,
+			id: expenseTransactions.id,
+			bookedAt: expenseTransactions.bookedAt,
+			valueDate: expenseTransactions.valueDate,
+			description: expenseTransactions.description,
+			amount: expenseTransactions.amount,
+			originalDescription: expenseTransactions.originalDescription,
+			originalAmount: expenseTransactions.originalAmount,
+			lastModified: expenseTransactions.last_modified,
+			category: expenseTransactions.category,
+			type: expenseTransactions.type,
+			expenseId: expenses.id,
+			expenseName: expenses.name,
+		})
+		.from(expenseTransactions)
+		.innerJoin(
+			expenseMonths,
+			eq(expenseTransactions.expenseMonthId, expenseMonths.id),
+		)
+		.leftJoin(expenses, eq(expenseTransactions.expenseId, expenses.id))
+		.where(eq(expenseTransactions.id, id))
+		.limit(1);
+	if (!row) return null;
+	const { month, expenseId, expenseName, ...transaction } = row;
+	return {
+		month,
+		transaction: {
+			...transaction,
+			expense:
+				expenseId !== null && expenseName !== null
+					? { id: expenseId, name: expenseName }
+					: null,
+		},
+	};
+}
 
 export async function getExpenseHistoryMonths(): Promise<
 	ExpenseHistoryMonthSummary[]

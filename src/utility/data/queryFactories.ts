@@ -21,9 +21,11 @@ import type { Session } from "@/providers/SessionProvider";
 import {
 	type ExpenseHistoryMonthDetail,
 	type ExpenseHistoryMonthSummary,
+	type ExpenseHistoryTransactionDetail,
 	type ExpenseOverviewSummary,
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
+	expenseHistoryTransactionDetailSchema,
 	expenseOverviewSummarySchema,
 } from "@/utility/expenseHistoryContracts";
 import { parseId } from "@/utility/resourceUtil";
@@ -56,6 +58,7 @@ const queryKeys = mergeQueryKeys(
 	createQueryKeys("expenseHistory", {
 		months: null,
 		month: (month: string) => [month],
+		transaction: (id: string | number) => ["transaction", String(id)],
 		overview: null,
 	}),
 );
@@ -306,6 +309,24 @@ export const expenseHistoryQuery = {
 				);
 			},
 		}),
+	transaction: (id: string | number) =>
+		queryOptions({
+			...queryKeys.expenseHistory.transaction(id),
+			queryFn: async (): Promise<ExpenseHistoryTransactionDetail> => {
+				const parsedId = parseId(id);
+				if (import.meta.env.SSR) {
+					const { getExpenseHistoryTransaction } = await import(
+						"@/server/expenseHistory/getExpenseHistory"
+					);
+					const result = await getExpenseHistoryTransaction(parsedId);
+					if (!result) throw new Error("Transaction not found.");
+					return result;
+				}
+				return expenseHistoryTransactionDetailSchema.parse(
+					await apiGetJson(`/api/expense-history/transactions/${parsedId}`),
+				);
+			},
+		}),
 };
 
 export const sessionQuery = {
@@ -350,4 +371,6 @@ export const sessionQueryOptions = sessionQuery.current;
 export const exchangeRatesQueryOptions = exchangeRatesQuery.current;
 export const expenseHistoryMonthsQueryOptions = expenseHistoryQuery.months;
 export const expenseHistoryMonthQueryOptions = expenseHistoryQuery.month;
+export const expenseHistoryTransactionQueryOptions =
+	expenseHistoryQuery.transaction;
 export const expenseOverviewSummaryQueryOptions = expenseHistoryQuery.overview;

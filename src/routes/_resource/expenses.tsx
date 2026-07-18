@@ -16,7 +16,9 @@ function ExpensesLayout() {
 		<ResourcePageLayout
 			resource="expenses"
 			showCreate={!isHistory}
-			headerContent={<ExpensesSubnavigation />}
+			headerContent={
+				<ExpensesSubnavigation active={isHistory ? "history" : "recurring"} />
+			}
 		>
 			<Outlet />
 		</ResourcePageLayout>

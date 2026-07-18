@@ -2,29 +2,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, FileUp, TriangleAlert } from "lucide-react";
 import { type ChangeEvent, useMemo, useRef, useState } from "react";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
+import { DataTable } from "@/components/DataTable";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
 	expenseHistoryMonthQueryOptions,
@@ -40,8 +20,13 @@ import {
 	expenseHistoryImportCommitResultSchema,
 	expenseHistoryImportPreviewSchema,
 } from "@/utility/expenseHistoryImportContracts";
-import { formatCurrency, locale } from "@/utility/formatUtil";
-import { ExpenseHistoryTransactionRow } from "./ExpenseHistoryTransactionRow";
+import {
+	ExpenseHistoryImportPanel,
+	ExpenseHistoryMonthNavigation,
+	ExpenseHistoryReplacementDialog,
+	ExpenseHistorySummaryToolbar,
+} from "./ExpenseHistoryPresentation";
+import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
 type ImportSource = { csv: string; sourceFilename: string };
 
@@ -59,15 +44,6 @@ async function postImport<Output>(
 		throw new Error(result.error || `Import ${path} failed.`);
 	}
 	return result as Output;
-}
-
-function formatMonth(month: string) {
-	const [year, monthNumber] = month.split("-").map(Number);
-	return new Intl.DateTimeFormat(locale, {
-		month: "long",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(new Date(Date.UTC(year, monthNumber - 1, 1)));
 }
 
 export default function ExpenseHistoryPage() {
@@ -174,164 +150,37 @@ export default function ExpenseHistoryPage() {
 
 	const chooseMonth = (month: string) =>
 		navigate({ search: { month }, replace: true });
+	const columns = useMemo(
+		() => (selectedMonth ? getExpenseHistoryColumns(selectedMonth) : []),
+		[selectedMonth],
+	);
 
 	return (
 		<div className="px-6 pb-12 md:px-10">
-			<section
-				aria-labelledby="import-heading"
-				className="my-4 border border-border bg-muted/40 p-4"
-			>
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-					<div>
-						<h2 id="import-heading" className="font-semibold">
-							Import a monthly bank CSV
-						</h2>
-						<p
-							id="bank-csv-help"
-							className="mt-1 max-w-2xl text-sm text-muted-foreground"
-						>
-							Preview one calendar month before importing. Credit rows are
-							skipped; replacing a month removes its existing transaction edits
-							and associations.
-						</p>
-					</div>
-					<label className="flex min-w-0 flex-col gap-1 text-sm">
-						<span className="font-medium">Bank CSV file</span>
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept=".csv,text/csv,text/plain"
-							aria-describedby="bank-csv-help"
-							aria-invalid={Boolean(importError)}
-							onChange={selectFile}
-							className="max-w-full text-sm file:mr-3 file:h-9 file:border file:border-border file:bg-background file:px-3 file:text-foreground hover:file:bg-accent"
-						/>
-					</label>
-				</div>
-				{previewMutation.isPending && (
-					<output className="mt-4 block">Validating the CSV…</output>
-				)}
-				{importError && (
-					<div
-						role="alert"
-						className="mt-4 border border-destructive/40 bg-destructive/5 p-3 text-sm"
-					>
-						<strong>Import could not be prepared.</strong> {importError}
-					</div>
-				)}
-				{preview && (
-					<div
-						className="mt-4 border border-border bg-background p-4"
-						aria-live="polite"
-					>
-						<div className="flex flex-wrap items-start justify-between gap-4">
-							<div>
-								<h3 className="font-semibold">
-									Preview: {formatMonth(preview.month)}
-								</h3>
-								<p className="mt-1 text-sm text-muted-foreground">
-									{preview.debitCount} debit transactions ·{" "}
-									{formatCurrency(preview.totalDebitAmount, "CHF")}
-								</p>
-							</div>
-							<Button
-								ref={
-									preview.replacementRequired
-										? replacementTriggerRef
-										: undefined
-								}
-								type="button"
-								variant={
-									preview.replacementRequired ? "destructive" : "default"
-								}
-								disabled={commitMutation.isPending}
-								onClick={() =>
-									preview.replacementRequired
-										? setReplaceOpen(true)
-										: commitMutation.mutate(false)
-								}
-							>
-								<FileUp size={16} />
-								{preview.replacementRequired
-									? "Review replacement"
-									: "Import month"}
-							</Button>
-						</div>
-						{preview.skippedCreditCount > 0 && (
-							<output className="mt-3 flex gap-2 border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
-								<TriangleAlert
-									className="shrink-0 text-amber-600"
-									size={18}
-									aria-hidden="true"
-								/>
-								<span>
-									{preview.skippedCreditCount} credit{" "}
-									{preview.skippedCreditCount === 1 ? "row was" : "rows were"}{" "}
-									skipped and will not be imported.
-								</span>
-							</output>
-						)}
-						{preview.warnings
-							.filter((warning) => !warning.toLowerCase().includes("credit"))
-							.map((warning) => (
-								<p key={warning} className="mt-2 text-sm text-muted-foreground">
-									{warning}
-								</p>
-							))}
-						{preview.replacementRequired && (
-							<p className="mt-3 text-sm font-medium">
-								History for this month already exists. Replacement requires
-								confirmation.
-							</p>
-						)}
-					</div>
-				)}
-			</section>
+			<ExpenseHistoryImportPanel
+				fileInputRef={fileInputRef}
+				onSelectFile={selectFile}
+				preview={preview}
+				error={importError}
+				previewPending={previewMutation.isPending}
+				commitPending={commitMutation.isPending}
+				replacementTriggerRef={replacementTriggerRef}
+				onImport={() => commitMutation.mutate(false)}
+				onReviewReplacement={() => setReplaceOpen(true)}
+			/>
 
 			<section aria-labelledby="history-heading">
+				<h2 id="history-heading" className="sr-only">
+					Expense history
+				</h2>
 				<div className="flex flex-col gap-3 border-b border-border py-4 md:flex-row md:items-center md:justify-between">
-					{months.length > 0 && (
-						<div className="flex items-center gap-2">
-							<Button
-								type="button"
-								size="icon"
-								variant="outline"
-								disabled={!navigation.older}
-								onClick={() =>
-									navigation.older && chooseMonth(navigation.older)
-								}
-								aria-label="Previous imported month"
-								className="shrink-0"
-							>
-								<ChevronLeft size={18} />
-							</Button>
-							<label className="sr-only" htmlFor="history-month">
-								Imported month
-							</label>
-							<Combobox
-								id="history-month"
-								value={monthIndex >= 0 ? (selectedMonth ?? "") : ""}
-								onChange={(val) => chooseMonth(`${val}`)}
-								options={months.map(({ month }) => ({
-									value: month,
-									label: formatMonth(month),
-								}))}
-							/>
-							<Button
-								type="button"
-								size="icon"
-								variant="outline"
-								disabled={!navigation.newer}
-								onClick={() =>
-									navigation.newer && chooseMonth(navigation.newer)
-								}
-								aria-label="Next imported month"
-								className="shrink-0"
-							>
-								<ChevronRight size={18} />
-							</Button>
-						</div>
-					)}
+					<ExpenseHistoryMonthNavigation
+						months={months}
+						selectedMonth={monthIndex >= 0 ? selectedMonth : null}
+						older={navigation.older}
+						newer={navigation.newer}
+						onChooseMonth={chooseMonth}
+					/>
 				</div>
 
 				{monthsQuery.isPending ? (
@@ -376,124 +225,58 @@ export default function ExpenseHistoryPage() {
 						{monthQuery.error.message}
 					</div>
 				) : monthQuery.data ? (
-					<div>
-						<div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-border bg-muted/30 p-3">
-							<div
-								className="flex flex-wrap gap-x-6 gap-y-1 text-sm"
-								aria-live="polite"
-							>
-								<span>
-									Total{" "}
-									<strong>
-										{formatCurrency(monthQuery.data.summary.total, "CHF")}
-									</strong>
-								</span>
-								<span>
-									Matched{" "}
-									<strong>
-										{formatCurrency(monthQuery.data.summary.matched, "CHF")}
-									</strong>
-								</span>
-								<span>
-									Other{" "}
-									<strong>
-										{formatCurrency(monthQuery.data.summary.other, "CHF")}
-									</strong>
-								</span>
-							</div>
-							<label className="flex items-center gap-2 text-sm">
-								<input
-									type="checkbox"
-									checked={otherOnly}
-									onChange={(event) => setOtherOnly(event.target.checked)}
-								/>
-								Other only
-							</label>
-						</div>
-						<section
-							className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							aria-label="Monthly transactions; scroll horizontally on small screens"
-							// biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard users need to scroll the wide transaction table.
-							tabIndex={0}
-						>
-							<Table className="min-w-[960px]">
-								<TableCaption className="sr-only">
-									Editable monthly bank transactions. Original bank values
-									remain available within each description cell.
-								</TableCaption>
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-32">Booked</TableHead>
-										<TableHead>Description</TableHead>
-										<TableHead className="w-36 text-right">Amount</TableHead>
-										<TableHead>Association</TableHead>
-										<TableHead>Category</TableHead>
-										<TableHead>Type</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{monthQuery.data.transactions
-										.filter((transaction) => !otherOnly || !transaction.expense)
-										.map((transaction) => (
-											<ExpenseHistoryTransactionRow
-												key={transaction.id}
-												transaction={transaction}
-												month={monthQuery.data.month.month}
-											/>
-										))}
-								</TableBody>
-							</Table>
-						</section>
-					</div>
+					<DataTable
+						key={monthQuery.data.month.month}
+						columns={columns}
+						data={monthQuery.data.transactions}
+						getRowId={(transaction) => String(transaction.id)}
+						initialState={{
+							pagination: { pageIndex: 0, pageSize: 50 },
+							columnFilters: otherOnly
+								? [{ id: "association", value: true }]
+								: [],
+						}}
+						tableClassName="min-w-[960px]"
+						containerClassName="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						containerAriaLabel="Monthly transactions; scroll horizontally on small screens"
+						caption={
+							<span className="sr-only">
+								Monthly bank transactions. Open a description to edit the
+								transaction. Original bank values remain available within each
+								description cell.
+							</span>
+						}
+						emptyMessage={otherOnly ? "No Other transactions." : undefined}
+						toolbar={(table) => (
+							<ExpenseHistorySummaryToolbar
+								summary={monthQuery.data.summary}
+								otherOnly={otherOnly}
+								onOtherOnlyChange={(next) => {
+									setOtherOnly(next);
+									table
+										.getColumn("association")
+										?.setFilterValue(next || undefined);
+								}}
+							/>
+						)}
+					/>
 				) : null}
 			</section>
 
-			<AlertDialog open={replaceOpen} onOpenChange={setReplaceOpen}>
-				<AlertDialogContent
-					onOpenAutoFocus={(event) => {
-						event.preventDefault();
-						replacementCancelRef.current?.focus();
-					}}
-					onCloseAutoFocus={(event) => {
-						event.preventDefault();
-						replacementTriggerRef.current?.focus();
-					}}
-				>
-					<AlertDialogHeader>
-						<AlertDialogTitle>
-							Replace {preview ? formatMonth(preview.month) : "this month"}?
-						</AlertDialogTitle>
-						<AlertDialogDescription>
-							This permanently deletes every existing transaction for the month,
-							including transaction edits and recurring-expense associations,
-							then imports the previewed CSV as the new active dataset. Imports
-							are not merged.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel
-							ref={replacementCancelRef}
-							disabled={commitMutation.isPending}
-						>
-							Keep existing month
-						</AlertDialogCancel>
-						<AlertDialogAction
-							disabled={commitMutation.isPending}
-							onClick={(event) => {
-								event.preventDefault();
-								commitMutation.mutate(true);
-							}}
-						>
-							{commitMutation.isPending ? "Replacing…" : "Replace month"}
-						</AlertDialogAction>
-					</AlertDialogFooter>
-					{commitMutation.error instanceof Error && (
-						<p role="alert" className="text-sm text-destructive">
-							{commitMutation.error.message}
-						</p>
-					)}
-				</AlertDialogContent>
-			</AlertDialog>
+			<ExpenseHistoryReplacementDialog
+				open={replaceOpen}
+				month={preview?.month ?? null}
+				pending={commitMutation.isPending}
+				error={
+					commitMutation.error instanceof Error
+						? commitMutation.error.message
+						: null
+				}
+				cancelRef={replacementCancelRef}
+				triggerRef={replacementTriggerRef}
+				onOpenChange={setReplaceOpen}
+				onConfirm={() => commitMutation.mutate(true)}
+			/>
 		</div>
 	);
 }

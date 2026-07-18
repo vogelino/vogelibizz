@@ -2,11 +2,13 @@ import { describe, expect, test } from "bun:test";
 import type {
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseHistoryTransactionDetail,
 	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
 import {
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
+	expenseHistoryTransactionDetailSchema,
 	expenseOverviewSummarySchema,
 } from "@/utility/expenseHistoryContracts";
 import { createExpenseHistoryReadHandlers } from "./readHttp";
@@ -47,6 +49,10 @@ const overview: ExpenseOverviewSummary = {
 	livingCostEstimate: 35,
 	observedMonthlyAverage: 17.5,
 };
+const transactionDetail: ExpenseHistoryTransactionDetail = {
+	month: "2026-06",
+	transaction: detail.transactions[0],
+};
 
 function request() {
 	return new Request("https://example.test/api/expense-history/months");
@@ -59,11 +65,13 @@ describe("expense history read HTTP API", () => {
 			getMonths: async () => months,
 			getMonth: async () => detail,
 			getOverview: async () => overview,
+			getTransaction: async () => transactionDetail,
 		});
 		const response = await handlers.months(request());
 		expect(response.status).toBe(401);
 		expect(await response.json()).toEqual({ error: "Unauthorized" });
 		expect((await handlers.overview(request())).status).toBe(401);
+		expect((await handlers.transaction(request(), "7")).status).toBe(401);
 	});
 
 	test("returns newest-first month summaries and the traceable row contract", async () => {
@@ -72,6 +80,7 @@ describe("expense history read HTTP API", () => {
 			getMonths: async () => months,
 			getMonth: async () => detail,
 			getOverview: async () => overview,
+			getTransaction: async () => transactionDetail,
 		});
 		const monthsResponse = await handlers.months(request());
 		expect(
@@ -82,6 +91,13 @@ describe("expense history read HTTP API", () => {
 		expect(
 			expenseHistoryMonthDetailSchema.parse(await monthResponse.json()),
 		).toEqual(detail);
+
+		const transactionResponse = await handlers.transaction(request(), "7");
+		expect(
+			expenseHistoryTransactionDetailSchema.parse(
+				await transactionResponse.json(),
+			),
+		).toEqual(transactionDetail);
 	});
 
 	test("returns the calculation summary contract", async () => {
@@ -90,6 +106,7 @@ describe("expense history read HTTP API", () => {
 			getMonths: async () => months,
 			getMonth: async () => detail,
 			getOverview: async () => overview,
+			getTransaction: async () => transactionDetail,
 		});
 		const response = await handlers.overview(request());
 		expect(expenseOverviewSummarySchema.parse(await response.json())).toEqual(
@@ -103,6 +120,7 @@ describe("expense history read HTTP API", () => {
 			getMonths: async () => months,
 			getMonth: async () => null,
 			getOverview: async () => overview,
+			getTransaction: async () => null,
 		});
 		expect((await handlers.month(request(), "June")).status).toBe(400);
 		const missing = await handlers.month(request(), "2026-05");
@@ -110,5 +128,7 @@ describe("expense history read HTTP API", () => {
 		expect(await missing.json()).toEqual({
 			error: "No expense history exists for 2026-05.",
 		});
+		expect((await handlers.transaction(request(), "invalid")).status).toBe(400);
+		expect((await handlers.transaction(request(), "7")).status).toBe(404);
 	});
 });

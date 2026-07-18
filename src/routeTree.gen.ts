@@ -53,8 +53,12 @@ import { Route as ResourceClientsEditIdRouteImport } from './routes/_resource/cl
 import { Route as ResourceClientsCreateModalRouteImport } from './routes/_resource/clients/create.modal'
 import { Route as ApiExpenseHistoryTransactionsIdExpenseRouteImport } from './routes/api/expense-history/transactions/$id/expense'
 import { Route as ResourceProjectsEditIdModalRouteImport } from './routes/_resource/projects/edit.$id.modal'
+import { Route as ResourceExpensesHistoryEditIdRouteImport } from './routes/_resource/expenses/history/edit/$id'
+import { Route as ResourceExpensesHistoryCreateExpenseIdRouteImport } from './routes/_resource/expenses/history/create-expense/$id'
 import { Route as ResourceExpensesEditIdModalRouteImport } from './routes/_resource/expenses/edit.$id.modal'
 import { Route as ResourceClientsEditIdModalRouteImport } from './routes/_resource/clients/edit.$id.modal'
+import { Route as ResourceExpensesHistoryEditIdModalRouteImport } from './routes/_resource/expenses/history/edit/$id/modal'
+import { Route as ResourceExpensesHistoryCreateExpenseIdModalRouteImport } from './routes/_resource/expenses/history/create-expense/$id/modal'
 
 const PdfRoute = PdfRouteImport.update({
   id: '/pdf',
@@ -285,6 +289,18 @@ const ResourceProjectsEditIdModalRoute =
     path: '/modal',
     getParentRoute: () => ResourceProjectsEditIdRoute,
   } as any)
+const ResourceExpensesHistoryEditIdRoute =
+  ResourceExpensesHistoryEditIdRouteImport.update({
+    id: '/edit/$id',
+    path: '/edit/$id',
+    getParentRoute: () => ResourceExpensesHistoryRoute,
+  } as any)
+const ResourceExpensesHistoryCreateExpenseIdRoute =
+  ResourceExpensesHistoryCreateExpenseIdRouteImport.update({
+    id: '/create-expense/$id',
+    path: '/create-expense/$id',
+    getParentRoute: () => ResourceExpensesHistoryRoute,
+  } as any)
 const ResourceExpensesEditIdModalRoute =
   ResourceExpensesEditIdModalRouteImport.update({
     id: '/modal',
@@ -296,6 +312,18 @@ const ResourceClientsEditIdModalRoute =
     id: '/modal',
     path: '/modal',
     getParentRoute: () => ResourceClientsEditIdRoute,
+  } as any)
+const ResourceExpensesHistoryEditIdModalRoute =
+  ResourceExpensesHistoryEditIdModalRouteImport.update({
+    id: '/modal',
+    path: '/modal',
+    getParentRoute: () => ResourceExpensesHistoryEditIdRoute,
+  } as any)
+const ResourceExpensesHistoryCreateExpenseIdModalRoute =
+  ResourceExpensesHistoryCreateExpenseIdModalRouteImport.update({
+    id: '/modal',
+    path: '/modal',
+    getParentRoute: () => ResourceExpensesHistoryCreateExpenseIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -315,7 +343,7 @@ export interface FileRoutesByFullPath {
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
-  '/expenses/history': typeof ResourceExpensesHistoryRoute
+  '/expenses/history': typeof ResourceExpensesHistoryRouteWithChildren
   '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
@@ -342,8 +370,12 @@ export interface FileRoutesByFullPath {
   '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
+  '/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
+  '/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
+  '/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
+  '/expenses/history/edit/$id/modal': typeof ResourceExpensesHistoryEditIdModalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -358,7 +390,7 @@ export interface FileRoutesByTo {
   '/api/settings': typeof ApiSettingsRoute
   '/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
-  '/expenses/history': typeof ResourceExpensesHistoryRoute
+  '/expenses/history': typeof ResourceExpensesHistoryRouteWithChildren
   '/invoices/$id': typeof ResourceInvoicesIdRoute
   '/invoices/create': typeof ResourceInvoicesCreateRoute
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
@@ -385,8 +417,12 @@ export interface FileRoutesByTo {
   '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
+  '/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
+  '/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
+  '/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
+  '/expenses/history/edit/$id/modal': typeof ResourceExpensesHistoryEditIdModalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -407,7 +443,7 @@ export interface FileRoutesById {
   '/api/settings': typeof ApiSettingsRoute
   '/_resource/clients/create': typeof ResourceClientsCreateRouteWithChildren
   '/_resource/expenses/create': typeof ResourceExpensesCreateRouteWithChildren
-  '/_resource/expenses/history': typeof ResourceExpensesHistoryRoute
+  '/_resource/expenses/history': typeof ResourceExpensesHistoryRouteWithChildren
   '/_resource/invoices/$id': typeof ResourceInvoicesIdRoute
   '/_resource/invoices/create': typeof ResourceInvoicesCreateRoute
   '/_resource/projects/create': typeof ResourceProjectsCreateRouteWithChildren
@@ -434,8 +470,12 @@ export interface FileRoutesById {
   '/api/expense-history/transactions/$id': typeof ApiExpenseHistoryTransactionsIdRouteWithChildren
   '/_resource/clients/edit/$id/modal': typeof ResourceClientsEditIdModalRoute
   '/_resource/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
+  '/_resource/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
+  '/_resource/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
   '/_resource/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
+  '/_resource/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
+  '/_resource/expenses/history/edit/$id/modal': typeof ResourceExpensesHistoryEditIdModalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -483,8 +523,12 @@ export interface FileRouteTypes {
     | '/api/expense-history/transactions/$id'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
+    | '/expenses/history/create-expense/$id'
+    | '/expenses/history/edit/$id'
     | '/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
+    | '/expenses/history/create-expense/$id/modal'
+    | '/expenses/history/edit/$id/modal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -526,8 +570,12 @@ export interface FileRouteTypes {
     | '/api/expense-history/transactions/$id'
     | '/clients/edit/$id/modal'
     | '/expenses/edit/$id/modal'
+    | '/expenses/history/create-expense/$id'
+    | '/expenses/history/edit/$id'
     | '/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
+    | '/expenses/history/create-expense/$id/modal'
+    | '/expenses/history/edit/$id/modal'
   id:
     | '__root__'
     | '/'
@@ -574,8 +622,12 @@ export interface FileRouteTypes {
     | '/api/expense-history/transactions/$id'
     | '/_resource/clients/edit/$id/modal'
     | '/_resource/expenses/edit/$id/modal'
+    | '/_resource/expenses/history/create-expense/$id'
+    | '/_resource/expenses/history/edit/$id'
     | '/_resource/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
+    | '/_resource/expenses/history/create-expense/$id/modal'
+    | '/_resource/expenses/history/edit/$id/modal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -908,6 +960,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceProjectsEditIdModalRouteImport
       parentRoute: typeof ResourceProjectsEditIdRoute
     }
+    '/_resource/expenses/history/edit/$id': {
+      id: '/_resource/expenses/history/edit/$id'
+      path: '/edit/$id'
+      fullPath: '/expenses/history/edit/$id'
+      preLoaderRoute: typeof ResourceExpensesHistoryEditIdRouteImport
+      parentRoute: typeof ResourceExpensesHistoryRoute
+    }
+    '/_resource/expenses/history/create-expense/$id': {
+      id: '/_resource/expenses/history/create-expense/$id'
+      path: '/create-expense/$id'
+      fullPath: '/expenses/history/create-expense/$id'
+      preLoaderRoute: typeof ResourceExpensesHistoryCreateExpenseIdRouteImport
+      parentRoute: typeof ResourceExpensesHistoryRoute
+    }
     '/_resource/expenses/edit/$id/modal': {
       id: '/_resource/expenses/edit/$id/modal'
       path: '/modal'
@@ -921,6 +987,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/edit/$id/modal'
       preLoaderRoute: typeof ResourceClientsEditIdModalRouteImport
       parentRoute: typeof ResourceClientsEditIdRoute
+    }
+    '/_resource/expenses/history/edit/$id/modal': {
+      id: '/_resource/expenses/history/edit/$id/modal'
+      path: '/modal'
+      fullPath: '/expenses/history/edit/$id/modal'
+      preLoaderRoute: typeof ResourceExpensesHistoryEditIdModalRouteImport
+      parentRoute: typeof ResourceExpensesHistoryEditIdRoute
+    }
+    '/_resource/expenses/history/create-expense/$id/modal': {
+      id: '/_resource/expenses/history/create-expense/$id/modal'
+      path: '/modal'
+      fullPath: '/expenses/history/create-expense/$id/modal'
+      preLoaderRoute: typeof ResourceExpensesHistoryCreateExpenseIdModalRouteImport
+      parentRoute: typeof ResourceExpensesHistoryCreateExpenseIdRoute
     }
   }
 }
@@ -981,6 +1061,54 @@ const ResourceExpensesCreateRouteWithChildren =
     ResourceExpensesCreateRouteChildren,
   )
 
+interface ResourceExpensesHistoryCreateExpenseIdRouteChildren {
+  ResourceExpensesHistoryCreateExpenseIdModalRoute: typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
+}
+
+const ResourceExpensesHistoryCreateExpenseIdRouteChildren: ResourceExpensesHistoryCreateExpenseIdRouteChildren =
+  {
+    ResourceExpensesHistoryCreateExpenseIdModalRoute:
+      ResourceExpensesHistoryCreateExpenseIdModalRoute,
+  }
+
+const ResourceExpensesHistoryCreateExpenseIdRouteWithChildren =
+  ResourceExpensesHistoryCreateExpenseIdRoute._addFileChildren(
+    ResourceExpensesHistoryCreateExpenseIdRouteChildren,
+  )
+
+interface ResourceExpensesHistoryEditIdRouteChildren {
+  ResourceExpensesHistoryEditIdModalRoute: typeof ResourceExpensesHistoryEditIdModalRoute
+}
+
+const ResourceExpensesHistoryEditIdRouteChildren: ResourceExpensesHistoryEditIdRouteChildren =
+  {
+    ResourceExpensesHistoryEditIdModalRoute:
+      ResourceExpensesHistoryEditIdModalRoute,
+  }
+
+const ResourceExpensesHistoryEditIdRouteWithChildren =
+  ResourceExpensesHistoryEditIdRoute._addFileChildren(
+    ResourceExpensesHistoryEditIdRouteChildren,
+  )
+
+interface ResourceExpensesHistoryRouteChildren {
+  ResourceExpensesHistoryCreateExpenseIdRoute: typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
+  ResourceExpensesHistoryEditIdRoute: typeof ResourceExpensesHistoryEditIdRouteWithChildren
+}
+
+const ResourceExpensesHistoryRouteChildren: ResourceExpensesHistoryRouteChildren =
+  {
+    ResourceExpensesHistoryCreateExpenseIdRoute:
+      ResourceExpensesHistoryCreateExpenseIdRouteWithChildren,
+    ResourceExpensesHistoryEditIdRoute:
+      ResourceExpensesHistoryEditIdRouteWithChildren,
+  }
+
+const ResourceExpensesHistoryRouteWithChildren =
+  ResourceExpensesHistoryRoute._addFileChildren(
+    ResourceExpensesHistoryRouteChildren,
+  )
+
 interface ResourceExpensesEditIdRouteChildren {
   ResourceExpensesEditIdModalRoute: typeof ResourceExpensesEditIdModalRoute
 }
@@ -997,14 +1125,14 @@ const ResourceExpensesEditIdRouteWithChildren =
 
 interface ResourceExpensesRouteChildren {
   ResourceExpensesCreateRoute: typeof ResourceExpensesCreateRouteWithChildren
-  ResourceExpensesHistoryRoute: typeof ResourceExpensesHistoryRoute
+  ResourceExpensesHistoryRoute: typeof ResourceExpensesHistoryRouteWithChildren
   ResourceExpensesIndexRoute: typeof ResourceExpensesIndexRoute
   ResourceExpensesEditIdRoute: typeof ResourceExpensesEditIdRouteWithChildren
 }
 
 const ResourceExpensesRouteChildren: ResourceExpensesRouteChildren = {
   ResourceExpensesCreateRoute: ResourceExpensesCreateRouteWithChildren,
-  ResourceExpensesHistoryRoute: ResourceExpensesHistoryRoute,
+  ResourceExpensesHistoryRoute: ResourceExpensesHistoryRouteWithChildren,
   ResourceExpensesIndexRoute: ResourceExpensesIndexRoute,
   ResourceExpensesEditIdRoute: ResourceExpensesEditIdRouteWithChildren,
 }

@@ -1,9 +1,11 @@
+import { z } from "zod";
 import { isAuthenticatedAndAdmin } from "@/auth";
 import { json } from "@/utility/apiUtil";
 import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts";
 import {
 	getExpenseHistoryMonth,
 	getExpenseHistoryMonths,
+	getExpenseHistoryTransaction,
 	getExpenseOverviewSummary,
 } from "./getExpenseHistory";
 
@@ -12,6 +14,7 @@ type ReadHttpDependencies = {
 	getMonths: typeof getExpenseHistoryMonths;
 	getMonth: typeof getExpenseHistoryMonth;
 	getOverview: typeof getExpenseOverviewSummary;
+	getTransaction: typeof getExpenseHistoryTransaction;
 };
 
 export function createExpenseHistoryReadHandlers(
@@ -20,6 +23,7 @@ export function createExpenseHistoryReadHandlers(
 		getMonths: getExpenseHistoryMonths,
 		getMonth: getExpenseHistoryMonth,
 		getOverview: getExpenseOverviewSummary,
+		getTransaction: getExpenseHistoryTransaction,
 	},
 ) {
 	return {
@@ -55,6 +59,20 @@ export function createExpenseHistoryReadHandlers(
 			}
 			return json(result);
 		},
+		transaction: async (request: Request, idParam: string) => {
+			if (!(await dependencies.authorize(request))) {
+				return json({ error: "Unauthorized" }, { status: 401 });
+			}
+			const id = z.coerce.number().int().positive().safeParse(idParam);
+			if (!id.success) {
+				return json({ error: "Invalid transaction id." }, { status: 400 });
+			}
+			const result = await dependencies.getTransaction(id.data);
+			if (!result) {
+				return json({ error: "Transaction not found." }, { status: 404 });
+			}
+			return json(result);
+		},
 	};
 }
 
@@ -62,3 +80,4 @@ const readHandlers = createExpenseHistoryReadHandlers();
 export const getExpenseHistoryMonthsHandler = readHandlers.months;
 export const getExpenseHistoryMonthHandler = readHandlers.month;
 export const getExpenseOverviewSummaryHandler = readHandlers.overview;
+export const getExpenseHistoryTransactionHandler = readHandlers.transaction;

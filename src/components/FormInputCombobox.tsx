@@ -12,15 +12,17 @@ function FormInputCombobox({
 	inputProps,
 	className,
 	loading = false,
+	disabled = false,
 }: {
 	error?: string;
 	inputProps?: HTMLProps<HTMLInputElement>;
 	options: OptionType[];
 	onChange: (value: string | number) => void;
 	label: ReactNode;
-	value: string;
+	value: string | number;
 	className?: string;
 	loading?: boolean;
+	disabled?: boolean;
 }) {
 	return (
 		<FormInputWrapper label={label} error={error} loading={loading}>
@@ -32,6 +34,7 @@ function FormInputCombobox({
 						options={options}
 						value={value}
 						onChange={(val) => onChange(val)}
+						disabled={disabled}
 					/>
 				</>
 			)}

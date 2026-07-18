@@ -32,6 +32,9 @@ export type ComboboxProps = {
 	selectedValueFormater?: (value: string | number) => ReactNode;
 	align?: PopoverContentProps["align"];
 	loading?: boolean;
+	disabled?: boolean;
+	"aria-label"?: string;
+	"aria-describedby"?: string;
 };
 export function Combobox({
 	id,
@@ -40,11 +43,13 @@ export function Combobox({
 	value: initialValue,
 	className,
 	selectedValueFormater = (value) =>
-		value
-			? options.find((option) => option.value === value)?.label
-			: "Select value...",
+		options.find((option) => String(option.value) === String(value))?.label ??
+		"Select value...",
 	align = "end",
 	loading = false,
+	disabled = false,
+	"aria-label": ariaLabel,
+	"aria-describedby": ariaDescribedBy,
 }: ComboboxProps) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState<string | number | undefined>(
@@ -72,6 +77,9 @@ export function Combobox({
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
+					aria-label={ariaLabel}
+					aria-describedby={ariaDescribedBy}
+					disabled={disabled}
 					className={cn(
 						"w-fit justify-between rounded-none",
 						"hover:bg-accent hover:text-accent-foreground border-border",

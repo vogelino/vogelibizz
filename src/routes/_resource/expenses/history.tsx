@@ -1,4 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Outlet,
+	useChildMatches,
+} from "@tanstack/react-router";
 import { z } from "zod";
 import ExpenseHistoryPage from "@/features/expenses/ExpenseHistoryPage";
 import { expenseHistoryMonthsQueryOptions } from "@/utility/data/queryOptions";
@@ -12,5 +16,10 @@ export const Route = createFileRoute("/_resource/expenses/history")({
 	validateSearch: historySearchSchema,
 	loader: ({ context }) =>
 		context.queryClient.ensureQueryData(expenseHistoryMonthsQueryOptions()),
-	component: ExpenseHistoryPage,
+	component: ExpenseHistoryRoute,
 });
+
+function ExpenseHistoryRoute() {
+	const childMatches = useChildMatches();
+	return childMatches.length > 0 ? <Outlet /> : <ExpenseHistoryPage />;
+}

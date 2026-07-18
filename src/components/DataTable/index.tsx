@@ -12,6 +12,7 @@ import {
 	type Row,
 	type RowSelectionState,
 	type SortingState,
+	type TableOptions,
 	type Table as TanstackTable,
 	useReactTable,
 } from "@tanstack/react-table";
@@ -23,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
+	TableCaption,
 	TableCell,
 	TableHead,
 	TableHeader,
@@ -45,6 +47,12 @@ type DataTableProps<TData> = {
 	toolbarSkeleton?: ReactNode;
 	enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
 	onSelectionChange?: (rows: TData[]) => void;
+	getRowId?: TableOptions<TData>["getRowId"];
+	caption?: ReactNode;
+	emptyMessage?: ReactNode;
+	tableClassName?: string;
+	containerClassName?: string;
+	containerAriaLabel?: string;
 };
 
 export function DataTable<TData>({
@@ -57,6 +65,12 @@ export function DataTable<TData>({
 	toolbarSkeleton,
 	enableRowSelection = false,
 	onSelectionChange,
+	getRowId,
+	caption,
+	emptyMessage = "No results.",
+	tableClassName,
+	containerClassName,
+	containerAriaLabel,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -81,6 +95,7 @@ export function DataTable<TData>({
 		onPaginationChange: setPagination,
 		onRowSelectionChange: setRowSelection,
 		enableRowSelection,
+		getRowId,
 		state: {
 			sorting,
 			columnFilters,
@@ -117,8 +132,13 @@ export function DataTable<TData>({
 					{loading ? (toolbarSkeleton ?? null) : toolbar(table)}
 				</div>
 			) : null}
-			<div className="rounded-md">
-				<Table>
+			<section
+				className={cn("rounded-md", containerClassName)}
+				aria-label={containerAriaLabel}
+				tabIndex={containerAriaLabel ? 0 : undefined}
+			>
+				<Table className={tableClassName}>
+					{caption ? <TableCaption>{caption}</TableCaption> : null}
 					<TableHeader
 						className={cn(
 							"sticky top-16 bg-background z-10",
@@ -216,13 +236,13 @@ export function DataTable<TData>({
 									colSpan={table.getAllColumns().length}
 									className="h-24 text-center"
 								>
-									No results.
+									{emptyMessage}
 								</TableCell>
 							</TableRow>
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</section>
 			{showPagination ? (
 				<div className="flex items-center justify-end space-x-2 py-4">
 					<div className="flex-1 text-sm text-muted-foreground">
