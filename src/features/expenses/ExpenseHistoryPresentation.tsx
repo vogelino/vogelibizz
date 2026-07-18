@@ -17,6 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ExpenseHistoryMonthDetail } from "@/utility/expenseHistoryContracts";
 import type { ExpenseHistoryImportPreview } from "@/utility/expenseHistoryImportContracts";
 import { formatCurrency, locale } from "@/utility/formatUtil";
+import {
+	ExpensesOverviewPanelLayout,
+	ExpensesOverviewValue,
+} from "./ExpensesOverviewPanel";
 
 export function formatExpenseHistoryMonth(month: string) {
 	const [year, monthNumber] = month.split("-").map(Number);
@@ -235,7 +239,7 @@ export function ExpenseHistoryMonthNavigation(
 	);
 }
 
-type ExpenseHistorySummaryToolbarProps =
+type ExpenseHistoryOverviewPanelProps =
 	| { loading: true }
 	| {
 			loading: false;
@@ -244,50 +248,53 @@ type ExpenseHistorySummaryToolbarProps =
 			onOtherOnlyChange: (checked: boolean) => void;
 	  };
 
-export function ExpenseHistorySummaryToolbar(
-	props: ExpenseHistorySummaryToolbarProps,
+export function ExpenseHistoryOverviewPanel(
+	props: ExpenseHistoryOverviewPanelProps,
 ) {
 	if (props.loading) {
 		return (
-			<div className="flex flex-wrap items-center justify-between gap-3 bg-muted/30 p-3 px-6 lg:px-10">
-				<div className="flex flex-wrap gap-x-6 gap-y-1">
-					<Skeleton className="h-5 w-28" />
-					<Skeleton className="h-5 w-32" />
-					<Skeleton className="h-5 w-28" />
-				</div>
-				<Skeleton className="h-5 w-22" />
-			</div>
+			<ExpensesOverviewPanelLayout aside={<Skeleton className="h-5 w-22" />}>
+				<ExpensesOverviewValue label="Total" value="" loading />
+				<ExpensesOverviewValue label="Matched" value="" loading />
+				<ExpensesOverviewValue label="Other" value="" loading />
+			</ExpensesOverviewPanelLayout>
 		);
 	}
 	const { summary, otherOnly, onOtherOnlyChange } = props;
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-3 bg-muted/30 p-3 px-6 lg:px-10">
-			<div
-				className="flex flex-wrap gap-x-6 gap-y-1 text-sm"
-				aria-live="polite"
-			>
-				<span>
-					Total <strong>{formatCurrency(summary.total, "CHF")}</strong>
-				</span>
-				<span>
-					Matched <strong>{formatCurrency(summary.matched, "CHF")}</strong>
-				</span>
-				<span>
-					Other <strong>{formatCurrency(summary.other, "CHF")}</strong>
-				</span>
-			</div>
-			<label
-				htmlFor="expense-history-other-only"
-				className="flex items-center gap-2 text-sm"
-			>
-				<Checkbox
-					id="expense-history-other-only"
-					checked={otherOnly}
-					onCheckedChange={(checked) => onOtherOnlyChange(Boolean(checked))}
+		<ExpensesOverviewPanelLayout
+			aside={
+				<label
+					htmlFor="expense-history-other-only"
+					className="flex items-center gap-2 text-sm"
+				>
+					<Checkbox
+						id="expense-history-other-only"
+						checked={otherOnly}
+						onCheckedChange={(checked) => onOtherOnlyChange(Boolean(checked))}
+					/>
+					Other only
+				</label>
+			}
+		>
+			<div className="contents" aria-live="polite">
+				<ExpensesOverviewValue
+					label="Total"
+					value={formatCurrency(summary.total, "CHF")}
+					loading={false}
 				/>
-				Other only
-			</label>
-		</div>
+				<ExpensesOverviewValue
+					label="Matched"
+					value={formatCurrency(summary.matched, "CHF")}
+					loading={false}
+				/>
+				<ExpensesOverviewValue
+					label="Other"
+					value={formatCurrency(summary.other, "CHF")}
+					loading={false}
+				/>
+			</div>
+		</ExpensesOverviewPanelLayout>
 	);
 }
 

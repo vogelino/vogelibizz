@@ -28,8 +28,8 @@ import { ExpenseFilter } from "./ExpenseFilter";
 import {
 	ExpenseHistoryImportPanel,
 	ExpenseHistoryMonthNavigation,
+	ExpenseHistoryOverviewPanel,
 	ExpenseHistoryReplacementDialog,
-	ExpenseHistorySummaryToolbar,
 } from "./ExpenseHistoryPresentation";
 import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
@@ -259,77 +259,80 @@ export default function ExpenseHistoryPage() {
 						</p>
 					</output>
 				) : (
-					<DataTable
-						key={selectedMonth ?? "expense-history"}
-						columns={columns}
-						data={transactions}
-						loading={historyLoading}
-						getRowId={(transaction) => String(transaction.id)}
-						enableRowSelection
-						onSelectionChange={setSelectedRows}
-						initialState={{
-							pagination: { pageIndex: 0, pageSize: 50 },
-							columnFilters: otherOnly
-								? [{ id: "association", value: true }]
-								: [],
-						}}
-						classNames={{
-							table: "min-w-240",
-							header: "top-26",
-							toolbar: "pb-0",
-						}}
-						toolbarSkeleton={
-							<>
+					<>
+						{historyLoading ? (
+							<ExpenseHistoryOverviewPanel loading />
+						) : monthQuery.data ? (
+							<ExpenseHistoryOverviewPanel
+								loading={false}
+								summary={monthQuery.data.summary}
+								otherOnly={otherOnly}
+								onOtherOnlyChange={(next) => {
+									setOtherOnly(next);
+									tableRef.current
+										?.getColumn("association")
+										?.setFilterValue(next || undefined);
+								}}
+							/>
+						) : null}
+						<DataTable
+							key={selectedMonth ?? "expense-history"}
+							columns={columns}
+							data={transactions}
+							loading={historyLoading}
+							getRowId={(transaction) => String(transaction.id)}
+							enableRowSelection
+							onSelectionChange={setSelectedRows}
+							initialState={{
+								pagination: { pageIndex: 0, pageSize: 50 },
+								columnFilters: otherOnly
+									? [{ id: "association", value: true }]
+									: [],
+							}}
+							classNames={{
+								table: "min-w-240",
+								header: "top-26",
+								toolbar: "pb-0",
+							}}
+							toolbarSkeleton={
 								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 									<ExpenseFilter loading />
 									<ExpenseHistoryMonthNavigation loading />
 								</div>
-								<ExpenseHistorySummaryToolbar loading />
-							</>
-						}
-						caption={
-							<span className="sr-only">
-								Monthly bank transactions. Open a description to edit the
-								transaction. Original bank values remain available within each
-								description cell.
-							</span>
-						}
-						emptyMessage={
-							otherOnly && !historyError ? "No Other transactions." : undefined
-						}
-						toolbar={(table) => (
-							<>
-								{(() => {
-									tableRef.current = table;
-									return null;
-								})()}
-								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
-									<ExpenseFilter loading={false} table={table} />
-									<ExpenseHistoryMonthNavigation
-										loading={false}
-										months={months}
-										selectedMonth={monthIndex >= 0 ? selectedMonth : null}
-										older={navigation.older}
-										newer={navigation.newer}
-										onChooseMonth={chooseMonth}
-									/>
-								</div>
-								{monthQuery.data ? (
-									<ExpenseHistorySummaryToolbar
-										loading={false}
-										summary={monthQuery.data.summary}
-										otherOnly={otherOnly}
-										onOtherOnlyChange={(next) => {
-											setOtherOnly(next);
-											table
-												.getColumn("association")
-												?.setFilterValue(next || undefined);
-										}}
-									/>
-								) : null}
-							</>
-						)}
-					/>
+							}
+							caption={
+								<span className="sr-only">
+									Monthly bank transactions. Open a description to edit the
+									transaction. Original bank values remain available within each
+									description cell.
+								</span>
+							}
+							emptyMessage={
+								otherOnly && !historyError
+									? "No Other transactions."
+									: undefined
+							}
+							toolbar={(table) => (
+								<>
+									{(() => {
+										tableRef.current = table;
+										return null;
+									})()}
+									<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+										<ExpenseFilter loading={false} table={table} />
+										<ExpenseHistoryMonthNavigation
+											loading={false}
+											months={months}
+											selectedMonth={monthIndex >= 0 ? selectedMonth : null}
+											older={navigation.older}
+											newer={navigation.newer}
+											onChooseMonth={chooseMonth}
+										/>
+									</div>
+								</>
+							)}
+						/>
+					</>
 				)}
 			</section>
 
