@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utility/classNames";
 
 export type ComboboxProps = {
+	id?: string;
 	options: {
 		label: ReactNode;
 		value: string | number;
@@ -33,6 +34,7 @@ export type ComboboxProps = {
 	loading?: boolean;
 };
 export function Combobox({
+	id,
 	options,
 	onChange = () => undefined,
 	value: initialValue,
@@ -66,6 +68,7 @@ export function Combobox({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					id={id}
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
