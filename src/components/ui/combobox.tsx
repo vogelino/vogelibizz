@@ -2,7 +2,7 @@
 
 import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -53,6 +53,10 @@ export function Combobox<TData>({
 	"aria-describedby": ariaDescribedBy,
 }: ComboboxProps<TData>) {
 	const [open, setOpen] = useState(false);
+	const triggerRef = useRef<HTMLButtonElement>(null);
+	const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+		null,
+	);
 	const [value, setValue] = useState<TData | undefined>(
 		initialValue ?? options[0]?.value,
 	);
@@ -70,10 +74,20 @@ export function Combobox<TData>({
 	if (loading) {
 		return <Skeleton className={cn("h-9.5 w-full", className)} />;
 	}
+	const handleOpenChange = (isOpen: boolean) => {
+		if (isOpen) {
+			// Keep the menu inside a modal drawer's scroll-lock boundary.
+			setPortalContainer(
+				triggerRef.current?.closest<HTMLElement>("[data-vaul-drawer]") ?? null,
+			);
+		}
+		setOpen(isOpen);
+	};
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover open={open} onOpenChange={handleOpenChange}>
 			<PopoverTrigger asChild>
 				<Button
+					ref={triggerRef}
 					id={id}
 					variant="outline"
 					role="combobox"
@@ -97,7 +111,12 @@ export function Combobox<TData>({
 					<ChevronsUpDown size={16} className="ml-2 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-fit p-0" align={align}>
+			<PopoverContent
+				portalContainer={portalContainer}
+				data-vaul-no-drag=""
+				className="w-fit p-0"
+				align={align}
+			>
 				<Command>
 					<CommandInput placeholder="Search..." />
 					<CommandList>

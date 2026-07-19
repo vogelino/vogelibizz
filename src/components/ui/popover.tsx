@@ -12,10 +12,15 @@ const PopoverAnchor = PopoverPrimitive.Anchor;
 
 type PopoverContentProps = React.ComponentPropsWithoutRef<
 	typeof PopoverPrimitive.Content
->;
+> & {
+	portalContainer?: HTMLElement | null;
+};
 const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
-	({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-		<PopoverPrimitive.Portal>
+	(
+		{ className, align = "center", sideOffset = 4, portalContainer, ...props },
+		ref,
+	) => (
+		<PopoverPrimitive.Portal container={portalContainer}>
 			<PopoverPrimitive.Content
 				ref={ref}
 				align={align}
