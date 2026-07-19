@@ -218,10 +218,16 @@ describe("expense history import", () => {
 			months: ["2026-06"],
 			debitCount: 1,
 			skippedCreditCount: 1,
-			totalDebitAmount: 42.5,
-			warnings: [
-				"1 positive credit row was skipped; only negative debits will be imported.",
+			skippedCredits: [
+				{
+					rowNumber: 5,
+					bookedAt: "2026-06-07",
+					description: "Synthetic credit",
+					amount: 10,
+				},
 			],
+			totalDebitAmount: 42.5,
+			warnings: [],
 			replacementRequired: false,
 			replacementMonths: [],
 		});

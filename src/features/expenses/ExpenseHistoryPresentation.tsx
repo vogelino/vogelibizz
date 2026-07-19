@@ -1,17 +1,23 @@
 import { ChevronLeft, ChevronRight, FileUp, TriangleAlert } from "lucide-react";
-import type { ChangeEventHandler, RefObject } from "react";
+import type { RefObject } from "react";
 import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { FileUpload } from "@/components/ui/file-upload";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utility/classNames";
 import type { ExpenseHistoryMonthDetail } from "@/utility/expenseHistoryContracts";
@@ -31,77 +37,69 @@ export function formatExpenseHistoryMonth(month: string) {
 	}).format(new Date(Date.UTC(year, monthNumber - 1, 1)));
 }
 
-export function ExpenseHistoryImportPanel({
+export function ExpenseHistoryImportDialog({
+	open,
+	onOpenChange,
 	fileInputRef,
+	selectedFile,
 	onSelectFile,
 	preview,
 	error,
 	previewPending,
 	commitPending,
-	replacementTriggerRef,
 	onImport,
-	onReviewReplacement,
 }: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
 	fileInputRef: RefObject<HTMLInputElement | null>;
-	onSelectFile: ChangeEventHandler<HTMLInputElement>;
+	selectedFile: File | null;
+	onSelectFile: (file: File | null) => void;
 	preview: ExpenseHistoryImportPreview | null;
 	error: string | null;
 	previewPending: boolean;
 	commitPending: boolean;
-	replacementTriggerRef: RefObject<HTMLButtonElement | null>;
-	onImport: () => void;
-	onReviewReplacement: () => void;
+	onImport: (replaceExistingMonths: boolean) => void;
 }) {
 	return (
-		<div className="px-10 sticky left-0">
-			<section
-				aria-labelledby="import-heading"
-				className="my-4 border border-border bg-muted/40 p-4"
-			>
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-					<div>
-						<h2 id="import-heading" className="font-semibold">
-							Import bank transactions
-						</h2>
-						<p
-							id="bank-export-help"
-							className="mt-1 max-w-2xl text-sm text-muted-foreground"
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="max-h-[calc(100vh-2rem)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-3xl">
+				<DialogHeader>
+					<DialogTitle>Import bank transactions</DialogTitle>
+					<DialogDescription id="bank-export-help">
+						Choose a Finanzassistent Excel workbook. Incoming payments are
+						excluded because expense history tracks outgoing payments.
+						Categories are translated to English and preserved. Replacing months
+						removes their existing transaction edits and associations.
+					</DialogDescription>
+				</DialogHeader>
+				<div className="overflow-y-auto p-6">
+					<FileUpload
+						ref={fileInputRef}
+						files={selectedFile ? [selectedFile] : []}
+						onFilesChange={(files) => onSelectFile(files[0] ?? null)}
+						accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+						hideDropzoneWhenFilesSelected
+						invalid={Boolean(error)}
+						disabled={previewPending || commitPending}
+						title="Drop your bank export here, or click to browse"
+						description="Finanzassistent Excel workbook (.xlsx)"
+					/>
+
+					{previewPending ? (
+						<output className="mt-4 block" aria-live="polite">
+							Validating the bank export…
+						</output>
+					) : null}
+					{error ? (
+						<div
+							role="alert"
+							className="mt-4 border border-destructive/40 bg-destructive/5 p-3 text-sm"
 						>
-							Choose a Finanzassistent Excel workbook. Credit rows are skipped;
-							categories are translated to English and preserved. Replacing
-							months removes their existing transaction edits and associations.
-						</p>
-					</div>
-					<label className="flex min-w-0 flex-col gap-1 text-sm">
-						<span className="font-medium">Bank export file</span>
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-							aria-describedby="bank-export-help"
-							aria-invalid={Boolean(error)}
-							onChange={onSelectFile}
-							className="max-w-full text-sm file:mr-3 file:h-9 file:border file:border-border file:bg-background file:px-3 file:text-foreground hover:file:bg-accent"
-						/>
-					</label>
-				</div>
-				{previewPending ? (
-					<output className="mt-4 block">Validating the bank export…</output>
-				) : null}
-				{error ? (
-					<div
-						role="alert"
-						className="mt-4 border border-destructive/40 bg-destructive/5 p-3 text-sm"
-					>
-						<strong>Import could not be prepared.</strong> {error}
-					</div>
-				) : null}
-				{preview ? (
-					<div
-						className="mt-4 border border-border bg-background p-4"
-						aria-live="polite"
-					>
-						<div className="flex flex-wrap items-start justify-between gap-4">
+							<strong>Import could not be prepared.</strong> {error}
+						</div>
+					) : null}
+					{preview ? (
+						<div className="mt-4" aria-live="polite">
 							<div>
 								<h3 className="font-semibold">
 									Preview: {preview.months.length}{" "}
@@ -115,61 +113,119 @@ export function ExpenseHistoryImportPanel({
 									{formatCurrency(preview.totalDebitAmount, "CHF")}
 								</p>
 							</div>
-							<Button
-								ref={
-									preview.replacementRequired
-										? replacementTriggerRef
-										: undefined
-								}
-								type="button"
-								variant={
-									preview.replacementRequired ? "destructive" : "default"
-								}
-								disabled={commitPending}
-								onClick={
-									preview.replacementRequired ? onReviewReplacement : onImport
-								}
-							>
-								<FileUp size={16} />
-								{preview.replacementRequired
-									? "Review replacement"
-									: preview.months.length === 1
-										? "Import month"
-										: "Import months"}
-							</Button>
-						</div>
-						{preview.skippedCreditCount > 0 ? (
-							<output className="mt-3 flex gap-2 border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
-								<TriangleAlert
-									className="shrink-0 text-amber-600"
-									size={18}
-									aria-hidden="true"
-								/>
-								<span>
-									{preview.skippedCreditCount} credit{" "}
-									{preview.skippedCreditCount === 1 ? "row was" : "rows were"}{" "}
-									skipped and will not be imported.
-								</span>
-							</output>
-						) : null}
-						{preview.warnings
-							.filter((warning) => !warning.toLowerCase().includes("credit"))
-							.map((warning) => (
+							{preview.skippedCreditCount > 0 ? (
+								<Accordion
+									type="single"
+									collapsible
+									className="mt-3 border border-amber-500/40 bg-amber-500/5 text-sm"
+								>
+									<AccordionItem value="skipped-payments" className="border-0">
+										<AccordionTrigger className="px-3 py-3">
+											<span className="flex items-center gap-2">
+												<TriangleAlert
+													className="shrink-0 text-amber-600"
+													size={18}
+													aria-hidden="true"
+												/>
+												<strong>
+													{preview.skippedCreditCount} incoming{" "}
+													{preview.skippedCreditCount === 1
+														? "payment"
+														: "payments"}{" "}
+													will not be imported
+												</strong>
+											</span>
+										</AccordionTrigger>
+										<AccordionContent className="pb-0">
+											<p className="border-t border-amber-500/30 p-3">
+												Expense history includes outgoing payments only. The
+												following positive amounts were excluded:
+											</p>
+											<div className="max-h-64 overflow-auto border-t border-amber-500/30 bg-background">
+												<table className="w-full min-w-130 text-left">
+													<thead className="sticky top-0 bg-muted">
+														<tr>
+															<th className="px-3 py-2 font-medium">
+																Excel row
+															</th>
+															<th className="px-3 py-2 font-medium">Date</th>
+															<th className="px-3 py-2 font-medium">
+																Description
+															</th>
+															<th className="px-3 py-2 text-right font-medium">
+																Amount
+															</th>
+														</tr>
+													</thead>
+													<tbody>
+														{preview.skippedCredits.map((credit) => (
+															<tr
+																key={`${credit.rowNumber}-${credit.bookedAt}-${credit.amount}`}
+																className="border-t border-border"
+															>
+																<td className="px-3 py-2 tabular-nums">
+																	{credit.rowNumber}
+																</td>
+																<td className="px-3 py-2 whitespace-nowrap">
+																	{credit.bookedAt}
+																</td>
+																<td className="px-3 py-2">
+																	{credit.description}
+																</td>
+																<td className="px-3 py-2 text-right whitespace-nowrap tabular-nums">
+																	{formatCurrency(credit.amount, "CHF")}
+																</td>
+															</tr>
+														))}
+													</tbody>
+												</table>
+											</div>
+										</AccordionContent>
+									</AccordionItem>
+								</Accordion>
+							) : null}
+							{preview.warnings.map((warning) => (
 								<p key={warning} className="mt-2 text-sm text-muted-foreground">
 									{warning}
 								</p>
 							))}
-						{preview.replacementRequired ? (
-							<p className="mt-3 text-sm font-medium">
-								History already exists for {preview.replacementMonths.length}{" "}
-								{preview.replacementMonths.length === 1 ? "month" : "months"} in
-								the selected file. Replacement requires confirmation.
-							</p>
-						) : null}
-					</div>
-				) : null}
-			</section>
-		</div>
+							{preview.replacementRequired ? (
+								<p className="mt-3 text-sm font-medium">
+									History already exists for {preview.replacementMonths.length}{" "}
+									{preview.replacementMonths.length === 1 ? "month" : "months"}{" "}
+									in the selected file. Replacing it removes existing
+									transaction edits and recurring-expense associations.
+								</p>
+							) : null}
+						</div>
+					) : null}
+				</div>
+				<DialogFooter>
+					<DialogClose asChild>
+						<Button type="button" variant="outline" disabled={commitPending}>
+							Cancel
+						</Button>
+					</DialogClose>
+					{preview ? (
+						<Button
+							type="button"
+							variant={preview.replacementRequired ? "destructive" : "default"}
+							disabled={commitPending}
+							onClick={() => onImport(preview.replacementRequired)}
+						>
+							<FileUp size={16} />
+							{commitPending
+								? preview.replacementRequired
+									? "Replacing…"
+									: "Importing…"
+								: preview.replacementRequired
+									? `Replace ${preview.replacementMonths.length} ${preview.replacementMonths.length === 1 ? "month" : "months"}`
+									: `Import ${preview.months.length} ${preview.months.length === 1 ? "month" : "months"}`}
+						</Button>
+					) : null}
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
@@ -280,74 +336,5 @@ export function ExpenseHistoryOverviewPanel(
 				/>
 			</div>
 		</ExpensesOverviewPanelLayout>
-	);
-}
-
-export function ExpenseHistoryReplacementDialog({
-	open,
-	months,
-	pending,
-	error,
-	cancelRef,
-	triggerRef,
-	onOpenChange,
-	onConfirm,
-}: {
-	open: boolean;
-	months: string[];
-	pending: boolean;
-	error: string | null;
-	cancelRef: RefObject<HTMLButtonElement | null>;
-	triggerRef: RefObject<HTMLButtonElement | null>;
-	onOpenChange: (open: boolean) => void;
-	onConfirm: () => void;
-}) {
-	return (
-		<AlertDialog open={open} onOpenChange={onOpenChange}>
-			<AlertDialogContent
-				onOpenAutoFocus={(event) => {
-					event.preventDefault();
-					cancelRef.current?.focus();
-				}}
-				onCloseAutoFocus={(event) => {
-					event.preventDefault();
-					triggerRef.current?.focus();
-				}}
-			>
-				<AlertDialogHeader>
-					<AlertDialogTitle>
-						Replace {months.length === 1 ? "this month" : "these months"}?
-					</AlertDialogTitle>
-					<AlertDialogDescription>
-						This permanently deletes every existing transaction for{" "}
-						{months.map(formatExpenseHistoryMonth).join(", ")}, including
-						transaction edits and recurring-expense associations. It then
-						imports all months in the previewed file as the new active datasets.
-						Imports are not merged.
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-				<AlertDialogFooter>
-					<AlertDialogCancel ref={cancelRef} disabled={pending}>
-						Keep existing {months.length === 1 ? "month" : "months"}
-					</AlertDialogCancel>
-					<AlertDialogAction
-						disabled={pending}
-						onClick={(event) => {
-							event.preventDefault();
-							onConfirm();
-						}}
-					>
-						{pending
-							? "Replacing…"
-							: `Replace ${months.length === 1 ? "month" : "months"}`}
-					</AlertDialogAction>
-				</AlertDialogFooter>
-				{error ? (
-					<p role="alert" className="text-sm text-destructive">
-						{error}
-					</p>
-				) : null}
-			</AlertDialogContent>
-		</AlertDialog>
 	);
 }

@@ -3,7 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
-import { type ChangeEvent, useMemo, useRef, useState } from "react";
+import { FileUp } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,9 @@ import {
 } from "@/utility/expenseHistoryImportContracts";
 import { ExpenseFilter } from "./ExpenseFilter";
 import {
-	ExpenseHistoryImportPanel,
+	ExpenseHistoryImportDialog,
 	ExpenseHistoryMonthNavigation,
 	ExpenseHistoryOverviewPanel,
-	ExpenseHistoryReplacementDialog,
 } from "./ExpenseHistoryPresentation";
 import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
@@ -78,23 +78,21 @@ export default function ExpenseHistoryPage() {
 		monthIndex >= 0 ? selectedMonth : null,
 	);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const replacementTriggerRef = useRef<HTMLButtonElement>(null);
-	const replacementCancelRef = useRef<HTMLButtonElement>(null);
 	const [source, setSource] = useState<ImportSource | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [preview, setPreview] = useState<ExpenseHistoryImportPreview | null>(
 		null,
 	);
 	const [fileError, setFileError] = useState<string | null>(null);
-	const [replaceOpen, setReplaceOpen] = useState(false);
+	const [importOpen, setImportOpen] = useState(false);
 	const [selectedRows, setSelectedRows] = useState<ExpenseHistoryTransaction[]>(
 		[],
 	);
 	const tableRef = useRef<TanstackTable<ExpenseHistoryTransaction> | null>(
 		null,
 	);
-	const deleteMutation = useExpenseHistoryTransactionDelete(
-		selectedMonth ?? "",
-	);
+	const { isPending: deletePending, mutate: deleteTransactions } =
+		useExpenseHistoryTransactionDelete(selectedMonth ?? "");
 
 	const previewMutation = useMutation({
 		mutationFn: async (input: ImportSource) =>
@@ -115,9 +113,10 @@ export default function ExpenseHistoryPage() {
 			);
 		},
 		onSuccess: async (result) => {
-			setReplaceOpen(false);
+			setImportOpen(false);
 			setPreview(null);
 			setSource(null);
+			setSelectedFile(null);
 			if (fileInputRef.current) fileInputRef.current.value = "";
 			const selectedImportedMonth = result.months.at(-1);
 			await Promise.all([
@@ -150,12 +149,12 @@ export default function ExpenseHistoryPage() {
 				? commitMutation.error.message
 				: null);
 
-	async function selectFile(event: ChangeEvent<HTMLInputElement>) {
+	async function selectFile(file: File | null) {
 		setPreview(null);
 		setFileError(null);
 		previewMutation.reset();
 		commitMutation.reset();
-		const file = event.target.files?.[0];
+		setSelectedFile(file);
 		if (!file) {
 			setSource(null);
 			return;
@@ -195,44 +194,54 @@ export default function ExpenseHistoryPage() {
 	const historyError = monthsQuery.error ?? monthQuery.error;
 	const transactions =
 		!historyError && monthQuery.data ? monthQuery.data.transactions : [];
-	const selectionActions = useMemo(() => {
-		if (selectedRows.length === 0) return null;
+	const resourceActions = useMemo(() => {
 		return (
-			<Button
-				type="button"
-				variant="destructive"
-				size="sm"
-				disabled={deleteMutation.isPending}
-				onClick={() => {
-					deleteMutation.mutate(
-						selectedRows.map(({ id }) => id),
-						{
-							onSuccess: () => {
-								setSelectedRows([]);
-								tableRef.current?.resetRowSelection();
-							},
-						},
-					);
-				}}
-			>
-				Delete selected ({selectedRows.length})
-			</Button>
+			<>
+				{selectedRows.length > 0 ? (
+					<Button
+						type="button"
+						variant="destructive"
+						size="sm"
+						disabled={deletePending}
+						onClick={() => {
+							deleteTransactions(
+								selectedRows.map(({ id }) => id),
+								{
+									onSuccess: () => {
+										setSelectedRows([]);
+										tableRef.current?.resetRowSelection();
+									},
+								},
+							);
+						}}
+					>
+						Delete selected ({selectedRows.length})
+					</Button>
+				) : null}
+				<Button type="button" onClick={() => setImportOpen(true)}>
+					<FileUp size={16} />
+					Import transactions
+				</Button>
+			</>
 		);
-	}, [deleteMutation, selectedRows]);
-	useResourceActions(selectionActions);
+	}, [deletePending, deleteTransactions, selectedRows]);
+	useResourceActions(resourceActions);
 
 	return (
 		<>
-			<ExpenseHistoryImportPanel
+			<ExpenseHistoryImportDialog
+				open={importOpen}
+				onOpenChange={setImportOpen}
 				fileInputRef={fileInputRef}
+				selectedFile={selectedFile}
 				onSelectFile={selectFile}
 				preview={preview}
 				error={importError}
 				previewPending={previewMutation.isPending}
 				commitPending={commitMutation.isPending}
-				replacementTriggerRef={replacementTriggerRef}
-				onImport={() => commitMutation.mutate(false)}
-				onReviewReplacement={() => setReplaceOpen(true)}
+				onImport={(replaceExistingMonths) =>
+					commitMutation.mutate(replaceExistingMonths)
+				}
 			/>
 
 			<section aria-labelledby="history-heading" className="contents">
@@ -244,7 +253,7 @@ export default function ExpenseHistoryPage() {
 					<div className="py-12 text-center px-6 md:px-10 sticky left-0">
 						<h3 className="font-semibold">No imported expense history</h3>
 						<p className="mt-1 text-sm text-muted-foreground">
-							Choose a bank export above to preview your first import.
+							Import a bank export to add your first expense history.
 						</p>
 					</div>
 				) : !monthsQuery.isPending && !monthsQuery.error && monthIndex < 0 ? (
@@ -320,21 +329,6 @@ export default function ExpenseHistoryPage() {
 					</>
 				)}
 			</section>
-
-			<ExpenseHistoryReplacementDialog
-				open={replaceOpen}
-				months={preview?.replacementMonths ?? []}
-				pending={commitMutation.isPending}
-				error={
-					commitMutation.error instanceof Error
-						? commitMutation.error.message
-						: null
-				}
-				cancelRef={replacementCancelRef}
-				triggerRef={replacementTriggerRef}
-				onOpenChange={setReplaceOpen}
-				onConfirm={() => commitMutation.mutate(true)}
-			/>
 		</>
 	);
 }

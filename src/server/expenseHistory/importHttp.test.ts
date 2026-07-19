@@ -14,6 +14,7 @@ const preview: ExpenseHistoryImportPreview = {
 	months: ["2026-06"],
 	debitCount: 1,
 	skippedCreditCount: 0,
+	skippedCredits: [],
 	totalDebitAmount: 12.5,
 	warnings: [],
 	replacementRequired: false,

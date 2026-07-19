@@ -131,6 +131,7 @@ function previewFromParsed(
 		months: parsed.months.map(({ month }) => month),
 		debitCount: parsed.debitCount,
 		skippedCreditCount: parsed.skippedCreditCount,
+		skippedCredits: parsed.skippedCredits,
 		totalDebitAmount: parsed.totalDebitAmount,
 		warnings: parsed.warnings,
 		replacementRequired: replacementMonths.length > 0,

@@ -251,6 +251,20 @@ describe("Finanzassistent Excel parser", () => {
 			},
 		]);
 		expect(parsed.skippedCreditCount).toBe(2);
+		expect(parsed.skippedCredits).toEqual([
+			{
+				rowNumber: 8,
+				bookedAt: "2026-07-17",
+				description: "Refund",
+				amount: 10,
+			},
+			{
+				rowNumber: 13,
+				bookedAt: "2026-07-12",
+				description: "Employer",
+				amount: 5000,
+			},
+		]);
 	});
 
 	test("rejects an unmapped category instead of silently losing it", () => {

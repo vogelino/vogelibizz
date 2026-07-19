@@ -203,6 +203,7 @@ export function parseBankXlsx(workbookBase64: string): ParsedBankImport {
 			description,
 			signedAmount: normalizeAmount(get("Betrag"), rowNumber),
 			sourceOrder: transactions.length,
+			sourceRowNumber: rowNumber,
 			category,
 		});
 	}

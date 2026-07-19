@@ -25,6 +25,14 @@ export const expenseHistoryImportPreviewSchema = z.object({
 	months: z.array(z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/)).nonempty(),
 	debitCount: z.number().int().positive(),
 	skippedCreditCount: z.number().int().nonnegative(),
+	skippedCredits: z.array(
+		z.object({
+			rowNumber: z.number().int().positive(),
+			bookedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+			description: z.string().min(1),
+			amount: z.number().finite().positive(),
+		}),
+	),
 	totalDebitAmount: z.number().finite().positive(),
 	warnings: z.array(z.string()),
 	replacementRequired: z.boolean(),

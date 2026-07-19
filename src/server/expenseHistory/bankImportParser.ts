@@ -14,6 +14,14 @@ export type ParsedBankDebit = {
 
 export type ParsedBankTransaction = Omit<ParsedBankDebit, "amount"> & {
 	signedAmount: number;
+	sourceRowNumber: number;
+};
+
+export type SkippedBankCredit = {
+	rowNumber: number;
+	bookedAt: string;
+	description: string;
+	amount: number;
 };
 
 export type ParsedBankImportMonth = {
@@ -27,6 +35,7 @@ export type ParsedBankImport = {
 	months: ParsedBankImportMonth[];
 	debitCount: number;
 	skippedCreditCount: number;
+	skippedCredits: SkippedBankCredit[];
 	totalDebitAmount: number;
 	warnings: string[];
 };
@@ -51,22 +60,31 @@ export function groupParsedBankTransactions(
 	}
 	const debits = parsedTransactions
 		.filter(({ signedAmount }) => signedAmount < 0)
-		.map(({ signedAmount, ...transaction }) => ({
-			...transaction,
-			amount: Math.abs(signedAmount),
-		}));
+		.map(
+			({
+				signedAmount,
+				sourceRowNumber: _sourceRowNumber,
+				...transaction
+			}) => ({
+				...transaction,
+				amount: Math.abs(signedAmount),
+			}),
+		);
 	if (debits.length === 0) {
 		throw new BankImportValidationError(
 			"The workbook contains no debit transactions to import.",
 		);
 	}
-	const skippedCreditCount = parsedTransactions.length - debits.length;
+	const skippedCredits = parsedTransactions
+		.filter(({ signedAmount }) => signedAmount > 0)
+		.map(({ sourceRowNumber, bookedAt, description, signedAmount }) => ({
+			rowNumber: sourceRowNumber,
+			bookedAt,
+			description,
+			amount: signedAmount,
+		}));
+	const skippedCreditCount = skippedCredits.length;
 	const warnings = [...additionalWarnings];
-	if (skippedCreditCount > 0) {
-		warnings.unshift(
-			`${skippedCreditCount} positive credit row${skippedCreditCount === 1 ? " was" : "s were"} skipped; only negative debits will be imported.`,
-		);
-	}
 	const monthKeys = [
 		...new Set(
 			parsedTransactions.map((transaction) => transaction.bookedAt.slice(0, 7)),
@@ -94,6 +112,7 @@ export function groupParsedBankTransactions(
 		months,
 		debitCount: debits.length,
 		skippedCreditCount,
+		skippedCredits,
 		totalDebitAmount: Number(
 			debits.reduce((total, debit) => total + debit.amount, 0).toFixed(2),
 		),
