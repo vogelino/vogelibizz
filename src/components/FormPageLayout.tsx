@@ -31,7 +31,7 @@ function FormPageLayout({
 				</h1>
 				<div className="flex gap-2">
 					<Button asChild variant="outline">
-						<Link to={allLink}>
+						<Link to={allLink} search>
 							<ListIcon />
 							<span>See all</span>
 						</Link>

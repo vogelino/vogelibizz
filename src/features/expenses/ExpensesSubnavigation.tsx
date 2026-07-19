@@ -23,6 +23,7 @@ export function ExpensesSubnavigation({
 						<li key={link.to}>
 							<Link
 								to={link.to}
+								search
 								aria-current={isActive ? "page" : undefined}
 								className={cn(
 									"inline-flex h-10 items-center whitespace-nowrap border-b-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

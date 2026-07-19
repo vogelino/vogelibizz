@@ -33,7 +33,7 @@ function getCreateRoute(resource: RoutedResource) {
 		case "clients":
 			return linkOptions({ to: "/clients/create/modal" });
 		case "expenses":
-			return linkOptions({ to: "/expenses/create/modal" });
+			return linkOptions({ to: "/expenses/create/modal", search: true });
 		case "projects":
 			return linkOptions({ to: "/projects/create/modal" });
 		case "invoices":

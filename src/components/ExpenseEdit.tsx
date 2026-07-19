@@ -55,7 +55,7 @@ export default function ExpenseEdit({
 			name: expense?.name ?? "",
 		},
 		onSubmit: async ({ value }) => {
-			navigate({ to: "/expenses" });
+			navigate({ to: "/expenses", search: true });
 			const expenseData = {
 				name: value.name,
 				type,

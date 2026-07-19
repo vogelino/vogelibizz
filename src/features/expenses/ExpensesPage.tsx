@@ -1,7 +1,8 @@
 "use client";
 
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
@@ -22,16 +23,12 @@ import useSettings from "@/utility/data/useSettings";
 import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
+import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getExpensesTableColumns } from "./columns";
-import {
-	ExpenseFilter,
-	type ExpenseFilterState,
-	type ExpenseFilterValue,
-} from "./ExpenseFilter";
+import { ExpenseFilter, type ExpenseFilterState } from "./ExpenseFilter";
 import { ExpensesOverviewPanel } from "./ExpensesOverviewPanel";
 import {
 	createExpenseOverviewRows,
-	type ExpenseOverviewCategory,
 	type ExpenseOverviewRow,
 	type ExpenseOverviewType,
 	filterExpenseOverviewRows,
@@ -43,34 +40,73 @@ import {
 
 type TypeFilterType = ExpenseOverviewType | "All types";
 
+type ExpenseUrlFilterState = {
+	categories: ExpenseFilterState["category"];
+	expenseType: ExpenseFilterState["type"];
+	expenseOtherOnly: boolean;
+};
+
+const expenseFilterDefaults: ExpenseUrlFilterState = {
+	categories: [],
+	expenseType: "All types",
+	expenseOtherOnly: false,
+};
+
 export default function ExpensesPage({
 	loading = false,
 }: {
 	loading?: boolean;
 }) {
+	const navigate = useNavigate({ from: "/expenses" });
+	const search = useSearch({ from: "/_resource/expenses" });
+	const updateSearch = useCallback(
+		(nextSearch: typeof search) =>
+			navigate({ search: nextSearch, replace: true }),
+		[navigate],
+	);
+	const [urlFilters, setUrlFilters] = useUrlSearchState(
+		search,
+		expenseFilterDefaults,
+		updateSearch,
+	);
+	const filters: ExpenseFilterState = {
+		category: urlFilters.categories,
+		type: urlFilters.expenseType,
+		otherOnly: urlFilters.expenseOtherOnly,
+	};
+	const setFilters = useCallback(
+		(
+			update:
+				| ExpenseFilterState
+				| ((previous: ExpenseFilterState) => ExpenseFilterState),
+		) => {
+			setUrlFilters((previous) => {
+				const previousFilters: ExpenseFilterState = {
+					category: previous.categories,
+					type: previous.expenseType,
+					otherOnly: previous.expenseOtherOnly,
+				};
+				const nextFilters =
+					typeof update === "function" ? update(previousFilters) : update;
+				return {
+					categories: nextFilters.category,
+					expenseType: nextFilters.type,
+					expenseOtherOnly: nextFilters.otherOnly,
+				};
+			});
+		},
+		[setUrlFilters],
+	);
 	const deleteMutation = useExpenseDelete();
 	const deleteColumn = getDeleteColumn<ExpenseOverviewRow>(
 		(id) => deleteMutation.mutate(id),
 		(row) => row.kind === "recurring",
 	);
 	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
-	const [categoryFilter, setCategoryFilter] = useState<
-		ExpenseOverviewCategory[]
-	>([]);
-	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
-	const [otherOnly, setOtherOnly] = useState(false);
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
-	const filters: ExpenseFilterState = {
-		category: categoryFilter,
-		type: typeFilter,
-		otherOnly,
-	};
-	const setFilters = (nextFilters: ExpenseFilterState) => {
-		setCategoryFilter(nextFilters.category);
-		setTypeFilter(nextFilters.type);
-		setOtherOnly(nextFilters.otherOnly);
-	};
+	const categoryFilter = filters.category;
+	const typeFilter = filters.type;
 
 	const { data = [], error, isPending } = useExpenses();
 	const overviewQuery = useExpenseOverviewSummary();
@@ -240,12 +276,11 @@ export default function ExpensesPage({
 								mixedClassification,
 							].find((value) => value === label);
 							if (!nextCategory) return;
-							setCategoryFilter([nextCategory]);
-							tableRef.current
-								?.getColumn("category")
-								?.setFilterValue([nextCategory]);
-							setTypeFilter("All types");
-							tableRef.current?.getColumn("type")?.setFilterValue(undefined);
+							setFilters((previous) => ({
+								...previous,
+								category: [nextCategory],
+								type: "All types",
+							}));
 						}}
 					/>
 				}
@@ -261,12 +296,11 @@ export default function ExpensesPage({
 								mixedClassification,
 							].find((value) => value === label);
 							if (!nextType) return;
-							setTypeFilter(nextType);
-							tableRef.current?.getColumn("type")?.setFilterValue(nextType);
-							setCategoryFilter([]);
-							tableRef.current
-								?.getColumn("category")
-								?.setFilterValue(undefined);
+							setFilters((previous) => ({
+								...previous,
+								category: [],
+								type: nextType,
+							}));
 						}}
 					/>
 				}

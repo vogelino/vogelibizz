@@ -42,7 +42,7 @@ function ExpenseEditPageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to="/expenses">
+						<Link to="/expenses" search>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

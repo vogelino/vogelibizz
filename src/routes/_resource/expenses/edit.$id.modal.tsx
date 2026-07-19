@@ -29,13 +29,13 @@ function ExpenseEditModal() {
 			<ResponsiveModal
 				open
 				title={<PageHeaderTitle name="Edit expense" id={parsedId} />}
-				onClose={() => navigate({ to: "/expenses" })}
+				onClose={() => navigate({ to: "/expenses", search: true })}
 				footer={
 					<>
 						<Button asChild variant="outline">
 							<button
 								type="button"
-								onClick={() => navigate({ to: "/expenses" })}
+								onClick={() => navigate({ to: "/expenses", search: true })}
 							>
 								Cancel
 							</button>
