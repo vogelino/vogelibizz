@@ -46,7 +46,13 @@ function ExpenseHistoryTransactionEditRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to="/expenses/history" search={{ month: detail.month }}>
+						<Link
+							to="/expenses/history"
+							search={(previous) => ({
+								...previous,
+								month: detail.month,
+							})}
+						>
 							Cancel
 						</Link>
 					</Button>
@@ -61,7 +67,10 @@ function ExpenseHistoryTransactionEditRoute() {
 				id={parsedId}
 				formId={formId}
 				onSaved={(month) =>
-					navigate({ to: "/expenses/history", search: { month } })
+					navigate({
+						to: "/expenses/history",
+						search: (previous) => ({ ...previous, month }),
+					})
 				}
 			/>
 		</FormPageLayout>

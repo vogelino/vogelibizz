@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
 	expenseHistoryImportCommitResultSchema,
 	expenseHistoryImportPreviewSchema,
 } from "@/utility/expenseHistoryImportContracts";
+import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { ExpenseFilter } from "./ExpenseFilter";
 import {
 	ExpenseHistoryImportDialog,
@@ -36,6 +37,18 @@ import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 type ImportSource = {
 	workbookBase64: string;
 	sourceFilename: string;
+};
+
+type ExpenseHistoryFilterState = {
+	category: NonNullable<ExpenseHistoryTransaction["category"]>[];
+	type: NonNullable<ExpenseHistoryTransaction["type"]> | "All types";
+	otherOnly: boolean;
+};
+
+const expenseHistoryFilterDefaults: ExpenseHistoryFilterState = {
+	category: [],
+	type: "All types",
+	otherOnly: false,
 };
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
@@ -69,6 +82,16 @@ async function postImport<Output>(
 export default function ExpenseHistoryPage() {
 	const navigate = useNavigate({ from: Route.fullPath });
 	const search = Route.useSearch();
+	const updateSearch = useCallback(
+		(nextSearch: typeof search) =>
+			navigate({ search: nextSearch, replace: true }),
+		[navigate],
+	);
+	const [filters, setFilters] = useUrlSearchState(
+		search,
+		expenseHistoryFilterDefaults,
+		updateSearch,
+	);
 	const queryClient = useQueryClient();
 	const monthsQuery = useExpenseHistoryMonths();
 	const months = monthsQuery.data ?? [];
@@ -134,7 +157,10 @@ export default function ExpenseHistoryPage() {
 			]);
 			if (selectedImportedMonth) {
 				await navigate({
-					search: { month: selectedImportedMonth },
+					search: (previous) => ({
+						...previous,
+						month: selectedImportedMonth,
+					}),
 					replace: true,
 				});
 			}
@@ -184,10 +210,17 @@ export default function ExpenseHistoryPage() {
 	);
 
 	const chooseMonth = (month: string) =>
-		navigate({ search: { month }, replace: true });
+		navigate({
+			search: (previous) => ({ ...previous, month }),
+			replace: true,
+		});
 	const columns = useMemo(
-		() => getExpenseHistoryColumns(selectedMonth ?? ""),
-		[selectedMonth],
+		() =>
+			getExpenseHistoryColumns({
+				...search,
+				month: selectedMonth ?? undefined,
+			}),
+		[search, selectedMonth],
 	);
 	const historyLoading =
 		monthsQuery.isPending || (monthIndex >= 0 && monthQuery.isPending);
@@ -286,7 +319,17 @@ export default function ExpenseHistoryPage() {
 							onSelectionChange={setSelectedRows}
 							initialState={{
 								pagination: { pageIndex: 0, pageSize: 50 },
-								columnFilters: [],
+								columnFilters: [
+									...(filters.category.length
+										? [{ id: "category", value: filters.category }]
+										: []),
+									...(filters.type !== "All types"
+										? [{ id: "type", value: filters.type }]
+										: []),
+									...(filters.otherOnly
+										? [{ id: "association", value: true }]
+										: []),
+								],
 							}}
 							classNames={{
 								table: "min-w-240",
@@ -313,7 +356,27 @@ export default function ExpenseHistoryPage() {
 										return null;
 									})()}
 									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
-										<ExpenseFilter loading={false} table={table} />
+										<ExpenseFilter
+											loading={false}
+											table={table}
+											filters={filters}
+											onFiltersChange={(nextFilters) =>
+												setFilters({
+													category: nextFilters.category.filter(
+														(
+															category,
+														): category is NonNullable<
+															ExpenseHistoryTransaction["category"]
+														> => category !== "Mixed",
+													),
+													type:
+														nextFilters.type === "Mixed"
+															? "All types"
+															: nextFilters.type,
+													otherOnly: nextFilters.otherOnly,
+												})
+											}
+										/>
 										<ExpenseHistoryMonthNavigation
 											loading={false}
 											months={months}

@@ -23,7 +23,11 @@ import { formatCurrency } from "@/utility/formatUtil";
 import { getDeleteColumn } from "@/utility/getDeleteColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { getExpensesTableColumns } from "./columns";
-import { ExpenseFilter, type ExpenseFilterValue } from "./ExpenseFilter";
+import {
+	ExpenseFilter,
+	type ExpenseFilterState,
+	type ExpenseFilterValue,
+} from "./ExpenseFilter";
 import { ExpensesOverviewPanel } from "./ExpensesOverviewPanel";
 import {
 	createExpenseOverviewRows,
@@ -54,8 +58,19 @@ export default function ExpensesPage({
 		ExpenseOverviewCategory[]
 	>([]);
 	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
+	const [otherOnly, setOtherOnly] = useState(false);
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
+	const filters: ExpenseFilterState = {
+		category: categoryFilter,
+		type: typeFilter,
+		otherOnly,
+	};
+	const setFilters = (nextFilters: ExpenseFilterState) => {
+		setCategoryFilter(nextFilters.category);
+		setTypeFilter(nextFilters.type);
+		setOtherOnly(nextFilters.otherOnly);
+	};
 
 	const { data = [], error, isPending } = useExpenses();
 	const overviewQuery = useExpenseOverviewSummary();
@@ -291,6 +306,8 @@ export default function ExpensesPage({
 						<ExpenseFilter
 							loading={false}
 							table={table}
+							filters={filters}
+							onFiltersChange={setFilters}
 							showMixedClassification
 						/>
 						<CurrencySettingSelect />

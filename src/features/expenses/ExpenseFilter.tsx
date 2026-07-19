@@ -1,6 +1,6 @@
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { ArrowLeftToLine } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import ExpenseCategoryBadge, {
 	ExpenseCategoryLabel,
 } from "@/components/ExpenseCategoryBadge";
@@ -26,6 +26,12 @@ const OPTION_VALUES = [
 
 export type ExpenseFilterValue = (typeof OPTION_VALUES)[number];
 
+export type ExpenseFilterState = {
+	category: ExpenseOverviewCategory[];
+	type: ExpenseFilterValue;
+	otherOnly: boolean;
+};
+
 function MixedCategoryLabel() {
 	return <IconBadge icon={mapTypeToIcon("Mixed")} label="Mixed" />;
 }
@@ -36,21 +42,24 @@ type ExpenseFilterProps<TData> =
 	| {
 			loading: true;
 			table?: never;
+			filters?: never;
+			onFiltersChange?: never;
 			showMixedClassification?: boolean;
 	  }
 	| {
 			loading: false;
 			table: TanstackTable<TData>;
+			filters: ExpenseFilterState;
+			onFiltersChange: (filters: ExpenseFilterState) => void;
 			showMixedClassification?: boolean;
 	  };
 
 export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	const { loading, showMixedClassification = false } = props;
-	const [categoryFilter, setCategoryFilter] = useState<
-		ExpenseOverviewCategory[]
-	>([]);
-	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
-	const [otherOnly, setOtherOnly] = useState(false);
+	const categoryFilter = loading ? [] : props.filters.category;
+	const typeFilter = loading ? "All types" : props.filters.type;
+	const otherOnly = loading ? false : props.filters.otherOnly;
+	const table = loading ? undefined : props.table;
 	const categoryOptions = useComboboxOptions({
 		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
 		renderer: (cat) =>
@@ -80,6 +89,17 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		return hasCategoryFilter || hasTypeFilter || hasOtherOnlyFilter;
 	}, [categoryFilter, typeFilter, otherOnly]);
 
+	useEffect(() => {
+		if (!table) return;
+		table
+			.getColumn("category")
+			?.setFilterValue(categoryFilter.length ? categoryFilter : undefined);
+		table
+			.getColumn("type")
+			?.setFilterValue(typeFilter === "All types" ? undefined : typeFilter);
+		table.getColumn("association")?.setFilterValue(otherOnly || undefined);
+	}, [categoryFilter, otherOnly, table, typeFilter]);
+
 	const categoryInput = (
 		<MultiValueInput<ExpenseOverviewCategory>
 			options={categoryOptions}
@@ -101,7 +121,10 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 							const nextValues = cat.map(
 								(c) => c.value as ExpenseOverviewCategory,
 							);
-							setCategoryFilter(nextValues);
+							props.onFiltersChange({
+								...props.filters,
+								category: nextValues,
+							});
 							props.table
 								.getColumn("category")
 								?.setFilterValue(nextValues.length ? nextValues : undefined);
@@ -119,7 +142,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 				loading
 					? undefined
 					: (value: TypeFilterType) => {
-							setTypeFilter(value);
+							props.onFiltersChange({ ...props.filters, type: value });
 							const column = props.table.getColumn("type");
 							if (!column) return;
 							const nextValue = `${value}`;
@@ -141,13 +164,20 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 			<Checkbox
 				id="expense-history-other-only"
 				checked={otherOnly}
-				onCheckedChange={(checked) => {
-					const next = Boolean(checked);
-					setOtherOnly(next);
-					props.table
-						?.getColumn("association")
-						?.setFilterValue(next || undefined);
-				}}
+				onCheckedChange={
+					loading
+						? undefined
+						: (checked) => {
+								const next = Boolean(checked);
+								props.onFiltersChange({
+									...props.filters,
+									otherOnly: next,
+								});
+								props.table
+									.getColumn("association")
+									?.setFilterValue(next || undefined);
+							}
+				}
 			/>
 			Other only
 		</label>
@@ -163,10 +193,14 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 					type="button"
 					variant="ghost"
 					onClick={() => {
-						setCategoryFilter([]);
-						setTypeFilter("All types");
+						props.onFiltersChange({
+							category: [],
+							type: "All types",
+							otherOnly: false,
+						});
 						props.table.getColumn("category")?.setFilterValue(undefined);
 						props.table.getColumn("type")?.setFilterValue(undefined);
+						props.table.getColumn("association")?.setFilterValue(undefined);
 					}}
 					className="h-9"
 				>

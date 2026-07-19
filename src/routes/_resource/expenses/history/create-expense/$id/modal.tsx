@@ -31,7 +31,7 @@ function ExpenseHistoryCreateExpenseModal() {
 		navigate({
 			to: "/expenses/history/edit/$id/modal",
 			params: { id },
-			search: { month: detail.month },
+			search: (previous) => ({ ...previous, month: detail.month }),
 			mask: {
 				to: "/expenses/history/edit/$id",
 				params: { id },
@@ -39,7 +39,10 @@ function ExpenseHistoryCreateExpenseModal() {
 			},
 		});
 	const finish = (month: string) =>
-		navigate({ to: "/expenses/history", search: { month } });
+		navigate({
+			to: "/expenses/history",
+			search: (previous) => ({ ...previous, month }),
+		});
 
 	return (
 		<>

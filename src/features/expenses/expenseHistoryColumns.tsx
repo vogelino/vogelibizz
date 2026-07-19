@@ -19,7 +19,14 @@ function formatDate(date: string) {
 	}).format(new Date(`${date}T00:00:00Z`));
 }
 
-export function getExpenseHistoryColumns(month: string) {
+type ExpenseHistorySearch = {
+	month?: string;
+	category?: NonNullable<ExpenseHistoryTransaction["category"]>[];
+	type?: NonNullable<ExpenseHistoryTransaction["type"]> | "All types";
+	otherOnly?: boolean;
+};
+
+export function getExpenseHistoryColumns(search: ExpenseHistorySearch) {
 	return [
 		columnHelper.display({
 			id: "select",
@@ -67,7 +74,7 @@ export function getExpenseHistoryColumns(month: string) {
 						<InternalLink
 							to="/expenses/history/edit/$id/modal"
 							params={{ id: String(transaction.id) }}
-							search={{ month }}
+							search={search}
 							mask={{
 								to: "/expenses/history/edit/$id",
 								params: { id: String(transaction.id) },

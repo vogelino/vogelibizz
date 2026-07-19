@@ -34,7 +34,10 @@ function ExpenseHistoryTransactionEditModal() {
 	const parsedId = parseId(id);
 	const formId = `expense-history-transaction-${parsedId}`;
 	const close = () =>
-		navigate({ to: "/expenses/history", search: { month: detail.month } });
+		navigate({
+			to: "/expenses/history",
+			search: (previous) => ({ ...previous, month: detail.month }),
+		});
 
 	return (
 		<>

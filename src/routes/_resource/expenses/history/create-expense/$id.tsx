@@ -41,7 +41,7 @@ function ExpenseHistoryCreateExpenseRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to="/expenses/history/edit/$id" params={{ id }}>
+						<Link to="/expenses/history/edit/$id" params={{ id }} search>
 							Cancel
 						</Link>
 					</Button>
@@ -56,7 +56,10 @@ function ExpenseHistoryCreateExpenseRoute() {
 				id={parsedId}
 				formId={formId}
 				onCreated={(month) =>
-					navigate({ to: "/expenses/history", search: { month } })
+					navigate({
+						to: "/expenses/history",
+						search: (previous) => ({ ...previous, month }),
+					})
 				}
 			/>
 		</FormPageLayout>
