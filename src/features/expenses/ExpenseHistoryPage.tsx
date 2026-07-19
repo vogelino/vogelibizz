@@ -86,7 +86,6 @@ export default function ExpenseHistoryPage() {
 	);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [replaceOpen, setReplaceOpen] = useState(false);
-	const [otherOnly, setOtherOnly] = useState(false);
 	const [selectedRows, setSelectedRows] = useState<ExpenseHistoryTransaction[]>(
 		[],
 	);
@@ -266,13 +265,6 @@ export default function ExpenseHistoryPage() {
 							<ExpenseHistoryOverviewPanel
 								loading={false}
 								summary={monthQuery.data.summary}
-								otherOnly={otherOnly}
-								onOtherOnlyChange={(next) => {
-									setOtherOnly(next);
-									tableRef.current
-										?.getColumn("association")
-										?.setFilterValue(next || undefined);
-								}}
 							/>
 						) : null}
 						<DataTable
@@ -285,13 +277,11 @@ export default function ExpenseHistoryPage() {
 							onSelectionChange={setSelectedRows}
 							initialState={{
 								pagination: { pageIndex: 0, pageSize: 50 },
-								columnFilters: otherOnly
-									? [{ id: "association", value: true }]
-									: [],
+								columnFilters: [],
 							}}
 							classNames={{
 								table: "min-w-240",
-								header: "top-26",
+								header: "top-32",
 								toolbar: "pb-0",
 							}}
 							toolbarSkeleton={
@@ -307,18 +297,13 @@ export default function ExpenseHistoryPage() {
 									description cell.
 								</span>
 							}
-							emptyMessage={
-								otherOnly && !historyError
-									? "No Other transactions."
-									: undefined
-							}
 							toolbar={(table) => (
 								<>
 									{(() => {
 										tableRef.current = table;
 										return null;
 									})()}
-									<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 										<ExpenseFilter loading={false} table={table} />
 										<ExpenseHistoryMonthNavigation
 											loading={false}

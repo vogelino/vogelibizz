@@ -11,9 +11,9 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/utility/classNames";
 import type { ExpenseHistoryMonthDetail } from "@/utility/expenseHistoryContracts";
 import type { ExpenseHistoryImportPreview } from "@/utility/expenseHistoryImportContracts";
 import { formatCurrency, locale } from "@/utility/formatUtil";
@@ -187,9 +187,10 @@ type ExpenseHistoryMonthNavigationProps =
 export function ExpenseHistoryMonthNavigation(
 	props: ExpenseHistoryMonthNavigationProps,
 ) {
+	const parentClassName = cn("flex items-center gap-y-1");
 	if (props.loading) {
 		return (
-			<div className="flex items-center gap-x-2 flex-wrap gap-y-1">
+			<div className={parentClassName}>
 				<Skeleton className="size-9" />
 				<Skeleton className="h-9.5 w-48" />
 				<Skeleton className="size-9" />
@@ -199,7 +200,7 @@ export function ExpenseHistoryMonthNavigation(
 	const { months, selectedMonth, older, newer, onChooseMonth } = props;
 	if (months.length === 0) return null;
 	return (
-		<div className="flex items-center gap-x-2 flex-wrap gap-y-1">
+		<div className={parentClassName}>
 			<Button
 				type="button"
 				size="icon"
@@ -207,7 +208,7 @@ export function ExpenseHistoryMonthNavigation(
 				disabled={!older}
 				onClick={() => older && onChooseMonth(older)}
 				aria-label="Previous imported month"
-				className="shrink-0"
+				className="shrink-0 border-r-0"
 			>
 				<ChevronLeft size={18} />
 			</Button>
@@ -231,7 +232,7 @@ export function ExpenseHistoryMonthNavigation(
 				disabled={!newer}
 				onClick={() => newer && onChooseMonth(newer)}
 				aria-label="Next imported month"
-				className="shrink-0"
+				className="shrink-0 border-l-0"
 			>
 				<ChevronRight size={18} />
 			</Button>
@@ -244,8 +245,6 @@ type ExpenseHistoryOverviewPanelProps =
 	| {
 			loading: false;
 			summary: ExpenseHistoryMonthDetail["summary"];
-			otherOnly: boolean;
-			onOtherOnlyChange: (checked: boolean) => void;
 	  };
 
 export function ExpenseHistoryOverviewPanel(
@@ -253,30 +252,16 @@ export function ExpenseHistoryOverviewPanel(
 ) {
 	if (props.loading) {
 		return (
-			<ExpensesOverviewPanelLayout aside={<Skeleton className="h-5 w-22" />}>
+			<ExpensesOverviewPanelLayout>
 				<ExpensesOverviewValue label="Total" value="" loading />
 				<ExpensesOverviewValue label="Matched" value="" loading />
 				<ExpensesOverviewValue label="Other" value="" loading />
 			</ExpensesOverviewPanelLayout>
 		);
 	}
-	const { summary, otherOnly, onOtherOnlyChange } = props;
+	const { summary } = props;
 	return (
-		<ExpensesOverviewPanelLayout
-			aside={
-				<label
-					htmlFor="expense-history-other-only"
-					className="flex items-center gap-2 text-sm"
-				>
-					<Checkbox
-						id="expense-history-other-only"
-						checked={otherOnly}
-						onCheckedChange={(checked) => onOtherOnlyChange(Boolean(checked))}
-					/>
-					Other only
-				</label>
-			}
-		>
+		<ExpensesOverviewPanelLayout>
 			<div className="contents" aria-live="polite">
 				<ExpensesOverviewValue
 					label="Total"

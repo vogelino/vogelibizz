@@ -57,6 +57,7 @@
 		"js-cookie": "3.0.5",
 		"lucide-react": "0.562.0",
 		"marked-react": "3.0.2",
+		"radix-ui": "1.6.2",
 		"react": "19.2.3",
 		"react-currency-input-field": "4.0.3",
 		"react-dom": "19.2.3",

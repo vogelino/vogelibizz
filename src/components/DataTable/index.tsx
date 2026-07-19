@@ -157,7 +157,7 @@ export function DataTable<TData>({
 				</div>
 			) : null}
 			<section
-				className={cn("rounded-md", classNames.container)}
+				className={cn("grow", classNames.container)}
 				aria-label={containerAriaLabel}
 				tabIndex={containerAriaLabel ? 0 : undefined}
 			>

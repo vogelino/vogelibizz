@@ -1,6 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
@@ -101,7 +100,7 @@ export function getExpenseHistoryColumns(month: string) {
 				return expense ? (
 					expense.name
 				) : (
-					<Badge variant="secondary">Other</Badge>
+					<span className="italic text-muted-foreground">Other</span>
 				);
 			},
 			filterFn: (row, _columnId, filterValue) =>
@@ -115,7 +114,7 @@ export function getExpenseHistoryColumns(month: string) {
 				return category ? (
 					<ExpenseCategoryBadge value={category} />
 				) : (
-					<Badge variant="outline">Unclassified</Badge>
+					<span className="italic text-muted-foreground">Unclassified</span>
 				);
 			},
 		}),
@@ -131,7 +130,7 @@ export function getExpenseHistoryColumns(month: string) {
 						className={typeToColorClass(type)}
 					/>
 				) : (
-					<Badge variant="outline">Unclassified</Badge>
+					<span className="italic text-muted-foreground">Unclassified</span>
 				);
 			},
 		}),

@@ -29,7 +29,7 @@ function ExpenseCategoryBadge<ValueType extends ExpenseType["category"]>({
 			<IconBadge
 				icon={null}
 				label={<ExpenseCategoryLabel value={value} />}
-				className={cn(categoryToColorClass(value), "m-0")}
+				className={cn(categoryToColorClass(value), "m-0 h-7")}
 			/>
 		</div>
 	);

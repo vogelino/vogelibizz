@@ -1,10 +1,13 @@
 import type { Table as TanstackTable } from "@tanstack/react-table";
+import { ArrowLeftToLine } from "lucide-react";
 import { useMemo, useState } from "react";
 import ExpenseCategoryBadge, {
 	ExpenseCategoryLabel,
 } from "@/components/ExpenseCategoryBadge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
+import { IconBadge } from "@/components/ui/icon-badge";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
@@ -24,12 +27,7 @@ const OPTION_VALUES = [
 export type ExpenseFilterValue = (typeof OPTION_VALUES)[number];
 
 function MixedCategoryLabel() {
-	return (
-		<span className="flex gap-2 items-center">
-			{mapTypeToIcon("Mixed")}
-			{mixedClassification}
-		</span>
-	);
+	return <IconBadge icon={mapTypeToIcon("Mixed")} label="Mixed" />;
 }
 
 type TypeFilterType = ExpenseOverviewType | "All types";
@@ -52,6 +50,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		ExpenseOverviewCategory[]
 	>([]);
 	const [typeFilter, setTypeFilter] = useState<ExpenseFilterValue>("All types");
+	const [otherOnly, setOtherOnly] = useState(false);
 	const categoryOptions = useComboboxOptions({
 		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
 		renderer: (cat) =>
@@ -77,8 +76,10 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	const showFilteredTotal = useMemo(() => {
 		const hasCategoryFilter = categoryFilter.length > 0;
 		const hasTypeFilter = typeFilter !== "All types";
-		return hasCategoryFilter || hasTypeFilter;
-	}, [categoryFilter, typeFilter]);
+		const hasOtherOnlyFilter = otherOnly;
+		return hasCategoryFilter || hasTypeFilter || hasOtherOnlyFilter;
+	}, [categoryFilter, typeFilter, otherOnly]);
+
 	const categoryInput = (
 		<MultiValueInput<ExpenseOverviewCategory>
 			options={categoryOptions}
@@ -107,7 +108,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 						}
 			}
 			loading={loading}
-			className="w-64"
+			className="min-w-64 max-w-full"
 		/>
 	);
 	const typeInput = (
@@ -132,22 +133,44 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		/>
 	);
 
+	const otherOnlyInput = (
+		<label
+			htmlFor="expense-history-other-only"
+			className="flex items-center gap-2 text-sm"
+		>
+			<Checkbox
+				id="expense-history-other-only"
+				checked={otherOnly}
+				onCheckedChange={(checked) => {
+					const next = Boolean(checked);
+					setOtherOnly(next);
+					props.table
+						?.getColumn("association")
+						?.setFilterValue(next || undefined);
+				}}
+			/>
+			Other only
+		</label>
+	);
+
 	return (
 		<div className="flex items-center gap-x-4 gap-y-1 flex-wrap">
 			{categoryInput}
 			{typeInput}
+			{otherOnlyInput}
 			{!loading && showFilteredTotal ? (
 				<Button
 					type="button"
-					variant="outline"
-					size="sm"
+					variant="ghost"
 					onClick={() => {
 						setCategoryFilter([]);
 						setTypeFilter("All types");
 						props.table.getColumn("category")?.setFilterValue(undefined);
 						props.table.getColumn("type")?.setFilterValue(undefined);
 					}}
+					className="h-9"
 				>
+					<ArrowLeftToLine size={20} />
 					Clear filters
 				</Button>
 			) : null}

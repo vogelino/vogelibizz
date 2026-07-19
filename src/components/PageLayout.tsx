@@ -10,14 +10,11 @@ export const PageLayout: React.FC<
 		modal?: ReactNode;
 		settings?: SettingsType;
 	}>
-> = ({ modal = null, settings, children }) => {
+> = ({ modal = null, children }) => {
 	const pathname = useLocation().pathname;
 	return (
 		<>
-			<Menu
-				currentPage={pathname.replace(/^\//, "")}
-				initialSettings={settings}
-			/>
+			<Menu currentPage={pathname.replace(/^\//, "")} />
 			{children}
 			<Footer />
 			{modal}

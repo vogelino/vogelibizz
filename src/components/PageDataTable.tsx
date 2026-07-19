@@ -70,6 +70,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 								table.toggleAllPageRowsSelected(Boolean(checked));
 							}}
 							aria-label="Select all rows"
+							className="mr-4"
 						/>
 					</div>
 				),
@@ -81,6 +82,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 								row.toggleSelected(Boolean(checked))
 							}
 							aria-label="Select row"
+							className="mr-4"
 						/>
 					</div>
 				),

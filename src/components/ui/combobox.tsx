@@ -84,11 +84,11 @@ export function Combobox<TData>({
 						"w-fit justify-between rounded-none",
 						"hover:bg-accent hover:text-accent-foreground border-border",
 						"text-base bg-background dark:bg-card",
-						"h-auto min-h-9.5 py-1 border-border",
+						"h-9 py-1 border-border pl-3",
 						className,
 					)}
 				>
-					<div className="w-full flex gap-3 items-center">
+					<div className="w-full flex gap-2 items-center">
 						{selectedOption
 							? selectedValueFormater(selectedOption.value)
 							: "Select value..."}
@@ -120,13 +120,13 @@ export function Combobox<TData>({
 									>
 										<Check
 											className={cn(
-												"mr-2 h-4 w-4",
+												"size-5",
 												optionValue === normalizedValue
 													? "opacity-100"
 													: "opacity-0",
 											)}
 										/>
-										<div className="w-full flex gap-3 items-center">
+										<div className="w-full flex gap-2 items-center">
 											{option.label}
 										</div>
 									</CommandItem>

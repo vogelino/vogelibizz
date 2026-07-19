@@ -6,7 +6,6 @@ import { useEffect, useMemo } from "react";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CurrencyInput from "@/components/ui/currency-input";
 import type { ExpenseType } from "@/db/schema";
@@ -97,7 +96,7 @@ export default function ExpenseHistoryTransactionEditor({
 			category ? (
 				<ExpenseCategoryBadge value={category as ExpenseType["category"]} />
 			) : (
-				<Badge variant="outline">Unclassified</Badge>
+				<span className="italic text-muted-foreground">Unclassified</span>
 			),
 	});
 	const typeOptions = useComboboxOptions({
@@ -109,12 +108,15 @@ export default function ExpenseHistoryTransactionEditor({
 					<span>{type}</span>
 				</>
 			) : (
-				<Badge variant="outline">Unclassified</Badge>
+				<span className="italic text-muted-foreground">Unclassified</span>
 			),
 	});
 	const expenseOptions = useMemo(
 		() => [
-			{ label: <Badge variant="secondary">Other</Badge>, value: "" },
+			{
+				label: <span className="italic text-muted-foreground">Other</span>,
+				value: "",
+			},
 			...expenses.map((expense) => ({
 				label: <span>{expense.name}</span>,
 				value: String(expense.id),

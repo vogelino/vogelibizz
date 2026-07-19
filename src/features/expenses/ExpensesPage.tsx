@@ -2,6 +2,7 @@
 
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useMemo, useRef, useState } from "react";
+import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,7 @@ export default function ExpensesPage({
 							table.toggleAllPageRowsSelected(Boolean(checked));
 						}}
 						aria-label="Select all rows"
+						className="mr-4"
 					/>
 				),
 				cell: ({ row }) =>
@@ -91,6 +93,7 @@ export default function ExpensesPage({
 								row.toggleSelected(Boolean(checked))
 							}
 							aria-label={`Select ${row.original.name}`}
+							className="mr-4"
 						/>
 					) : null,
 				size: 36,
@@ -280,7 +283,7 @@ export default function ExpensesPage({
 					header: "top-30 pt-3",
 				}}
 				toolbar={(table) => (
-					<div className="px-6 lg:px-10 sticky left-0 pt-3">
+					<div className="px-6 lg:px-10 sticky left-0 pt-3 flex justify-between items-center gap-8 flex-wrap">
 						{(() => {
 							tableRef.current = table;
 							return null;
@@ -290,6 +293,7 @@ export default function ExpensesPage({
 							table={table}
 							showMixedClassification
 						/>
+						<CurrencySettingSelect />
 					</div>
 				)}
 			/>
