@@ -46,6 +46,7 @@ export const expenseHistoryMonthlySummarySchema = z.object({
 });
 
 export const expenseHistoryMonthDetailSchema = z.object({
+	currency: z.enum(currencyEnum.enumValues),
 	month: expenseHistoryMonthSummarySchema,
 	transactions: z.array(expenseHistoryTransactionSchema),
 	summary: expenseHistoryMonthlySummarySchema,

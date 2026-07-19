@@ -92,41 +92,56 @@ export async function getExpenseHistoryMonth(
 		.limit(1);
 	if (!monthRow) return null;
 
-	const rows = await db
-		.select({
-			id: expenseTransactions.id,
-			bookedAt: expenseTransactions.bookedAt,
-			valueDate: expenseTransactions.valueDate,
-			description: expenseTransactions.description,
-			amount: expenseTransactions.amount,
-			originalDescription: expenseTransactions.originalDescription,
-			originalAmount: expenseTransactions.originalAmount,
-			lastModified: expenseTransactions.last_modified,
-			category: expenseTransactions.category,
-			type: expenseTransactions.type,
-			expenseId: expenses.id,
-			expenseName: expenses.name,
-		})
-		.from(expenseTransactions)
-		.innerJoin(
-			expenseMonths,
-			eq(expenseTransactions.expenseMonthId, expenseMonths.id),
-		)
-		.leftJoin(expenses, eq(expenseTransactions.expenseId, expenses.id))
-		.where(eq(expenseMonths.month, month))
-		.orderBy(
-			asc(expenseTransactions.bookedAt),
-			asc(expenseTransactions.sourceOrder),
-		);
+	const [rows, rates, currency] = await Promise.all([
+		db
+			.select({
+				id: expenseTransactions.id,
+				bookedAt: expenseTransactions.bookedAt,
+				valueDate: expenseTransactions.valueDate,
+				description: expenseTransactions.description,
+				amount: expenseTransactions.amount,
+				originalDescription: expenseTransactions.originalDescription,
+				originalAmount: expenseTransactions.originalAmount,
+				lastModified: expenseTransactions.last_modified,
+				category: expenseTransactions.category,
+				type: expenseTransactions.type,
+				expenseId: expenses.id,
+				expenseName: expenses.name,
+			})
+			.from(expenseTransactions)
+			.innerJoin(
+				expenseMonths,
+				eq(expenseTransactions.expenseMonthId, expenseMonths.id),
+			)
+			.leftJoin(expenses, eq(expenseTransactions.expenseId, expenses.id))
+			.where(eq(expenseMonths.month, month))
+			.orderBy(
+				asc(expenseTransactions.bookedAt),
+				asc(expenseTransactions.sourceOrder),
+			),
+		getExchangeRates(),
+		getTargetCurrency(),
+	]);
 
 	const transactions = rows.map(
-		({ expenseId, expenseName, ...transaction }) => ({
-			...transaction,
-			expense:
-				expenseId !== null && expenseName !== null
-					? { id: expenseId, name: expenseName }
-					: null,
-		}),
+		({ expenseId, expenseName, ...transaction }) => {
+			const amount =
+				getValueInTargetCurrencyPerMonth({
+					value: transaction.amount,
+					currency: "CHF",
+					billingRate: "Monthly",
+					rates,
+					targetCurrency: currency,
+				}) ?? transaction.amount;
+			return {
+				...transaction,
+				amount,
+				expense:
+					expenseId !== null && expenseName !== null
+						? { id: expenseId, name: expenseName }
+						: null,
+			};
+		},
 	);
 	const total = transactions.reduce(
 		(sum, transaction) => sum + transaction.amount,
@@ -141,6 +156,7 @@ export async function getExpenseHistoryMonth(
 		0,
 	);
 	return {
+		currency,
 		month: monthRow,
 		transactions,
 		summary: { total, matched, other },

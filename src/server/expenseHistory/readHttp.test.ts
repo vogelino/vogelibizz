@@ -22,6 +22,7 @@ const months: ExpenseHistoryMonthSummary[] = [
 	},
 ];
 const detail: ExpenseHistoryMonthDetail = {
+	currency: "CHF",
 	month: months[0],
 	transactions: [
 		{

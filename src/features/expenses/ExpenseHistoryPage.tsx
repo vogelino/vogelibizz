@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ export default function ExpenseHistoryPage() {
 	const monthQuery = useExpenseHistoryMonth(
 		monthIndex >= 0 ? selectedMonth : null,
 	);
+	const targetCurrency = monthQuery.data?.currency ?? "CLP";
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [source, setSource] = useState<ImportSource | null>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -216,11 +218,14 @@ export default function ExpenseHistoryPage() {
 		});
 	const columns = useMemo(
 		() =>
-			getExpenseHistoryColumns({
-				...search,
-				month: selectedMonth ?? undefined,
-			}),
-		[search, selectedMonth],
+			getExpenseHistoryColumns(
+				{
+					...search,
+					month: selectedMonth ?? undefined,
+				},
+				targetCurrency,
+			),
+		[search, selectedMonth, targetCurrency],
 	);
 	const historyLoading =
 		monthsQuery.isPending || (monthIndex >= 0 && monthQuery.isPending);
@@ -307,6 +312,7 @@ export default function ExpenseHistoryPage() {
 							<ExpenseHistoryOverviewPanel
 								loading={false}
 								summary={monthQuery.data.summary}
+								currency={monthQuery.data.currency}
 							/>
 						) : null}
 						<DataTable
@@ -377,14 +383,17 @@ export default function ExpenseHistoryPage() {
 												})
 											}
 										/>
-										<ExpenseHistoryMonthNavigation
-											loading={false}
-											months={months}
-											selectedMonth={monthIndex >= 0 ? selectedMonth : null}
-											older={navigation.older}
-											newer={navigation.newer}
-											onChooseMonth={chooseMonth}
-										/>
+										<div className="flex items-center gap-3">
+											<CurrencySettingSelect />
+											<ExpenseHistoryMonthNavigation
+												loading={false}
+												months={months}
+												selectedMonth={monthIndex >= 0 ? selectedMonth : null}
+												older={navigation.older}
+												newer={navigation.newer}
+												onChooseMonth={chooseMonth}
+											/>
+										</div>
 									</div>
 								</>
 							)}

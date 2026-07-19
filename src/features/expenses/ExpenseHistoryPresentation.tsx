@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { CurrencyIdType } from "@/db/schema";
 import { cn } from "@/utility/classNames";
 import type { ExpenseHistoryMonthDetail } from "@/utility/expenseHistoryContracts";
 import type { ExpenseHistoryImportPreview } from "@/utility/expenseHistoryImportContracts";
@@ -301,6 +302,7 @@ type ExpenseHistoryOverviewPanelProps =
 	| {
 			loading: false;
 			summary: ExpenseHistoryMonthDetail["summary"];
+			currency: CurrencyIdType;
 	  };
 
 export function ExpenseHistoryOverviewPanel(
@@ -315,23 +317,23 @@ export function ExpenseHistoryOverviewPanel(
 			</ExpensesOverviewPanelLayout>
 		);
 	}
-	const { summary } = props;
+	const { currency, summary } = props;
 	return (
 		<ExpensesOverviewPanelLayout>
 			<div className="contents" aria-live="polite">
 				<ExpensesOverviewValue
 					label="Total"
-					value={formatCurrency(summary.total, "CHF")}
+					value={formatCurrency(summary.total, currency)}
 					loading={false}
 				/>
 				<ExpensesOverviewValue
 					label="Matched"
-					value={formatCurrency(summary.matched, "CHF")}
+					value={formatCurrency(summary.matched, currency)}
 					loading={false}
 				/>
 				<ExpensesOverviewValue
 					label="Other"
-					value={formatCurrency(summary.other, "CHF")}
+					value={formatCurrency(summary.other, currency)}
 					loading={false}
 				/>
 			</div>

@@ -3,6 +3,7 @@ import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconBadge } from "@/components/ui/icon-badge";
 import InternalLink from "@/components/ui/internal-link";
+import type { CurrencyIdType } from "@/db/schema";
 import { expenseHistoryTransactionQueryOptions } from "@/utility/data/queryOptions";
 import type { ExpenseHistoryTransaction } from "@/utility/expenseHistoryContracts";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
@@ -26,7 +27,10 @@ type ExpenseHistorySearch = {
 	otherOnly?: boolean;
 };
 
-export function getExpenseHistoryColumns(search: ExpenseHistorySearch) {
+export function getExpenseHistoryColumns(
+	search: ExpenseHistorySearch,
+	currency: CurrencyIdType,
+) {
 	return [
 		columnHelper.display({
 			id: "select",
@@ -92,10 +96,12 @@ export function getExpenseHistoryColumns(search: ExpenseHistorySearch) {
 			},
 		}),
 		columnHelper.accessor("amount", {
-			header: "Amount",
+			header: `Amount (${currency})`,
 			size: 150,
 			cell: ({ getValue }) => (
-				<span className="font-mono">{formatCurrency(getValue(), "CHF")}</span>
+				<span className="font-mono">
+					{formatCurrency(getValue(), currency)}
+				</span>
 			),
 		}),
 		columnHelper.accessor((row) => row.expense, {

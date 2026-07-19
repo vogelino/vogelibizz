@@ -37,6 +37,9 @@ function useSettingsUpdate() {
 			queryClient.invalidateQueries({
 				queryKey: expenseHistoryQuery.overview().queryKey,
 			});
+			queryClient.invalidateQueries({
+				queryKey: expenseHistoryQuery.month("").queryKey.slice(0, -1),
+			});
 		},
 	});
 }
