@@ -25,6 +25,7 @@ export type ComboboxProps<TData> = {
 	options: {
 		label: ReactNode;
 		value: TData;
+		searchValue?: string;
 	}[];
 	onChange?: (value: TData) => void;
 	value?: TData;
@@ -104,10 +105,14 @@ export function Combobox<TData>({
 						<CommandGroup>
 							{options.map((option) => {
 								const optionValue = String(option.value);
+								const searchValue =
+									option.searchValue ??
+									(typeof option.label === "string" ? option.label : undefined);
 								return (
 									<CommandItem
 										key={optionValue}
 										value={optionValue}
+										keywords={searchValue ? [searchValue] : undefined}
 										onSelect={() => {
 											const item = options.find(
 												(item) => String(item.value) === optionValue,
