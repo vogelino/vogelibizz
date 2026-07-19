@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch } from "../dataHookUtil";
 import {
-	expenseHistoryMonthQueryOptions,
+	expenseHistoryMonthQueriesKey,
 	expenseOverviewSummaryQueryOptions,
 } from "./queryOptions";
 
-export default function useExpenseHistoryTransactionDelete(month: string) {
+export default function useExpenseHistoryTransactionDelete() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (transactionIds: number[]) => {
@@ -29,7 +29,7 @@ export default function useExpenseHistoryTransactionDelete(month: string) {
 		onSuccess: async (transactionIds) => {
 			await Promise.all([
 				queryClient.invalidateQueries({
-					queryKey: expenseHistoryMonthQueryOptions(month).queryKey,
+					queryKey: expenseHistoryMonthQueriesKey,
 				}),
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,

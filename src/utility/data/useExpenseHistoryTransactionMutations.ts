@@ -9,7 +9,7 @@ import type {
 import { expenseHistoryTransactionSchema } from "@/utility/expenseHistoryContracts";
 import { apiFetch } from "../dataHookUtil";
 import {
-	expenseHistoryMonthQueryOptions,
+	expenseHistoryMonthQueriesKey,
 	expenseHistoryTransactionQueryOptions,
 	expenseOverviewSummaryQueryOptions,
 	expensesQueryOptions,
@@ -49,7 +49,6 @@ async function mutateTransaction(
 
 export function useExpenseHistoryTransactionMutations({
 	transactionId,
-	month,
 }: {
 	transactionId: number;
 	month: string;
@@ -61,7 +60,7 @@ export function useExpenseHistoryTransactionMutations({
 				queryKey: expenseHistoryTransactionQueryOptions(transactionId).queryKey,
 			}),
 			queryClient.invalidateQueries({
-				queryKey: expenseHistoryMonthQueryOptions(month).queryKey,
+				queryKey: expenseHistoryMonthQueriesKey,
 			}),
 			queryClient.invalidateQueries({
 				queryKey: expenseOverviewSummaryQueryOptions().queryKey,

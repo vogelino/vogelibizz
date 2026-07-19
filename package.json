@@ -46,6 +46,7 @@
 		"@tanstack/react-router": "^1.0.0",
 		"@tanstack/react-start": "^1.0.0",
 		"@tanstack/react-table": "8.21.3",
+		"@tanstack/react-virtual": "3.13.12",
 		"baseline-browser-mapping": "2.10.34",
 		"caniuse-lite": "1.0.30001764",
 		"class-variance-authority": "0.7.1",

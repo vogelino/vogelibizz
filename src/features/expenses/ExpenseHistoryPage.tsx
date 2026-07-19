@@ -11,7 +11,7 @@ import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
-	expenseHistoryMonthQueryOptions,
+	expenseHistoryMonthQueriesKey,
 	expenseHistoryMonthsQueryOptions,
 	expenseOverviewSummaryQueryOptions,
 } from "@/utility/data/queryOptions";
@@ -96,12 +96,19 @@ export default function ExpenseHistoryPage() {
 	const queryClient = useQueryClient();
 	const monthsQuery = useExpenseHistoryMonths();
 	const months = monthsQuery.data ?? [];
-	const selectedMonth = search.month ?? months[0]?.month ?? null;
+	const selectedMonth = search.month ?? null;
 	const monthIndex = months.findIndex(({ month }) => month === selectedMonth);
+	const selectedMonthIsValid = selectedMonth === null || monthIndex >= 0;
 	const monthQuery = useExpenseHistoryMonth(
-		monthIndex >= 0 ? selectedMonth : null,
+		monthsQuery.isPending ||
+			monthsQuery.error ||
+			months.length === 0 ||
+			!selectedMonthIsValid
+			? undefined
+			: selectedMonth,
 	);
-	const targetCurrency = monthQuery.data?.currency ?? "CLP";
+	const monthDetail = monthQuery.data?.pages[0];
+	const targetCurrency = monthDetail?.currency ?? "CLP";
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [source, setSource] = useState<ImportSource | null>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -117,7 +124,7 @@ export default function ExpenseHistoryPage() {
 		null,
 	);
 	const { isPending: deletePending, mutate: deleteTransactions } =
-		useExpenseHistoryTransactionDelete(selectedMonth ?? "");
+		useExpenseHistoryTransactionDelete();
 
 	const previewMutation = useMutation({
 		mutationFn: async (input: ImportSource) =>
@@ -148,11 +155,9 @@ export default function ExpenseHistoryPage() {
 				queryClient.invalidateQueries({
 					queryKey: expenseHistoryMonthsQueryOptions().queryKey,
 				}),
-				...result.months.map((month) =>
-					queryClient.invalidateQueries({
-						queryKey: expenseHistoryMonthQueryOptions(month).queryKey,
-					}),
-				),
+				queryClient.invalidateQueries({
+					queryKey: expenseHistoryMonthQueriesKey,
+				}),
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
 				}),
@@ -200,20 +205,9 @@ export default function ExpenseHistoryPage() {
 		}
 	}
 
-	const navigation = useMemo(
-		() => ({
-			newer: monthIndex > 0 ? months[monthIndex - 1]?.month : null,
-			older:
-				monthIndex >= 0 && monthIndex < months.length - 1
-					? months[monthIndex + 1]?.month
-					: null,
-		}),
-		[monthIndex, months],
-	);
-
-	const chooseMonth = (month: string) =>
+	const chooseMonth = (month: string | null) =>
 		navigate({
-			search: (previous) => ({ ...previous, month }),
+			search: (previous) => ({ ...previous, month: month ?? undefined }),
 			replace: true,
 		});
 	const columns = useMemo(
@@ -228,10 +222,21 @@ export default function ExpenseHistoryPage() {
 		[search, selectedMonth, targetCurrency],
 	);
 	const historyLoading =
-		monthsQuery.isPending || (monthIndex >= 0 && monthQuery.isPending);
+		monthsQuery.isPending ||
+		(months.length > 0 && selectedMonthIsValid && monthQuery.isPending);
 	const historyError = monthsQuery.error ?? monthQuery.error;
-	const transactions =
-		!historyError && monthQuery.data ? monthQuery.data.transactions : [];
+	const transactions = useMemo(
+		() =>
+			!historyError && monthQuery.data
+				? monthQuery.data.pages.flatMap((page) => page.transactions)
+				: [],
+		[historyError, monthQuery.data],
+	);
+	const loadMoreTransactions = useCallback(() => {
+		if (monthQuery.hasNextPage && !monthQuery.isFetchingNextPage) {
+			void monthQuery.fetchNextPage();
+		}
+	}, [monthQuery]);
 	const resourceActions = useMemo(() => {
 		return (
 			<>
@@ -294,7 +299,10 @@ export default function ExpenseHistoryPage() {
 							Import a bank export to add your first expense history.
 						</p>
 					</div>
-				) : !monthsQuery.isPending && !monthsQuery.error && monthIndex < 0 ? (
+				) : !monthsQuery.isPending &&
+					!monthsQuery.error &&
+					selectedMonth !== null &&
+					monthIndex < 0 ? (
 					<output
 						className="block py-12 text-center px-6 md:px-10 sticky left-0"
 						aria-label="This month is not available"
@@ -308,23 +316,26 @@ export default function ExpenseHistoryPage() {
 					<>
 						{historyLoading ? (
 							<ExpenseHistoryOverviewPanel loading />
-						) : monthQuery.data ? (
+						) : monthDetail ? (
 							<ExpenseHistoryOverviewPanel
 								loading={false}
-								summary={monthQuery.data.summary}
-								currency={monthQuery.data.currency}
+								summary={monthDetail.summary}
+								currency={monthDetail.currency}
 							/>
 						) : null}
 						<DataTable
-							key={selectedMonth ?? "expense-history"}
+							key={selectedMonth ?? "all-expense-history"}
 							columns={columns}
 							data={transactions}
 							loading={historyLoading}
+							virtualized
+							hasMore={monthQuery.hasNextPage}
+							loadingMore={monthQuery.isFetchingNextPage}
+							onEndReached={loadMoreTransactions}
 							getRowId={(transaction) => String(transaction.id)}
 							enableRowSelection
 							onSelectionChange={setSelectedRows}
 							initialState={{
-								pagination: { pageIndex: 0, pageSize: 50 },
 								columnFilters: [
 									...(filters.category.length
 										? [{ id: "category", value: filters.category }]
@@ -350,7 +361,7 @@ export default function ExpenseHistoryPage() {
 							}
 							caption={
 								<span className="sr-only">
-									Monthly bank transactions. Open a description to edit the
+									Imported bank transactions. Open a description to edit the
 									transaction. Original bank values remain available within each
 									description cell.
 								</span>
@@ -388,9 +399,7 @@ export default function ExpenseHistoryPage() {
 											<ExpenseHistoryMonthNavigation
 												loading={false}
 												months={months}
-												selectedMonth={monthIndex >= 0 ? selectedMonth : null}
-												older={navigation.older}
-												newer={navigation.newer}
+												selectedMonth={selectedMonth}
 												onChooseMonth={chooseMonth}
 											/>
 										</div>

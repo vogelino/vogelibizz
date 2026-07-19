@@ -47,9 +47,11 @@ export const expenseHistoryMonthlySummarySchema = z.object({
 
 export const expenseHistoryMonthDetailSchema = z.object({
 	currency: z.enum(currencyEnum.enumValues),
-	month: expenseHistoryMonthSummarySchema,
+	month: expenseHistoryMonthSummarySchema.nullable(),
 	transactions: z.array(expenseHistoryTransactionSchema),
 	summary: expenseHistoryMonthlySummarySchema,
+	totalCount: z.number().int().nonnegative(),
+	nextOffset: z.number().int().nonnegative().nullable(),
 });
 
 export const expenseHistoryTransactionDetailSchema = z.object({

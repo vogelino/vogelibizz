@@ -2,7 +2,7 @@ import {
 	createQueryKeys,
 	mergeQueryKeys,
 } from "@lukemorales/query-key-factory";
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import {
 	type ClientType,
 	type CurrencyIdType,
@@ -57,7 +57,7 @@ const queryKeys = mergeQueryKeys(
 	}),
 	createQueryKeys("expenseHistory", {
 		months: null,
-		month: (month: string) => [month],
+		month: (month: string | null) => [month ?? "all"],
 		transaction: (id: string | number) => ["transaction", String(id)],
 		overview: null,
 	}),
@@ -289,25 +289,30 @@ export const expenseHistoryQuery = {
 				);
 			},
 		}),
-	month: (month: string) =>
-		queryOptions({
+	month: (month: string | null) =>
+		infiniteQueryOptions({
 			...queryKeys.expenseHistory.month(month),
-			queryFn: async (): Promise<ExpenseHistoryMonthDetail> => {
+			initialPageParam: 0,
+			queryFn: async ({ pageParam }): Promise<ExpenseHistoryMonthDetail> => {
 				if (import.meta.env.SSR) {
 					const { getExpenseHistoryMonth } = await import(
 						"@/server/expenseHistory/getExpenseHistory"
 					);
-					const result = await getExpenseHistoryMonth(month);
+					const result = await getExpenseHistoryMonth(month, {
+						offset: pageParam,
+						limit: 50,
+					});
 					if (!result)
 						throw new Error(`No expense history exists for ${month}.`);
 					return result;
 				}
 				return expenseHistoryMonthDetailSchema.parse(
 					await apiGetJson(
-						`/api/expense-history/months/${encodeURIComponent(month)}`,
+						`/api/expense-history/months/${month ? encodeURIComponent(month) : "all"}?offset=${pageParam}&limit=50`,
 					),
 				);
 			},
+			getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
 		}),
 	transaction: (id: string | number) =>
 		queryOptions({
@@ -371,6 +376,10 @@ export const sessionQueryOptions = sessionQuery.current;
 export const exchangeRatesQueryOptions = exchangeRatesQuery.current;
 export const expenseHistoryMonthsQueryOptions = expenseHistoryQuery.months;
 export const expenseHistoryMonthQueryOptions = expenseHistoryQuery.month;
+export const expenseHistoryMonthQueriesKey = [
+	"expenseHistory",
+	"month",
+] as const;
 export const expenseHistoryTransactionQueryOptions =
 	expenseHistoryQuery.transaction;
 export const expenseOverviewSummaryQueryOptions = expenseHistoryQuery.overview;

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, FileUp, TriangleAlert } from "lucide-react";
+import { FileUp, TriangleAlert } from "lucide-react";
 import type { RefObject } from "react";
 import {
 	Accordion,
@@ -236,9 +236,7 @@ type ExpenseHistoryMonthNavigationProps =
 			loading: false;
 			months: readonly { month: string }[];
 			selectedMonth: string | null;
-			older: string | null;
-			newer: string | null;
-			onChooseMonth: (month: string) => void;
+			onChooseMonth: (month: string | null) => void;
 	  };
 
 export function ExpenseHistoryMonthNavigation(
@@ -248,51 +246,32 @@ export function ExpenseHistoryMonthNavigation(
 	if (props.loading) {
 		return (
 			<div className={parentClassName}>
-				<Skeleton className="size-9" />
 				<Skeleton className="h-9.5 w-48" />
-				<Skeleton className="size-9" />
 			</div>
 		);
 	}
-	const { months, selectedMonth, older, newer, onChooseMonth } = props;
+	const { months, selectedMonth, onChooseMonth } = props;
 	if (months.length === 0) return null;
 	return (
 		<div className={parentClassName}>
-			<Button
-				type="button"
-				size="icon"
-				variant="outline"
-				disabled={!older}
-				onClick={() => older && onChooseMonth(older)}
-				aria-label="Previous imported month"
-				className="shrink-0 border-r-0"
-			>
-				<ChevronLeft size={18} />
-			</Button>
 			<label className="sr-only" htmlFor="history-month">
 				Imported month
 			</label>
 			<Combobox
 				id="history-month"
-				value={selectedMonth ?? ""}
-				onChange={(value) => onChooseMonth(String(value))}
-				options={months.map(({ month }) => ({
-					value: month,
-					label: formatExpenseHistoryMonth(month),
-				}))}
+				value={selectedMonth ?? "all"}
+				onChange={(value) =>
+					onChooseMonth(value === "all" ? null : String(value))
+				}
+				options={[
+					{ value: "all", label: "All" },
+					...months.map(({ month }) => ({
+						value: month,
+						label: formatExpenseHistoryMonth(month),
+					})),
+				]}
 				className="w-48"
 			/>
-			<Button
-				type="button"
-				size="icon"
-				variant="outline"
-				disabled={!newer}
-				onClick={() => newer && onChooseMonth(newer)}
-				aria-label="Next imported month"
-				className="shrink-0 border-l-0"
-			>
-				<ChevronRight size={18} />
-			</Button>
 		</div>
 	);
 }

@@ -1,4 +1,4 @@
-import { asc, desc, eq, exists } from "drizzle-orm";
+import { asc, count, desc, eq, exists, sql, sum } from "drizzle-orm";
 import db from "@/db";
 import { expenseMonths, expenses, expenseTransactions } from "@/db/schema";
 import {
@@ -78,21 +78,25 @@ export async function getExpenseHistoryMonths(): Promise<
 }
 
 export async function getExpenseHistoryMonth(
-	month: string,
+	month: string | null,
+	{ offset = 0, limit = 50 }: { offset?: number; limit?: number } = {},
 ): Promise<ExpenseHistoryMonthDetail | null> {
-	const [monthRow] = await db
-		.select({
-			month: expenseMonths.month,
-			importedAt: expenseMonths.imported_at,
-			importedDebitCount: expenseMonths.importedDebitCount,
-			skippedCreditCount: expenseMonths.skippedCreditCount,
-		})
-		.from(expenseMonths)
-		.where(eq(expenseMonths.month, month))
-		.limit(1);
-	if (!monthRow) return null;
+	const [monthRow] = month
+		? await db
+				.select({
+					month: expenseMonths.month,
+					importedAt: expenseMonths.imported_at,
+					importedDebitCount: expenseMonths.importedDebitCount,
+					skippedCreditCount: expenseMonths.skippedCreditCount,
+				})
+				.from(expenseMonths)
+				.where(eq(expenseMonths.month, month))
+				.limit(1)
+		: [null];
+	if (month && !monthRow) return null;
+	const monthCondition = month ? eq(expenseMonths.month, month) : undefined;
 
-	const [rows, rates, currency] = await Promise.all([
+	const [rows, aggregateRows, rates, currency] = await Promise.all([
 		db
 			.select({
 				id: expenseTransactions.id,
@@ -114,11 +118,30 @@ export async function getExpenseHistoryMonth(
 				eq(expenseTransactions.expenseMonthId, expenseMonths.id),
 			)
 			.leftJoin(expenses, eq(expenseTransactions.expenseId, expenses.id))
-			.where(eq(expenseMonths.month, month))
+			.where(monthCondition)
 			.orderBy(
-				asc(expenseTransactions.bookedAt),
-				asc(expenseTransactions.sourceOrder),
-			),
+				month
+					? asc(expenseTransactions.bookedAt)
+					: desc(expenseTransactions.bookedAt),
+				month
+					? asc(expenseTransactions.sourceOrder)
+					: desc(expenseTransactions.sourceOrder),
+			)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({
+				totalCount: count(),
+				total: sum(expenseTransactions.amount),
+				matched: sql<number>`sum(case when ${expenseTransactions.expenseId} is not null then ${expenseTransactions.amount} else 0 end)`,
+				other: sql<number>`sum(case when ${expenseTransactions.expenseId} is null then ${expenseTransactions.amount} else 0 end)`,
+			})
+			.from(expenseTransactions)
+			.innerJoin(
+				expenseMonths,
+				eq(expenseTransactions.expenseMonthId, expenseMonths.id),
+			)
+			.where(monthCondition),
 		getExchangeRates(),
 		getTargetCurrency(),
 	]);
@@ -143,23 +166,27 @@ export async function getExpenseHistoryMonth(
 			};
 		},
 	);
-	const total = transactions.reduce(
-		(sum, transaction) => sum + transaction.amount,
-		0,
-	);
-	const matched = transactions.reduce(
-		(sum, transaction) => sum + (transaction.expense ? transaction.amount : 0),
-		0,
-	);
-	const other = transactions.reduce(
-		(sum, transaction) => sum + (transaction.expense ? 0 : transaction.amount),
-		0,
-	);
+	const aggregate = aggregateRows[0];
+	const convertTotal = (value: string | number | null | undefined) =>
+		getValueInTargetCurrencyPerMonth({
+			value: Number(value ?? 0),
+			currency: "CHF",
+			billingRate: "Monthly",
+			rates,
+			targetCurrency: currency,
+		}) ?? Number(value ?? 0);
+	const totalCount = aggregate?.totalCount ?? 0;
 	return {
 		currency,
 		month: monthRow,
 		transactions,
-		summary: { total, matched, other },
+		summary: {
+			total: convertTotal(aggregate?.total),
+			matched: convertTotal(aggregate?.matched),
+			other: convertTotal(aggregate?.other),
+		},
+		totalCount,
+		nextOffset: offset + rows.length < totalCount ? offset + rows.length : null,
 	};
 }
 

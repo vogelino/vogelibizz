@@ -40,6 +40,8 @@ const detail: ExpenseHistoryMonthDetail = {
 		},
 	],
 	summary: { total: 12.5, matched: 12.5, other: 0 },
+	totalCount: 1,
+	nextOffset: null,
 };
 const overview: ExpenseOverviewSummary = {
 	currency: "CHF",
@@ -113,6 +115,56 @@ describe("expense history read HTTP API", () => {
 		expect(expenseOverviewSummarySchema.parse(await response.json())).toEqual(
 			overview,
 		);
+	});
+
+	test("validates and forwards infinite-scroll pagination", async () => {
+		let receivedPagination: { offset?: number; limit?: number } | undefined;
+		const handlers = createExpenseHistoryReadHandlers({
+			authorize: async () => true,
+			getMonths: async () => months,
+			getMonth: async (_month, pagination) => {
+				receivedPagination = pagination;
+				return detail;
+			},
+			getOverview: async () => overview,
+			getTransaction: async () => transactionDetail,
+		});
+		const response = await handlers.month(
+			new Request(
+				"https://example.test/api/expense-history/months/2026-06?offset=50&limit=25",
+			),
+			"2026-06",
+		);
+		expect(response.status).toBe(200);
+		expect(receivedPagination).toEqual({ offset: 50, limit: 25 });
+
+		const invalid = await handlers.month(
+			new Request(
+				"https://example.test/api/expense-history/months/2026-06?offset=-1&limit=101",
+			),
+			"2026-06",
+		);
+		expect(invalid.status).toBe(400);
+	});
+
+	test("uses a null month filter for the all-transactions feed", async () => {
+		let receivedMonth: string | null | undefined;
+		const handlers = createExpenseHistoryReadHandlers({
+			authorize: async () => true,
+			getMonths: async () => months,
+			getMonth: async (month) => {
+				receivedMonth = month;
+				return { ...detail, month: null };
+			},
+			getOverview: async () => overview,
+			getTransaction: async () => transactionDetail,
+		});
+		const response = await handlers.month(request(), "all");
+		expect(response.status).toBe(200);
+		expect(receivedMonth).toBeNull();
+		expect(
+			expenseHistoryMonthDetailSchema.parse(await response.json()).month,
+		).toBeNull();
 	});
 
 	test("rejects malformed and missing selected months", async () => {

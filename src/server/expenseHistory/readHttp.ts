@@ -43,17 +43,46 @@ export function createExpenseHistoryReadHandlers(
 			if (!(await dependencies.authorize(request))) {
 				return json({ error: "Unauthorized" }, { status: 401 });
 			}
-			const parsedMonth = expenseHistoryMonthKeySchema.safeParse(monthParam);
-			if (!parsedMonth.success) {
+			const parsedMonth =
+				monthParam === "all"
+					? null
+					: expenseHistoryMonthKeySchema.safeParse(monthParam);
+			if (parsedMonth !== null && !parsedMonth.success) {
 				return json(
 					{ error: "Month must use YYYY-MM format." },
 					{ status: 400 },
 				);
 			}
-			const result = await dependencies.getMonth(parsedMonth.data);
+			const url = new URL(request.url);
+			const pagination = z
+				.object({
+					offset: z.coerce.number().int().nonnegative().default(0),
+					limit: z.coerce.number().int().min(1).max(100).default(50),
+				})
+				.safeParse({
+					offset: url.searchParams.get("offset") ?? undefined,
+					limit: url.searchParams.get("limit") ?? undefined,
+				});
+			if (!pagination.success) {
+				return json(
+					{
+						error:
+							"Pagination requires a non-negative offset and a limit from 1 to 100.",
+					},
+					{ status: 400 },
+				);
+			}
+			const result = await dependencies.getMonth(
+				parsedMonth?.data ?? null,
+				pagination.data,
+			);
 			if (!result) {
 				return json(
-					{ error: `No expense history exists for ${parsedMonth.data}.` },
+					{
+						error: parsedMonth
+							? `No expense history exists for ${parsedMonth.data}.`
+							: "No expense history exists.",
+					},
 					{ status: 404 },
 				);
 			}

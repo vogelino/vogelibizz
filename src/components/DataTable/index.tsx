@@ -16,9 +16,10 @@ import {
 	type Table as TanstackTable,
 	useReactTable,
 } from "@tanstack/react-table";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -70,6 +71,10 @@ type DataTableProps<TData> = {
 	emptyMessage?: ReactNode;
 	classNames?: ClassNames;
 	containerAriaLabel?: string;
+	virtualized?: boolean;
+	hasMore?: boolean;
+	loadingMore?: boolean;
+	onEndReached?: () => void;
 };
 
 export function DataTable<TData>({
@@ -87,6 +92,10 @@ export function DataTable<TData>({
 	emptyMessage = "No results.",
 	classNames = {},
 	containerAriaLabel,
+	virtualized = false,
+	hasMore = false,
+	loadingMore = false,
+	onEndReached,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -104,7 +113,7 @@ export function DataTable<TData>({
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
+		...(virtualized ? {} : { getPaginationRowModel: getPaginationRowModel() }),
 		getSortedRowModel: getSortedRowModel(),
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
@@ -142,7 +151,75 @@ export function DataTable<TData>({
 		[skeletonRows],
 	);
 
-	const showPagination = table.getPageCount() > 1;
+	const rows = table.getRowModel().rows;
+	const loadingMoreSkeletonRows = 3;
+	const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+	const [scrollMargin, setScrollMargin] = useState(0);
+	const rowVirtualizer = useVirtualizer<HTMLElement, HTMLTableRowElement>({
+		count: virtualized
+			? rows.length + (hasMore ? loadingMoreSkeletonRows : 0)
+			: 0,
+		// reset.css makes body the fixed-height overflow element, so window does
+		// not receive the scroll events that advance this virtual range.
+		getScrollElement: () =>
+			typeof document === "undefined" ? null : document.body,
+		estimateSize: () => 52,
+		overscan: 8,
+		scrollMargin,
+		enabled: virtualized,
+	});
+	const virtualRows = rowVirtualizer.getVirtualItems();
+	const firstVirtualRow = virtualRows[0];
+	const lastVirtualRow = virtualRows.at(-1);
+	const paddingTop = firstVirtualRow
+		? Math.max(0, firstVirtualRow.start - scrollMargin)
+		: 0;
+	const paddingBottom = lastVirtualRow
+		? Math.max(
+				0,
+				rowVirtualizer.getTotalSize() - (lastVirtualRow.end - scrollMargin),
+			)
+		: 0;
+
+	useEffect(() => {
+		if (!virtualized) return;
+		const measureScrollMargin = () => {
+			const body = tableBodyRef.current;
+			if (!body) return;
+			setScrollMargin(
+				body.getBoundingClientRect().top + document.body.scrollTop,
+			);
+		};
+		measureScrollMargin();
+		const resizeObserver = new ResizeObserver(measureScrollMargin);
+		resizeObserver.observe(document.body);
+		window.addEventListener("resize", measureScrollMargin);
+		return () => {
+			resizeObserver.disconnect();
+			window.removeEventListener("resize", measureScrollMargin);
+		};
+	}, [virtualized]);
+
+	useEffect(() => {
+		if (
+			virtualized &&
+			hasMore &&
+			!loadingMore &&
+			lastVirtualRow &&
+			lastVirtualRow.index >= rows.length
+		) {
+			onEndReached?.();
+		}
+	}, [
+		hasMore,
+		lastVirtualRow,
+		loadingMore,
+		onEndReached,
+		rows.length,
+		virtualized,
+	]);
+
+	const showPagination = !virtualized && table.getPageCount() > 1;
 
 	return (
 		<>
@@ -223,6 +300,7 @@ export function DataTable<TData>({
 						))}
 					</TableHeader>
 					<TableBody
+						ref={tableBodyRef}
 						className={cn(
 							"[&_td:first-child]:pl-6 md:[&_td:first-child]:pl-10 [&_td:last-child]:pr-6 md:[&_td:last-child]:pr-10",
 							classNames.body,
@@ -247,27 +325,87 @@ export function DataTable<TData>({
 									))}
 								</TableRow>
 							))
-						) : table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									className={cn("relative", classNames.row)}
-									data-state={row.getIsSelected() ? "selected" : undefined}
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell
-											key={cell.id}
-											style={{ width: `${cell.column.getSize()}px` }}
-											className={classNames.cell}
+						) : rows.length || (virtualized && hasMore) ? (
+							<>
+								{virtualized && paddingTop > 0 ? (
+									<tr className="border-0 pointer-events-none">
+										<td
+											colSpan={table.getAllColumns().length}
+											style={{ height: paddingTop, padding: 0 }}
+										/>
+									</tr>
+								) : null}
+								{(virtualized ? virtualRows : rows).map((item) => {
+									const virtualItem = virtualized
+										? (item as VirtualItem)
+										: null;
+									const row: Row<TData> | undefined = virtualized
+										? rows[item.index]
+										: (item as Row<TData>);
+									if (!row) {
+										return (
+											<TableRow
+												key={`load-more-${virtualItem?.index}`}
+												aria-label={
+													virtualItem?.index === rows.length
+														? "Loading more transactions"
+														: undefined
+												}
+												data-index={virtualItem?.index}
+												ref={
+													virtualized
+														? rowVirtualizer.measureElement
+														: undefined
+												}
+											>
+												{table.getAllColumns().map((column) => (
+													<TableCell
+														key={`load-more-${virtualItem?.index}-${column.id}`}
+														style={{ width: `${column.getSize()}px` }}
+														className={classNames.cell}
+													>
+														<Skeleton
+															className={cn("h-5 w-full", classNames.skeleton)}
+														/>
+													</TableCell>
+												))}
+											</TableRow>
+										);
+									}
+									return (
+										<TableRow
+											key={row.id}
+											data-index={virtualItem?.index}
+											ref={
+												virtualized ? rowVirtualizer.measureElement : undefined
+											}
+											className={cn("relative", classNames.row)}
+											data-state={row.getIsSelected() ? "selected" : undefined}
 										>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
-							))
+											{row.getVisibleCells().map((cell) => (
+												<TableCell
+													key={cell.id}
+													style={{ width: `${cell.column.getSize()}px` }}
+													className={classNames.cell}
+												>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
+										</TableRow>
+									);
+								})}
+								{virtualized && paddingBottom > 0 ? (
+									<tr className="border-0 pointer-events-none">
+										<td
+											colSpan={table.getAllColumns().length}
+											style={{ height: paddingBottom, padding: 0 }}
+										/>
+									</tr>
+								) : null}
+							</>
 						) : (
 							<TableRow className={classNames.row}>
 								<TableCell

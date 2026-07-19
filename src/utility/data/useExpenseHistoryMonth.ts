@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { expenseHistoryMonthQueryOptions } from "./queryOptions";
 
-export default function useExpenseHistoryMonth(month: string | null) {
-	return useQuery({
-		...expenseHistoryMonthQueryOptions(month ?? ""),
-		enabled: month !== null,
+export default function useExpenseHistoryMonth(
+	month: string | null | undefined,
+) {
+	return useInfiniteQuery({
+		...expenseHistoryMonthQueryOptions(month ?? null),
+		enabled: month !== undefined,
 	});
 }
