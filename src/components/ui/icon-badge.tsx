@@ -2,17 +2,19 @@ import type { ReactNode } from "react";
 import { cn } from "@/utility/classNames";
 import { Badge, type BadgeProps } from "./badge";
 
+type IconBadgeProps = {
+	icon: ReactNode;
+	badgeProps?: BadgeProps;
+	label?: ReactNode;
+	className?: string;
+};
+
 export function IconBadge({
 	icon,
 	badgeProps = {},
 	label,
 	className,
-}: {
-	icon: ReactNode;
-	badgeProps?: BadgeProps;
-	label?: ReactNode;
-	className?: string;
-}) {
+}: IconBadgeProps) {
 	return (
 		<Badge
 			variant="outline"
