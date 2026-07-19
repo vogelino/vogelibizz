@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, exists } from "drizzle-orm";
 import db from "@/db";
 import { expenseMonths, expenses, expenseTransactions } from "@/db/schema";
 import {
@@ -66,6 +66,14 @@ export async function getExpenseHistoryMonths(): Promise<
 			skippedCreditCount: expenseMonths.skippedCreditCount,
 		})
 		.from(expenseMonths)
+		.where(
+			exists(
+				db
+					.select({ id: expenseTransactions.id })
+					.from(expenseTransactions)
+					.where(eq(expenseTransactions.expenseMonthId, expenseMonths.id)),
+			),
+		)
 		.orderBy(desc(expenseMonths.month));
 }
 
@@ -143,7 +151,17 @@ export async function getExpenseOverviewSummary(): Promise<ExpenseOverviewSummar
 	const [configuredExpenses, importedMonths, transactions, rates, currency] =
 		await Promise.all([
 			db.query.expenses.findMany(),
-			db.select({ id: expenseMonths.id }).from(expenseMonths),
+			db
+				.select({ id: expenseMonths.id })
+				.from(expenseMonths)
+				.where(
+					exists(
+						db
+							.select({ id: expenseTransactions.id })
+							.from(expenseTransactions)
+							.where(eq(expenseTransactions.expenseMonthId, expenseMonths.id)),
+					),
+				),
 			db
 				.select({
 					expenseMonthId: expenseTransactions.expenseMonthId,

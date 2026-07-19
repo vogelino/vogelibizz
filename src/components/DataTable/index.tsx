@@ -284,7 +284,7 @@ export function DataTable<TData>({
 			{showPagination ? (
 				<div
 					className={cn(
-						"flex items-center justify-end space-x-2 py-4 px-6 lg:px-10 sticky left-0",
+						"flex items-center justify-end space-x-2 py-4 px-6 md:px-10 sticky left-0",
 						classNames.pagination,
 					)}
 				>

@@ -241,7 +241,7 @@ export default function ExpenseHistoryPage() {
 				</h2>
 
 				{!monthsQuery.isPending && !monthsQuery.error && months.length === 0 ? (
-					<div className="py-12 text-center px-6 lg:px-10 sticky left-0">
+					<div className="py-12 text-center px-6 md:px-10 sticky left-0">
 						<h3 className="font-semibold">No imported expense history</h3>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Choose a bank export above to preview your first import.
@@ -249,7 +249,7 @@ export default function ExpenseHistoryPage() {
 					</div>
 				) : !monthsQuery.isPending && !monthsQuery.error && monthIndex < 0 ? (
 					<output
-						className="block py-12 text-center px-6 lg:px-10 sticky left-0"
+						className="block py-12 text-center px-6 md:px-10 sticky left-0"
 						aria-label="This month is not available"
 					>
 						<h3 className="font-semibold">This month is not available</h3>
@@ -285,7 +285,7 @@ export default function ExpenseHistoryPage() {
 								toolbar: "pb-0",
 							}}
 							toolbarSkeleton={
-								<div className="flex flex-col gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+								<div className="flex flex-col gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 									<ExpenseFilter loading />
 									<ExpenseHistoryMonthNavigation loading />
 								</div>
@@ -303,7 +303,7 @@ export default function ExpenseHistoryPage() {
 										tableRef.current = table;
 										return null;
 									})()}
-									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 lg:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
+									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 										<ExpenseFilter loading={false} table={table} />
 										<ExpenseHistoryMonthNavigation
 											loading={false}

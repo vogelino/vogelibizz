@@ -263,7 +263,7 @@ export default function ExpensesPage({
 				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}
 				toolbarSkeleton={
-					<div className="px-6 lg:px-10 sticky left-0 pt-3">
+					<div className="px-6 md:px-10 sticky left-0 pt-3">
 						<ExpenseFilter loading showMixedClassification />
 					</div>
 				}
@@ -283,7 +283,7 @@ export default function ExpensesPage({
 					header: "top-30 pt-3",
 				}}
 				toolbar={(table) => (
-					<div className="px-6 lg:px-10 sticky left-0 pt-3 flex justify-between items-center gap-8 flex-wrap">
+					<div className="px-6 md:px-10 sticky left-0 pt-3 flex justify-between items-center gap-8 flex-wrap">
 						{(() => {
 							tableRef.current = table;
 							return null;
