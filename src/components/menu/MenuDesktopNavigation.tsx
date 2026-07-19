@@ -68,7 +68,7 @@ export function MenuDesktopNavigation({
 	onLinkClick,
 }: MenuDesktopNavigationProps) {
 	return (
-		<NavigationMenu id="menu" aria-label="Main navigation">
+		<NavigationMenu id="menu" aria-label="Main navigation" viewport={false}>
 			<NavigationMenuList aria-label="Main menu items">
 				{menuItems.map((item) => {
 					if ("routes" in item) {
