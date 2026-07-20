@@ -65,36 +65,6 @@ export function getExpensesTableColumns(targetCurrency: CurrencyIdType) {
 			),
 			sortUndefined: "last",
 		}),
-		columnHelper.accessor("difference", {
-			id: "difference",
-			size: 160,
-			header: "Configured − real",
-			cell: ({ getValue }) => (
-				<span>{formatAvailableCurrency(getValue(), targetCurrency)}</span>
-			),
-			sortUndefined: "last",
-		}),
-		columnHelper.accessor((row) => row.expense?.originalPrice ?? null, {
-			id: "originalPrice",
-			size: 120,
-			header: "Original price",
-			cell: ({ getValue, row }) => {
-				const value = getValue();
-				return value === null || row.original.kind === "other" ? (
-					<span>–</span>
-				) : (
-					<span>
-						{formatCurrency(value, row.original.expense.originalCurrency)}
-					</span>
-				);
-			},
-			sortUndefined: "last",
-		}),
-		columnHelper.accessor((row) => row.expense?.rate ?? "Automatic", {
-			id: "rate",
-			size: 110,
-			header: "Billing Freq.",
-		}),
 		columnHelper.accessor("category", {
 			id: "category",
 			size: 200,
