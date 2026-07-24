@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { LoaderCircleIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { type InvoiceInsertType, invoiceInsertSchema } from "@/db/schema";
 import createQueryFunction from "@/utility/data/createQueryFunction";
@@ -12,6 +13,9 @@ import {
 import useInvoices from "@/utility/data/useInvoices";
 
 export const Route = createFileRoute("/_resource/invoices/create")({
+	validateSearch: z.object({
+		duplicateId: z.coerce.number().int().positive().optional(),
+	}),
 	loader: async ({ context }) => {
 		if (import.meta.env.SSR) {
 			const { getInvoices } = await import(
@@ -37,6 +41,7 @@ const createInvoice = createQueryFunction<number[], InvoiceInsertType[]>({
 });
 
 function InvoiceCreateRoute() {
+	const { duplicateId } = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const startedRef = useRef(false);
@@ -61,11 +66,42 @@ function InvoiceCreateRoute() {
 		if (startedRef.current) return;
 		if (invoicesQuery.isPending) return;
 		startedRef.current = true;
+		const duplicate = duplicateId
+			? invoicesQuery.data?.find((invoice) => invoice.id === duplicateId)
+			: undefined;
+		if (duplicateId && !duplicate) {
+			createMutation.mutate([], {
+				onError: () => {
+					startedRef.current = false;
+				},
+			});
+			return;
+		}
 		const nextInvoiceNumber =
 			(invoicesQuery.data ?? []).reduce(
 				(maxValue, invoice) => Math.max(maxValue, invoice.invoiceNumber),
 				0,
 			) + 1;
+		if (duplicate) {
+			createMutation.mutate([
+				{
+					name: `copy ${duplicate.name}`,
+					subject: `copy ${duplicate.subject || duplicate.name}`,
+					date: duplicate.date,
+					clientId: duplicate.clientId,
+					invoiceNumber: nextInvoiceNumber,
+					clientNumber: duplicate.clientNumber,
+					introduction: duplicate.introduction,
+					footNote: duplicate.footNote,
+					currency: duplicate.currency,
+					language: duplicate.language,
+					hourlyRate: duplicate.hourlyRate,
+					invoiceLocation: duplicate.invoiceLocation,
+					rows: duplicate.rows.map((row) => ({ ...row })),
+				},
+			]);
+			return;
+		}
 		const name = `Invoice ${nextInvoiceNumber}`;
 		createMutation.mutate([
 			{
@@ -76,7 +112,12 @@ function InvoiceCreateRoute() {
 				rows: [],
 			},
 		]);
-	}, [createMutation, invoicesQuery.data, invoicesQuery.isPending]);
+	}, [
+		createMutation,
+		duplicateId,
+		invoicesQuery.data,
+		invoicesQuery.isPending,
+	]);
 
 	if (createMutation.isError) {
 		return (
@@ -109,7 +150,7 @@ function InvoiceCreateRoute() {
 		<div className="px-6 py-10 md:px-10">
 			<div className="mx-auto flex max-w-xl items-center gap-3 rounded-md border border-border bg-card p-6 text-sm text-muted-foreground">
 				<LoaderCircleIcon className="size-4 animate-spin" />
-				Creating invoice...
+				{duplicateId ? "Duplicating invoice..." : "Creating invoice..."}
 			</div>
 		</div>
 	);

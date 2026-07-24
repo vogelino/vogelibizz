@@ -1,5 +1,6 @@
 "use client";
 
+import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
@@ -11,7 +12,7 @@ import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useInvoiceDelete from "@/utility/data/useInvoiceDelete";
 import useProjectDelete from "@/utility/data/useProjectDelete";
-import { getDeleteColumn } from "@/utility/getDeleteColumn";
+import { getRowActionsColumn } from "@/utility/getRowActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 
 export default function PageDataTable<DataType extends { id: number }>({
@@ -28,6 +29,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	defaultSortColumn: string;
 	loading?: boolean;
 }) {
+	const navigate = useNavigate();
 	const clientDeleteMutation = useClientDelete();
 	const projectDeleteMutation = useProjectDelete();
 	const expenseDeleteMutation = useExpenseDelete();
@@ -53,7 +55,92 @@ export default function PageDataTable<DataType extends { id: number }>({
 			invoiceDeleteMutation,
 		],
 	);
-	const deleteColumn = getDeleteColumn<DataType>(deleteAction);
+	const rowActionsColumn = getRowActionsColumn<DataType>({
+		onEdit: (row) => {
+			const id = String(row.id);
+			switch (resource) {
+				case "clients":
+					return navigate({
+						to: "/clients/edit/$id/modal",
+						params: { id },
+						mask: {
+							to: "/clients/edit/$id",
+							params: { id },
+							unmaskOnReload: true,
+						},
+					});
+				case "projects":
+					return navigate({
+						to: "/projects/edit/$id/modal",
+						params: { id },
+						mask: {
+							to: "/projects/edit/$id",
+							params: { id },
+							unmaskOnReload: true,
+						},
+					});
+				case "expenses":
+					return navigate({
+						to: "/expenses/edit/$id/modal",
+						params: { id },
+						search: true,
+						mask: {
+							to: "/expenses/edit/$id",
+							params: { id },
+							unmaskOnReload: true,
+						},
+					});
+				case "invoices":
+					return navigate({ to: "/invoices/$id", params: { id } });
+			}
+		},
+		onDuplicate: (row) => {
+			const duplicateId = row.id;
+			switch (resource) {
+				case "clients":
+					return navigate({
+						to: "/clients/create/modal",
+						search: { duplicateId },
+						mask: {
+							to: "/clients/create",
+							search: { duplicateId },
+							unmaskOnReload: true,
+						},
+					});
+				case "projects":
+					return navigate({
+						to: "/projects/create/modal",
+						search: { duplicateId },
+						mask: {
+							to: "/projects/create",
+							search: { duplicateId },
+							unmaskOnReload: true,
+						},
+					});
+				case "expenses":
+					return navigate({
+						to: "/expenses/create/modal",
+						search: (previous) => ({ ...previous, duplicateId }),
+						mask: {
+							to: "/expenses/create",
+							search: (previous) => ({ ...previous, duplicateId }),
+							unmaskOnReload: true,
+						},
+					});
+				case "invoices":
+					return navigate({
+						to: "/invoices/duplicate/$id/modal",
+						params: { id: String(duplicateId) },
+						mask: {
+							to: "/invoices/create",
+							search: { duplicateId },
+							unmaskOnReload: true,
+						},
+					});
+			}
+		},
+		onDelete: (row) => deleteAction(row.id),
+	});
 	const lastModifiedColumn = useLastModifiedColumn<DataType>();
 	const selectionColumn = useMemo(
 		() =>
@@ -96,7 +183,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 		selectionColumn,
 		...pageSpecificColumns,
 		lastModifiedColumn,
-		deleteColumn,
+		rowActionsColumn,
 		// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	] as ColumnDef<DataType, any>[];
 

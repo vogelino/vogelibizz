@@ -5,16 +5,26 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ClientList from "@/features/clients/ClientsList";
-import { projectsQueryOptions } from "@/utility/data/queryOptions";
+import {
+	clientQueryOptions,
+	projectsQueryOptions,
+} from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/clients/create/modal")({
-	loader: ({ context }) =>
-		context.queryClient.ensureQueryData(projectsQueryOptions()),
+	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
+	loader: async ({ context, deps }) => ({
+		projects: await context.queryClient.ensureQueryData(projectsQueryOptions()),
+		duplicate: deps.duplicateId
+			? await context.queryClient.ensureQueryData(
+					clientQueryOptions(deps.duplicateId),
+				)
+			: undefined,
+	}),
 	component: ClientCreateModal,
 });
 
 function ClientCreateModal() {
-	const projects = Route.useLoaderData();
+	const { duplicate, projects } = Route.useLoaderData();
 	const navigate = useNavigate();
 	const formId = "client-create-form";
 
@@ -23,7 +33,11 @@ function ClientCreateModal() {
 			<ClientList />
 			<ResponsiveModal
 				open
-				title={<PageHeaderTitle name="Create client" />}
+				title={
+					<PageHeaderTitle
+						name={duplicate ? "Duplicate client" : "Create client"}
+					/>
+				}
 				onClose={() => navigate({ to: "/clients" })}
 				footer={
 					<>
@@ -42,7 +56,15 @@ function ClientCreateModal() {
 					</>
 				}
 			>
-				<ClientEdit formId={formId} initialProjects={projects} />
+				<ClientEdit
+					formId={formId}
+					initialData={
+						duplicate
+							? { ...duplicate, name: `copy ${duplicate.name}` }
+							: undefined
+					}
+					initialProjects={projects}
+				/>
 			</ResponsiveModal>
 		</>
 	);

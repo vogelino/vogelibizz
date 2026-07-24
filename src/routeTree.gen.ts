@@ -54,6 +54,7 @@ import { Route as ResourceClientsEditIdRouteImport } from './routes/_resource/cl
 import { Route as ResourceClientsCreateModalRouteImport } from './routes/_resource/clients/create.modal'
 import { Route as ApiExpenseHistoryTransactionsIdExpenseRouteImport } from './routes/api/expense-history/transactions/$id/expense'
 import { Route as ResourceProjectsEditIdModalRouteImport } from './routes/_resource/projects/edit.$id.modal'
+import { Route as ResourceInvoicesDuplicateIdModalRouteImport } from './routes/_resource/invoices/duplicate.$id.modal'
 import { Route as ResourceExpensesHistoryEditIdRouteImport } from './routes/_resource/expenses/history/edit/$id'
 import { Route as ResourceExpensesHistoryCreateExpenseIdRouteImport } from './routes/_resource/expenses/history/create-expense/$id'
 import { Route as ResourceExpensesEditIdModalRouteImport } from './routes/_resource/expenses/edit.$id.modal'
@@ -296,6 +297,12 @@ const ResourceProjectsEditIdModalRoute =
     path: '/modal',
     getParentRoute: () => ResourceProjectsEditIdRoute,
   } as any)
+const ResourceInvoicesDuplicateIdModalRoute =
+  ResourceInvoicesDuplicateIdModalRouteImport.update({
+    id: '/duplicate/$id/modal',
+    path: '/duplicate/$id/modal',
+    getParentRoute: () => ResourceInvoicesRoute,
+  } as any)
 const ResourceExpensesHistoryEditIdRoute =
   ResourceExpensesHistoryEditIdRouteImport.update({
     id: '/edit/$id',
@@ -380,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
   '/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
+  '/invoices/duplicate/$id/modal': typeof ResourceInvoicesDuplicateIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
   '/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
@@ -428,6 +436,7 @@ export interface FileRoutesByTo {
   '/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
   '/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
+  '/invoices/duplicate/$id/modal': typeof ResourceInvoicesDuplicateIdModalRoute
   '/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
   '/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
@@ -482,6 +491,7 @@ export interface FileRoutesById {
   '/_resource/expenses/edit/$id/modal': typeof ResourceExpensesEditIdModalRoute
   '/_resource/expenses/history/create-expense/$id': typeof ResourceExpensesHistoryCreateExpenseIdRouteWithChildren
   '/_resource/expenses/history/edit/$id': typeof ResourceExpensesHistoryEditIdRouteWithChildren
+  '/_resource/invoices/duplicate/$id/modal': typeof ResourceInvoicesDuplicateIdModalRoute
   '/_resource/projects/edit/$id/modal': typeof ResourceProjectsEditIdModalRoute
   '/api/expense-history/transactions/$id/expense': typeof ApiExpenseHistoryTransactionsIdExpenseRoute
   '/_resource/expenses/history/create-expense/$id/modal': typeof ResourceExpensesHistoryCreateExpenseIdModalRoute
@@ -536,6 +546,7 @@ export interface FileRouteTypes {
     | '/expenses/edit/$id/modal'
     | '/expenses/history/create-expense/$id'
     | '/expenses/history/edit/$id'
+    | '/invoices/duplicate/$id/modal'
     | '/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
     | '/expenses/history/create-expense/$id/modal'
@@ -584,6 +595,7 @@ export interface FileRouteTypes {
     | '/expenses/edit/$id/modal'
     | '/expenses/history/create-expense/$id'
     | '/expenses/history/edit/$id'
+    | '/invoices/duplicate/$id/modal'
     | '/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
     | '/expenses/history/create-expense/$id/modal'
@@ -637,6 +649,7 @@ export interface FileRouteTypes {
     | '/_resource/expenses/edit/$id/modal'
     | '/_resource/expenses/history/create-expense/$id'
     | '/_resource/expenses/history/edit/$id'
+    | '/_resource/invoices/duplicate/$id/modal'
     | '/_resource/projects/edit/$id/modal'
     | '/api/expense-history/transactions/$id/expense'
     | '/_resource/expenses/history/create-expense/$id/modal'
@@ -981,6 +994,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceProjectsEditIdModalRouteImport
       parentRoute: typeof ResourceProjectsEditIdRoute
     }
+    '/_resource/invoices/duplicate/$id/modal': {
+      id: '/_resource/invoices/duplicate/$id/modal'
+      path: '/duplicate/$id/modal'
+      fullPath: '/invoices/duplicate/$id/modal'
+      preLoaderRoute: typeof ResourceInvoicesDuplicateIdModalRouteImport
+      parentRoute: typeof ResourceInvoicesRoute
+    }
     '/_resource/expenses/history/edit/$id': {
       id: '/_resource/expenses/history/edit/$id'
       path: '/edit/$id'
@@ -1165,12 +1185,14 @@ interface ResourceInvoicesRouteChildren {
   ResourceInvoicesIdRoute: typeof ResourceInvoicesIdRoute
   ResourceInvoicesCreateRoute: typeof ResourceInvoicesCreateRoute
   ResourceInvoicesIndexRoute: typeof ResourceInvoicesIndexRoute
+  ResourceInvoicesDuplicateIdModalRoute: typeof ResourceInvoicesDuplicateIdModalRoute
 }
 
 const ResourceInvoicesRouteChildren: ResourceInvoicesRouteChildren = {
   ResourceInvoicesIdRoute: ResourceInvoicesIdRoute,
   ResourceInvoicesCreateRoute: ResourceInvoicesCreateRoute,
   ResourceInvoicesIndexRoute: ResourceInvoicesIndexRoute,
+  ResourceInvoicesDuplicateIdModalRoute: ResourceInvoicesDuplicateIdModalRoute,
 }
 
 const ResourceInvoicesRouteWithChildren =

@@ -5,12 +5,21 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ExpensesPage from "@/features/expenses/ExpensesPage";
+import { expenseQueryOptions } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/expenses/create/modal")({
+	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
+	loader: ({ context, deps }) =>
+		deps.duplicateId
+			? context.queryClient.ensureQueryData(
+					expenseQueryOptions(deps.duplicateId),
+				)
+			: undefined,
 	component: ExpenseCreateModal,
 });
 
 function ExpenseCreateModal() {
+	const duplicate = Route.useLoaderData();
 	const navigate = useNavigate();
 	const formId = "expense-create-form";
 
@@ -19,14 +28,34 @@ function ExpenseCreateModal() {
 			<ExpensesPage />
 			<ResponsiveModal
 				open
-				title={<PageHeaderTitle name="Create expense" />}
-				onClose={() => navigate({ to: "/expenses", search: true })}
+				title={
+					<PageHeaderTitle
+						name={duplicate ? "Duplicate expense" : "Create expense"}
+					/>
+				}
+				onClose={() =>
+					navigate({
+						to: "/expenses",
+						search: (previous) => ({
+							...previous,
+							duplicateId: undefined,
+						}),
+					})
+				}
 				footer={
 					<>
 						<Button asChild variant="outline">
 							<button
 								type="button"
-								onClick={() => navigate({ to: "/expenses", search: true })}
+								onClick={() =>
+									navigate({
+										to: "/expenses",
+										search: (previous) => ({
+											...previous,
+											duplicateId: undefined,
+										}),
+									})
+								}
 							>
 								Cancel
 							</button>
@@ -38,7 +67,14 @@ function ExpenseCreateModal() {
 					</>
 				}
 			>
-				<ExpenseEdit formId={formId} />
+				<ExpenseEdit
+					formId={formId}
+					initialData={
+						duplicate
+							? { ...duplicate, name: `copy ${duplicate.name}` }
+							: undefined
+					}
+				/>
 			</ResponsiveModal>
 		</>
 	);

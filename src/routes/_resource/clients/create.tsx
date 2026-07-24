@@ -5,20 +5,34 @@ import {
 	useChildMatches,
 } from "@tanstack/react-router";
 import { SaveIcon } from "lucide-react";
+import { z } from "zod";
 import ClientEdit from "@/components/ClientEdit";
 import FormPageLayout from "@/components/FormPageLayout";
 import { Button } from "@/components/ui/button";
-import { projectsQueryOptions } from "@/utility/data/queryOptions";
+import {
+	clientQueryOptions,
+	projectsQueryOptions,
+} from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/clients/create")({
-	loader: ({ context }) =>
-		context.queryClient.ensureQueryData(projectsQueryOptions()),
+	validateSearch: z.object({
+		duplicateId: z.coerce.number().int().positive().optional(),
+	}),
+	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
+	loader: async ({ context, deps }) => ({
+		projects: await context.queryClient.ensureQueryData(projectsQueryOptions()),
+		duplicate: deps.duplicateId
+			? await context.queryClient.ensureQueryData(
+					clientQueryOptions(deps.duplicateId),
+				)
+			: undefined,
+	}),
 	component: ClientCreatePageRoute,
 });
 
 function ClientCreatePageRoute() {
 	const childMatches = useChildMatches();
-	const projects = Route.useLoaderData();
+	const { duplicate, projects } = Route.useLoaderData();
 	if (childMatches.length > 0) return <Outlet />;
 	return (
 		<FormPageLayout
@@ -38,7 +52,15 @@ function ClientCreatePageRoute() {
 				</>
 			}
 		>
-			<ClientEdit formId="client-create-form" initialProjects={projects} />
+			<ClientEdit
+				formId="client-create-form"
+				initialData={
+					duplicate
+						? { ...duplicate, name: `copy ${duplicate.name}` }
+						: undefined
+				}
+				initialProjects={projects}
+			/>
 		</FormPageLayout>
 	);
 }

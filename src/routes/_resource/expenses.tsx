@@ -15,6 +15,7 @@ const expensesSearchSchema = z.object({
 		.optional()
 		.catch(undefined),
 	expenseOtherOnly: z.boolean().optional().catch(undefined),
+	duplicateId: z.coerce.number().int().positive().optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_resource/expenses")({

@@ -40,8 +40,8 @@ export default function ProjectEdit({
 	const clientsQuery = useClients({ initialData: initialClients });
 	const editMutation = useProjectEdit();
 	const createMutation = useProjectCreate();
-	const projectQuery = useProject(id, initialData);
-	const { data: project } = projectQuery;
+	const projectQuery = useProject(id, id ? initialData : undefined);
+	const project = id ? projectQuery.data : initialData;
 	const isLoading = loading || (Boolean(id) && projectQuery.isPending);
 	const [status, setStatus] = useState(project?.status ?? "active");
 	const [content, setContent] = useState(project?.content ?? "");

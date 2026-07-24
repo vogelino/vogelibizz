@@ -40,8 +40,8 @@ export default function ClientEdit({
 	loading?: boolean;
 }) {
 	const navigate = useNavigate();
-	const clientQuery = useClient(id, initialData);
-	const { data: client } = clientQuery;
+	const clientQuery = useClient(id, id ? initialData : undefined);
+	const client = id ? clientQuery.data : initialData;
 	const isLoading = loading || (Boolean(id) && clientQuery.isPending);
 	const projectsQuery = useProjects({ initialData: initialProjects });
 	const editMutation = useClientEdit();

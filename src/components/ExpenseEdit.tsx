@@ -35,7 +35,8 @@ export default function ExpenseEdit({
 }) {
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
-	const { data: expense } = useExpense(id, initialData);
+	const expenseQuery = useExpense(id, id ? initialData : undefined);
+	const expense = id ? expenseQuery.data : initialData;
 	const navigate = useNavigate();
 	const isLoading = loading || (Boolean(id) && !expense);
 	const [type, setType] = useState(expense?.type ?? "Freelance");
@@ -55,7 +56,10 @@ export default function ExpenseEdit({
 			name: expense?.name ?? "",
 		},
 		onSubmit: async ({ value }) => {
-			navigate({ to: "/expenses", search: true });
+			navigate({
+				to: "/expenses",
+				search: (previous) => ({ ...previous, duplicateId: undefined }),
+			});
 			const expenseData = {
 				name: value.name,
 				type,

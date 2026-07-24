@@ -5,16 +5,26 @@ import ProjectEdit from "@/components/ProjectEdit";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ProjectList from "@/features/projects/ProjectsList";
-import { clientsQueryOptions } from "@/utility/data/queryOptions";
+import {
+	clientsQueryOptions,
+	projectQueryOptions,
+} from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/projects/create/modal")({
-	loader: ({ context }) =>
-		context.queryClient.ensureQueryData(clientsQueryOptions()),
+	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
+	loader: async ({ context, deps }) => ({
+		clients: await context.queryClient.ensureQueryData(clientsQueryOptions()),
+		duplicate: deps.duplicateId
+			? await context.queryClient.ensureQueryData(
+					projectQueryOptions(deps.duplicateId),
+				)
+			: undefined,
+	}),
 	component: ProjectCreateModal,
 });
 
 function ProjectCreateModal() {
-	const clients = Route.useLoaderData();
+	const { clients, duplicate } = Route.useLoaderData();
 	const navigate = useNavigate();
 	const formId = "project-create-form";
 
@@ -23,7 +33,11 @@ function ProjectCreateModal() {
 			<ProjectList />
 			<ResponsiveModal
 				open
-				title={<PageHeaderTitle name="Create project" />}
+				title={
+					<PageHeaderTitle
+						name={duplicate ? "Duplicate project" : "Create project"}
+					/>
+				}
 				onClose={() => navigate({ to: "/projects" })}
 				footer={
 					<>
@@ -42,7 +56,15 @@ function ProjectCreateModal() {
 					</>
 				}
 			>
-				<ProjectEdit formId={formId} initialClients={clients} />
+				<ProjectEdit
+					formId={formId}
+					initialData={
+						duplicate
+							? { ...duplicate, name: `copy ${duplicate.name}` }
+							: undefined
+					}
+					initialClients={clients}
+				/>
 			</ResponsiveModal>
 		</>
 	);

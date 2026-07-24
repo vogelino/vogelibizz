@@ -21,7 +21,7 @@ import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary"
 import useExpenses from "@/utility/data/useExpenses";
 import useSettings from "@/utility/data/useSettings";
 import { formatCurrency } from "@/utility/formatUtil";
-import { getDeleteColumn } from "@/utility/getDeleteColumn";
+import { getRowActionsColumn } from "@/utility/getRowActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getExpensesTableColumns } from "./columns";
@@ -98,10 +98,38 @@ export default function ExpensesPage({
 		[setUrlFilters],
 	);
 	const deleteMutation = useExpenseDelete();
-	const deleteColumn = getDeleteColumn<ExpenseOverviewRow>(
-		(id) => deleteMutation.mutate(id),
-		(row) => row.kind === "recurring",
-	);
+	const rowActionsColumn = getRowActionsColumn<ExpenseOverviewRow>({
+		onEdit: (row) => {
+			if (row.kind !== "recurring") return;
+			const id = String(row.id);
+			navigate({
+				to: "/expenses/edit/$id/modal",
+				params: { id },
+				search: true,
+				mask: {
+					to: "/expenses/edit/$id",
+					params: { id },
+					unmaskOnReload: true,
+				},
+			});
+		},
+		onDuplicate: (row) => {
+			if (row.kind !== "recurring") return;
+			navigate({
+				to: "/expenses/create/modal",
+				search: (previous) => ({ ...previous, duplicateId: row.id }),
+				mask: {
+					to: "/expenses/create",
+					search: (previous) => ({ ...previous, duplicateId: row.id }),
+					unmaskOnReload: true,
+				},
+			});
+		},
+		onDelete: (row) => {
+			if (row.kind === "recurring") deleteMutation.mutate(row.id);
+		},
+		canShowActions: (row) => row.kind === "recurring",
+	});
 	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
@@ -160,10 +188,10 @@ export default function ExpensesPage({
 				selectionColumn,
 				...getExpensesTableColumns(targetCurrency),
 				lastModifiedColumn,
-				deleteColumn,
+				rowActionsColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseOverviewRow, any>[],
-		[targetCurrency, selectionColumn, deleteColumn, lastModifiedColumn],
+		[targetCurrency, selectionColumn, rowActionsColumn, lastModifiedColumn],
 	);
 
 	const {
