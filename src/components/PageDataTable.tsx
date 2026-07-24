@@ -12,7 +12,11 @@ import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useInvoiceDelete from "@/utility/data/useInvoiceDelete";
 import useProjectDelete from "@/utility/data/useProjectDelete";
-import { getRowActionsColumn } from "@/utility/getRowActionsColumn";
+import {
+	getRowActionsColumn,
+	type RowActionOptions,
+	RowActionsContextMenu,
+} from "@/utility/getRowActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 
 export default function PageDataTable<DataType extends { id: number }>({
@@ -55,7 +59,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 			invoiceDeleteMutation,
 		],
 	);
-	const rowActionsColumn = getRowActionsColumn<DataType>({
+	const rowActions: RowActionOptions<DataType> = {
 		onEdit: (row) => {
 			const id = String(row.id);
 			switch (resource) {
@@ -140,7 +144,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 			}
 		},
 		onDelete: (row) => deleteAction(row.id),
-	});
+	};
+	const rowActionsColumn = getRowActionsColumn<DataType>(rowActions);
 	const lastModifiedColumn = useLastModifiedColumn<DataType>();
 	const selectionColumn = useMemo(
 		() =>
@@ -220,6 +225,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 					loading={loading}
 					enableRowSelection
 					onSelectionChange={setSelectedRows}
+					rowContextMenu={(row, trigger) => (
+						<RowActionsContextMenu key={row.id} row={row} {...rowActions}>
+							{trigger}
+						</RowActionsContextMenu>
+					)}
 					initialState={{
 						sorting: [{ id: defaultSortColumn, desc: true }],
 						pagination: { pageIndex: 0, pageSize: 50 },

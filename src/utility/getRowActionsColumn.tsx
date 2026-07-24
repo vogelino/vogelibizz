@@ -7,7 +7,7 @@ import {
 	PencilIcon,
 	Trash2Icon,
 } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
@@ -28,7 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utility/classNames";
 
-type RowActionOptions<RowType> = {
+export type RowActionOptions<RowType> = {
 	onEdit: (row: RowType) => void;
 	onDuplicate: (row: RowType) => void;
 	onDelete: (row: RowType) => void;
@@ -58,6 +65,53 @@ export function getRowActionsColumn<RowType extends { id: string | number }>({
 				/>
 			) : null,
 	};
+}
+
+export function RowActionsContextMenu<RowType>({
+	row,
+	onEdit,
+	onDuplicate,
+	onDelete,
+	children,
+}: RowActionOptions<RowType> & { row: RowType; children: ReactNode }) {
+	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [contextMenuOpen, setContextMenuOpen] = useState(false);
+
+	return (
+		<>
+			<ContextMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+				<ContextMenuTrigger
+					asChild
+					data-context-menu-open={contextMenuOpen ? "" : undefined}
+				>
+					{children}
+				</ContextMenuTrigger>
+				<ContextMenuContent>
+					<ContextMenuItem onSelect={() => onEdit(row)}>
+						<PencilIcon className="size-4" />
+						Edit
+					</ContextMenuItem>
+					<ContextMenuItem onSelect={() => onDuplicate(row)}>
+						<CopyIcon className="size-4" />
+						Duplicate
+					</ContextMenuItem>
+					<ContextMenuSeparator />
+					<ContextMenuItem
+						className="text-destructive focus:text-destructive"
+						onSelect={() => setConfirmDelete(true)}
+					>
+						<Trash2Icon className="size-4" />
+						Delete
+					</ContextMenuItem>
+				</ContextMenuContent>
+			</ContextMenu>
+			<DeleteConfirmation
+				open={confirmDelete}
+				onOpenChange={setConfirmDelete}
+				onDelete={() => onDelete(row)}
+			/>
+		</>
+	);
 }
 
 function RowActions<RowType extends { id: string | number }>({
@@ -101,26 +155,44 @@ function RowActions<RowType extends { id: string | number }>({
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Delete this item?</AlertDialogTitle>
-						<AlertDialogDescription>
-							This action cannot be undone. This will permanently delete the
-							item from the server.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							className={cn(buttonVariants({ variant: "destructive" }))}
-							onClick={() => onDelete(row)}
-						>
-							Delete
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<DeleteConfirmation
+				open={confirmDelete}
+				onOpenChange={setConfirmDelete}
+				onDelete={() => onDelete(row)}
+			/>
 		</>
+	);
+}
+
+function DeleteConfirmation({
+	open,
+	onOpenChange,
+	onDelete,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	onDelete: () => void;
+}) {
+	return (
+		<AlertDialog open={open} onOpenChange={onOpenChange}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Delete this item?</AlertDialogTitle>
+					<AlertDialogDescription>
+						This action cannot be undone. This will permanently delete the item
+						from the server.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction
+						className={cn(buttonVariants({ variant: "destructive" }))}
+						onClick={onDelete}
+					>
+						Delete
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }

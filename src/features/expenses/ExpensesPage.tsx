@@ -21,7 +21,11 @@ import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary"
 import useExpenses from "@/utility/data/useExpenses";
 import useSettings from "@/utility/data/useSettings";
 import { formatCurrency } from "@/utility/formatUtil";
-import { getRowActionsColumn } from "@/utility/getRowActionsColumn";
+import {
+	getRowActionsColumn,
+	type RowActionOptions,
+	RowActionsContextMenu,
+} from "@/utility/getRowActionsColumn";
 import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getExpensesTableColumns } from "./columns";
@@ -98,7 +102,7 @@ export default function ExpensesPage({
 		[setUrlFilters],
 	);
 	const deleteMutation = useExpenseDelete();
-	const rowActionsColumn = getRowActionsColumn<ExpenseOverviewRow>({
+	const rowActions: RowActionOptions<ExpenseOverviewRow> = {
 		onEdit: (row) => {
 			if (row.kind !== "recurring") return;
 			const id = String(row.id);
@@ -129,7 +133,8 @@ export default function ExpensesPage({
 			if (row.kind === "recurring") deleteMutation.mutate(row.id);
 		},
 		canShowActions: (row) => row.kind === "recurring",
-	});
+	};
+	const rowActionsColumn = getRowActionsColumn<ExpenseOverviewRow>(rowActions);
 	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
@@ -339,6 +344,15 @@ export default function ExpensesPage({
 				loading={isLoading}
 				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}
+				rowContextMenu={(row, trigger) =>
+					rowActions.canShowActions?.(row) ? (
+						<RowActionsContextMenu key={row.id} row={row} {...rowActions}>
+							{trigger}
+						</RowActionsContextMenu>
+					) : (
+						trigger
+					)
+				}
 				toolbarSkeleton={
 					<div className="px-6 md:px-10 sticky left-0 pt-3">
 						<ExpenseFilter loading showMixedClassification />

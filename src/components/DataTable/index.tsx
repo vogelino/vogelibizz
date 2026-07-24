@@ -75,6 +75,7 @@ type DataTableProps<TData> = {
 	hasMore?: boolean;
 	loadingMore?: boolean;
 	onEndReached?: () => void;
+	rowContextMenu?: (row: TData, trigger: ReactNode) => ReactNode;
 };
 
 export function DataTable<TData>({
@@ -96,6 +97,7 @@ export function DataTable<TData>({
 	hasMore = false,
 	loadingMore = false,
 	onEndReached,
+	rowContextMenu,
 }: DataTableProps<TData>) {
 	const [sorting, setSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -372,7 +374,7 @@ export function DataTable<TData>({
 											</TableRow>
 										);
 									}
-									return (
+									const rowElement = (
 										<TableRow
 											key={row.id}
 											data-index={virtualItem?.index}
@@ -396,6 +398,9 @@ export function DataTable<TData>({
 											))}
 										</TableRow>
 									);
+									return rowContextMenu
+										? rowContextMenu(row.original, rowElement)
+										: rowElement;
 								})}
 								{virtualized && paddingBottom > 0 ? (
 									<tr className="border-0 pointer-events-none">
