@@ -2,10 +2,17 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconBadge } from "@/components/ui/icon-badge";
-import InternalLink from "@/components/ui/internal-link";
-import type { CurrencyIdType } from "@/db/schema";
-import { expenseHistoryTransactionQueryOptions } from "@/utility/data/queryOptions";
-import type { ExpenseHistoryTransaction } from "@/utility/expenseHistoryContracts";
+import { InlineCombobox, InlineInput } from "@/components/ui/inline-edit";
+import {
+	type CurrencyIdType,
+	type ExpenseWithMonthlyCLPPriceType,
+	expenseCategoryEnum,
+	expenseTypeEnum,
+} from "@/db/schema";
+import type {
+	ExpenseHistoryTransaction,
+	ExpenseHistoryTransactionMutation,
+} from "@/utility/expenseHistoryContracts";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency, locale } from "@/utility/formatUtil";
 
@@ -20,16 +27,15 @@ function formatDate(date: string) {
 	}).format(new Date(`${date}T00:00:00Z`));
 }
 
-type ExpenseHistorySearch = {
-	month?: string;
-	category?: NonNullable<ExpenseHistoryTransaction["category"]>[];
-	type?: NonNullable<ExpenseHistoryTransaction["type"]> | "All types";
-	otherOnly?: boolean;
-};
-
 export function getExpenseHistoryColumns(
-	search: ExpenseHistorySearch,
 	currency: CurrencyIdType,
+	onEdit: (
+		transaction: ExpenseHistoryTransaction,
+		change: Omit<ExpenseHistoryTransactionMutation, "lastModified">,
+		optimisticChange?: Partial<ExpenseHistoryTransaction>,
+	) => void,
+	expenses: readonly ExpenseWithMonthlyCLPPriceType[],
+	toChf: ((amount: number) => number) | undefined,
 ) {
 	return [
 		columnHelper.display({
@@ -74,46 +80,99 @@ export function getExpenseHistoryColumns(
 			cell: ({ getValue, row }) => {
 				const transaction = row.original;
 				return (
-					<div className="min-w-64 max-w-120 truncate">
-						<InternalLink
-							to="/expenses/history/edit/$id/modal"
-							params={{ id: String(transaction.id) }}
-							search={search}
-							mask={{
-								to: "/expenses/history/edit/$id",
-								params: { id: String(transaction.id) },
-								unmaskOnReload: true,
-							}}
-							prefetchQuery={expenseHistoryTransactionQueryOptions(
-								transaction.id,
-							)}
-							className="text-base -ml-3 bg-transparent whitespace-nowrap"
-						>
-							{getValue()}
-						</InternalLink>
-					</div>
+					<InlineInput
+						value={getValue()}
+						ariaLabel={`description for ${getValue()}`}
+						onCommit={(description) => onEdit(transaction, { description })}
+						className="h-10 min-w-64 max-w-120"
+						displayClassName="h-10 text-base"
+						inputClassName="h-10"
+					/>
 				);
 			},
 		}),
 		columnHelper.accessor("amount", {
 			header: `Amount (${currency})`,
 			size: 150,
-			cell: ({ getValue }) => (
-				<span className="font-mono">
-					{formatCurrency(getValue(), currency)}
-				</span>
-			),
+			cell: ({ getValue, row }) =>
+				toChf ? (
+					<InlineInput
+						type="number"
+						min={0}
+						value={getValue()}
+						displayValue={formatCurrency(getValue(), currency)}
+						ariaLabel={`amount for ${row.original.description}`}
+						displayClassName="font-mono"
+						inputClassName="font-mono"
+						onCommit={(amount) =>
+							onEdit(row.original, { amount: toChf(amount) }, { amount })
+						}
+					/>
+				) : (
+					<span className="font-mono">
+						{formatCurrency(getValue(), currency)}
+					</span>
+				),
 		}),
 		columnHelper.accessor((row) => row.expense, {
 			id: "association",
 			header: "Association",
 			size: 240,
-			cell: ({ getValue }) => {
+			cell: ({ getValue, row }) => {
 				const expense = getValue();
-				return expense ? (
-					expense.name
-				) : (
-					<span className="italic text-muted-foreground">Other</span>
+				return (
+					<InlineCombobox
+						value={expense?.id ?? null}
+						aria-label={`association for ${row.original.description}`}
+						align="start"
+						options={[
+							{
+								value: null,
+								label: (
+									<span className="italic text-muted-foreground">Other</span>
+								),
+								searchValue: "Other",
+							},
+							...expenses.map((option) => ({
+								value: option.id as number | null,
+								label: option.name,
+								searchValue: option.name,
+							})),
+						]}
+						selectedValueFormater={(selectedId) => {
+							const selectedExpense = expenses.find(
+								(option) => option.id === selectedId,
+							);
+							return selectedExpense ? (
+								selectedExpense.name
+							) : (
+								<span className="italic text-muted-foreground">Other</span>
+							);
+						}}
+						onChange={(expenseId) => {
+							const selectedExpense = expenses.find(
+								(option) => option.id === expenseId,
+							);
+							onEdit(
+								row.original,
+								{ expenseId },
+								{
+									expense: selectedExpense
+										? {
+												id: selectedExpense.id,
+												name: selectedExpense.name,
+											}
+										: null,
+									...(selectedExpense
+										? {
+												category: selectedExpense.category,
+												type: selectedExpense.type,
+											}
+										: {}),
+								},
+							);
+						}}
+					/>
 				);
 			},
 			filterFn: (row, _columnId, filterValue) =>
@@ -122,28 +181,92 @@ export function getExpenseHistoryColumns(
 		columnHelper.accessor("category", {
 			header: "Category",
 			size: 200,
-			cell: ({ getValue }) => {
+			cell: ({ getValue, row }) => {
 				const category = getValue();
-				return category ? (
-					<ExpenseCategoryBadge value={category} />
-				) : (
-					<span className="italic text-muted-foreground">Unclassified</span>
+				return (
+					<InlineCombobox
+						value={category}
+						aria-label={`category for ${row.original.description}`}
+						align="start"
+						options={[
+							{
+								value: null,
+								label: (
+									<span className="italic text-muted-foreground">
+										Unclassified
+									</span>
+								),
+								searchValue: "Unclassified",
+							},
+							...expenseCategoryEnum.enumValues.map((option) => ({
+								value: option as typeof category,
+								label: <ExpenseCategoryBadge value={option} />,
+								searchValue: option,
+							})),
+						]}
+						selectedValueFormater={(selectedCategory) =>
+							selectedCategory ? (
+								<ExpenseCategoryBadge value={selectedCategory} />
+							) : (
+								<span className="italic text-muted-foreground">
+									Unclassified
+								</span>
+							)
+						}
+						onChange={(nextCategory) =>
+							onEdit(row.original, { category: nextCategory })
+						}
+					/>
 				);
 			},
 		}),
 		columnHelper.accessor("type", {
 			header: "Type",
 			size: 160,
-			cell: ({ getValue }) => {
+			cell: ({ getValue, row }) => {
 				const type = getValue();
-				return type ? (
-					<IconBadge
-						icon={mapTypeToIcon(type)}
-						label={type}
-						className={typeToColorClass(type)}
+				return (
+					<InlineCombobox
+						value={type}
+						aria-label={`type for ${row.original.description}`}
+						align="start"
+						options={[
+							{
+								value: null,
+								label: (
+									<span className="italic text-muted-foreground">
+										Unclassified
+									</span>
+								),
+								searchValue: "Unclassified",
+							},
+							...expenseTypeEnum.enumValues.map((option) => ({
+								value: option as typeof type,
+								label: (
+									<IconBadge
+										icon={mapTypeToIcon(option)}
+										label={option}
+										className={typeToColorClass(option)}
+									/>
+								),
+								searchValue: option,
+							})),
+						]}
+						selectedValueFormater={(selectedType) =>
+							selectedType ? (
+								<IconBadge
+									icon={mapTypeToIcon(selectedType)}
+									label={selectedType}
+									className={typeToColorClass(selectedType)}
+								/>
+							) : (
+								<span className="italic text-muted-foreground">
+									Unclassified
+								</span>
+							)
+						}
+						onChange={(nextType) => onEdit(row.original, { type: nextType })}
 					/>
-				) : (
-					<span className="italic text-muted-foreground">Unclassified</span>
 				);
 			},
 		}),

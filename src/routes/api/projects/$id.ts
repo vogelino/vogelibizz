@@ -29,12 +29,14 @@ export const Route = createFileRoute("/api/projects/$id")({
 					await db
 						.delete(projectsToClients)
 						.where(eq(projectsToClients.projectId, id));
-					await db.insert(projectsToClients).values(
-						clients.map((client) => ({
-							clientId: client.id,
-							projectId: id,
-						})),
-					);
+					if (clients.length > 0) {
+						await db.insert(projectsToClients).values(
+							clients.map((client) => ({
+								clientId: client.id,
+								projectId: id,
+							})),
+						);
+					}
 				}
 			}),
 			DELETE: getDeletionRoute(async (id) => {

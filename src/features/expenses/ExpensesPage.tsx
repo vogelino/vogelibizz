@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
+import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
 import useExpenses from "@/utility/data/useExpenses";
 import useSettings from "@/utility/data/useSettings";
@@ -102,6 +103,7 @@ export default function ExpensesPage({
 		[setUrlFilters],
 	);
 	const deleteMutation = useExpenseDelete();
+	const editMutation = useExpenseEdit();
 	const rowActions: RowActionOptions<ExpenseOverviewRow> = {
 		onEdit: (row) => {
 			if (row.kind !== "recurring") return;
@@ -151,6 +153,24 @@ export default function ExpensesPage({
 		() => createExpenseOverviewRows(data, overviewQuery.data),
 		[data, overviewQuery.data],
 	);
+	const editExpenseCell = useCallback(
+		(
+			row: Extract<ExpenseOverviewRow, { kind: "recurring" }>,
+			change: Partial<typeof row.expense>,
+		) => {
+			const {
+				clpMonthlyPrice: _clpMonthlyPrice,
+				created_at,
+				...expense
+			} = row.expense;
+			editMutation.mutate({
+				...expense,
+				...change,
+				last_modified: new Date().toISOString(),
+			});
+		},
+		[editMutation],
+	);
 
 	const selectionColumn = useMemo(
 		() =>
@@ -191,12 +211,18 @@ export default function ExpensesPage({
 		() =>
 			[
 				selectionColumn,
-				...getExpensesTableColumns(targetCurrency),
+				...getExpensesTableColumns(targetCurrency, editExpenseCell),
 				lastModifiedColumn,
 				rowActionsColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseOverviewRow, any>[],
-		[targetCurrency, selectionColumn, rowActionsColumn, lastModifiedColumn],
+		[
+			targetCurrency,
+			selectionColumn,
+			rowActionsColumn,
+			lastModifiedColumn,
+			editExpenseCell,
+		],
 	);
 
 	const {

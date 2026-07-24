@@ -20,19 +20,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utility/classNames";
 import { IconBadge } from "./icon-badge";
 
-type OptionType = {
+export type MultiValueOption = {
 	label: ReactNode;
 	value: string | number;
 };
 
-type MultiValueInputProps<OptionValueType> = {
-	options: OptionType[];
-	onChange?: (newOptions: OptionType[]) => void;
+export type MultiValueInputProps<OptionValueType> = {
+	options: MultiValueOption[];
+	onChange?: (newOptions: MultiValueOption[]) => void;
 	values?: OptionValueType[];
 	className?: string;
 	placeholder?: string;
 	selectedValueFormater?: (value: string | number) => ReactNode;
 	loading?: boolean;
+	variant?: "default" | "inline";
+	"aria-label"?: string;
 };
 
 export function MultiValueInput<OptionValueType extends string = string>({
@@ -43,6 +45,8 @@ export function MultiValueInput<OptionValueType extends string = string>({
 	placeholder = "Select options",
 	selectedValueFormater,
 	loading = false,
+	variant = "default",
+	"aria-label": ariaLabel,
 }: MultiValueInputProps<OptionValueType>) {
 	const onChange = originalOnChange || (() => {});
 	const selectedValueFormaterFn =
@@ -52,7 +56,9 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		(optionValue) => options.find(getOptionComparator(optionValue))!,
 	);
 	const [selectedOptions, setSelectedOptions] =
-		useState<OptionType[]>(initialOptions);
+		useState<MultiValueOption[]>(initialOptions);
+	const inline = variant === "inline";
+	const visibleOptionCount = inline ? 2 : 4;
 
 	useEffect(() => {
 		const nextOptions = initialValues
@@ -113,6 +119,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 				<div
 					role="combobox"
 					aria-expanded={open}
+					aria-label={ariaLabel}
 					tabIndex={0}
 					onKeyDown={(event) => {
 						if (event.key === "Enter" || event.key === " ") {
@@ -122,41 +129,60 @@ export function MultiValueInput<OptionValueType extends string = string>({
 					}}
 					className={cn(
 						buttonVariants({ variant: "outline" }),
-						"w-fit justify-between",
-						"hover:bg-accent hover:text-accent-foreground",
-						"text-base bg-background dark:bg-card",
+						"group/relations w-fit justify-between",
+						inline
+							? "-ml-2 w-[calc(100%+0.5rem)] border-transparent bg-transparent text-foreground hover:border-border hover:bg-transparent hover:text-foreground dark:bg-transparent"
+							: "bg-background text-base hover:bg-accent hover:text-accent-foreground dark:bg-card",
 						"p-0 has-[&>svg]:pl-0 pr-1.5 py-1 h-9",
 						className,
 					)}
 				>
-					<div className="grow flex gap-4 pl-1 pr-3 items-center border-r border-border w-fit">
+					<div
+						className={cn(
+							"grow flex gap-4 pl-1 pr-3 items-center border-r border-border w-fit",
+							inline && "border-r-transparent pl-2",
+						)}
+					>
 						{!selectedOptions.length && (
-							<span className="text-muted-foreground pl-1.5 opacity-80 min-w-40 [text-box-trim:trim-both]">
+							<span
+								className={cn(
+									"text-muted-foreground pl-1.5 opacity-80 min-w-40 [text-box-trim:trim-both]",
+									inline && "min-w-0",
+								)}
+							>
 								{placeholder}
 							</span>
 						)}
 						{selectedOptions.length > 0 && (
-							<div className="min-w-40 grow flex gap-4 justify-between items-center w-fit">
-								<div className="flex gap-x-1 gap-y-0.5 items-center">
-									{[...selectedOptions].slice(0, 4).map((option) => (
-										<button
-											key={option.value}
-											type="button"
-											className="focusable text-sm trim-both items-center h-7"
-											onClick={(evt) => {
-												evt.stopPropagation();
-												onOptionSelect(option.value);
-											}}
-										>
-											{selectedValueFormaterFn(option.value)}
-										</button>
-									))}
+							<div
+								className={cn(
+									"min-w-40 grow flex gap-4 justify-between items-center w-fit",
+									inline && "min-w-0",
+								)}
+							>
+								<div className="flex min-w-0 gap-x-1 gap-y-0.5 items-center overflow-hidden">
+									{[...selectedOptions]
+										.slice(0, visibleOptionCount)
+										.map((option) => (
+											<button
+												key={option.value}
+												type="button"
+												className="focusable text-sm trim-both items-center h-7"
+												onClick={(evt) => {
+													if (inline) return;
+													evt.stopPropagation();
+													onOptionSelect(option.value);
+												}}
+											>
+												{selectedValueFormaterFn(option.value)}
+											</button>
+										))}
 
-									{selectedOptions.length > 5 && (
+									{selectedOptions.length > visibleOptionCount && (
 										<span className="bg-background">
 											<IconBadge
 												icon={null}
-												label={`+${selectedOptions.length - 5}`}
+												label={`+${selectedOptions.length - visibleOptionCount}`}
 												className="h-7 border-transparent bg-accent/0 hover:bg-accent"
 											/>
 										</span>
@@ -175,7 +201,11 @@ export function MultiValueInput<OptionValueType extends string = string>({
 										onChange([]);
 										setOpen(false);
 									}}
-									className="text-muted-foreground hover:text-foreground focusable h-7"
+									className={cn(
+										"text-muted-foreground hover:text-foreground focusable h-7",
+										inline &&
+											"opacity-0 group-hover/relations:opacity-100 group-focus-within/relations:opacity-100",
+									)}
 									aria-label="Clear selected options"
 								>
 									<ArrowLeftToLine size={20} />
@@ -183,7 +213,13 @@ export function MultiValueInput<OptionValueType extends string = string>({
 							</div>
 						)}
 					</div>
-					<ChevronDown className="inline-block" />
+					<ChevronDown
+						className={cn(
+							"inline-block",
+							inline &&
+								"opacity-0 group-hover/relations:opacity-50 group-focus-within/relations:opacity-50",
+						)}
+					/>
 				</div>
 			</PopoverTrigger>
 			<PopoverContent className="w-fit p-0" align="end">
@@ -227,13 +263,13 @@ function getOptionComparator(
 	include = true,
 ) {
 	const a = String(optionToCompareTo).toLowerCase();
-	return (option: OptionType) => {
+	return (option: MultiValueOption) => {
 		const b = String(option.value).toLowerCase();
 		return include ? a === b : a !== b;
 	};
 }
 
-function areOptionsEqual(a: OptionType[], b: OptionType[]) {
+function areOptionsEqual(a: MultiValueOption[], b: MultiValueOption[]) {
 	if (a.length !== b.length) return false;
 	return a.every((option, index) => {
 		const otherOption = b[index];
@@ -245,7 +281,7 @@ function areOptionsEqual(a: OptionType[], b: OptionType[]) {
 	});
 }
 
-function getDefaultValueFormatter(options: OptionType[]) {
+function getDefaultValueFormatter(options: MultiValueOption[]) {
 	return function defaultFormatter(value: string | number) {
 		const option = options.find(
 			(option) => String(option.value) === String(value),

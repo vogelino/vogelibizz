@@ -18,14 +18,31 @@ export const Route = createFileRoute("/api/invoices/$id")({
 				(id) => `Invoice with id '${id}' does not exist`,
 			),
 			PATCH: getEditionRoute(async (id, body) => {
-				const [{ invoiceEditSchema, invoices }, { default: db }, { eq }] =
-					await Promise.all([
-						import("@/db/schema"),
-						import("@/db"),
-						import("drizzle-orm"),
-					]);
+				const [
+					{ invoiceEditSchema, invoices, projectsToInvoices },
+					{ default: db },
+					{ eq },
+				] = await Promise.all([
+					import("@/db/schema"),
+					import("@/db"),
+					import("drizzle-orm"),
+				]);
 				const parsedBody = invoiceEditSchema.parse({ ...(body as object), id });
-				await db.update(invoices).set(parsedBody).where(eq(invoices.id, id));
+				const { projects, ...invoice } = parsedBody;
+				await db.update(invoices).set(invoice).where(eq(invoices.id, id));
+				if (projects !== undefined) {
+					await db
+						.delete(projectsToInvoices)
+						.where(eq(projectsToInvoices.invoiceId, id));
+					if (projects.length > 0) {
+						await db.insert(projectsToInvoices).values(
+							projects.map((project) => ({
+								projectId: project.id,
+								invoiceId: id,
+							})),
+						);
+					}
+				}
 			}),
 			DELETE: getDeletionRoute(async (id) => {
 				const [{ invoices, projectsToInvoices }, { default: db }, { eq }] =

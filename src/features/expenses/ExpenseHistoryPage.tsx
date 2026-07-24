@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
@@ -9,8 +9,10 @@ import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
+import type { CurrencyIdType } from "@/db/schema";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
+	exchangeRatesQueryOptions,
 	expenseHistoryMonthQueriesKey,
 	expenseHistoryMonthsQueryOptions,
 	expenseOverviewSummaryQueryOptions,
@@ -18,8 +20,17 @@ import {
 import useExpenseHistoryMonth from "@/utility/data/useExpenseHistoryMonth";
 import useExpenseHistoryMonths from "@/utility/data/useExpenseHistoryMonths";
 import useExpenseHistoryTransactionDelete from "@/utility/data/useExpenseHistoryTransactionDelete";
+import { useExpenseHistoryTransactionInlineEdit } from "@/utility/data/useExpenseHistoryTransactionMutations";
+import useExpenses from "@/utility/data/useExpenses";
 import { apiFetch } from "@/utility/dataHookUtil";
-import type { ExpenseHistoryTransaction } from "@/utility/expenseHistoryContracts";
+import {
+	getValueInTargetCurrencyPerMonth,
+	type RatesMapType,
+} from "@/utility/expenseFetchUtil";
+import type {
+	ExpenseHistoryTransaction,
+	ExpenseHistoryTransactionMutation,
+} from "@/utility/expenseHistoryContracts";
 import {
 	type ExpenseHistoryImportCommitResult,
 	type ExpenseHistoryImportPreview,
@@ -109,6 +120,10 @@ export default function ExpenseHistoryPage() {
 	);
 	const monthDetail = monthQuery.data?.pages[0];
 	const targetCurrency = monthDetail?.currency ?? "CLP";
+	const { data: recurringExpenses = [] } = useExpenses();
+	const exchangeRatesQuery = useQuery(exchangeRatesQueryOptions());
+	const { mutate: editInlineTransaction } =
+		useExpenseHistoryTransactionInlineEdit();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [source, setSource] = useState<ImportSource | null>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -210,16 +225,45 @@ export default function ExpenseHistoryPage() {
 			search: (previous) => ({ ...previous, month: month ?? undefined }),
 			replace: true,
 		});
+	const editTransaction = useCallback(
+		(
+			transaction: ExpenseHistoryTransaction,
+			change: Omit<ExpenseHistoryTransactionMutation, "lastModified">,
+			optimisticChange?: Partial<ExpenseHistoryTransaction>,
+		) => {
+			editInlineTransaction({ transaction, change, optimisticChange });
+		},
+		[editInlineTransaction],
+	);
+	const convertTargetAmountToChf = useMemo(() => {
+		if (targetCurrency === "CHF") return (amount: number) => amount;
+		if (!exchangeRatesQuery.data) return undefined;
+		const rates = new Map(
+			Object.entries(exchangeRatesQuery.data) as [CurrencyIdType, number][],
+		) as RatesMapType;
+		return (amount: number) =>
+			getValueInTargetCurrencyPerMonth({
+				value: amount,
+				currency: targetCurrency,
+				targetCurrency: "CHF",
+				billingRate: "Monthly",
+				rates,
+			}) ?? amount;
+	}, [exchangeRatesQuery.data, targetCurrency]);
 	const columns = useMemo(
 		() =>
 			getExpenseHistoryColumns(
-				{
-					...search,
-					month: selectedMonth ?? undefined,
-				},
 				targetCurrency,
+				editTransaction,
+				recurringExpenses,
+				convertTargetAmountToChf,
 			),
-		[search, selectedMonth, targetCurrency],
+		[
+			convertTargetAmountToChf,
+			editTransaction,
+			recurringExpenses,
+			targetCurrency,
+		],
 	);
 	const historyLoading =
 		monthsQuery.isPending ||
@@ -361,9 +405,9 @@ export default function ExpenseHistoryPage() {
 							}
 							caption={
 								<span className="sr-only">
-									Imported bank transactions. Open a description to edit the
-									transaction. Original bank values remain available within each
-									description cell.
+									Imported bank transactions. Editable values can be changed
+									inline. Original bank values remain available in the
+									transaction detail.
 								</span>
 							}
 							toolbar={(table) => (

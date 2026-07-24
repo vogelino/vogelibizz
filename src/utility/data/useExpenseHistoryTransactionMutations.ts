@@ -1,9 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+	type InfiniteData,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import type {
 	ExpenseHistoryCreateExpense,
+	ExpenseHistoryMonthDetail,
+	ExpenseHistoryTransaction,
 	ExpenseHistoryTransactionMutation,
 } from "@/utility/expenseHistoryContracts";
 import { expenseHistoryTransactionSchema } from "@/utility/expenseHistoryContracts";
@@ -110,4 +116,77 @@ export function useExpenseHistoryTransactionMutations({
 	});
 
 	return { update, createExpense };
+}
+
+type InlineTransactionEdit = {
+	transaction: ExpenseHistoryTransaction;
+	change: Omit<ExpenseHistoryTransactionMutation, "lastModified">;
+	optimisticChange?: Partial<ExpenseHistoryTransaction>;
+};
+
+export function useExpenseHistoryTransactionInlineEdit() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({ transaction, change }: InlineTransactionEdit) =>
+			mutateTransaction(
+				transaction.id,
+				{ lastModified: transaction.lastModified, ...change },
+				false,
+			),
+		onMutate: async ({ transaction, change, optimisticChange }) => {
+			await queryClient.cancelQueries({
+				queryKey: expenseHistoryMonthQueriesKey,
+			});
+			const previous = queryClient.getQueriesData<
+				InfiniteData<ExpenseHistoryMonthDetail, number>
+			>({ queryKey: expenseHistoryMonthQueriesKey });
+			queryClient.setQueriesData<
+				InfiniteData<ExpenseHistoryMonthDetail, number>
+			>({ queryKey: expenseHistoryMonthQueriesKey }, (old) => {
+				if (!old) return old;
+				const nextChange = optimisticChange ?? change;
+				return {
+					...old,
+					pages: old.pages.map((page) => ({
+						...page,
+						transactions: page.transactions.map((item) =>
+							item.id === transaction.id
+								? {
+										...item,
+										...nextChange,
+										lastModified: new Date().toISOString(),
+									}
+								: item,
+						),
+					})),
+				};
+			});
+			return { previous };
+		},
+		onSuccess: () => {
+			toast.success("Transaction saved.");
+		},
+		onError: (error, _variables, context) => {
+			for (const [queryKey, data] of context?.previous ?? []) {
+				queryClient.setQueryData(queryKey, data);
+			}
+			toast.error("Transaction was not saved.", {
+				description: error.message,
+			});
+		},
+		onSettled: async (_data, _error, { transaction }) => {
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: expenseHistoryTransactionQueryOptions(transaction.id)
+						.queryKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseHistoryMonthQueriesKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
+				}),
+			]);
+		},
+	});
 }

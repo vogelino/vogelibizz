@@ -102,7 +102,6 @@ export const invoiceEditSchema = invoiceSelectSchema
 	.omit({
 		created_at: true,
 		last_modified: true,
-		projects: true,
 		clients: true,
 	})
 	.partial()

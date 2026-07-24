@@ -37,7 +37,18 @@ function createOptimisticDataEntry(
 ): ExpenseWithMonthlyCLPPriceType[] {
 	return (oldData || []).map((c) =>
 		c.id === editedData.id
-			? { ...c, ...editedData, last_modified: getNowInUTC() }
+			? {
+					...c,
+					...editedData,
+					clpMonthlyPrice:
+						editedData.originalPrice === undefined
+							? c.clpMonthlyPrice
+							: c.originalPrice === 0
+								? editedData.originalPrice
+								: c.clpMonthlyPrice *
+									(editedData.originalPrice / c.originalPrice),
+					last_modified: getNowInUTC(),
+				}
 			: c,
 	);
 }
