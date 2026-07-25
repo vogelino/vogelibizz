@@ -48,6 +48,7 @@ import {
 	ExpenseHistoryImportDialog,
 	ExpenseHistoryMonthNavigation,
 	ExpenseHistoryOverviewPanel,
+	formatExpenseHistoryMonth,
 } from "./ExpenseHistoryPresentation";
 import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
@@ -306,13 +307,29 @@ export default function ExpenseHistoryPage() {
 					.filter(Boolean)
 					.join(" "),
 		);
-		return filters.uncategorizedOnly
+		const matchingCategory = filters.uncategorizedOnly
 			? matchingText.filter((transaction) => transaction.category === null)
 			: matchingText;
-	}, [filters.uncategorizedOnly, search.q, transactions]);
+		return matchingCategory.filter((transaction) => {
+			const transactionMonth = transaction.bookedAt.slice(0, 7);
+			return (
+				(!search.fromMonth || transactionMonth >= search.fromMonth) &&
+				(!search.toMonth || transactionMonth <= search.toMonth)
+			);
+		});
+	}, [
+		filters.uncategorizedOnly,
+		search.fromMonth,
+		search.q,
+		search.toMonth,
+		transactions,
+	]);
 	useEffect(() => {
 		if (
-			(!search.q && !filters.uncategorizedOnly) ||
+			(!search.q &&
+				!filters.uncategorizedOnly &&
+				!search.fromMonth &&
+				!search.toMonth) ||
 			!monthQuery.hasNextPage ||
 			monthQuery.isFetchingNextPage
 		) {
@@ -324,7 +341,9 @@ export default function ExpenseHistoryPage() {
 		monthQuery.fetchNextPage,
 		monthQuery.hasNextPage,
 		monthQuery.isFetchingNextPage,
+		search.fromMonth,
 		search.q,
+		search.toMonth,
 	]);
 	const loadMoreTransactions = useCallback(() => {
 		if (monthQuery.hasNextPage && !monthQuery.isFetchingNextPage) {
@@ -418,7 +437,7 @@ export default function ExpenseHistoryPage() {
 							/>
 						) : null}
 						<DataTable
-							key={`${selectedMonth ?? "all-expense-history"}-${filters.uncategorizedOnly ? "uncategorized" : "all"}`}
+							key={`${selectedMonth ?? "all-expense-history"}-${filters.uncategorizedOnly ? "uncategorized" : "all"}-${search.fromMonth ?? "start"}-${search.toMonth ?? "end"}`}
 							columns={columns}
 							data={visibleTransactions}
 							loading={historyLoading}
@@ -502,6 +521,32 @@ export default function ExpenseHistoryPage() {
 												}
 											>
 												Uncategorized only · Clear
+											</Button>
+										) : null}
+										{search.fromMonth || search.toMonth ? (
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												onClick={() =>
+													navigate({
+														search: (previous) => ({
+															...previous,
+															fromMonth: undefined,
+															toMonth: undefined,
+														}),
+														replace: true,
+													})
+												}
+											>
+												{search.fromMonth
+													? formatExpenseHistoryMonth(search.fromMonth)
+													: "First import"}{" "}
+												–{" "}
+												{search.toMonth
+													? formatExpenseHistoryMonth(search.toMonth)
+													: "Latest"}{" "}
+												· Clear
 											</Button>
 										) : null}
 										<div className="flex items-center gap-3">

@@ -38,9 +38,11 @@ type TrendSelection = {
 export function MonthlySpendingTrend({
 	data,
 	onSelect,
+	referenceLabel = "Typical month",
 }: {
 	data: ExpenseDashboard;
 	onSelect: (selection: TrendSelection) => void;
+	referenceLabel?: string;
 }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const chartRef = useRef<EChartsType | null>(null);
@@ -48,7 +50,7 @@ export function MonthlySpendingTrend({
 	onSelectRef.current = onSelect;
 
 	const option = useMemo<EChartsCoreOption>(() => {
-		const visibleMonths = data.months.slice(-12);
+		const visibleMonths = data.months;
 		const totalsByCategory = new Map<string, number>();
 		for (const month of visibleMonths) {
 			for (const category of month.categories) {
@@ -162,7 +164,7 @@ export function MonthlySpendingTrend({
 			series: [
 				...categorySeries,
 				{
-					name: "Typical month",
+					name: referenceLabel,
 					type: "line",
 					symbol: "none",
 					lineStyle: { color: "#98a2b3", width: 2, type: "dashed" },
@@ -171,7 +173,7 @@ export function MonthlySpendingTrend({
 				},
 			],
 		};
-	}, [data]);
+	}, [data, referenceLabel]);
 
 	useEffect(() => {
 		const container = containerRef.current;

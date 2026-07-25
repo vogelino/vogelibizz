@@ -69,6 +69,9 @@ const dashboard: ExpenseDashboard = {
 			total: 17.5,
 			matched: 12.5,
 			unmatched: 5,
+			unmatchedCount: 1,
+			uncategorizedCount: 0,
+			reviewCount: 1,
 			categories: [{ category: "Software", total: 17.5, transactionCount: 1 }],
 		},
 	],
@@ -92,6 +95,7 @@ const dashboard: ExpenseDashboard = {
 			plannedMonthly: 30,
 			actualMonthlyAverage: 12.5,
 			difference: -17.5,
+			monthlyActuals: [{ month: "2026-06", total: 12.5, transactionCount: 1 }],
 		},
 	],
 };

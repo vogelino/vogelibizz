@@ -17,6 +17,16 @@ const expensesSearchSchema = z.object({
 		.catch(undefined),
 	expenseOtherOnly: z.boolean().optional().catch(undefined),
 	uncategorizedOnly: z.boolean().optional().catch(undefined),
+	fromMonth: z
+		.string()
+		.regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+		.optional()
+		.catch(undefined),
+	toMonth: z
+		.string()
+		.regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+		.optional()
+		.catch(undefined),
 	duplicateId: z.coerce.number().int().positive().optional().catch(undefined),
 });
 

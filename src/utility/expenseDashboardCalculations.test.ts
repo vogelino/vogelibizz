@@ -48,6 +48,11 @@ describe("calculateExpenseDashboard", () => {
 		expect(dashboard.typicalMonthlyTotal).toBe(30);
 		expect(dashboard.configuredMonthlyTotal).toBe(10);
 		expect(dashboard.months.map(({ total }) => total)).toEqual([40, 20]);
+		expect(dashboard.months[1]).toMatchObject({
+			unmatchedCount: 1,
+			uncategorizedCount: 1,
+			reviewCount: 1,
+		});
 		expect(dashboard.latest).toMatchObject({
 			month: "2026-06",
 			total: 20,
@@ -67,6 +72,10 @@ describe("calculateExpenseDashboard", () => {
 			expenseId: 10,
 			actualMonthlyAverage: 11,
 			difference: 1,
+			monthlyActuals: [
+				{ month: "2026-05", total: 10, transactionCount: 1 },
+				{ month: "2026-06", total: 12, transactionCount: 1 },
+			],
 		});
 	});
 
@@ -88,5 +97,6 @@ describe("calculateExpenseDashboard", () => {
 		expect(dashboard.latest).toBeNull();
 		expect(dashboard.typicalMonthlyTotal).toBeNull();
 		expect(dashboard.recurring[0].actualMonthlyAverage).toBeNull();
+		expect(dashboard.recurring[0].monthlyActuals).toEqual([]);
 	});
 });

@@ -52,8 +52,17 @@ export function calculateExpenseDashboard({
 			},
 		]),
 	);
-	const actualByExpenseId = new Map(
-		configuredExpenses.map((expense) => [expense.expenseId, 0]),
+	const actualByExpenseId = new Map<
+		number,
+		{
+			total: number;
+			months: Map<string, { total: number; transactionCount: number }>;
+		}
+	>(
+		configuredExpenses.map((expense) => [
+			expense.expenseId,
+			{ total: 0, months: new Map() },
+		]),
 	);
 
 	for (const transaction of transactions) {
@@ -69,11 +78,17 @@ export function calculateExpenseDashboard({
 			month.unmatchedCount += 1;
 		} else {
 			month.matched += transaction.amount;
-			actualByExpenseId.set(
-				transaction.expenseId,
-				(actualByExpenseId.get(transaction.expenseId) ?? 0) +
-					transaction.amount,
-			);
+			const actual = actualByExpenseId.get(transaction.expenseId);
+			if (actual) {
+				actual.total += transaction.amount;
+				const monthlyActual = actual.months.get(month.month) ?? {
+					total: 0,
+					transactionCount: 0,
+				};
+				monthlyActual.total += transaction.amount;
+				monthlyActual.transactionCount += 1;
+				actual.months.set(month.month, monthlyActual);
+			}
 		}
 		if (transaction.category === null) {
 			month.uncategorizedTotal += transaction.amount;
@@ -111,6 +126,9 @@ export function calculateExpenseDashboard({
 		total: month.total,
 		matched: month.matched,
 		unmatched: month.unmatched,
+		unmatchedCount: month.unmatchedCount,
+		uncategorizedCount: month.uncategorizedCount,
+		reviewCount: month.reviewCount,
 		categories: categoryRows(month.categoryTotals),
 	}));
 	const latestSource = sortedMonths.at(-1);
@@ -150,9 +168,12 @@ export function calculateExpenseDashboard({
 			: null,
 		recurring: configuredExpenses
 			.map((expense) => {
-				const actualTotal = actualByExpenseId.get(expense.expenseId) ?? 0;
+				const actual = actualByExpenseId.get(expense.expenseId) ?? {
+					total: 0,
+					months: new Map(),
+				};
 				const actualMonthlyAverage =
-					importedMonthCount === 0 ? null : actualTotal / importedMonthCount;
+					importedMonthCount === 0 ? null : actual.total / importedMonthCount;
 				return {
 					...expense,
 					actualMonthlyAverage,
@@ -160,6 +181,9 @@ export function calculateExpenseDashboard({
 						actualMonthlyAverage === null
 							? null
 							: actualMonthlyAverage - expense.plannedMonthly,
+					monthlyActuals: [...actual.months.entries()]
+						.map(([month, values]) => ({ month, ...values }))
+						.sort((a, b) => a.month.localeCompare(b.month)),
 				};
 			})
 			.sort(
