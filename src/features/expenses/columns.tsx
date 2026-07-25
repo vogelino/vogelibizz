@@ -1,4 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, Check } from "lucide-react";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { InlineCombobox, InlineInput } from "@/components/ui/inline-edit";
@@ -10,7 +11,11 @@ import {
 } from "@/db/schema";
 import { mapTypeToIcon, typeToColorClass } from "@/utility/expensesIconUtil";
 import { formatCurrency } from "@/utility/formatUtil";
-import type { ExpenseOverviewRow } from "./expenseOverviewRows";
+import {
+	type ExpenseOverviewRow,
+	getRealMonthlyAverageStatus,
+	type RealMonthlyAverageStatus,
+} from "./expenseOverviewRows";
 
 const columnHelper = createColumnHelper<ExpenseOverviewRow>();
 
@@ -20,6 +25,27 @@ function formatAvailableCurrency(
 ) {
 	return value === null ? "–" : formatCurrency(value, currency);
 }
+
+const realMonthlyAverageIndicators: Record<
+	Exclude<RealMonthlyAverageStatus, "unavailable">,
+	{ icon: typeof ArrowUp; label: string; className: string }
+> = {
+	overpaid: {
+		icon: ArrowUp,
+		label: "Overpaid compared with expected monthly amount",
+		className: "text-red-500",
+	},
+	underpaid: {
+		icon: ArrowDown,
+		label: "Underpaid compared with expected monthly amount",
+		className: "text-red-500",
+	},
+	"as-expected": {
+		icon: Check,
+		label: "Matches expected monthly amount",
+		className: "text-green-600",
+	},
+};
 
 export function getExpensesTableColumns(
 	targetCurrency: CurrencyIdType,
@@ -92,9 +118,34 @@ export function getExpensesTableColumns(
 			id: "realMonthlyAverage",
 			size: 150,
 			header: "Real avg./month",
-			cell: ({ getValue }) => (
-				<span>{formatAvailableCurrency(getValue(), targetCurrency)}</span>
-			),
+			cell: ({ getValue, row }) => {
+				const value = getValue();
+				if (row.original.kind === "other" || value === null) {
+					return <span>{formatAvailableCurrency(value, targetCurrency)}</span>;
+				}
+
+				const status = getRealMonthlyAverageStatus(
+					row.original.monthlyAmount,
+					value,
+				);
+				if (status === "unavailable") return null;
+				const indicator = realMonthlyAverageIndicators[status];
+				const IndicatorIcon = indicator.icon;
+
+				return (
+					<span
+						className="inline-flex items-center gap-1.5"
+						title={indicator.label}
+					>
+						<IndicatorIcon
+							aria-hidden="true"
+							className={`size-4 shrink-0 ${indicator.className}`}
+						/>
+						<span>{formatCurrency(value, targetCurrency)}</span>
+						<span className="sr-only">({indicator.label})</span>
+					</span>
+				);
+			},
 			sortUndefined: "last",
 		}),
 		columnHelper.accessor("category", {

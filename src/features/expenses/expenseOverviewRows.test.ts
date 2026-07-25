@@ -4,6 +4,7 @@ import type { ExpenseOverviewSummary } from "@/utility/expenseHistoryContracts";
 import {
 	createExpenseOverviewRows,
 	filterExpenseOverviewRows,
+	getRealMonthlyAverageStatus,
 	limitChartSeries,
 	mixedClassification,
 	totalMonthlyAmount,
@@ -37,12 +38,6 @@ describe("expense overview rows", () => {
 	test("adds calculated values and a non-recurring Mixed Other row", () => {
 		const rows = createExpenseOverviewRows([expense], summary);
 		expect(rows).toEqual([
-			expect.objectContaining({
-				kind: "recurring",
-				monthlyAmount: 100,
-				realMonthlyAverage: 80,
-				difference: 20,
-			}),
 			{
 				kind: "other",
 				id: "other",
@@ -55,6 +50,12 @@ describe("expense overview rows", () => {
 				difference: null,
 				last_modified: null,
 			},
+			expect.objectContaining({
+				kind: "recurring",
+				monthlyAmount: 100,
+				realMonthlyAverage: 80,
+				difference: 20,
+			}),
 		]);
 		expect(totalMonthlyAmount(rows)).toBe(summary.livingCostEstimate ?? 0);
 	});
@@ -75,13 +76,20 @@ describe("expense overview rows", () => {
 		});
 	});
 
+	test("classifies real monthly averages relative to the expected amount", () => {
+		expect(getRealMonthlyAverageStatus(100, 120)).toBe("overpaid");
+		expect(getRealMonthlyAverageStatus(100, 80)).toBe("underpaid");
+		expect(getRealMonthlyAverageStatus(100, 100)).toBe("as-expected");
+		expect(getRealMonthlyAverageStatus(100, null)).toBe("unavailable");
+	});
+
 	test("filters and pie classifications include Other only when Mixed applies", () => {
 		const rows = createExpenseOverviewRows([expense], summary);
 		expect(
 			filterExpenseOverviewRows(rows, [mixedClassification], "All types"),
 		).toHaveLength(1);
 		expect(filterExpenseOverviewRows(rows, ["Home"], "Personal")).toEqual([
-			rows[0],
+			rows[1],
 		]);
 		expect(totalsByClassification(rows, (row) => row.category)).toEqual([
 			{ label: "Home", value: 100 },

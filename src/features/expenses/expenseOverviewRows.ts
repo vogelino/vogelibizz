@@ -31,6 +31,21 @@ export type ExpenseOverviewRow =
 
 export type ExpenseOverviewCategory = ExpenseOverviewRow["category"];
 export type ExpenseOverviewType = ExpenseOverviewRow["type"];
+export type RealMonthlyAverageStatus =
+	| "overpaid"
+	| "underpaid"
+	| "as-expected"
+	| "unavailable";
+
+export function getRealMonthlyAverageStatus(
+	monthlyAmount: number,
+	realMonthlyAverage: number | null,
+): RealMonthlyAverageStatus {
+	if (realMonthlyAverage === null) return "unavailable";
+	if (realMonthlyAverage > monthlyAmount) return "overpaid";
+	if (realMonthlyAverage < monthlyAmount) return "underpaid";
+	return "as-expected";
+}
 
 export function createExpenseOverviewRows(
 	expenses: readonly ExpenseWithMonthlyCLPPriceType[],
@@ -61,7 +76,6 @@ export function createExpenseOverviewRows(
 
 	if (!summary?.other) return recurringRows;
 	return [
-		...recurringRows,
 		{
 			kind: "other",
 			id: "other",
@@ -74,6 +88,7 @@ export function createExpenseOverviewRows(
 			difference: null,
 			last_modified: null,
 		},
+		...recurringRows,
 	];
 }
 
