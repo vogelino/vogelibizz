@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+	amountSearchText,
 	createSearchIndex,
 	filterRowsByText,
 	searchDocuments,
@@ -15,7 +16,7 @@ const documents: SearchDocument[] = [
 		scope: "expenses",
 		title: "Figma subscription",
 		subtitle: "Software Freelance",
-		keywords: "design monthly",
+		keywords: `design monthly ${amountSearchText(1299.5, "CHF")}`,
 		category: "Software",
 		type: "Freelance",
 	},
@@ -66,6 +67,19 @@ describe("searchDocuments", () => {
 			searchDocuments(index, "", "expenses", {
 				category: ["Software"],
 				type: "Freelance",
+			}).map((result) => result.id),
+		).toEqual(["expense:1"]);
+	});
+
+	test("matches raw and currency-formatted amounts", () => {
+		expect(
+			searchDocuments(index, "1299.5", "expenses", { category: [] }).map(
+				(result) => result.id,
+			),
+		).toEqual(["expense:1"]);
+		expect(
+			searchDocuments(index, "CHF 1’299.50", "expenses", {
+				category: [],
 			}).map((result) => result.id),
 		).toEqual(["expense:1"]);
 	});

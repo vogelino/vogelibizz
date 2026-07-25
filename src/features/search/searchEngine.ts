@@ -13,6 +13,30 @@ const searchOptions = {
 	boost: { title: 5, subtitle: 2, keywords: 1 },
 };
 
+export function amountSearchText(value: number, currency?: string) {
+	const variants = new Set([
+		String(value),
+		value.toFixed(2),
+		value.toLocaleString("en-GB", { maximumFractionDigits: 2 }),
+		value.toLocaleString("de-CH", { maximumFractionDigits: 2 }),
+		value.toLocaleString("de-DE", { maximumFractionDigits: 2 }),
+	]);
+	if (currency) {
+		variants.add(currency);
+		for (const locale of ["en-GB", "de-CH", "de-DE"]) {
+			variants.add(
+				new Intl.NumberFormat(locale, {
+					style: "currency",
+					currency,
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				}).format(value),
+			);
+		}
+	}
+	return [...variants].join(" ");
+}
+
 export function createSearchIndex(documents: readonly SearchDocument[]) {
 	const index = new MiniSearch<SearchDocument>({
 		idField: "id",

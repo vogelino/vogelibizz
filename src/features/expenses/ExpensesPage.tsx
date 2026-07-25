@@ -16,7 +16,10 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
-import { filterRowsByText } from "@/features/search/searchEngine";
+import {
+	amountSearchText,
+	filterRowsByText,
+} from "@/features/search/searchEngine";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
@@ -166,8 +169,22 @@ export default function ExpensesPage({
 						row.name,
 						row.category,
 						row.type,
-						row.kind === "recurring" ? row.expense.rate : "other unassociated",
-					].join(" "),
+						amountSearchText(row.monthlyAmount),
+						row.realMonthlyAverage === null
+							? null
+							: amountSearchText(row.realMonthlyAverage),
+						row.kind === "recurring"
+							? [
+									row.expense.rate,
+									amountSearchText(
+										row.expense.originalPrice,
+										row.expense.originalCurrency,
+									),
+								].join(" ")
+							: "other unassociated",
+					]
+						.filter(Boolean)
+						.join(" "),
 			),
 		[rows, search.q],
 	);

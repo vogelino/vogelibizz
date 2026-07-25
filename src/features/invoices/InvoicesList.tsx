@@ -4,12 +4,16 @@ import { useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
 import type { InvoiceType } from "@/db/schema";
-import { filterRowsByText } from "@/features/search/searchEngine";
+import {
+	amountSearchText,
+	filterRowsByText,
+} from "@/features/search/searchEngine";
 import useClients from "@/utility/data/useClients";
 import useInvoiceEdit from "@/utility/data/useInvoiceEdit";
 import useInvoices from "@/utility/data/useInvoices";
 import useProjects from "@/utility/data/useProjects";
 import { getInvoiceTableColumns } from "./columns";
+import { getInvoiceHours, getInvoiceTotal } from "./invoiceTotals";
 
 export default function InvoicesList({
 	loading = false,
@@ -50,9 +54,21 @@ export default function InvoicesList({
 						invoice.name,
 						invoice.invoiceNumber,
 						invoice.subject,
+						invoice.currency,
+						amountSearchText(getInvoiceTotal(invoice), invoice.currency),
+						amountSearchText(invoice.hourlyRate, invoice.currency),
+						getInvoiceHours(invoice),
 						invoice.clients?.map(({ name }) => name).join(" "),
 						invoice.projects?.map(({ name }) => name).join(" "),
 						invoice.rows.map(({ description }) => description).join(" "),
+						invoice.rows
+							.map(({ hoursCount }) =>
+								amountSearchText(
+									hoursCount * invoice.hourlyRate,
+									invoice.currency,
+								),
+							)
+							.join(" "),
 					]
 						.filter(Boolean)
 						.join(" "),

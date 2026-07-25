@@ -10,7 +10,10 @@ import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import type { CurrencyIdType } from "@/db/schema";
-import { filterRowsByText } from "@/features/search/searchEngine";
+import {
+	amountSearchText,
+	filterRowsByText,
+} from "@/features/search/searchEngine";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
 	exchangeRatesQueryOptions,
@@ -292,6 +295,8 @@ export default function ExpenseHistoryPage() {
 						transaction.category,
 						transaction.type,
 						transaction.expense?.name,
+						amountSearchText(transaction.amount),
+						amountSearchText(transaction.originalAmount, "CHF"),
 					]
 						.filter(Boolean)
 						.join(" "),

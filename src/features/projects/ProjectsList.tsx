@@ -4,7 +4,10 @@ import { useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
 import type { ProjectType } from "@/db/schema";
-import { filterRowsByText } from "@/features/search/searchEngine";
+import {
+	amountSearchText,
+	filterRowsByText,
+} from "@/features/search/searchEngine";
 import useClients from "@/utility/data/useClients";
 import useProjectEdit from "@/utility/data/useProjectEdit";
 import useProjects from "@/utility/data/useProjects";
@@ -48,6 +51,7 @@ export default function ProjectList({
 						project.status,
 						project.description,
 						project.content,
+						amountSearchText(project.hourlyRate),
 						project.clients?.map(({ name }) => name).join(" "),
 					]
 						.filter(Boolean)

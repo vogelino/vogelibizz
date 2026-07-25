@@ -4,7 +4,13 @@ import type {
 	InvoiceType,
 	ProjectType,
 } from "@/db/schema";
+import {
+	getInvoiceHours,
+	getInvoiceTotal,
+} from "@/features/invoices/invoiceTotals";
 import type { ExpenseHistoryTransaction } from "@/utility/expenseHistoryContracts";
+import { formatCurrency } from "@/utility/formatUtil";
+import { amountSearchText } from "./searchEngine";
 import type { SearchDocument, SearchFilterOption } from "./searchTypes";
 
 const text = (...values: unknown[]) =>
@@ -54,12 +60,14 @@ export function createSearchDocuments({
 				subtitle: text(
 					project.status.replaceAll("_", " "),
 					project.clients?.map(({ name }) => name),
+					`${project.hourlyRate}/hour`,
 				),
 				keywords: text(
 					project.id,
 					project.description,
 					project.content,
 					project.status,
+					amountSearchText(project.hourlyRate),
 					project.clients?.map(({ name }) => name),
 				),
 				status: project.status,
@@ -75,14 +83,21 @@ export function createSearchDocuments({
 				subtitle: text(
 					`#${invoice.invoiceNumber}`,
 					invoice.clients?.map(({ name }) => name),
+					formatCurrency(getInvoiceTotal(invoice), invoice.currency),
 				),
 				keywords: text(
 					invoice.id,
 					invoice.invoiceNumber,
 					invoice.subject,
+					amountSearchText(getInvoiceTotal(invoice), invoice.currency),
+					amountSearchText(invoice.hourlyRate, invoice.currency),
+					getInvoiceHours(invoice),
 					invoice.clients?.map(({ name }) => name),
 					invoice.projects?.map(({ name }) => name),
 					invoice.rows.map(({ description }) => description),
+					invoice.rows.map(({ hoursCount }) =>
+						amountSearchText(hoursCount * invoice.hourlyRate, invoice.currency),
+					),
 				),
 			}),
 		),
@@ -93,13 +108,19 @@ export function createSearchDocuments({
 				kind: "expense",
 				scope: "expenses",
 				title: expense.name,
-				subtitle: text(expense.category, expense.type),
+				subtitle: text(
+					expense.category,
+					expense.type,
+					formatCurrency(expense.originalPrice, expense.originalCurrency),
+				),
 				keywords: text(
 					expense.id,
 					expense.category,
 					expense.type,
 					expense.rate,
 					expense.originalCurrency,
+					amountSearchText(expense.originalPrice, expense.originalCurrency),
+					amountSearchText(expense.clpMonthlyPrice),
 				),
 				category: expense.category,
 				type: expense.type,
@@ -112,7 +133,11 @@ export function createSearchDocuments({
 				kind: "expense-transaction",
 				scope: "expense-history",
 				title: transaction.description,
-				subtitle: text(transaction.bookedAt, transaction.expense?.name),
+				subtitle: text(
+					transaction.bookedAt,
+					transaction.expense?.name,
+					formatCurrency(transaction.originalAmount, "CHF"),
+				),
 				keywords: text(
 					transaction.id,
 					transaction.originalDescription,
@@ -120,6 +145,8 @@ export function createSearchDocuments({
 					transaction.category,
 					transaction.type,
 					transaction.expense?.name,
+					amountSearchText(transaction.amount),
+					amountSearchText(transaction.originalAmount, "CHF"),
 				),
 				category: transaction.category ?? undefined,
 				type: transaction.type ?? undefined,
