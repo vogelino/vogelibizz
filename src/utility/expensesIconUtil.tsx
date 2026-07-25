@@ -140,6 +140,41 @@ export const categoryToOptionClass = <
 	}
 };
 
+const categoryColorByClass = {
+	"bg-red-500": "#fb2c36",
+	"bg-blue-500": "#2b7fff",
+	"bg-green-500": "#00c950",
+	"bg-yellow-500": "#f0b100",
+	"bg-purple-500": "#ad46ff",
+	"bg-pink-500": "#f6339a",
+	"bg-orange-500": "#ff6900",
+	"bg-indigo-500": "#615fff",
+	"bg-gray-500": "#6a7282",
+	"bg-teal-500": "#00bba7",
+	"bg-lime-500": "#7ccf00",
+	"bg-amber-500": "#fe9a00",
+	"bg-violet-500": "#8e51ff",
+	"bg-emerald-500": "#00bc7d",
+	"bg-sky-500": "#00a6f4",
+	"bg-rose-500": "#ff2056",
+	"bg-green-600": "#00a63e",
+	"bg-fuchsia-500": "#e12afb",
+	"bg-slate-500": "#62748e",
+	"bg-cyan-600": "#0092b8",
+	"bg-blue-600": "#155dfc",
+	"bg-emerald-600": "#009966",
+} as const;
+
+export const categoryToSolidColor = (
+	category: ExpenseType["category"],
+): string => {
+	const colorClass = categoryToOptionClass(category);
+	return (
+		categoryColorByClass[colorClass as keyof typeof categoryColorByClass] ??
+		"#6a7282"
+	);
+};
+
 const categoryToIconMap = {
 	Essentials: { Icon: Package, className: "text-purple-500" },
 	Home: { Icon: House, className: "text-gray-500" },
