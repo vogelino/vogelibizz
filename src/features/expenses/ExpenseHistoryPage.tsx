@@ -4,12 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
 import type { CurrencyIdType } from "@/db/schema";
+import { filterRowsByText } from "@/features/search/searchEngine";
 import { Route } from "@/routes/_resource/expenses/history";
 import {
 	exchangeRatesQueryOptions,
@@ -276,6 +277,38 @@ export default function ExpenseHistoryPage() {
 				: [],
 		[historyError, monthQuery.data],
 	);
+	const visibleTransactions = useMemo(
+		() =>
+			filterRowsByText(
+				transactions,
+				search.q,
+				(transaction) => transaction.id,
+				(transaction) =>
+					[
+						transaction.id,
+						transaction.description,
+						transaction.originalDescription,
+						transaction.bookedAt,
+						transaction.category,
+						transaction.type,
+						transaction.expense?.name,
+					]
+						.filter(Boolean)
+						.join(" "),
+			),
+		[search.q, transactions],
+	);
+	useEffect(() => {
+		if (!search.q || !monthQuery.hasNextPage || monthQuery.isFetchingNextPage) {
+			return;
+		}
+		void monthQuery.fetchNextPage();
+	}, [
+		monthQuery.fetchNextPage,
+		monthQuery.hasNextPage,
+		monthQuery.isFetchingNextPage,
+		search.q,
+	]);
 	const loadMoreTransactions = useCallback(() => {
 		if (monthQuery.hasNextPage && !monthQuery.isFetchingNextPage) {
 			void monthQuery.fetchNextPage();
@@ -370,7 +403,7 @@ export default function ExpenseHistoryPage() {
 						<DataTable
 							key={selectedMonth ?? "all-expense-history"}
 							columns={columns}
-							data={transactions}
+							data={visibleTransactions}
 							loading={historyLoading}
 							virtualized
 							hasMore={monthQuery.hasNextPage}

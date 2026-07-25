@@ -1,9 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/utility/classNames";
+import { type ResourceIconKey, resourceIconMap } from "@/utility/resourceIcons";
 
-const links = [
-	{ to: "/expenses", label: "Recurring expenses" },
-	{ to: "/expenses/history", label: "Expenses History" },
+const links: readonly {
+	to: "/expenses" | "/expenses/history";
+	label: string;
+	icon: ResourceIconKey;
+}[] = [
+	{ to: "/expenses", label: "Recurring expenses", icon: "expenses" },
+	{
+		to: "/expenses/history",
+		label: "Expense history",
+		icon: "expense-history",
+	},
 ] as const;
 
 export function ExpensesSubnavigation({
@@ -15,6 +24,7 @@ export function ExpensesSubnavigation({
 		<nav aria-label="Expenses sections" className="border-b border-border">
 			<ul className="flex gap-6 overflow-x-auto">
 				{links.map((link) => {
+					const Icon = resourceIconMap[link.icon];
 					const isActive =
 						active === "recurring"
 							? link.to === "/expenses"
@@ -32,6 +42,10 @@ export function ExpensesSubnavigation({
 										: "border-transparent text-muted-foreground hover:text-foreground",
 								)}
 							>
+								<Icon
+									className="mr-2 size-5 text-muted-foreground"
+									aria-hidden="true"
+								/>
 								{link.label}
 							</Link>
 						</li>

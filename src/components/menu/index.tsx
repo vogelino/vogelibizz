@@ -2,19 +2,30 @@
 
 import { Link } from "@tanstack/react-router";
 import { Menu as MenuIcon, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BizzLogo from "@/components/BizzLogo";
+import { SearchTrigger } from "@/features/search/SearchProvider";
 import { cn } from "@/utility/classNames";
 import { MenuAuxiliaryItems } from "./MenuAuxiliaryItems";
 import { MenuDesktopNavigation } from "./MenuDesktopNavigation";
+import { MenuMobileNavigation } from "./MenuMobileNavigation";
 
 type MenuProps = {
 	withBg?: boolean;
 	currentPage: string;
 };
 
-export const Menu = ({ withBg = true }: MenuProps) => {
+export const Menu = ({ withBg = true, currentPage }: MenuProps) => {
 	const [mobileOpen, setMobileOpen] = useState(false);
+
+	useEffect(() => {
+		if (!mobileOpen) return;
+		const closeOnEscape = (event: KeyboardEvent) => {
+			if (event.key === "Escape") setMobileOpen(false);
+		};
+		document.addEventListener("keydown", closeOnEscape);
+		return () => document.removeEventListener("keydown", closeOnEscape);
+	}, [mobileOpen]);
 
 	const withBgClasses = "bg-background border-border";
 	const withoutBgClasses = "border-b-transparent";
@@ -41,23 +52,41 @@ export const Menu = ({ withBg = true }: MenuProps) => {
 			>
 				<BizzLogo />
 			</Link>
-			<button
-				type="button"
-				aria-label={
-					mobileOpen ? "Close navigation menu" : "Open navigation menu"
-				}
-				id="burger-menu"
-				aria-controls="menu"
-				aria-expanded={mobileOpen}
-				onClick={() => setMobileOpen((o) => !o)}
-				className="md:hidden p-2 -mr-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-			>
-				{mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
-			</button>
-			<div className="flex items-center gap-4 md:gap-6">
+			<div className="flex items-center gap-2 md:hidden">
+				<SearchTrigger onOpen={() => setMobileOpen(false)} />
+				<button
+					type="button"
+					aria-label={
+						mobileOpen ? "Close navigation menu" : "Open navigation menu"
+					}
+					id="burger-menu"
+					aria-controls="mobile-menu"
+					aria-expanded={mobileOpen}
+					onClick={() => setMobileOpen((o) => !o)}
+					className="rounded-md p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-ring"
+				>
+					{mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
+				</button>
+			</div>
+			<div className="hidden items-center gap-4 md:flex md:gap-6">
 				<MenuDesktopNavigation onLinkClick={() => setMobileOpen(false)} />
+				<SearchTrigger />
 				<MenuAuxiliaryItems />
 			</div>
+			{mobileOpen ? (
+				<div
+					id="mobile-menu"
+					className="absolute inset-x-0 top-full max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-border bg-background px-6 pb-6 shadow-lg md:hidden"
+				>
+					<MenuMobileNavigation
+						currentPage={currentPage}
+						onLinkClick={() => setMobileOpen(false)}
+					/>
+					<div className="pt-4">
+						<MenuAuxiliaryItems />
+					</div>
+				</div>
+			) : null}
 		</header>
 	);
 };

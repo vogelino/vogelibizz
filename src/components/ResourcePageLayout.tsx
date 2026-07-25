@@ -6,6 +6,7 @@ import {
 	useState,
 } from "react";
 import ResourceCreateButton from "@/components/ResourceCreateButton";
+import { resourceIconMap } from "@/utility/resourceIcons";
 import type { RoutedResource } from "@/utility/routedResources";
 
 const ResourceActionsContext = createContext<
@@ -33,12 +34,17 @@ function ResourcePageLayout({
 	headerContent?: ReactNode;
 }) {
 	const [actions, setActions] = useState<ReactNode | null>(null);
+	const ResourceIcon = resourceIconMap[resource];
 
 	return (
 		<ResourceActionsContext.Provider value={setActions}>
 			<div className="px-6 md:px-10 sticky left-0 pt-6 md:pt-10">
 				<div className="flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center">
-					<h1 className="text-lg font-semibold uppercase antialiased">
+					<h1 className="flex items-center gap-2 text-lg font-semibold uppercase antialiased">
+						<ResourceIcon
+							className="size-5 text-muted-foreground"
+							aria-hidden="true"
+						/>
 						{resource}
 					</h1>
 					<div className="flex items-center gap-2">

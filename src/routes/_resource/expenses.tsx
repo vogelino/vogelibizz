@@ -6,6 +6,7 @@ import ExpensesPage from "@/features/expenses/ExpensesPage";
 import { ExpensesSubnavigation } from "@/features/expenses/ExpensesSubnavigation";
 
 const expensesSearchSchema = z.object({
+	q: z.string().trim().min(1).optional().catch(undefined),
 	categories: z
 		.array(z.enum([...expenseCategoryEnum.enumValues, "Mixed"]))
 		.optional()

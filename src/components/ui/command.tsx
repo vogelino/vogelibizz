@@ -7,6 +7,7 @@ import {
 	type ComponentPropsWithoutRef,
 	forwardRef,
 	type HTMLAttributes,
+	type ReactNode,
 } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/utility/classNames";
@@ -53,20 +54,24 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
 	);
 };
 
-type CommandInputProps = ComponentPropsWithoutRef<
-	typeof CommandPrimitive.Input
->;
+type CommandInputProps = Omit<
+	ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
+	"prefix"
+> & {
+	prefix?: ReactNode;
+};
 const CommandInput = forwardRef<HTMLInputElement, CommandInputProps>(
-	({ className, ...props }, ref) => (
+	({ className, prefix, ...props }, ref) => (
 		<div
-			className="flex items-center border-b border-border pl-3"
+			className="flex min-h-12 items-center border-b border-border pl-3"
 			cmdk-input-wrapper=""
 		>
 			<SearchIcon className="mr-2 shrink-0 opacity-50 text-muted-foreground" />
+			{prefix}
 			<CommandPrimitive.Input
 				ref={ref}
 				className={cn(
-					"flex h-10 w-full bg-transparent py-2 outline-none border-none",
+					"flex h-10 min-w-20 grow bg-transparent py-2 outline-none border-none",
 					"placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
 					"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
 					className,

@@ -63,7 +63,7 @@ function NavigationMenuItem({ className, ...props }: NavigationMenuItemProps) {
 }
 
 const navigationMenuTriggerStyle = cn(
-	"group inline-flex w-max items-center justify-center",
+	"group inline-flex w-max flex-row items-center justify-center gap-2 whitespace-nowrap",
 	"px-4 py-2 font-medium transition-colors",
 	"hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
 	"focusable disabled:pointer-events-none disabled:opacity-50 data-[state=open]:bg-accent/50",

@@ -16,6 +16,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
+import { filterRowsByText } from "@/features/search/searchEngine";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
@@ -153,6 +154,30 @@ export default function ExpensesPage({
 		() => createExpenseOverviewRows(data, overviewQuery.data),
 		[data, overviewQuery.data],
 	);
+	const visibleRows = useMemo(
+		() =>
+			filterRowsByText(
+				rows,
+				search.q,
+				(row) => row.id,
+				(row) =>
+					[
+						row.id,
+						row.name,
+						row.category,
+						row.type,
+						row.kind === "recurring" ? row.expense.rate : "other unassociated",
+					].join(" "),
+			),
+		[rows, search.q],
+	);
+	const tableRows = useMemo(
+		() =>
+			filters.otherOnly
+				? visibleRows.filter((row) => row.kind === "other")
+				: visibleRows,
+		[filters.otherOnly, visibleRows],
+	);
 	const editExpenseCell = useCallback(
 		(
 			row: Extract<ExpenseOverviewRow, { kind: "recurring" }>,
@@ -236,8 +261,9 @@ export default function ExpensesPage({
 	} = useMemo(() => {
 		const hasCategoryFilter = categoryFilter.length > 0;
 		const hasTypeFilter = typeFilter !== "All types";
+		const hasSearchFilter = Boolean(search.q) || filters.otherOnly;
 		const filteredData = filterExpenseOverviewRows(
-			rows,
+			tableRows,
 			categoryFilter,
 			(typeFilter ?? "All types") as TypeFilterType,
 		);
@@ -281,7 +307,7 @@ export default function ExpensesPage({
 							targetCurrency,
 						),
 			filteredLabel: formatCurrency(filtered, targetCurrency),
-			showFilteredTotal: hasCategoryFilter || hasTypeFilter,
+			showFilteredTotal: hasCategoryFilter || hasTypeFilter || hasSearchFilter,
 			categorySeries: topCategories,
 			typeSeries: typeTotals,
 		};
@@ -289,7 +315,9 @@ export default function ExpensesPage({
 		categoryFilter,
 		data,
 		overviewQuery.data,
-		rows,
+		filters.otherOnly,
+		search.q,
+		tableRows,
 		targetCurrency,
 		typeFilter,
 	]);
@@ -366,7 +394,7 @@ export default function ExpensesPage({
 			/>
 			<DataTable
 				columns={columns}
-				data={!error && rows.length > 0 ? rows : []}
+				data={!error && tableRows.length > 0 ? tableRows : []}
 				loading={isLoading}
 				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}

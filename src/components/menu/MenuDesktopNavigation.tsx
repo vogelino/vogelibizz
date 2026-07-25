@@ -1,4 +1,5 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
+import { type ResourceIconKey, resourceIconMap } from "@/utility/resourceIcons";
 import {
 	NavigationMenu,
 	NavigationMenuContent,
@@ -9,24 +10,24 @@ import {
 	navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
 
-type MenuRoute = LinkProps["to"];
+export type MenuRoute = LinkProps["to"];
 
-type MenuLinkBase = {
-	key: string;
+export type MenuLinkBase = {
+	key: ResourceIconKey;
 	label: string;
 };
 
-type MenuLinkLeaf = MenuLinkBase & {
+export type MenuLinkLeaf = MenuLinkBase & {
 	route: MenuRoute;
 };
 
-type MenuLinkParent = MenuLinkBase & {
+export type MenuLinkParent = MenuLinkBase & {
 	routes: MenuLinkLeaf[];
 };
 
-type MenuLinkType = MenuLinkLeaf | MenuLinkParent;
+export type MenuLinkType = MenuLinkLeaf | MenuLinkParent;
 
-const menuItems: MenuLinkType[] = [
+export const menuItems: MenuLinkType[] = [
 	{
 		key: "projects",
 		label: "Projects",
@@ -42,7 +43,7 @@ const menuItems: MenuLinkType[] = [
 		label: "Expenses",
 		routes: [
 			{
-				key: "recurring-expenses",
+				key: "expenses",
 				label: "Recurring Expenses",
 				route: "/expenses",
 			},
@@ -68,9 +69,14 @@ export function MenuDesktopNavigation({
 	onLinkClick,
 }: MenuDesktopNavigationProps) {
 	return (
-		<NavigationMenu id="menu" aria-label="Main navigation" viewport={false}>
+		<NavigationMenu
+			id="desktop-menu"
+			aria-label="Main navigation"
+			viewport={false}
+		>
 			<NavigationMenuList aria-label="Main menu items">
 				{menuItems.map((item) => {
+					const ItemIcon = resourceIconMap[item.key];
 					if ("routes" in item) {
 						return (
 							<NavigationMenuItem key={item.key}>
@@ -79,19 +85,36 @@ export function MenuDesktopNavigation({
 										to={item.routes[0].route}
 										title={item.label}
 										onClick={() => onLinkClick?.(item)}
+										className="inline-flex items-center gap-2 whitespace-nowrap"
 									>
-										{item.label}
+										<ItemIcon
+											className="size-5 shrink-0 text-muted-foreground"
+											aria-hidden="true"
+										/>
+										<span>{item.label}</span>
 									</Link>
 								</NavigationMenuTrigger>
 								<NavigationMenuContent>
 									<ul className="w-52">
-										{item.routes.map((subItem) => (
-											<li key={subItem.key}>
-												<NavigationMenuLink asChild>
-													<Link to={subItem.route}>{subItem.label}</Link>
-												</NavigationMenuLink>
-											</li>
-										))}
+										{item.routes.map((subItem) => {
+											const SubItemIcon = resourceIconMap[subItem.key];
+											return (
+												<li key={subItem.key}>
+													<NavigationMenuLink
+														asChild
+														className="flex-row items-center gap-2 whitespace-nowrap"
+													>
+														<Link to={subItem.route}>
+															<SubItemIcon
+																className="size-5 shrink-0 text-muted-foreground"
+																aria-hidden="true"
+															/>
+															<span>{subItem.label}</span>
+														</Link>
+													</NavigationMenuLink>
+												</li>
+											);
+										})}
 									</ul>
 								</NavigationMenuContent>
 							</NavigationMenuItem>
@@ -109,7 +132,11 @@ export function MenuDesktopNavigation({
 									title={item.label ?? "-"}
 									onClick={() => onLinkClick?.(item)}
 								>
-									{item.label}
+									<ItemIcon
+										className="size-5 shrink-0 text-muted-foreground"
+										aria-hidden="true"
+									/>
+									<span>{item.label}</span>
 								</Link>
 							</NavigationMenuLink>
 						</NavigationMenuItem>

@@ -10,6 +10,7 @@ import { expenseHistoryMonthsQueryOptions } from "@/utility/data/queryOptions";
 import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts";
 
 const historySearchSchema = z.object({
+	q: z.string().trim().min(1).optional().catch(undefined),
 	month: expenseHistoryMonthKeySchema.optional().catch(undefined),
 	category: z
 		.array(z.enum(expenseCategoryEnum.enumValues))
