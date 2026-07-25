@@ -298,10 +298,16 @@ export async function getExpenseDashboard(): Promise<ExpenseDashboard> {
 			expenseId: expense.id,
 			name: expense.name,
 			category: expense.category,
+			rate: expense.rate,
 			plannedMonthly: toTargetMonthlyAmount(
 				expense.originalPrice,
 				expense.originalCurrency,
 				expense.rate,
+			),
+			plannedCharge: toTargetMonthlyAmount(
+				expense.originalPrice,
+				expense.originalCurrency,
+				"Monthly",
 			),
 		})),
 		transactions: transactions.map((transaction) => ({

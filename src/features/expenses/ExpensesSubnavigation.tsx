@@ -43,7 +43,7 @@ export function ExpensesSubnavigation({
 								className={cn(
 									"inline-flex h-10 items-center whitespace-nowrap border-b-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 									isActive
-										? "border-foreground font-semibold text-foreground"
+										? "border-foreground text-foreground"
 										: "border-transparent text-muted-foreground hover:text-foreground",
 								)}
 							>

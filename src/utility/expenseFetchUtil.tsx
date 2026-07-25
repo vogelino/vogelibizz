@@ -1,5 +1,4 @@
-import { differenceInHours, formatISO, subMinutes } from "date-fns";
-import { inArray, type SQL, sql } from "drizzle-orm";
+import { and, eq, inArray, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import db from "@/db";
 import {
@@ -11,6 +10,7 @@ import {
 	type ExpenseWithMonthlyCLPPriceType,
 } from "@/db/schema";
 import env from "@/env";
+import { isExchangeRateCacheStale } from "@/utility/exchangeRateCache";
 
 const OpenExchangeRatesJsonSchema = z.object({
 	rates: z.record(z.string(), z.number()),
@@ -22,21 +22,44 @@ export async function getExchangeRates(): Promise<RatesMapType> {
 	console.log("Fetching exchange rates from DB");
 	const dbCurrencies = await db.query.currencies.findMany();
 	console.log(`Found ${dbCurrencies.length} currencies in DB`);
-	const lastUpdated = dbCurrencies[0]?.last_modified;
+	const cacheCurrency =
+		dbCurrencies.find((currency) => currency.id === "CLP") ?? dbCurrencies[0];
+	const lastUpdated = cacheCurrency?.last_modified;
 
-	if (
-		!lastUpdated ||
-		differenceInHours(new Date(), new Date(lastUpdated)) > 6
-	) {
+	if (isExchangeRateCacheStale(lastUpdated)) {
+		const claimedRefresh =
+			!cacheCurrency ||
+			(await claimExchangeRateRefresh(cacheCurrency.id, lastUpdated));
+		if (!claimedRefresh) return currencyToRatesMap(dbCurrencies);
+
 		console.log("Updating exchange rates");
 		const updatedRates = await fetchOpenExchangeRates();
 		if (!updatedRates) return currencyToRatesMap(dbCurrencies);
 		const updatedCurrencies = openExchangeRatesToCurrencies(updatedRates);
-		void updateRates(updatedCurrencies);
+		await updateRates(updatedCurrencies);
 		return currencyToRatesMap(updatedCurrencies);
 	}
 
 	return currencyToRatesMap(dbCurrencies);
+}
+
+async function claimExchangeRateRefresh(
+	currencyId: CurrencyIdType,
+	lastUpdated: string,
+): Promise<boolean> {
+	const utcIsoString = new Date().toISOString();
+	const claimedRows = await db
+		.update(currencies)
+		.set({ last_modified: utcIsoString })
+		.where(
+			and(
+				eq(currencies.id, currencyId),
+				eq(currencies.last_modified, lastUpdated),
+			),
+		)
+		.returning({ id: currencies.id });
+
+	return claimedRows.length === 1;
 }
 
 export async function getExpensesWithMonthlyClpPrice(
@@ -216,9 +239,7 @@ async function updateRates(
 	sqlChunks.push(sql`end)`);
 	const finalSql: SQL = sql.join(sqlChunks, sql.raw(" "));
 
-	const now = new Date();
-	const utcNow = subMinutes(now, now.getTimezoneOffset());
-	const utcIsoString = formatISO(utcNow);
+	const utcIsoString = new Date().toISOString();
 
 	await db
 		.update(currencies)

@@ -14,7 +14,9 @@ describe("calculateExpenseDashboard", () => {
 					expenseId: 10,
 					name: "Cloud storage",
 					category: "Software",
+					rate: "Monthly",
 					plannedMonthly: 10,
+					plannedCharge: 10,
 				},
 			],
 			transactions: [
@@ -89,7 +91,9 @@ describe("calculateExpenseDashboard", () => {
 					expenseId: 10,
 					name: "Cloud storage",
 					category: "Software",
+					rate: "Yearly",
 					plannedMonthly: 10,
+					plannedCharge: 120,
 				},
 			],
 		});

@@ -41,7 +41,9 @@ const dashboard = {
 			expenseId: 1,
 			name: "Cloud",
 			category: "Software",
+			rate: "Monthly",
 			plannedMonthly: 40,
+			plannedCharge: 40,
 			actualMonthlyAverage: 37.5,
 			difference: -2.5,
 			monthlyActuals: [
@@ -100,5 +102,56 @@ describe("getExpenseDashboardComparisonView", () => {
 			baselineActual: 30,
 			differenceFromPlan: 0,
 		});
+	});
+
+	test("only expects a quarterly charge in its inferred billing month", () => {
+		const quarterlyDashboard = {
+			...dashboard,
+			months: [
+				...dashboard.months,
+				month("2026-04", 70, 70, 0),
+				month("2026-05", 80, 80, 0),
+				month("2026-06", 90, 90, 0),
+			],
+			recurring: [
+				{
+					expenseId: 2,
+					name: "Quarterly service",
+					category: "Software",
+					rate: "Quarterly",
+					plannedMonthly: 30,
+					plannedCharge: 120,
+					actualMonthlyAverage: 20,
+					difference: -10,
+					monthlyActuals: [
+						{ month: "2026-03", total: 120, transactionCount: 1 },
+					],
+				},
+			],
+		} as ExpenseDashboard;
+
+		const notDue = getExpenseDashboardComparisonView(
+			quarterlyDashboard,
+			"2026-05",
+			"3m",
+		);
+		expect(notDue?.recurringComparisons[0]).toMatchObject({
+			expectation: "not-due",
+			expectedThisMonth: 0,
+			differenceFromPlan: null,
+		});
+		expect(notDue?.expectedRecurringRemaining).toBe(0);
+
+		const due = getExpenseDashboardComparisonView(
+			quarterlyDashboard,
+			"2026-06",
+			"3m",
+		);
+		expect(due?.recurringComparisons[0]).toMatchObject({
+			expectation: "due",
+			expectedThisMonth: 120,
+			differenceFromPlan: -120,
+		});
+		expect(due?.expectedRecurringRemaining).toBe(120);
 	});
 });

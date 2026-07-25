@@ -13,6 +13,8 @@ import {
 	WalletCards,
 } from "lucide-react";
 import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Tooltip,
@@ -112,7 +114,7 @@ function DistributionBar({
 	if (total === 0) {
 		return (
 			<div
-				className="h-8 rounded bg-muted"
+				className="h-8 bg-muted"
 				role="img"
 				aria-label={`${label}: no data`}
 			/>
@@ -120,7 +122,7 @@ function DistributionBar({
 	}
 	return (
 		<fieldset
-			className="flex h-8 w-full gap-px overflow-hidden rounded"
+			className="flex h-8 w-full gap-px overflow-hidden"
 			aria-label={label}
 		>
 			{categories.map((item) => {
@@ -132,7 +134,7 @@ function DistributionBar({
 							<button
 								type="button"
 								onClick={() => onSelect(item.category)}
-								className="focusable h-full min-w-0 transition-[filter,transform] first:rounded-l-md last:rounded-r-md hover:z-10 hover:brightness-110 focus-visible:z-10"
+								className="focusable h-full min-w-0 transition-[filter,transform] hover:z-10 hover:brightness-110 focus-visible:z-10"
 								style={{
 									flexGrow: item.total,
 									flexBasis: 0,
@@ -365,37 +367,37 @@ export default function ExpenseDashboardPage() {
 			<div className="flex flex-wrap items-end justify-between gap-5">
 				<div>
 					<p className="text-sm text-muted-foreground">Managing expenses for</p>
-					<div className="mt-1 flex items-center gap-1">
-						<button
-							type="button"
+					<h2 className="sr-only">{view.current.month}</h2>
+					<div className="mt-1 flex items-center">
+						<Button
 							disabled={!view.previousMonth}
 							onClick={() => setMonth(view.previousMonth)}
-							className="focusable rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30"
 							aria-label="Review previous imported month"
+							size="icon"
+							variant="outline"
+							className="size-12 grow border-r-0"
 						>
-							<ChevronLeft className="size-4" />
-						</button>
-						<select
+							<ChevronLeft className="size-5" />
+						</Button>
+						<Combobox
+							options={dashboard.months.map(({ month }) => ({
+								value: month,
+								label: formatExpenseHistoryMonth(month),
+							}))}
 							value={view.current.month}
-							onChange={(event) => setMonth(event.target.value)}
-							className="focusable rounded-md border border-input bg-background px-3 py-1.5 text-lg font-semibold"
-							aria-label="Month to review"
-						>
-							{[...dashboard.months].reverse().map(({ month }) => (
-								<option key={month} value={month}>
-									{formatExpenseHistoryMonth(month)}
-								</option>
-							))}
-						</select>
-						<button
-							type="button"
+							onChange={(value) => setMonth(value)}
+							className="text-xl h-12 font-semibold"
+						/>
+						<Button
 							disabled={!view.nextMonth}
 							onClick={() => setMonth(view.nextMonth)}
-							className="focusable rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30"
 							aria-label="Review next imported month"
+							size="icon"
+							variant="outline"
+							className="size-12 grow border-l-0"
 						>
-							<ChevronRight className="size-4" />
-						</button>
+							<ChevronRight className="size-5" />
+						</Button>
 					</div>
 				</div>
 				<div className="flex flex-wrap items-end gap-4">
@@ -415,7 +417,7 @@ export default function ExpenseDashboardPage() {
 									replace: true,
 								})
 							}
-							className="focusable rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground"
+							className="focusable border border-input bg-background px-3 py-2 text-sm font-medium text-foreground"
 						>
 							{comparisonOptions.map((option) => (
 								<option key={option.value} value={option.value}>
@@ -557,19 +559,29 @@ export default function ExpenseDashboardPage() {
 							{recurringRows.map((expense) => {
 								const remaining = Math.max(
 									0,
-									expense.planned - expense.currentActual,
+									expense.expectedThisMonth - expense.currentActual,
 								);
-								const over = expense.currentActual - expense.planned;
+								const over = expense.currentActual - expense.expectedThisMonth;
+								const canBeDuplicate = ![
+									"Daily",
+									"Hourly",
+									"Weekly",
+									"Bi-Weekly",
+								].includes(expense.rate);
 								const status =
-									expense.currentTransactionCount > 1
-										? `${expense.currentTransactionCount} charges detected`
-										: expense.currentActual === 0
-											? "Not seen yet"
-											: over > 0.01
-												? `${formatCurrency(over, dashboard.currency)} over plan`
-												: remaining > 0.01
-													? `${formatCurrency(remaining, dashboard.currency)} still expected`
-													: "On plan";
+									expense.expectation === "not-due"
+										? `${expense.rate} · not due this month`
+										: expense.expectation === "unknown"
+											? `${expense.rate} · billing month unknown`
+											: canBeDuplicate && expense.currentTransactionCount > 1
+												? `${expense.currentTransactionCount} charges detected`
+												: expense.currentActual === 0
+													? `${expense.rate} · expected this month`
+													: over > 0.01
+														? `${formatCurrency(over, dashboard.currency)} over plan`
+														: remaining > 0.01
+															? `${formatCurrency(remaining, dashboard.currency)} still expected`
+															: "On plan";
 								return (
 									<li
 										key={expense.expenseId}
@@ -588,10 +600,17 @@ export default function ExpenseDashboardPage() {
 												expense.currentActual,
 												dashboard.currency,
 											)}
-											<span className="text-muted-foreground">
-												{" "}
-												/ {formatCurrency(expense.planned, dashboard.currency)}
-											</span>
+											{expense.expectation === "due" ||
+											expense.expectation === "one-time" ? (
+												<span className="text-muted-foreground">
+													{" "}
+													/{" "}
+													{formatCurrency(
+														expense.expectedThisMonth,
+														dashboard.currency,
+													)}
+												</span>
+											) : null}
 										</p>
 									</li>
 								);

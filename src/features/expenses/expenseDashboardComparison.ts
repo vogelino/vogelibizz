@@ -26,11 +26,13 @@ export type ExpenseDashboardRecurringComparison = {
 	expenseId: number;
 	name: string;
 	category: ExpenseDashboard["recurring"][number]["category"];
-	planned: number;
+	rate: ExpenseDashboard["recurring"][number]["rate"];
+	expectedThisMonth: number;
+	expectation: "due" | "not-due" | "unknown" | "one-time";
 	currentActual: number;
 	currentTransactionCount: number;
 	baselineActual: number;
-	differenceFromPlan: number;
+	differenceFromPlan: number | null;
 };
 
 export type ExpenseDashboardComparisonView = {
@@ -56,6 +58,35 @@ function average(values: readonly number[]): number | null {
 function monthOneYearEarlier(month: string) {
 	const [year, monthNumber] = month.split("-");
 	return `${Number(year) - 1}-${monthNumber}`;
+}
+
+function monthDistance(from: string, to: string) {
+	const [fromYear, fromMonth] = from.split("-").map(Number);
+	const [toYear, toMonth] = to.split("-").map(Number);
+	return (toYear - fromYear) * 12 + toMonth - fromMonth;
+}
+
+function billingIntervalMonths(
+	rate: ExpenseDashboard["recurring"][number]["rate"],
+): number | null {
+	switch (rate) {
+		case "Bi-Monthly":
+			return 2;
+		case "Quarterly":
+			return 3;
+		case "Semester":
+			return 6;
+		case "Yearly":
+			return 12;
+		case "Bi-Yearly":
+			return 24;
+		case "Tri-Yearly":
+			return 36;
+		case "One-time":
+			return null;
+		default:
+			return 1;
+	}
 }
 
 export function getExpenseDashboardComparisonView(
@@ -145,23 +176,56 @@ export function getExpenseDashboardComparisonView(
 						({ month }) => actualByMonth.get(month)?.total ?? 0,
 					),
 				) ?? 0;
+			const intervalMonths = billingIntervalMonths(expense.rate);
+			const anchorMonth = expense.monthlyActuals[0]?.month;
+			const expectation: ExpenseDashboardRecurringComparison["expectation"] =
+				expense.rate === "One-time"
+					? currentActual > 0
+						? "one-time"
+						: "not-due"
+					: currentActual > 0
+						? "due"
+						: intervalMonths === 1
+							? "due"
+							: anchorMonth === undefined
+								? "unknown"
+								: Math.abs(monthDistance(anchorMonth, current.month)) %
+											(intervalMonths ?? 1) ===
+										0
+									? "due"
+									: "not-due";
+			const expectedThisMonth =
+				expectation === "due"
+					? intervalMonths === 1
+						? expense.plannedMonthly
+						: expense.plannedCharge
+					: expectation === "one-time"
+						? expense.plannedCharge
+						: 0;
 			return {
 				expenseId: expense.expenseId,
 				name: expense.name,
 				category: expense.category,
-				planned: expense.plannedMonthly,
+				rate: expense.rate,
+				expectedThisMonth,
+				expectation,
 				currentActual,
 				currentTransactionCount: currentActualRow?.transactionCount ?? 0,
 				baselineActual,
-				differenceFromPlan: currentActual - expense.plannedMonthly,
+				differenceFromPlan:
+					expectation === "unknown" || expectation === "not-due"
+						? null
+						: currentActual - expectedThisMonth,
 			};
 		})
 		.sort(
-			(a, b) => Math.abs(b.differenceFromPlan) - Math.abs(a.differenceFromPlan),
+			(a, b) =>
+				Math.abs(b.differenceFromPlan ?? 0) -
+				Math.abs(a.differenceFromPlan ?? 0),
 		);
 	const expectedRecurringRemaining = recurringComparisons.reduce(
 		(total, expense) =>
-			total + Math.max(0, expense.planned - expense.currentActual),
+			total + Math.max(0, expense.expectedThisMonth - expense.currentActual),
 		0,
 	);
 

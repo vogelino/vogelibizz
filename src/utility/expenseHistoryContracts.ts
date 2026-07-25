@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
 	currencyEnum,
 	expenseCategoryEnum,
+	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
 
@@ -122,7 +123,9 @@ export const expenseDashboardSchema = z.object({
 			expenseId: z.number().int().positive(),
 			name: z.string().min(1),
 			category: z.enum(expenseCategoryEnum.enumValues),
+			rate: z.enum(expenseRateEnum.enumValues),
 			plannedMonthly: z.number().finite().nonnegative(),
+			plannedCharge: z.number().finite().nonnegative(),
 			actualMonthlyAverage: z.number().finite().nonnegative().nullable(),
 			difference: z.number().finite().nullable(),
 			monthlyActuals: z.array(

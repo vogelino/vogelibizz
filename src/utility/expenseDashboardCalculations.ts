@@ -1,7 +1,8 @@
-import type { expenseCategoryEnum } from "@/db/schema";
+import type { expenseCategoryEnum, expenseRateEnum } from "@/db/schema";
 import type { ExpenseDashboard } from "./expenseHistoryContracts";
 
 type ExpenseCategory = (typeof expenseCategoryEnum.enumValues)[number];
+type ExpenseRate = (typeof expenseRateEnum.enumValues)[number];
 
 export type DashboardMonthInput = {
 	id: number;
@@ -19,7 +20,9 @@ export type DashboardExpenseInput = {
 	expenseId: number;
 	name: string;
 	category: ExpenseCategory;
+	rate: ExpenseRate;
 	plannedMonthly: number;
+	plannedCharge: number;
 };
 
 export function calculateExpenseDashboard({

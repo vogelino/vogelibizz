@@ -18,6 +18,7 @@ import {
 	settingsSelectSchema,
 } from "@/db/schema";
 import type { Session } from "@/providers/SessionProvider";
+import { EXCHANGE_RATE_CACHE_TTL_MS } from "@/utility/exchangeRateCache";
 import {
 	type ExpenseDashboard,
 	type ExpenseHistoryMonthDetail,
@@ -246,7 +247,7 @@ export const exchangeRatesQuery = {
 	current: () =>
 		queryOptions({
 			...queryKeys.exchangeRates.current,
-			staleTime: 6 * 60 * 60 * 1000,
+			staleTime: EXCHANGE_RATE_CACHE_TTL_MS,
 			queryFn: async (): Promise<Record<CurrencyIdType, number>> => {
 				if (import.meta.env.SSR) {
 					const { getExchangeRatesRecord } = await import(
