@@ -37,14 +37,20 @@ export type RealMonthlyAverageStatus =
 	| "as-expected"
 	| "unavailable";
 
+const realMonthlyAverageTolerance = 0.05;
+
 export function getRealMonthlyAverageStatus(
 	monthlyAmount: number,
 	realMonthlyAverage: number | null,
 ): RealMonthlyAverageStatus {
 	if (realMonthlyAverage === null) return "unavailable";
+	const allowedDifference =
+		Math.abs(monthlyAmount) * realMonthlyAverageTolerance;
+	if (Math.abs(realMonthlyAverage - monthlyAmount) <= allowedDifference) {
+		return "as-expected";
+	}
 	if (realMonthlyAverage > monthlyAmount) return "overpaid";
-	if (realMonthlyAverage < monthlyAmount) return "underpaid";
-	return "as-expected";
+	return "underpaid";
 }
 
 export function createExpenseOverviewRows(

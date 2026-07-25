@@ -181,6 +181,10 @@ export function getExpenseHistoryColumns(
 		columnHelper.accessor("category", {
 			header: "Category",
 			size: 200,
+			filterFn: (row, columnId, filterValue) =>
+				(
+					filterValue as NonNullable<ExpenseHistoryTransaction["category"]>[]
+				).includes(row.getValue(columnId)),
 			cell: ({ getValue, row }) => {
 				const category = getValue();
 				return (

@@ -77,9 +77,16 @@ describe("expense overview rows", () => {
 	});
 
 	test("classifies real monthly averages relative to the expected amount", () => {
-		expect(getRealMonthlyAverageStatus(100, 120)).toBe("overpaid");
-		expect(getRealMonthlyAverageStatus(100, 80)).toBe("underpaid");
+		expect(getRealMonthlyAverageStatus(100, 105)).toBe("as-expected");
+		expect(getRealMonthlyAverageStatus(100, 95)).toBe("as-expected");
+		expect(getRealMonthlyAverageStatus(100, 105.01)).toBe("overpaid");
+		expect(getRealMonthlyAverageStatus(100, 94.99)).toBe("underpaid");
 		expect(getRealMonthlyAverageStatus(100, 100)).toBe("as-expected");
+		expect(getRealMonthlyAverageStatus(23.9, 23.900000000000002)).toBe(
+			"as-expected",
+		);
+		expect(getRealMonthlyAverageStatus(0, 0)).toBe("as-expected");
+		expect(getRealMonthlyAverageStatus(0, 0.01)).toBe("overpaid");
 		expect(getRealMonthlyAverageStatus(100, null)).toBe("unavailable");
 	});
 
