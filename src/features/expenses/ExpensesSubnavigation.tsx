@@ -3,10 +3,15 @@ import { cn } from "@/utility/classNames";
 import { type ResourceIconKey, resourceIconMap } from "@/utility/resourceIcons";
 
 const links: readonly {
-	to: "/expenses" | "/expenses/history";
+	to: "/expenses" | "/expenses/dashboard" | "/expenses/history";
 	label: string;
 	icon: ResourceIconKey;
 }[] = [
+	{
+		to: "/expenses/dashboard",
+		label: "Dashboard",
+		icon: "expense-dashboard",
+	},
 	{ to: "/expenses", label: "Recurring expenses", icon: "expenses" },
 	{
 		to: "/expenses/history",
@@ -18,7 +23,7 @@ const links: readonly {
 export function ExpensesSubnavigation({
 	active,
 }: {
-	active: "recurring" | "history";
+	active: "dashboard" | "recurring" | "history";
 }) {
 	return (
 		<nav aria-label="Expenses sections" className="border-b border-border">
@@ -26,9 +31,9 @@ export function ExpensesSubnavigation({
 				{links.map((link) => {
 					const Icon = resourceIconMap[link.icon];
 					const isActive =
-						active === "recurring"
-							? link.to === "/expenses"
-							: link.to === "/expenses/history";
+						(active === "dashboard" && link.to === "/expenses/dashboard") ||
+						(active === "recurring" && link.to === "/expenses") ||
+						(active === "history" && link.to === "/expenses/history");
 					return (
 						<li key={link.to}>
 							<Link

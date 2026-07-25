@@ -1,6 +1,7 @@
 import { asc, count, desc, eq, exists, sql, sum } from "drizzle-orm";
 import db from "@/db";
 import { expenseMonths, expenses, expenseTransactions } from "@/db/schema";
+import { calculateExpenseDashboard } from "@/utility/expenseDashboardCalculations";
 import {
 	getExchangeRates,
 	getTargetCurrency,
@@ -8,6 +9,7 @@ import {
 } from "@/utility/expenseFetchUtil";
 import { calculateExpenseHistorySummary } from "@/utility/expenseHistoryCalculations";
 import type {
+	ExpenseDashboard,
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
 	ExpenseHistoryTransactionDetail,
@@ -247,4 +249,64 @@ export async function getExpenseOverviewSummary(): Promise<ExpenseOverviewSummar
 			})),
 		}),
 	};
+}
+
+export async function getExpenseDashboard(): Promise<ExpenseDashboard> {
+	const [configuredExpenses, importedMonths, transactions, rates, currency] =
+		await Promise.all([
+			db.query.expenses.findMany(),
+			db
+				.select({ id: expenseMonths.id, month: expenseMonths.month })
+				.from(expenseMonths)
+				.where(
+					exists(
+						db
+							.select({ id: expenseTransactions.id })
+							.from(expenseTransactions)
+							.where(eq(expenseTransactions.expenseMonthId, expenseMonths.id)),
+					),
+				),
+			db
+				.select({
+					expenseMonthId: expenseTransactions.expenseMonthId,
+					expenseId: expenseTransactions.expenseId,
+					amount: expenseTransactions.amount,
+					category: expenseTransactions.category,
+				})
+				.from(expenseTransactions),
+			getExchangeRates(),
+			getTargetCurrency(),
+		]);
+
+	const toTargetMonthlyAmount = (
+		value: number,
+		originalCurrency: (typeof configuredExpenses)[number]["originalCurrency"],
+		billingRate: (typeof configuredExpenses)[number]["rate"],
+	) =>
+		getValueInTargetCurrencyPerMonth({
+			value,
+			currency: originalCurrency,
+			billingRate,
+			rates,
+			targetCurrency: currency,
+		}) ?? value;
+
+	return calculateExpenseDashboard({
+		currency,
+		importedMonths,
+		configuredExpenses: configuredExpenses.map((expense) => ({
+			expenseId: expense.id,
+			name: expense.name,
+			category: expense.category,
+			plannedMonthly: toTargetMonthlyAmount(
+				expense.originalPrice,
+				expense.originalCurrency,
+				expense.rate,
+			),
+		})),
+		transactions: transactions.map((transaction) => ({
+			...transaction,
+			amount: toTargetMonthlyAmount(transaction.amount, "CHF", "Monthly"),
+		})),
+	});
 }

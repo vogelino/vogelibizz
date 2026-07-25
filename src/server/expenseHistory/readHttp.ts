@@ -3,6 +3,7 @@ import { isAuthenticatedAndAdmin } from "@/auth";
 import { json } from "@/utility/apiUtil";
 import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts";
 import {
+	getExpenseDashboard,
 	getExpenseHistoryMonth,
 	getExpenseHistoryMonths,
 	getExpenseHistoryTransaction,
@@ -14,18 +15,22 @@ type ReadHttpDependencies = {
 	getMonths: typeof getExpenseHistoryMonths;
 	getMonth: typeof getExpenseHistoryMonth;
 	getOverview: typeof getExpenseOverviewSummary;
+	getDashboard: typeof getExpenseDashboard;
 	getTransaction: typeof getExpenseHistoryTransaction;
 };
 
 export function createExpenseHistoryReadHandlers(
-	dependencies: ReadHttpDependencies = {
+	overrides: Partial<ReadHttpDependencies> = {},
+) {
+	const dependencies: ReadHttpDependencies = {
 		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
 		getMonths: getExpenseHistoryMonths,
 		getMonth: getExpenseHistoryMonth,
 		getOverview: getExpenseOverviewSummary,
+		getDashboard: getExpenseDashboard,
 		getTransaction: getExpenseHistoryTransaction,
-	},
-) {
+		...overrides,
+	};
 	return {
 		months: async (request: Request) => {
 			if (!(await dependencies.authorize(request))) {
@@ -38,6 +43,12 @@ export function createExpenseHistoryReadHandlers(
 				return json({ error: "Unauthorized" }, { status: 401 });
 			}
 			return json(await dependencies.getOverview());
+		},
+		dashboard: async (request: Request) => {
+			if (!(await dependencies.authorize(request))) {
+				return json({ error: "Unauthorized" }, { status: 401 });
+			}
+			return json(await dependencies.getDashboard());
 		},
 		month: async (request: Request, monthParam: string) => {
 			if (!(await dependencies.authorize(request))) {
@@ -109,4 +120,5 @@ const readHandlers = createExpenseHistoryReadHandlers();
 export const getExpenseHistoryMonthsHandler = readHandlers.months;
 export const getExpenseHistoryMonthHandler = readHandlers.month;
 export const getExpenseOverviewSummaryHandler = readHandlers.overview;
+export const getExpenseDashboardHandler = readHandlers.dashboard;
 export const getExpenseHistoryTransactionHandler = readHandlers.transaction;

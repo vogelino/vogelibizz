@@ -43,6 +43,11 @@ export const menuItems: MenuLinkType[] = [
 		label: "Expenses",
 		routes: [
 			{
+				key: "expense-dashboard",
+				label: "Dashboard",
+				route: "/expenses/dashboard",
+			},
+			{
 				key: "expenses",
 				label: "Recurring Expenses",
 				route: "/expenses",

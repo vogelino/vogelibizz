@@ -80,6 +80,52 @@ export const expenseOverviewSummarySchema = z.object({
 	observedMonthlyAverage: z.number().finite().nonnegative().nullable(),
 });
 
+export const expenseDashboardCategorySchema = z.object({
+	category: z.enum(expenseCategoryEnum.enumValues).nullable(),
+	total: z.number().finite().nonnegative(),
+	transactionCount: z.number().int().nonnegative(),
+});
+
+export const expenseDashboardSchema = z.object({
+	currency: z.enum(currencyEnum.enumValues),
+	importedMonthCount: z.number().int().nonnegative(),
+	configuredMonthlyTotal: z.number().finite().nonnegative(),
+	typicalMonthlyTotal: z.number().finite().nonnegative().nullable(),
+	months: z.array(
+		z.object({
+			month: expenseHistoryMonthKeySchema,
+			total: z.number().finite().nonnegative(),
+			matched: z.number().finite().nonnegative(),
+			unmatched: z.number().finite().nonnegative(),
+			categories: z.array(expenseDashboardCategorySchema),
+		}),
+	),
+	latest: z
+		.object({
+			month: expenseHistoryMonthKeySchema,
+			total: z.number().finite().nonnegative(),
+			previousTotal: z.number().finite().nonnegative().nullable(),
+			matched: z.number().finite().nonnegative(),
+			unmatched: z.number().finite().nonnegative(),
+			unmatchedCount: z.number().int().nonnegative(),
+			uncategorizedTotal: z.number().finite().nonnegative(),
+			uncategorizedCount: z.number().int().nonnegative(),
+			reviewCount: z.number().int().nonnegative(),
+			categories: z.array(expenseDashboardCategorySchema),
+		})
+		.nullable(),
+	recurring: z.array(
+		z.object({
+			expenseId: z.number().int().positive(),
+			name: z.string().min(1),
+			category: z.enum(expenseCategoryEnum.enumValues),
+			plannedMonthly: z.number().finite().nonnegative(),
+			actualMonthlyAverage: z.number().finite().nonnegative().nullable(),
+			difference: z.number().finite().nullable(),
+		}),
+	),
+});
+
 export const expenseHistoryTransactionMutationSchema = z
 	.object({
 		lastModified: z.string().min(1),
@@ -127,3 +173,4 @@ export type ExpenseHistoryTransactionDetail = z.infer<
 export type ExpenseOverviewSummary = z.infer<
 	typeof expenseOverviewSummarySchema
 >;
+export type ExpenseDashboard = z.infer<typeof expenseDashboardSchema>;

@@ -19,10 +19,12 @@ import {
 } from "@/db/schema";
 import type { Session } from "@/providers/SessionProvider";
 import {
+	type ExpenseDashboard,
 	type ExpenseHistoryMonthDetail,
 	type ExpenseHistoryMonthSummary,
 	type ExpenseHistoryTransactionDetail,
 	type ExpenseOverviewSummary,
+	expenseDashboardSchema,
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
 	expenseHistoryTransactionDetailSchema,
@@ -60,6 +62,7 @@ const queryKeys = mergeQueryKeys(
 		month: (month: string | null) => [month ?? "all"],
 		transaction: (id: string | number) => ["transaction", String(id)],
 		overview: null,
+		dashboard: null,
 	}),
 );
 
@@ -259,6 +262,21 @@ export const exchangeRatesQuery = {
 };
 
 export const expenseHistoryQuery = {
+	dashboard: () =>
+		queryOptions({
+			...queryKeys.expenseHistory.dashboard,
+			queryFn: async (): Promise<ExpenseDashboard> => {
+				if (import.meta.env.SSR) {
+					const { getExpenseDashboard } = await import(
+						"@/server/expenseHistory/getExpenseHistory"
+					);
+					return getExpenseDashboard();
+				}
+				return expenseDashboardSchema.parse(
+					await apiGetJson("/api/expense-history/dashboard"),
+				);
+			},
+		}),
 	overview: () =>
 		queryOptions({
 			...queryKeys.expenseHistory.overview,
@@ -383,3 +401,4 @@ export const expenseHistoryMonthQueriesKey = [
 export const expenseHistoryTransactionQueryOptions =
 	expenseHistoryQuery.transaction;
 export const expenseOverviewSummaryQueryOptions = expenseHistoryQuery.overview;
+export const expenseDashboardQueryOptions = expenseHistoryQuery.dashboard;

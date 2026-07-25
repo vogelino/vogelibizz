@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiFetch } from "../dataHookUtil";
 import {
+	expenseDashboardQueryOptions,
 	expenseHistoryMonthQueriesKey,
 	expenseOverviewSummaryQueryOptions,
 } from "./queryOptions";
@@ -33,6 +34,9 @@ export default function useExpenseHistoryTransactionDelete() {
 				}),
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseDashboardQueryOptions().queryKey,
 				}),
 			]);
 			toast.success(

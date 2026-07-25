@@ -17,6 +17,7 @@ import {
 import { Route } from "@/routes/_resource/expenses/history";
 import {
 	exchangeRatesQueryOptions,
+	expenseDashboardQueryOptions,
 	expenseHistoryMonthQueriesKey,
 	expenseHistoryMonthsQueryOptions,
 	expenseOverviewSummaryQueryOptions,
@@ -59,12 +60,14 @@ type ExpenseHistoryFilterState = {
 	category: NonNullable<ExpenseHistoryTransaction["category"]>[];
 	type: NonNullable<ExpenseHistoryTransaction["type"]> | "All types";
 	otherOnly: boolean;
+	uncategorizedOnly: boolean;
 };
 
 const expenseHistoryFilterDefaults: ExpenseHistoryFilterState = {
 	category: [],
 	type: "All types",
 	otherOnly: false,
+	uncategorizedOnly: false,
 };
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
@@ -180,6 +183,9 @@ export default function ExpenseHistoryPage() {
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
 				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseDashboardQueryOptions().queryKey,
+				}),
 			]);
 			if (selectedImportedMonth) {
 				await navigate({
@@ -280,35 +286,41 @@ export default function ExpenseHistoryPage() {
 				: [],
 		[historyError, monthQuery.data],
 	);
-	const visibleTransactions = useMemo(
-		() =>
-			filterRowsByText(
-				transactions,
-				search.q,
-				(transaction) => transaction.id,
-				(transaction) =>
-					[
-						transaction.id,
-						transaction.description,
-						transaction.originalDescription,
-						transaction.bookedAt,
-						transaction.category,
-						transaction.type,
-						transaction.expense?.name,
-						amountSearchText(transaction.amount),
-						amountSearchText(transaction.originalAmount, "CHF"),
-					]
-						.filter(Boolean)
-						.join(" "),
-			),
-		[search.q, transactions],
-	);
+	const visibleTransactions = useMemo(() => {
+		const matchingText = filterRowsByText(
+			transactions,
+			search.q,
+			(transaction) => transaction.id,
+			(transaction) =>
+				[
+					transaction.id,
+					transaction.description,
+					transaction.originalDescription,
+					transaction.bookedAt,
+					transaction.category,
+					transaction.type,
+					transaction.expense?.name,
+					amountSearchText(transaction.amount),
+					amountSearchText(transaction.originalAmount, "CHF"),
+				]
+					.filter(Boolean)
+					.join(" "),
+		);
+		return filters.uncategorizedOnly
+			? matchingText.filter((transaction) => transaction.category === null)
+			: matchingText;
+	}, [filters.uncategorizedOnly, search.q, transactions]);
 	useEffect(() => {
-		if (!search.q || !monthQuery.hasNextPage || monthQuery.isFetchingNextPage) {
+		if (
+			(!search.q && !filters.uncategorizedOnly) ||
+			!monthQuery.hasNextPage ||
+			monthQuery.isFetchingNextPage
+		) {
 			return;
 		}
 		void monthQuery.fetchNextPage();
 	}, [
+		filters.uncategorizedOnly,
 		monthQuery.fetchNextPage,
 		monthQuery.hasNextPage,
 		monthQuery.isFetchingNextPage,
@@ -406,7 +418,7 @@ export default function ExpenseHistoryPage() {
 							/>
 						) : null}
 						<DataTable
-							key={selectedMonth ?? "all-expense-history"}
+							key={`${selectedMonth ?? "all-expense-history"}-${filters.uncategorizedOnly ? "uncategorized" : "all"}`}
 							columns={columns}
 							data={visibleTransactions}
 							loading={historyLoading}
@@ -473,9 +485,25 @@ export default function ExpenseHistoryPage() {
 															? "All types"
 															: nextFilters.type,
 													otherOnly: nextFilters.otherOnly,
+													uncategorizedOnly: filters.uncategorizedOnly,
 												})
 											}
 										/>
+										{filters.uncategorizedOnly ? (
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												onClick={() =>
+													setFilters((previous) => ({
+														...previous,
+														uncategorizedOnly: false,
+													}))
+												}
+											>
+												Uncategorized only · Clear
+											</Button>
+										) : null}
 										<div className="flex items-center gap-3">
 											<CurrencySettingSelect />
 											<ExpenseHistoryMonthNavigation

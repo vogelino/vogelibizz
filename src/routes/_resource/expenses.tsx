@@ -16,6 +16,7 @@ const expensesSearchSchema = z.object({
 		.optional()
 		.catch(undefined),
 	expenseOtherOnly: z.boolean().optional().catch(undefined),
+	uncategorizedOnly: z.boolean().optional().catch(undefined),
 	duplicateId: z.coerce.number().int().positive().optional().catch(undefined),
 });
 
@@ -26,16 +27,19 @@ export const Route = createFileRoute("/_resource/expenses")({
 });
 
 function ExpensesLayout() {
-	const isHistory = useLocation({
-		select: (location) => location.pathname.startsWith("/expenses/history"),
+	const pathname = useLocation({
+		select: (location) => location.pathname,
 	});
+	const active = pathname.startsWith("/expenses/dashboard")
+		? "dashboard"
+		: pathname.startsWith("/expenses/history")
+			? "history"
+			: "recurring";
 	return (
 		<ResourcePageLayout
 			resource="expenses"
-			showCreate={!isHistory}
-			headerContent={
-				<ExpensesSubnavigation active={isHistory ? "history" : "recurring"} />
-			}
+			showCreate={active === "recurring"}
+			headerContent={<ExpensesSubnavigation active={active} />}
 		>
 			<Outlet />
 		</ResourcePageLayout>

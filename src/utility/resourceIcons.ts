@@ -1,4 +1,5 @@
 import {
+	ChartNoAxesCombined,
 	Coins,
 	FileText,
 	FolderKanban,
@@ -11,13 +12,17 @@ import {
 } from "lucide-react";
 import type { ResourceType } from "@/db/schema";
 
-export type ResourceIconKey = ResourceType | "expense-history";
+export type ResourceIconKey =
+	| ResourceType
+	| "expense-dashboard"
+	| "expense-history";
 
 export const resourceIconMap = {
 	clients: Users,
 	projects: FolderKanban,
 	invoices: ReceiptText,
 	expenses: WalletCards,
+	"expense-dashboard": ChartNoAxesCombined,
 	"expense-history": History,
 	quotes: FileText,
 	currencies: Coins,

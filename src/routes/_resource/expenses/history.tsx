@@ -21,6 +21,7 @@ const historySearchSchema = z.object({
 		.optional()
 		.catch(undefined),
 	otherOnly: z.boolean().optional().catch(undefined),
+	uncategorizedOnly: z.boolean().optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_resource/expenses/history")({

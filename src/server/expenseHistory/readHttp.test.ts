@@ -1,11 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import type {
+	ExpenseDashboard,
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
 	ExpenseHistoryTransactionDetail,
 	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
 import {
+	expenseDashboardSchema,
 	expenseHistoryMonthDetailSchema,
 	expenseHistoryMonthsSchema,
 	expenseHistoryTransactionDetailSchema,
@@ -56,6 +58,43 @@ const transactionDetail: ExpenseHistoryTransactionDetail = {
 	month: "2026-06",
 	transaction: detail.transactions[0],
 };
+const dashboard: ExpenseDashboard = {
+	currency: "CHF",
+	importedMonthCount: 1,
+	configuredMonthlyTotal: 30,
+	typicalMonthlyTotal: 17.5,
+	months: [
+		{
+			month: "2026-06",
+			total: 17.5,
+			matched: 12.5,
+			unmatched: 5,
+			categories: [{ category: "Software", total: 17.5, transactionCount: 1 }],
+		},
+	],
+	latest: {
+		month: "2026-06",
+		total: 17.5,
+		previousTotal: null,
+		matched: 12.5,
+		unmatched: 5,
+		unmatchedCount: 1,
+		uncategorizedTotal: 0,
+		uncategorizedCount: 0,
+		reviewCount: 1,
+		categories: [{ category: "Software", total: 17.5, transactionCount: 1 }],
+	},
+	recurring: [
+		{
+			expenseId: 4,
+			name: "Synthetic recurring",
+			category: "Software",
+			plannedMonthly: 30,
+			actualMonthlyAverage: 12.5,
+			difference: -17.5,
+		},
+	],
+};
 
 function request() {
 	return new Request("https://example.test/api/expense-history/months");
@@ -74,6 +113,7 @@ describe("expense history read HTTP API", () => {
 		expect(response.status).toBe(401);
 		expect(await response.json()).toEqual({ error: "Unauthorized" });
 		expect((await handlers.overview(request())).status).toBe(401);
+		expect((await handlers.dashboard(request())).status).toBe(401);
 		expect((await handlers.transaction(request(), "7")).status).toBe(401);
 	});
 
@@ -114,6 +154,17 @@ describe("expense history read HTTP API", () => {
 		const response = await handlers.overview(request());
 		expect(expenseOverviewSummarySchema.parse(await response.json())).toEqual(
 			overview,
+		);
+	});
+
+	test("returns the dashboard contract", async () => {
+		const handlers = createExpenseHistoryReadHandlers({
+			authorize: async () => true,
+			getDashboard: async () => dashboard,
+		});
+		const response = await handlers.dashboard(request());
+		expect(expenseDashboardSchema.parse(await response.json())).toEqual(
+			dashboard,
 		);
 	});
 

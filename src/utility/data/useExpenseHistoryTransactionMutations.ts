@@ -15,6 +15,7 @@ import type {
 import { expenseHistoryTransactionSchema } from "@/utility/expenseHistoryContracts";
 import { apiFetch } from "../dataHookUtil";
 import {
+	expenseDashboardQueryOptions,
 	expenseHistoryMonthQueriesKey,
 	expenseHistoryTransactionQueryOptions,
 	expenseOverviewSummaryQueryOptions,
@@ -70,6 +71,9 @@ export function useExpenseHistoryTransactionMutations({
 			}),
 			queryClient.invalidateQueries({
 				queryKey: expenseOverviewSummaryQueryOptions().queryKey,
+			}),
+			queryClient.invalidateQueries({
+				queryKey: expenseDashboardQueryOptions().queryKey,
 			}),
 		];
 		if (created) {
@@ -185,6 +189,9 @@ export function useExpenseHistoryTransactionInlineEdit() {
 				}),
 				queryClient.invalidateQueries({
 					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseDashboardQueryOptions().queryKey,
 				}),
 			]);
 		},
