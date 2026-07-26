@@ -63,7 +63,10 @@ type CommandInputProps = Omit<
 const CommandInput = forwardRef<HTMLInputElement, CommandInputProps>(
 	({ className, prefix, ...props }, ref) => (
 		<div
-			className="flex min-h-12 items-center border-b border-border pl-3"
+			className={cn(
+				"flex min-h-12 items-center border-b border-border pl-3",
+				"has-[input[type=text]:focus-visible]:ring-2 has-[input[type=text]:focus-visible]:ring-ring has-[input[type=text]:focus-visible]:ring-inset",
+			)}
 			cmdk-input-wrapper=""
 		>
 			<SearchIcon className="mr-2 shrink-0 opacity-50 text-muted-foreground" />
@@ -71,9 +74,8 @@ const CommandInput = forwardRef<HTMLInputElement, CommandInputProps>(
 			<CommandPrimitive.Input
 				ref={ref}
 				className={cn(
-					"flex h-10 min-w-20 grow bg-transparent py-2 outline-none border-none",
+					"flex h-10 min-w-20 grow bg-transparent py-2 outline-none border-none pl-3",
 					"placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-					"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
 					className,
 				)}
 				{...props}

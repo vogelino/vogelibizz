@@ -271,8 +271,8 @@ export default function InvoiceEditorPage({
 				</div>
 			</div>
 			<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
-				<div className="overflow-hidden rounded-md border border-border bg-background">
-					<div className="h-[78vh] min-h-[40rem]">
+				<div className="overflow-hidden border border-border bg-background">
+					<div className="h-[78vh] min-h-160">
 						{previewData ? (
 							<InvoicePdfPreview data={previewData} />
 						) : (
@@ -286,7 +286,7 @@ export default function InvoiceEditorPage({
 				<aside className="xl:sticky xl:top-24">
 					<form
 						onSubmit={handleSubmit}
-						className="flex max-h-[78vh] min-h-[40rem] flex-col gap-6 overflow-auto rounded-md border border-border bg-card p-4"
+						className="flex max-h-[78vh] min-h-160 flex-col gap-6 overflow-auto border border-border bg-card p-4"
 					>
 						<div className="flex items-center justify-between gap-2">
 							<div>
@@ -381,7 +381,7 @@ export default function InvoiceEditorPage({
 
 						<div className="flex flex-col gap-3">
 							<span className="text-muted-foreground">Line items</span>
-							<div className="overflow-hidden rounded-md border border-border">
+							<div className="overflow-hidden border border-border">
 								<table className="w-full border-collapse">
 									<thead className="bg-muted/40 text-left text-sm text-muted-foreground">
 										<tr>

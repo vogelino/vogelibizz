@@ -63,7 +63,7 @@ export const Menu = ({ withBg = true, currentPage }: MenuProps) => {
 					aria-controls="mobile-menu"
 					aria-expanded={mobileOpen}
 					onClick={() => setMobileOpen((o) => !o)}
-					className="rounded-md p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-ring"
+					className="p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-ring"
 				>
 					{mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
 				</button>

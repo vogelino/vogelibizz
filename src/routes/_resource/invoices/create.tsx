@@ -122,7 +122,7 @@ function InvoiceCreateRoute() {
 	if (createMutation.isError) {
 		return (
 			<div className="px-6 py-10 md:px-10">
-				<div className="mx-auto flex max-w-xl flex-col gap-4 rounded-md border border-border bg-card p-6">
+				<div className="mx-auto flex max-w-xl flex-col gap-4 border border-border bg-card p-6">
 					<h2 className="text-lg font-semibold">Could not create invoice</h2>
 					<p className="text-sm text-muted-foreground">
 						{String(createMutation.error)}
@@ -148,7 +148,7 @@ function InvoiceCreateRoute() {
 
 	return (
 		<div className="px-6 py-10 md:px-10">
-			<div className="mx-auto flex max-w-xl items-center gap-3 rounded-md border border-border bg-card p-6 text-sm text-muted-foreground">
+			<div className="mx-auto flex max-w-xl items-center gap-3 border border-border bg-card p-6 text-sm text-muted-foreground">
 				<LoaderCircleIcon className="size-4 animate-spin" />
 				{duplicateId ? "Duplicating invoice..." : "Creating invoice..."}
 			</div>

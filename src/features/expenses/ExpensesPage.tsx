@@ -526,13 +526,10 @@ function MiniPieChart({
 	return (
 		<div className="flex flex-col gap-2">
 			<span className="text-xs text-muted-foreground">{title}</span>
-			<div
-				ref={wrapperRef}
-				className="relative rounded-md bg-background/70 px-2 py-1.5"
-			>
+			<div ref={wrapperRef} className="relative bg-background/70 px-2 py-1.5">
 				{tooltip.visible ? (
 					<div
-						className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-border/40 bg-background px-2 py-1 text-xs text-foreground shadow-md flex flex-col"
+						className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full border border-border/40 bg-background px-2 py-1 text-xs text-foreground shadow-md flex flex-col"
 						style={{ left: tooltip.x, top: tooltip.y }}
 					>
 						<span>{tooltip.label}</span>
