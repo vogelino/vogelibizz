@@ -4,7 +4,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import Footer from "@/components/Footer";
 import { Menu } from "@/components/menu";
 import type { SettingsType } from "@/db/schema";
-import { SearchProvider } from "@/features/search/SearchProvider";
+import { SearchProvider } from "@/features/search";
 
 export const PageLayout: React.FC<
 	PropsWithChildren<{

@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu as MenuIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import BizzLogo from "@/components/BizzLogo";
-import { SearchTrigger } from "@/features/search/SearchProvider";
+import { SearchTrigger } from "@/features/search";
 import { cn } from "@/utility/classNames";
 import { MenuAuxiliaryItems } from "./MenuAuxiliaryItems";
 import { MenuDesktopNavigation } from "./MenuDesktopNavigation";
