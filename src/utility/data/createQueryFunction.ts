@@ -1,4 +1,4 @@
-import { ZodError, type ZodSchema } from "zod";
+import { ZodError, type ZodType } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
 import { apiFetch, handleFetchResponse } from "../dataHookUtil";
@@ -20,18 +20,18 @@ type DataCollection = Array<DataWithOptionalId>;
 type CreateInput = DataWithOptionalId | DataCollection;
 
 type QueryAllArgs<OutputType> = CommonArgs<"queryAll"> & {
-	outputZodSchema: ZodSchema<OutputType>;
+	outputZodSchema: ZodType<OutputType>;
 };
 type QuerySingleArgs<OutputType> = CommonArgs<"querySingle"> & {
-	outputZodSchema: ZodSchema<OutputType>;
+	outputZodSchema: ZodType<OutputType>;
 	id: string | number;
 };
 type CreateArgs<InputType extends CreateInput> = CommonArgs<"create"> & {
-	inputZodSchema: ZodSchema<InputType>;
+	inputZodSchema: ZodType<InputType>;
 };
 type DeleteArgs = CommonArgs<"delete">;
 type EditArgs<InputType extends DataWithRequiredId> = CommonArgs<"edit"> & {
-	inputZodSchema: ZodSchema<InputType>;
+	inputZodSchema: ZodType<InputType>;
 };
 
 type CreateQueryFnArgs<OutputType, InputType extends CreateInput> =

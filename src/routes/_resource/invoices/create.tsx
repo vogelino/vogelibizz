@@ -14,7 +14,7 @@ import useInvoices from "@/utility/data/useInvoices";
 
 export const Route = createFileRoute("/_resource/invoices/create")({
 	validateSearch: z.object({
-		duplicateId: z.coerce.number().int().positive().optional(),
+		duplicateId: z.coerce.number().pipe(z.int().positive()).optional(),
 	}),
 	loader: async ({ context }) => {
 		if (import.meta.env.SSR) {

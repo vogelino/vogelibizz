@@ -1,4 +1,4 @@
-import { ZodError, type ZodSchema } from "zod";
+import { ZodError, type ZodType } from "zod";
 import type { ResourceType } from "@/db/schema";
 import env from "@/env";
 
@@ -48,7 +48,7 @@ export async function handleFetchResponse<OutputType>({
 		| string;
 	crudAction: "create" | "edit" | "delete" | "query";
 	resourceName: ResourceType;
-	zodSchema?: ZodSchema<OutputType>;
+	zodSchema?: ZodType<OutputType>;
 }): Promise<OutputType> {
 	let id: number | string | undefined;
 	if (typeof data === "number" || typeof data === "string") {

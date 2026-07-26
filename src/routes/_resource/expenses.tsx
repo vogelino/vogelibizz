@@ -27,7 +27,11 @@ const expensesSearchSchema = z.object({
 		.regex(/^\d{4}-(0[1-9]|1[0-2])$/)
 		.optional()
 		.catch(undefined),
-	duplicateId: z.coerce.number().int().positive().optional().catch(undefined),
+	duplicateId: z.coerce
+		.number()
+		.pipe(z.int().positive())
+		.optional()
+		.catch(undefined),
 });
 
 export const Route = createFileRoute("/_resource/expenses")({

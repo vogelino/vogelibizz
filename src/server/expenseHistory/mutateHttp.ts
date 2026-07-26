@@ -34,7 +34,7 @@ export function createExpenseHistoryMutationHandlers(
 		async (request: Request, idParam: string) => {
 			if (!(await dependencies.authorize(request)))
 				return json({ error: "Unauthorized" }, { status: 401 });
-			const id = z.coerce.number().int().positive().safeParse(idParam);
+			const id = z.coerce.number().pipe(z.int().positive()).safeParse(idParam);
 			if (!id.success)
 				return json({ error: "Invalid transaction id." }, { status: 400 });
 			try {
@@ -87,10 +87,9 @@ export const createExpenseFromTransactionHandler = handlers.createExpense;
 export const deleteExpenseHistoryTransactionHandler = handlers.delete;
 
 const batchDeleteSchema = z
-	.object({
-		ids: z.array(z.number().int().positive()).min(1).max(1_000),
+	.strictObject({
+		ids: z.array(z.int().positive()).min(1).max(1_000),
 	})
-	.strict()
 	.refine(({ ids }) => new Set(ids).size === ids.length, {
 		message: "Transaction ids must be unique.",
 		path: ["ids"],

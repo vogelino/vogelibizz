@@ -219,9 +219,9 @@ const calendarDateSchema = z.iso.date();
 const nonEmptyTextSchema = z
 	.string()
 	.refine((value) => value.trim().length > 0, "Expected non-empty text");
-const nonNegativeIntegerSchema = z.number().int().nonnegative();
-const nonNegativeAmountSchema = z.number().finite().nonnegative();
-const positiveAmountSchema = z.number().finite().positive();
+const nonNegativeIntegerSchema = z.int().nonnegative();
+const nonNegativeAmountSchema = z.number().nonnegative();
+const positiveAmountSchema = z.number().positive();
 
 export const expenseMonthSelectSchema = createSelectSchema(
 	expenseMonths,

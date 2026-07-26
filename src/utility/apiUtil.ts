@@ -43,7 +43,7 @@ async function validateParams(
 
 async function _validateBody<
 	InputType extends { id: number | string },
-	InputSchema extends z.ZodSchema<InputType>,
+	InputSchema extends z.ZodType<InputType>,
 >(
 	body: unknown,
 	schema: InputSchema,
@@ -84,7 +84,7 @@ export function getEditionRoute(
 		let body = {};
 		try {
 			body = await request.json();
-			body = z.object({}).passthrough().parse(body);
+			body = z.looseObject({}).parse(body);
 		} catch (err) {
 			return handleError(err, "edit");
 		}

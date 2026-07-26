@@ -67,8 +67,8 @@ export function createExpenseHistoryReadHandlers(
 			const url = new URL(request.url);
 			const pagination = z
 				.object({
-					offset: z.coerce.number().int().nonnegative().default(0),
-					limit: z.coerce.number().int().min(1).max(100).default(50),
+					offset: z.coerce.number().pipe(z.int().nonnegative()).default(0),
+					limit: z.coerce.number().pipe(z.int().min(1).max(100)).default(50),
 				})
 				.safeParse({
 					offset: url.searchParams.get("offset") ?? undefined,
@@ -103,7 +103,7 @@ export function createExpenseHistoryReadHandlers(
 			if (!(await dependencies.authorize(request))) {
 				return json({ error: "Unauthorized" }, { status: 401 });
 			}
-			const id = z.coerce.number().int().positive().safeParse(idParam);
+			const id = z.coerce.number().pipe(z.int().positive()).safeParse(idParam);
 			if (!id.success) {
 				return json({ error: "Invalid transaction id." }, { status: 400 });
 			}

@@ -16,7 +16,7 @@ import {
 
 export const Route = createFileRoute("/_resource/projects/create")({
 	validateSearch: z.object({
-		duplicateId: z.coerce.number().int().positive().optional(),
+		duplicateId: z.coerce.number().pipe(z.int().positive()).optional(),
 	}),
 	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
 	loader: async ({ context, deps }) => ({

@@ -25,7 +25,7 @@ const ServerEnvSchema = PublicEnvSchema.extend({
 
 export type EnvSchema = z.infer<typeof ServerEnvSchema>;
 
-function parseEnvSchema<T extends z.ZodSchema>(
+function parseEnvSchema<T extends z.ZodType>(
 	schema: T,
 	env: Record<string, unknown>,
 ): z.infer<T> {
