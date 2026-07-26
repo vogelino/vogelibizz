@@ -1,15 +1,14 @@
 import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
-import {
-	getExpenseCategoryColor,
-	getExpenseCategoryLabel,
-} from "../../expenseDashboardPresentation";
+import { getExpenseCategoryLabel } from "../../expenseDashboardPresentation";
+import { CategoryColorDot } from "../category-color-dot";
+
+type DashboardCategory =
+	ExpenseDashboard["months"][number]["categories"][number]["category"];
 
 type DistributionLegendProps = {
 	currentCategories: ExpenseDashboard["months"][number]["categories"];
 	total: number;
-	onSelectCurrent: (
-		category: ExpenseDashboard["months"][number]["categories"][number]["category"],
-	) => void;
+	onSelectCurrent: (category: DashboardCategory) => void;
 };
 export function DistributionLegend({
 	currentCategories,
@@ -27,12 +26,7 @@ export function DistributionLegend({
 							onClick={() => onSelectCurrent(item.category)}
 							className="focusable flex items-center gap-2 text-left text-sm hover:text-foreground"
 						>
-							<span
-								className="size-2.5 shrink-0 rounded-full"
-								style={{
-									backgroundColor: getExpenseCategoryColor(item.category),
-								}}
-							/>
+							<CategoryColorDot category={item.category} />
 							<span>{label}</span>
 							<span className="tabular-nums text-muted-foreground">
 								{total === 0

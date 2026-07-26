@@ -9,14 +9,16 @@ import {
 	getExpenseCategoryColor,
 	getExpenseCategoryLabel,
 } from "../../expenseDashboardPresentation";
+import { getCategoryTotal } from "./categoryDistributionUtils";
+
+type DashboardCategory =
+	ExpenseDashboard["months"][number]["categories"][number]["category"];
 
 type DistributionBarProps = {
 	categories: ExpenseDashboard["months"][number]["categories"];
 	currency: ExpenseDashboard["currency"];
 	label: string;
-	onSelect: (
-		category: ExpenseDashboard["months"][number]["categories"][number]["category"],
-	) => void;
+	onSelect: (category: DashboardCategory) => void;
 };
 
 export function DistributionBar({
@@ -25,7 +27,7 @@ export function DistributionBar({
 	label,
 	onSelect,
 }: DistributionBarProps) {
-	const total = categories.reduce((sum, category) => sum + category.total, 0);
+	const total = getCategoryTotal(categories);
 	if (total === 0) {
 		return (
 			<div

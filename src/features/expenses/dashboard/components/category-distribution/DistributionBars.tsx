@@ -1,19 +1,10 @@
 import { useMemo } from "react";
 import { cn } from "@/utility/classNames";
-import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
-import type { ExpenseDashboardComparisonView } from "../../expenseDashboardComparison";
+import { formatExpenseHistoryMonth } from "../../../ExpenseHistoryPresentation";
+import type { CategoryDistributionProps } from "./categoryDistributionTypes";
 import { DistributionBar } from "./DistributionBar";
 
-type Category =
-	ExpenseDashboard["months"][number]["categories"][number]["category"];
-
-type DistributionBarsProps = {
-	currentTitle: string;
-	view: ExpenseDashboardComparisonView;
-	dashboard: ExpenseDashboard;
-	onSelectCurrent: (category: Category) => void;
-	onSelectBaseline: (category: Category) => void;
-};
+type DistributionBarsProps = CategoryDistributionProps;
 
 const distributionBarWrapperClass = cn(
 	"grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-3",
@@ -21,12 +12,12 @@ const distributionBarWrapperClass = cn(
 const distributionBarLabelClass = cn("truncate text-xs");
 
 export function DistributionBars({
-	currentTitle,
 	view,
 	dashboard,
 	onSelectCurrent,
 	onSelectBaseline,
 }: DistributionBarsProps) {
+	const currentTitle = formatExpenseHistoryMonth(view.current.month);
 	const baselineCategories = useMemo(
 		() =>
 			view.categoryComparisons

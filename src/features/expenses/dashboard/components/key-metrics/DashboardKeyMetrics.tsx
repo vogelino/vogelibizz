@@ -8,18 +8,14 @@ import {
 } from "lucide-react";
 import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
 import { formatCurrency } from "@/utility/formatUtil";
-import type { ExpenseDashboardComparisonView } from "../expenseDashboardComparison";
+import type { ExpenseDashboardComparisonView } from "../../expenseDashboardComparison";
+import { formatSignedCurrency } from "../formatSignedCurrency";
 import { DashboardMetric } from "./DashboardMetric";
 
 type DashboardKeyMetricsProps = {
-	view: ExpenseDashboardComparisonView;
 	dashboard: ExpenseDashboard;
+	view: ExpenseDashboardComparisonView;
 };
-
-function signedCurrency(value: number, currency: ExpenseDashboard["currency"]) {
-	if (value === 0) return formatCurrency(0, currency);
-	return `${value > 0 ? "+" : "−"}${formatCurrency(Math.abs(value), currency)}`;
-}
 
 export function DashboardKeyMetrics({
 	view,
@@ -28,7 +24,7 @@ export function DashboardKeyMetrics({
 	const comparisonDetail =
 		view.difference === null
 			? `No data for ${view.baselineLabel}`
-			: `${signedCurrency(view.difference, dashboard.currency)} vs ${view.baselineLabel}`;
+			: `${formatSignedCurrency(view.difference, dashboard.currency)} vs ${view.baselineLabel}`;
 	return (
 		<div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 xl:grid-cols-4">
 			<DashboardMetric

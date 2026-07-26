@@ -1,22 +1,17 @@
-import type { ComponentProps } from "react";
-import type { ExpenseDashboardComparisonView } from "../../expenseDashboardComparison";
-import { DashboardSection } from "../DashboardSection";
+import { formatExpenseHistoryMonth } from "../../../ExpenseHistoryPresentation";
+import { DashboardSection } from "../dashboard-section";
+import type { CategoryDistributionProps } from "./categoryDistributionTypes";
 import { DashboardDistribution } from "./DashboardDistribution";
 
-type DashboardDistributionProps = ComponentProps<
-	typeof DashboardDistribution
-> & {
-	currentTitle: string;
-	view: ExpenseDashboardComparisonView;
-};
+type DashboardCategoryDistributionProps = CategoryDistributionProps;
 
 export function DashboardCategoryDistribution({
-	currentTitle,
 	view,
 	dashboard,
 	onSelectCurrent,
 	onSelectBaseline,
-}: DashboardDistributionProps) {
+}: DashboardCategoryDistributionProps) {
+	const currentTitle = formatExpenseHistoryMonth(view.current.month);
 	return (
 		<DashboardSection
 			title="Where the money went"
@@ -25,7 +20,6 @@ export function DashboardCategoryDistribution({
 			<DashboardDistribution
 				view={view}
 				dashboard={dashboard}
-				currentTitle={currentTitle}
 				onSelectCurrent={onSelectCurrent}
 				onSelectBaseline={onSelectBaseline}
 			/>

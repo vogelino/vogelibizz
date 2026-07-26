@@ -17,7 +17,8 @@ import {
 	getExpenseCategoryLabel,
 	otherCategoriesLabel,
 	uncategorizedLabel,
-} from "../expenseDashboardPresentation";
+} from "../../expenseDashboardPresentation";
+import type { MonthlySpendingTrendProps } from "./recentContextTypes";
 
 echarts.use([
 	BarChart,
@@ -28,22 +29,11 @@ echarts.use([
 	SVGRenderer,
 ]);
 
-type TrendSelection = {
-	month: string;
-	category:
-		| ExpenseDashboard["months"][number]["categories"][number]["category"]
-		| undefined;
-};
-
 export function MonthlySpendingTrend({
 	data,
 	onSelect,
 	referenceLabel = "Typical month",
-}: {
-	data: ExpenseDashboard;
-	onSelect: (selection: TrendSelection) => void;
-	referenceLabel?: string;
-}) {
+}: MonthlySpendingTrendProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const chartRef = useRef<EChartsType | null>(null);
 	const onSelectRef = useRef(onSelect);

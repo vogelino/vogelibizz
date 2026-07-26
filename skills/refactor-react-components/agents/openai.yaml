@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refactor React Components"
+  short_description: "Apply this app's React page architecture"
+  default_prompt: "Use $refactor-react-components to simplify this component tree and improve its boundaries."
