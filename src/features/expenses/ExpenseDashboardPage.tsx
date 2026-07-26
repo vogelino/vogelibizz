@@ -2,7 +2,6 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import {
-	ArrowRight,
 	CalendarDays,
 	ChevronLeft,
 	ChevronRight,
@@ -401,38 +400,29 @@ export default function ExpenseDashboardPage() {
 					</div>
 				</div>
 				<div className="flex flex-wrap items-end gap-4">
-					<label className="grid gap-1.5 text-xs text-muted-foreground">
-						Compare with
-						<select
+					<label className="grid gap-1" htmlFor="compare-with">
+						<span className="text-sm text-muted-foreground">Compare with</span>
+						<Combobox
+							id="compare-with"
+							options={comparisonOptions.map((option) => ({
+								value: option.value,
+								label: option.label,
+							}))}
 							value={comparison}
-							onChange={(event) =>
+							onChange={(value) =>
 								navigate({
 									search: (previous) => ({
 										...previous,
 										compare:
-											event.target.value === "3m"
+											value === "3m"
 												? undefined
-												: (event.target.value as ExpenseDashboardComparison),
+												: (value as ExpenseDashboardComparison),
 									}),
 									replace: true,
 								})
 							}
-							className="focusable border border-input bg-background px-3 py-2 text-sm font-medium text-foreground"
-						>
-							{comparisonOptions.map((option) => (
-								<option key={option.value} value={option.value}>
-									{option.label}
-								</option>
-							))}
-						</select>
+						/>
 					</label>
-					<button
-						type="button"
-						onClick={() => openHistory()}
-						className="focusable inline-flex items-center gap-2 py-2 text-sm font-medium hover:text-muted-foreground"
-					>
-						View transactions <ArrowRight className="size-4" />
-					</button>
 				</div>
 			</div>
 
