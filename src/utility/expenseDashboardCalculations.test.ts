@@ -25,24 +25,28 @@ describe("calculateExpenseDashboard", () => {
 					expenseId: 10,
 					amount: 10,
 					category: "Software",
+					bookedAt: "2026-05-04",
 				},
 				{
 					expenseMonthId: 1,
 					expenseId: null,
 					amount: 30,
 					category: "Dining",
+					bookedAt: "2026-05-04",
 				},
 				{
 					expenseMonthId: 2,
 					expenseId: 10,
 					amount: 12,
 					category: "Software",
+					bookedAt: "2026-06-10",
 				},
 				{
 					expenseMonthId: 2,
 					expenseId: null,
 					amount: 8,
 					category: null,
+					bookedAt: "2026-06-18",
 				},
 			],
 		});
@@ -50,6 +54,11 @@ describe("calculateExpenseDashboard", () => {
 		expect(dashboard.typicalMonthlyTotal).toBe(30);
 		expect(dashboard.configuredMonthlyTotal).toBe(10);
 		expect(dashboard.months.map(({ total }) => total)).toEqual([40, 20]);
+		expect(dashboard.days).toEqual([
+			{ date: "2026-05-04", total: 40, transactionCount: 2 },
+			{ date: "2026-06-10", total: 12, transactionCount: 1 },
+			{ date: "2026-06-18", total: 8, transactionCount: 1 },
+		]);
 		expect(dashboard.months[1]).toMatchObject({
 			unmatchedCount: 1,
 			uncategorizedCount: 1,

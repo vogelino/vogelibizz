@@ -1,5 +1,6 @@
 import type { ExpenseDashboardPageState } from "../../useExpenseDashboardPage";
 import { DashboardCategoryDistribution } from "../category-distribution";
+import { DashboardDailySpending } from "../daily-spending-heatmap";
 import { DashboardControls } from "../dashboard-controls";
 import { DashboardKeyMetrics } from "../key-metrics";
 import { DashboardMovers } from "../movers";
@@ -35,34 +36,43 @@ export function ExpenseDashboardView({ state }: ExpenseDashboardViewProps) {
 
 	const { dashboard, view, comparison, actions } = state;
 	return (
-		<div className="space-y-12 px-6 py-6 md:px-10">
-			<DashboardControls
-				dashboard={dashboard}
-				view={view}
-				comparison={comparison}
-				onMonthChange={actions.setMonth}
-				onComparisonChange={actions.setComparison}
-			/>
-			<DashboardKeyMetrics view={view} dashboard={dashboard} />
-			<DashboardCategoryDistribution
-				view={view}
-				dashboard={dashboard}
-				onSelectCurrent={actions.openCurrentHistory}
-				onSelectBaseline={actions.openBaselineHistory}
-			/>
-			<div className="grid gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">
-				<DashboardMovers
+		<div className="space-y-16 px-6 py-6 md:px-10">
+			<DashboardDailySpending dashboard={dashboard} />
+			<section className="space-y-12">
+				<div>
+					<h2 className="font-semibold">Monthly review</h2>
+					<p className="mt-1 text-sm text-muted-foreground">
+						Review one month and understand what changed
+					</p>
+				</div>
+				<DashboardControls
+					dashboard={dashboard}
+					view={view}
+					comparison={comparison}
+					onMonthChange={actions.setMonth}
+					onComparisonChange={actions.setComparison}
+				/>
+				<DashboardKeyMetrics view={view} dashboard={dashboard} />
+				<DashboardCategoryDistribution
 					view={view}
 					dashboard={dashboard}
-					onSelect={actions.openCurrentHistory}
+					onSelectCurrent={actions.openCurrentHistory}
+					onSelectBaseline={actions.openBaselineHistory}
 				/>
-				<DashboardRecurringStatus view={view} dashboard={dashboard} />
-			</div>
-			<DashboardRecentContext
-				view={view}
-				dashboard={dashboard}
-				onSelect={actions.openTrendHistory}
-			/>
+				<div className="grid gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">
+					<DashboardMovers
+						view={view}
+						dashboard={dashboard}
+						onSelect={actions.openCurrentHistory}
+					/>
+					<DashboardRecurringStatus view={view} dashboard={dashboard} />
+				</div>
+				<DashboardRecentContext
+					view={view}
+					dashboard={dashboard}
+					onSelect={actions.openTrendHistory}
+				/>
+			</section>
 		</div>
 	);
 }

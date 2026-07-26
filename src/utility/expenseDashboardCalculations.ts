@@ -14,6 +14,7 @@ export type DashboardTransactionInput = {
 	expenseId: number | null;
 	amount: number;
 	category: ExpenseCategory | null;
+	bookedAt: string;
 };
 
 export type DashboardExpenseInput = {
@@ -67,6 +68,10 @@ export function calculateExpenseDashboard({
 			{ total: 0, months: new Map() },
 		]),
 	);
+	const totalsByDay = new Map<
+		string,
+		{ total: number; transactionCount: number }
+	>();
 
 	for (const transaction of transactions) {
 		const month = monthById.get(transaction.expenseMonthId);
@@ -74,6 +79,14 @@ export function calculateExpenseDashboard({
 		if (!Number.isFinite(transaction.amount) || transaction.amount < 0) {
 			throw new Error("Dashboard transaction amounts must be non-negative");
 		}
+
+		const day = totalsByDay.get(transaction.bookedAt) ?? {
+			total: 0,
+			transactionCount: 0,
+		};
+		day.total += transaction.amount;
+		day.transactionCount += 1;
+		totalsByDay.set(transaction.bookedAt, day);
 
 		month.total += transaction.amount;
 		if (transaction.expenseId === null) {
@@ -154,6 +167,9 @@ export function calculateExpenseDashboard({
 			0,
 		),
 		typicalMonthlyTotal,
+		days: [...totalsByDay.entries()]
+			.map(([date, values]) => ({ date, ...values }))
+			.sort((a, b) => a.date.localeCompare(b.date)),
 		months,
 		latest: latestSource
 			? {

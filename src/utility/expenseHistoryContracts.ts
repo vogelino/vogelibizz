@@ -87,11 +87,18 @@ export const expenseDashboardCategorySchema = z.object({
 	transactionCount: z.int().nonnegative(),
 });
 
+export const expenseDashboardDaySchema = z.object({
+	date: z.iso.date(),
+	total: z.number().nonnegative(),
+	transactionCount: z.int().nonnegative(),
+});
+
 export const expenseDashboardSchema = z.object({
 	currency: z.enum(currencyEnum.enumValues),
 	importedMonthCount: z.int().nonnegative(),
 	configuredMonthlyTotal: z.number().nonnegative(),
 	typicalMonthlyTotal: z.number().nonnegative().nullable(),
+	days: z.array(expenseDashboardDaySchema),
 	months: z.array(
 		z.object({
 			month: expenseHistoryMonthKeySchema,

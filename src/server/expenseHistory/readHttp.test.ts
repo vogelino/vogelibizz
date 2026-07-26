@@ -63,6 +63,7 @@ const dashboard: ExpenseDashboard = {
 	importedMonthCount: 1,
 	configuredMonthlyTotal: 30,
 	typicalMonthlyTotal: 17.5,
+	days: [{ date: "2026-06-03", total: 17.5, transactionCount: 1 }],
 	months: [
 		{
 			month: "2026-06",

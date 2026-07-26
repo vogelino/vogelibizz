@@ -272,6 +272,7 @@ export async function getExpenseDashboard(): Promise<ExpenseDashboard> {
 					expenseId: expenseTransactions.expenseId,
 					amount: expenseTransactions.amount,
 					category: expenseTransactions.category,
+					bookedAt: expenseTransactions.bookedAt,
 				})
 				.from(expenseTransactions),
 			getExchangeRates(),
