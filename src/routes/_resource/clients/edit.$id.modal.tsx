@@ -12,10 +12,12 @@ import {
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/clients/edit/$id/modal")({
-	loader: ({ context, params }) => {
+	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		void context.queryClient.prefetchQuery(clientQueryOptions(parsedId));
-		void context.queryClient.prefetchQuery(projectsQueryOptions());
+		await Promise.all([
+			context.queryClient.prefetchQuery(clientQueryOptions(parsedId)),
+			context.queryClient.prefetchQuery(projectsQueryOptions()),
+		]);
 	},
 	component: ClientEditModal,
 });

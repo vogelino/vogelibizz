@@ -9,9 +9,9 @@ import { expenseQueryOptions } from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/expenses/edit/$id/modal")({
-	loader: ({ context, params }) => {
+	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		void context.queryClient.prefetchQuery(expenseQueryOptions(parsedId));
+		await context.queryClient.prefetchQuery(expenseQueryOptions(parsedId));
 	},
 	component: ExpenseEditModal,
 });

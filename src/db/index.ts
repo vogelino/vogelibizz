@@ -20,20 +20,12 @@ function resolveD1Database(): D1Database {
 
 type SchemaDb = DrizzleD1Database<typeof schema> & { $client: D1Database };
 
-let cachedDb: SchemaDb | null = null;
-let cachedClient: D1Database | null = null;
-
 export function getDb() {
 	const client = resolveD1Database();
-	if (cachedDb && cachedClient === client) {
-		return cachedDb;
-	}
-	cachedClient = client;
-	cachedDb = drizzle(client, {
+	return drizzle(client, {
 		schema,
 		logger: false,
 	});
-	return cachedDb;
 }
 
 export function getDbProxyProperty(database: object, prop: PropertyKey) {
