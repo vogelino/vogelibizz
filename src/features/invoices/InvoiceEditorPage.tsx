@@ -1,7 +1,7 @@
 "use client";
 
 import { PlusIcon, SaveIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
@@ -33,13 +33,19 @@ type InvoiceDraftState = {
 	subject: string;
 	introduction: string;
 	footNote: string;
-	rows: InvoiceLineItemType[];
+	rows: InvoiceDraftLineItem[];
+};
+
+type InvoiceDraftLineItem = InvoiceLineItemType & {
+	editorKey: number;
 };
 
 const currencyOptions = currencyEnum.enumValues.map((currency) => ({
 	label: currency,
 	value: currency,
 }));
+
+const PDF_PREVIEW_DEBOUNCE_MS = 500;
 
 export default function InvoiceEditorPage({
 	id,
@@ -54,13 +60,14 @@ export default function InvoiceEditorPage({
 	const invoicesQuery = useInvoices();
 	const editMutation = useInvoiceEdit();
 	const invoice = invoiceQuery.data;
+	const nextRowKeyRef = useRef(0);
 	const [draft, setDraft] = useState<InvoiceDraftState | null>(
-		initialData ? toDraft(initialData) : null,
+		initialData ? toDraft(initialData, nextRowKeyRef) : null,
 	);
 
 	useEffect(() => {
 		if (!invoice) return;
-		setDraft(toDraft(invoice));
+		setDraft(toDraft(invoice, nextRowKeyRef));
 	}, [invoice]);
 
 	const selectedClient = useMemo(() => {
@@ -118,7 +125,7 @@ export default function InvoiceEditorPage({
 			clientNumber: selectedClient?.clientNumber || draft.clientNumber,
 			language: derivedLanguage,
 			hourlyRate: derivedHourlyRate,
-			rows: draft.rows,
+			rows: toInvoiceRows(draft.rows),
 			clients: selectedClient ? [selectedClient] : [],
 		};
 	}, [
@@ -130,10 +137,30 @@ export default function InvoiceEditorPage({
 		derivedHourlyRate,
 	]);
 
-	const previewData = useMemo(() => {
+	const calculatedPreviewData = useMemo(() => {
 		if (!previewInvoice || !settingsQuery.data) return null;
 		return buildInvoicePdfData(previewInvoice, settingsQuery.data);
 	}, [previewInvoice, settingsQuery.data]);
+	const [previewData, setPreviewData] = useState(calculatedPreviewData);
+	const hasPreviewDataRef = useRef(calculatedPreviewData !== null);
+
+	useEffect(() => {
+		if (!calculatedPreviewData) {
+			hasPreviewDataRef.current = false;
+			setPreviewData(null);
+			return;
+		}
+		if (!hasPreviewDataRef.current) {
+			hasPreviewDataRef.current = true;
+			setPreviewData(calculatedPreviewData);
+			return;
+		}
+		const timeoutId = window.setTimeout(
+			() => setPreviewData(calculatedPreviewData),
+			PDF_PREVIEW_DEBOUNCE_MS,
+		);
+		return () => window.clearTimeout(timeoutId);
+	}, [calculatedPreviewData]);
 
 	const isLoading =
 		invoiceQuery.isPending ||
@@ -182,7 +209,14 @@ export default function InvoiceEditorPage({
 			currentDraft
 				? {
 						...currentDraft,
-						rows: [...currentDraft.rows, { description: "", hoursCount: 0 }],
+						rows: [
+							...currentDraft.rows,
+							{
+								description: "",
+								hoursCount: 0,
+								editorKey: nextRowKeyRef.current++,
+							},
+						],
 					}
 				: currentDraft,
 		);
@@ -236,7 +270,7 @@ export default function InvoiceEditorPage({
 			clientNumber: selectedClient?.clientNumber || draft.clientNumber,
 			language: derivedLanguage,
 			hourlyRate: derivedHourlyRate,
-			rows: draft.rows,
+			rows: toInvoiceRows(draft.rows),
 		});
 	}
 
@@ -393,7 +427,7 @@ export default function InvoiceEditorPage({
 									<tbody>
 										{draft?.rows.map((row, index) => (
 											<tr
-												key={`${index}-${row.description}`}
+												key={row.editorKey}
 												className="border-t border-border align-top"
 											>
 												<td>
@@ -471,7 +505,10 @@ export default function InvoiceEditorPage({
 	);
 }
 
-function toDraft(invoice: InvoiceType): InvoiceDraftState {
+function toDraft(
+	invoice: InvoiceType,
+	nextRowKeyRef: React.RefObject<number>,
+): InvoiceDraftState {
 	return {
 		name: invoice.subject || invoice.name,
 		date: invoice.date,
@@ -487,9 +524,25 @@ function toDraft(invoice: InvoiceType): InvoiceDraftState {
 		footNote: invoice.footNote,
 		rows:
 			invoice.rows.length > 0
-				? invoice.rows.map((row) => ({ ...row }))
-				: [{ description: "", hoursCount: 0 }],
+				? invoice.rows.map((row) => ({
+						...row,
+						editorKey: nextRowKeyRef.current++,
+					}))
+				: [
+						{
+							description: "",
+							hoursCount: 0,
+							editorKey: nextRowKeyRef.current++,
+						},
+					],
 	};
+}
+
+function toInvoiceRows(rows: InvoiceDraftLineItem[]): InvoiceLineItemType[] {
+	return rows.map(({ description, hoursCount }) => ({
+		description,
+		hoursCount,
+	}));
 }
 
 function isCurrencyValue(

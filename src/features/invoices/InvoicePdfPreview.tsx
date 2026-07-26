@@ -1,5 +1,5 @@
 import { Font } from "@react-pdf/renderer";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import ClientOnly from "@/components/ClientOnly";
 import { cn } from "@/utility/classNames";
 import { InvoicePdfDocument } from "./InvoicePdfDocument";
@@ -41,11 +41,13 @@ export function InvoicePdfPreview({
 		fontsRegistered = true;
 	}, []);
 
+	const document = useMemo(() => <InvoicePdfDocument data={data} />, [data]);
+
 	return (
 		<ClientOnly fallback={<p>Loading PDF preview...</p>}>
 			<Suspense fallback={<p>Loading PDF preview...</p>}>
 				<PDFViewer className={cn("h-full w-full border-0", className)}>
-					<InvoicePdfDocument data={data} />
+					{document}
 				</PDFViewer>
 			</Suspense>
 		</ClientOnly>
