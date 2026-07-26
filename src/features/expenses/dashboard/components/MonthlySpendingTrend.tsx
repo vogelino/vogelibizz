@@ -17,7 +17,7 @@ import {
 	getExpenseCategoryLabel,
 	otherCategoriesLabel,
 	uncategorizedLabel,
-} from "./expenseDashboardPresentation";
+} from "../expenseDashboardPresentation";
 
 echarts.use([
 	BarChart,

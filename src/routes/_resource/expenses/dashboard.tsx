@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import ExpenseDashboardPage from "@/features/expenses/ExpenseDashboardPage";
-import { expenseDashboardComparisonValues } from "@/features/expenses/expenseDashboardComparison";
+import ExpenseDashboardPage from "@/features/expenses/dashboard/ExpenseDashboardPage";
+import { expenseDashboardComparisonValues } from "@/features/expenses/dashboard/expenseDashboardComparison";
 import { expenseDashboardQueryOptions } from "@/utility/data/queryOptions";
 import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts";
 
