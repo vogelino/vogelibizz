@@ -21,13 +21,30 @@ echarts.use([
 	SVGRenderer,
 ]);
 
-const spendingIntensityLegend = [
-	{ value: 0, label: "No spending", color: "#eff6ff" },
-	{ value: 1, label: "Lower", color: "#dbeafe" },
-	{ value: 2, label: "Typical", color: "#93c5fd" },
-	{ value: 3, label: "Higher", color: "#3b82f6" },
-	{ value: 4, label: "Highest", color: "#1e3a8a" },
+const spendingIntensityLevels = [
+	{ value: 0, label: "No spending", strength: 0 },
+	{ value: 1, label: "Lower", strength: 0.2 },
+	{ value: 2, label: "Typical", strength: 0.45 },
+	{ value: 3, label: "Higher", strength: 0.7 },
+	{ value: 4, label: "Highest", strength: 1 },
 ] as const;
+const spendingIntensityLegend = spendingIntensityLevels.map(
+	({ strength, ...entry }) => ({
+		...entry,
+		color: `rgba(37, 99, 235, ${strength})`,
+	}),
+);
+
+function datesBetween(start: string, end: string) {
+	const dates: string[] = [];
+	const cursor = new Date(`${start}T00:00:00Z`);
+	const last = new Date(`${end}T00:00:00Z`);
+	while (cursor <= last) {
+		dates.push(cursor.toISOString().slice(0, 10));
+		cursor.setUTCDate(cursor.getUTCDate() + 1);
+	}
+	return dates;
+}
 
 type DailySpendingHeatmapProps = {
 	habits: SpendingHabits;
@@ -44,6 +61,9 @@ export function DailySpendingHeatmap({
 
 	const option = useMemo<EChartsCoreOption>(() => {
 		const daysByDate = new Map(habits.days.map((day) => [day.date, day]));
+		const missingDates = datesBetween(...habits.range).filter(
+			(date) => !daysByDate.has(date),
+		);
 
 		return {
 			animationDuration: 350,
@@ -68,20 +88,29 @@ export function DailySpendingHeatmap({
 					].join("<br/>");
 				},
 			},
-			visualMap: {
-				type: "piecewise",
-				show: false,
-				dimension: 2,
-				selectedMode: false,
-				orient: "horizontal",
-				left: 44,
-				bottom: 0,
-				itemWidth: 12,
-				itemHeight: 12,
-				itemGap: 12,
-				textStyle: { color: "#98a2b3", fontSize: 11 },
-				pieces: spendingIntensityLegend,
-			},
+			visualMap: [
+				{
+					type: "piecewise",
+					show: false,
+					seriesIndex: 0,
+					pieces: [{ value: 0, color: "rgba(152, 162, 179, 0.12)" }],
+				},
+				{
+					type: "piecewise",
+					show: false,
+					dimension: 2,
+					selectedMode: false,
+					orient: "horizontal",
+					left: 44,
+					bottom: 0,
+					itemWidth: 12,
+					itemHeight: 12,
+					itemGap: 12,
+					textStyle: { color: "#98a2b3", fontSize: 11 },
+					seriesIndex: 1,
+					pieces: spendingIntensityLegend,
+				},
+			],
 			calendar: {
 				top: 28,
 				left: 44,
@@ -91,7 +120,7 @@ export function DailySpendingHeatmap({
 				cellSize: ["auto", 18],
 				splitLine: { show: false },
 				itemStyle: {
-					color: "rgba(152, 162, 179, 0.12)",
+					color: "transparent",
 					borderWidth: 3,
 					borderColor: "transparent",
 				},
@@ -110,6 +139,13 @@ export function DailySpendingHeatmap({
 				yearLabel: { show: false },
 			},
 			series: [
+				{
+					type: "heatmap",
+					coordinateSystem: "calendar",
+					silent: true,
+					itemStyle: { color: "rgba(152, 162, 179, 0.12)" },
+					data: missingDates.map((date) => [date, 0]),
+				},
 				{
 					type: "heatmap",
 					coordinateSystem: "calendar",
@@ -163,7 +199,7 @@ export function DailySpendingHeatmap({
 					ref={containerRef}
 					className="h-48 min-w-3xl"
 					role="img"
-					aria-label={`Daily spending calendar heatmap from ${habits.range[0]} to ${habits.range[1]}. Darker days indicate more spending; grey days have no imported data.`}
+					aria-label={`Daily spending calendar heatmap from ${habits.range[0]} to ${habits.range[1]}. Stronger blue indicates more spending; grey days have no imported data.`}
 				/>
 			</div>
 			<ul
