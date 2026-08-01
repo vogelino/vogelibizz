@@ -1,5 +1,5 @@
 import { FileUp, TriangleAlert } from "lucide-react";
-import type { RefObject } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import {
 	Accordion,
 	AccordionContent,
@@ -46,6 +46,7 @@ export function ExpenseHistoryImportDialog({
 	onSelectFile,
 	preview,
 	error,
+	errorStage,
 	previewPending,
 	commitPending,
 	onImport,
@@ -57,10 +58,16 @@ export function ExpenseHistoryImportDialog({
 	onSelectFile: (file: File | null) => void;
 	preview: ExpenseHistoryImportPreview | null;
 	error: string | null;
+	errorStage: "preview" | "commit";
 	previewPending: boolean;
 	commitPending: boolean;
 	onImport: (replaceExistingMonths: boolean) => void;
 }) {
+	const errorRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (error) errorRef.current?.scrollIntoView({ block: "nearest" });
+	}, [error]);
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-h-[calc(100vh-2rem)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-3xl">
@@ -93,10 +100,16 @@ export function ExpenseHistoryImportDialog({
 					) : null}
 					{error ? (
 						<div
+							ref={errorRef}
 							role="alert"
 							className="mt-4 border border-destructive/40 bg-destructive/5 p-3 text-sm"
 						>
-							<strong>Import could not be prepared.</strong> {error}
+							<strong>
+								{errorStage === "commit"
+									? "Import could not be completed."
+									: "Import could not be prepared."}
+							</strong>{" "}
+							{error}
 						</div>
 					) : null}
 					{preview ? (

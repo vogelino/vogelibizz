@@ -92,9 +92,25 @@ async function postImport<Output>(
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(body),
 	});
-	const result = (await response.json()) as { error?: string };
+	let result: unknown;
+	try {
+		result = await response.json();
+	} catch {
+		throw new Error(
+			`Import ${path} failed with HTTP ${response.status}, but the server did not return an error message. Check the server log.`,
+		);
+	}
 	if (!response.ok) {
-		throw new Error(result.error || `Import ${path} failed.`);
+		const errorResult = result as { error?: unknown; errorId?: unknown };
+		const message =
+			typeof errorResult.error === "string"
+				? errorResult.error
+				: `Import ${path} failed with HTTP ${response.status}.`;
+		const reference =
+			typeof errorResult.errorId === "string"
+				? ` Error reference: ${errorResult.errorId}`
+				: "";
+		throw new Error(`${message}${reference}`);
 	}
 	return result as Output;
 }
@@ -200,13 +216,13 @@ export default function ExpenseHistoryPage() {
 		},
 	});
 
-	const importError =
-		fileError ??
-		(previewMutation.error instanceof Error
+	const commitError =
+		commitMutation.error instanceof Error ? commitMutation.error.message : null;
+	const previewError =
+		previewMutation.error instanceof Error
 			? previewMutation.error.message
-			: commitMutation.error instanceof Error
-				? commitMutation.error.message
-				: null);
+			: null;
+	const importError = fileError ?? commitError ?? previewError;
 
 	async function selectFile(file: File | null) {
 		setPreview(null);
@@ -393,6 +409,7 @@ export default function ExpenseHistoryPage() {
 				onSelectFile={selectFile}
 				preview={preview}
 				error={importError}
+				errorStage={commitError ? "commit" : "preview"}
 				previewPending={previewMutation.isPending}
 				commitPending={commitMutation.isPending}
 				onImport={(replaceExistingMonths) =>

@@ -116,4 +116,40 @@ describe("expense history import HTTP API", () => {
 		expect(acknowledged).toBe(true);
 		expect(await response.json()).toEqual(result);
 	});
+
+	test("logs unexpected failures and returns a searchable error reference", async () => {
+		const originalConsoleError = console.error;
+		const loggedErrors: unknown[][] = [];
+		console.error = (...args) => loggedErrors.push(args);
+		try {
+			const handlers = createExpenseHistoryImportHandlers({
+				authorize: async () => true,
+				preview: async () => {
+					throw new Error("database unavailable");
+				},
+				commit: async () => ({
+					...preview,
+					replacedExistingMonths: [],
+				}),
+			});
+			const response = await handlers.preview(post(workbookRequest));
+			const body = (await response.json()) as {
+				code: string;
+				errorId: string;
+			};
+
+			expect(response.status).toBe(500);
+			expect(body.code).toBe("EXPENSE_HISTORY_IMPORT_FAILED");
+			expect(body.errorId).toMatch(
+				/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+			);
+			expect(loggedErrors).toHaveLength(1);
+			expect(loggedErrors[0]?.[1]).toMatchObject({
+				errorId: body.errorId,
+				operation: "preview",
+			});
+		} finally {
+			console.error = originalConsoleError;
+		}
+	});
 });

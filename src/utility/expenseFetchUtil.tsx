@@ -233,7 +233,7 @@ async function updateRates(
 	sqlChunks.push(sql`(case`);
 	for (const currency of updatedCurrencies) {
 		sqlChunks.push(
-			sql`when ${currencies.id} = ${currency.id} then ${currency.usdRate}::double precision`,
+			sql`when ${currencies.id} = ${currency.id} then ${currency.usdRate}`,
 		);
 	}
 	sqlChunks.push(sql`end)`);
@@ -247,5 +247,10 @@ async function updateRates(
 			last_modified: utcIsoString,
 			usdRate: finalSql,
 		})
-		.where(inArray(currencies.id, currencyEnum.enumValues));
+		.where(
+			inArray(
+				currencies.id,
+				updatedCurrencies.map((currency) => currency.id),
+			),
+		);
 }

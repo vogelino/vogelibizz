@@ -12,7 +12,10 @@ import {
 	previewExpenseHistoryImport,
 } from "./importExpenseHistory";
 
-export function importErrorResponse(error: unknown) {
+export function importErrorResponse(
+	error: unknown,
+	operation: "preview" | "commit" = "preview",
+) {
 	if (error instanceof ExpenseHistoryReplacementRequiredError) {
 		return json(
 			{ error: error.message, code: error.code, months: error.months },
@@ -31,8 +34,19 @@ export function importErrorResponse(error: unknown) {
 			{ status: 400 },
 		);
 	}
+	const errorId = crypto.randomUUID();
+	console.error("Unexpected expense history import error", {
+		errorId,
+		operation,
+		error,
+	});
 	return json(
-		{ error: "The expense history import could not be completed." },
+		{
+			error:
+				"The expense history import could not be completed. Check the server log using the error reference below.",
+			code: "EXPENSE_HISTORY_IMPORT_FAILED",
+			errorId,
+		},
 		{ status: 500 },
 	);
 }
@@ -61,7 +75,7 @@ export function createExpenseHistoryImportHandlers(
 				);
 				return json(await dependencies.preview(body));
 			} catch (error) {
-				return importErrorResponse(error);
+				return importErrorResponse(error, "preview");
 			}
 		},
 		commit: async (request: Request) => {
@@ -74,7 +88,7 @@ export function createExpenseHistoryImportHandlers(
 				);
 				return json(await dependencies.commit(body));
 			} catch (error) {
-				return importErrorResponse(error);
+				return importErrorResponse(error, "commit");
 			}
 		},
 	};
