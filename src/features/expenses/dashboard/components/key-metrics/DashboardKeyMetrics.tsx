@@ -1,5 +1,8 @@
 import {
-	CalendarDays,
+	ArrowDown,
+	ArrowUp,
+	CalendarClock,
+	Check,
 	CircleAlert,
 	ReceiptText,
 	TrendingDown,
@@ -8,6 +11,7 @@ import {
 } from "lucide-react";
 import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
 import { formatCurrency } from "@/utility/formatUtil";
+import { formatExpenseHistoryMonth } from "../../../ExpenseHistoryPresentation";
 import type { ExpenseDashboardComparisonView } from "../../expenseDashboardComparison";
 import { formatSignedCurrency } from "../formatSignedCurrency";
 import { DashboardMetric } from "./DashboardMetric";
@@ -21,14 +25,36 @@ export function DashboardKeyMetrics({
 	view,
 	dashboard,
 }: DashboardKeyMetricsProps) {
+	const currentTitle = formatExpenseHistoryMonth(view.current.month);
 	const comparisonDetail =
 		view.difference === null
 			? `No data for ${view.baselineLabel}`
 			: `${formatSignedCurrency(view.difference, dashboard.currency)} vs ${view.baselineLabel}`;
+	const uncategorizedTotal =
+		view.current.categories.find(({ category }) => category === null)?.total ??
+		0;
+	const recurringPlanStatus =
+		view.recurringPlanVariance > 0.01
+			? {
+					icon: ArrowUp,
+					iconClassName: "text-red-500",
+					label: "Above plan",
+				}
+			: view.recurringPlanVariance < -0.01
+				? {
+						icon: ArrowDown,
+						iconClassName: "text-red-500",
+						label: "Below plan",
+					}
+				: {
+						icon: Check,
+						iconClassName: "text-green-600",
+						label: "On plan",
+					};
 	return (
-		<div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 xl:grid-cols-4">
+		<div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 xl:grid-cols-5">
 			<DashboardMetric
-				label="Spent this month"
+				label={`Spent in ${currentTitle}`}
 				value={formatCurrency(view.current.total, dashboard.currency)}
 				detail={comparisonDetail}
 				icon={
@@ -40,25 +66,42 @@ export function DashboardKeyMetrics({
 				}
 			/>
 			<DashboardMetric
-				label="Recurring still expected"
+				label="Set aside for bills"
 				value={formatCurrency(
-					view.expectedRecurringRemaining,
+					dashboard.configuredMonthlyTotal,
 					dashboard.currency,
 				)}
-				detail={`${formatCurrency(view.current.matched, dashboard.currency)} matched so far`}
-				icon={CalendarDays}
+				detail="Amount to keep each month for upcoming bills"
+				icon={CalendarClock}
 			/>
 			<DashboardMetric
-				label="Committed outlook"
+				label="Bills vs monthly plan"
+				value={formatCurrency(
+					Math.abs(view.recurringPlanVariance),
+					dashboard.currency,
+				)}
+				detail={`${recurringPlanStatus.label} · big bills split into monthly amounts`}
+				icon={recurringPlanStatus.icon}
+				iconClassName={recurringPlanStatus.iconClassName}
+			/>
+			<DashboardMetric
+				label={`Expected total for ${currentTitle}`}
 				value={formatCurrency(view.committedOutlook, dashboard.currency)}
-				detail="Spent plus recurring amounts not seen yet"
+				detail="Spent so far, plus bills still to come"
 				icon={WalletCards}
 			/>
 			<DashboardMetric
-				label="Needs review"
-				value={String(view.current.reviewCount)}
-				detail={`${formatCurrency(view.current.unmatched, dashboard.currency)} unmatched`}
-				icon={CircleAlert}
+				label="Missing a category"
+				value={String(view.current.uncategorizedCount)}
+				detail={
+					view.current.uncategorizedCount === 0
+						? "Everything has a category"
+						: `${formatCurrency(uncategorizedTotal, dashboard.currency)} needs a category`
+				}
+				icon={view.current.uncategorizedCount === 0 ? Check : CircleAlert}
+				iconClassName={
+					view.current.uncategorizedCount === 0 ? "text-green-600" : undefined
+				}
 			/>
 		</div>
 	);

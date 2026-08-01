@@ -46,6 +46,7 @@ export type ExpenseDashboardComparisonView = {
 	percentageDifference: number | null;
 	categoryComparisons: ExpenseDashboardCategoryComparison[];
 	recurringComparisons: ExpenseDashboardRecurringComparison[];
+	recurringPlanVariance: number;
 	expectedRecurringRemaining: number;
 	committedOutlook: number;
 };
@@ -200,6 +201,12 @@ export function getExpenseDashboardComparisonView(
 					: expectation === "one-time"
 						? expense.plannedCharge
 						: 0;
+			const differenceFromPlan =
+				expectation === "unknown" || expectation === "not-due"
+					? null
+					: intervalMonths === null
+						? currentActual - expectedThisMonth
+						: currentActual / intervalMonths - expense.plannedMonthly;
 			return {
 				expenseId: expense.expenseId,
 				name: expense.name,
@@ -210,10 +217,7 @@ export function getExpenseDashboardComparisonView(
 				currentActual,
 				currentTransactionCount: currentActualRow?.transactionCount ?? 0,
 				baselineActual,
-				differenceFromPlan:
-					expectation === "unknown" || expectation === "not-due"
-						? null
-						: currentActual - expectedThisMonth,
+				differenceFromPlan,
 			};
 		})
 		.sort(
@@ -224,6 +228,10 @@ export function getExpenseDashboardComparisonView(
 	const expectedRecurringRemaining = recurringComparisons.reduce(
 		(total, expense) =>
 			total + Math.max(0, expense.expectedThisMonth - expense.currentActual),
+		0,
+	);
+	const recurringPlanVariance = recurringComparisons.reduce(
+		(total, expense) => total + (expense.differenceFromPlan ?? 0),
 		0,
 	);
 
@@ -245,6 +253,7 @@ export function getExpenseDashboardComparisonView(
 		percentageDifference,
 		categoryComparisons,
 		recurringComparisons,
+		recurringPlanVariance,
 		expectedRecurringRemaining,
 		committedOutlook: current.total + expectedRecurringRemaining,
 	};

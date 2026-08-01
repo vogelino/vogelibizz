@@ -103,12 +103,14 @@ export const expenseDashboardSchema = z.object({
 	currency: z.enum(currencyEnum.enumValues),
 	importedMonthCount: z.int().nonnegative(),
 	configuredMonthlyTotal: z.number().nonnegative(),
+	configuredMonthlySavings: z.number().nonnegative(),
 	typicalMonthlyTotal: z.number().nonnegative().nullable(),
 	days: z.array(expenseDashboardDaySchema),
 	months: z.array(
 		z.object({
 			month: expenseHistoryMonthKeySchema,
 			total: z.number().nonnegative(),
+			savings: z.number().nonnegative(),
 			matched: z.number().nonnegative(),
 			unmatched: z.number().nonnegative(),
 			unmatchedCount: z.int().nonnegative(),
@@ -121,6 +123,7 @@ export const expenseDashboardSchema = z.object({
 		.object({
 			month: expenseHistoryMonthKeySchema,
 			total: z.number().nonnegative(),
+			savings: z.number().nonnegative(),
 			previousTotal: z.number().nonnegative().nullable(),
 			matched: z.number().nonnegative(),
 			unmatched: z.number().nonnegative(),

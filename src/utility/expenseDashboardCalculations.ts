@@ -44,6 +44,7 @@ export function calculateExpenseDashboard({
 			{
 				month: month.month,
 				total: 0,
+				savings: 0,
 				matched: 0,
 				unmatched: 0,
 				unmatchedCount: 0,
@@ -81,22 +82,26 @@ export function calculateExpenseDashboard({
 			throw new Error("Dashboard transaction amounts must be non-negative");
 		}
 
-		const spendingDate =
-			transaction.occurredAt?.slice(0, 10) ?? transaction.bookedAt;
-		const day = totalsByDay.get(spendingDate) ?? {
-			total: 0,
-			transactionCount: 0,
-		};
-		day.total += transaction.amount;
-		day.transactionCount += 1;
-		totalsByDay.set(spendingDate, day);
-
-		month.total += transaction.amount;
+		const isSavings = transaction.category === "Savings";
+		if (isSavings) {
+			month.savings += transaction.amount;
+		} else {
+			const spendingDate =
+				transaction.occurredAt?.slice(0, 10) ?? transaction.bookedAt;
+			const day = totalsByDay.get(spendingDate) ?? {
+				total: 0,
+				transactionCount: 0,
+			};
+			day.total += transaction.amount;
+			day.transactionCount += 1;
+			totalsByDay.set(spendingDate, day);
+			month.total += transaction.amount;
+		}
 		if (transaction.expenseId === null) {
 			month.unmatched += transaction.amount;
 			month.unmatchedCount += 1;
 		} else {
-			month.matched += transaction.amount;
+			if (!isSavings) month.matched += transaction.amount;
 			const actual = actualByExpenseId.get(transaction.expenseId);
 			if (actual) {
 				actual.total += transaction.amount;
@@ -112,18 +117,18 @@ export function calculateExpenseDashboard({
 		if (transaction.category === null) {
 			month.uncategorizedTotal += transaction.amount;
 			month.uncategorizedCount += 1;
-		}
-		if (transaction.expenseId === null || transaction.category === null) {
 			month.reviewCount += 1;
 		}
 
-		const category = month.categoryTotals.get(transaction.category) ?? {
-			total: 0,
-			transactionCount: 0,
-		};
-		category.total += transaction.amount;
-		category.transactionCount += 1;
-		month.categoryTotals.set(transaction.category, category);
+		if (!isSavings) {
+			const category = month.categoryTotals.get(transaction.category) ?? {
+				total: 0,
+				transactionCount: 0,
+			};
+			category.total += transaction.amount;
+			category.transactionCount += 1;
+			month.categoryTotals.set(transaction.category, category);
+		}
 	}
 
 	const categoryRows = (
@@ -143,6 +148,7 @@ export function calculateExpenseDashboard({
 	const months = sortedMonths.map((month) => ({
 		month: month.month,
 		total: month.total,
+		savings: month.savings,
 		matched: month.matched,
 		unmatched: month.unmatched,
 		unmatchedCount: month.unmatchedCount,
@@ -166,7 +172,13 @@ export function calculateExpenseDashboard({
 		currency,
 		importedMonthCount,
 		configuredMonthlyTotal: configuredExpenses.reduce(
-			(total, expense) => total + expense.plannedMonthly,
+			(total, expense) =>
+				expense.category === "Savings" ? total : total + expense.plannedMonthly,
+			0,
+		),
+		configuredMonthlySavings: configuredExpenses.reduce(
+			(total, expense) =>
+				expense.category === "Savings" ? total + expense.plannedMonthly : total,
 			0,
 		),
 		typicalMonthlyTotal,
@@ -178,6 +190,7 @@ export function calculateExpenseDashboard({
 			? {
 					month: latestSource.month,
 					total: latestSource.total,
+					savings: latestSource.savings,
 					previousTotal: previousSource?.total ?? null,
 					matched: latestSource.matched,
 					unmatched: latestSource.unmatched,
@@ -189,6 +202,7 @@ export function calculateExpenseDashboard({
 				}
 			: null,
 		recurring: configuredExpenses
+			.filter((expense) => expense.category !== "Savings")
 			.map((expense) => {
 				const actual = actualByExpenseId.get(expense.expenseId) ?? {
 					total: 0,

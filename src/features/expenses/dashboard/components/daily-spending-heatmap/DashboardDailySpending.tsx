@@ -23,7 +23,7 @@ export function DashboardDailySpending({
 	return (
 		<DashboardSection
 			title="Spending habits"
-			description={`${rangeStart}–${rangeEnd} · colours are ranked against your own spending days`}
+			description={`${rangeStart}–${rangeEnd} · savings are not counted as spending`}
 		>
 			<div className="space-y-8">
 				<DailySpendingHeatmap habits={habits} currency={dashboard.currency} />

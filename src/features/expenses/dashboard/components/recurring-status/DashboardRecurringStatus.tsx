@@ -26,8 +26,8 @@ export function DashboardRecurringStatus({
 
 	return (
 		<DashboardSection
-			title="Recurring plan status"
-			description="What has arrived compared with the monthly plan"
+			title="Upcoming bills"
+			description={`Bills paid in ${currentTitle} and bills that may still be coming`}
 		>
 			{recurringRows.length === 0 ? (
 				<DashboardSectionMessage>

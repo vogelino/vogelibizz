@@ -10,11 +10,12 @@ const month = (
 ): ExpenseDashboard["months"][number] => ({
 	month: key,
 	total,
+	savings: 0,
 	matched: software,
 	unmatched: dining,
 	unmatchedCount: dining > 0 ? 1 : 0,
 	uncategorizedCount: 0,
-	reviewCount: dining > 0 ? 1 : 0,
+	reviewCount: 0,
 	categories: [
 		{
 			category: "Dining" as const,
@@ -63,6 +64,7 @@ describe("getExpenseDashboardComparisonView", () => {
 			baselineTotal: (80 + 100 + 140) / 3,
 			difference: 200 - (80 + 100 + 140) / 3,
 			expectedRecurringRemaining: 0,
+			recurringPlanVariance: 10,
 			committedOutlook: 200,
 		});
 		expect(view?.baselineMonths.map(({ month: key }) => key)).toEqual([
@@ -96,6 +98,7 @@ describe("getExpenseDashboardComparisonView", () => {
 			"previous",
 		);
 		expect(view?.expectedRecurringRemaining).toBe(0);
+		expect(view?.recurringPlanVariance).toBe(0);
 		expect(view?.recurringComparisons[0]).toMatchObject({
 			currentActual: 40,
 			currentTransactionCount: 1,
@@ -119,7 +122,7 @@ describe("getExpenseDashboardComparisonView", () => {
 					name: "Quarterly service",
 					category: "Software",
 					rate: "Quarterly",
-					plannedMonthly: 30,
+					plannedMonthly: 40,
 					plannedCharge: 120,
 					actualMonthlyAverage: 20,
 					difference: -10,
@@ -141,6 +144,7 @@ describe("getExpenseDashboardComparisonView", () => {
 			differenceFromPlan: null,
 		});
 		expect(notDue?.expectedRecurringRemaining).toBe(0);
+		expect(notDue?.recurringPlanVariance).toBe(0);
 
 		const due = getExpenseDashboardComparisonView(
 			quarterlyDashboard,
@@ -150,9 +154,10 @@ describe("getExpenseDashboardComparisonView", () => {
 		expect(due?.recurringComparisons[0]).toMatchObject({
 			expectation: "due",
 			expectedThisMonth: 120,
-			differenceFromPlan: -120,
+			differenceFromPlan: -40,
 		});
 		expect(due?.expectedRecurringRemaining).toBe(120);
+		expect(due?.recurringPlanVariance).toBe(-40);
 	});
 
 	test("does not make a full yearly charge due from an off-cycle partial match", () => {
@@ -195,5 +200,24 @@ describe("getExpenseDashboardComparisonView", () => {
 			differenceFromPlan: null,
 		});
 		expect(view?.expectedRecurringRemaining).toBe(0);
+		expect(view?.recurringPlanVariance).toBe(0);
+
+		const billingMonth = getExpenseDashboardComparisonView(
+			yearlyDashboard,
+			"2026-02",
+			"previous",
+		);
+		expect(billingMonth?.recurringComparisons[0]).toMatchObject({
+			expectation: "due",
+			expectedThisMonth: 9_120,
+			currentActual: 27.95,
+		});
+		expect(
+			billingMonth?.recurringComparisons[0]?.differenceFromPlan,
+		).toBeCloseTo((27.95 - 9_120) / 12);
+		expect(billingMonth?.expectedRecurringRemaining).toBe(9_120 - 27.95);
+		expect(billingMonth?.recurringPlanVariance).toBeCloseTo(
+			(27.95 - 9_120) / 12,
+		);
 	});
 });

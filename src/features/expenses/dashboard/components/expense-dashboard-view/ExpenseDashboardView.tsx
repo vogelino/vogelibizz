@@ -6,6 +6,7 @@ import { DashboardKeyMetrics } from "../key-metrics";
 import { DashboardMovers } from "../movers";
 import { DashboardRecentContext } from "../recent-context";
 import { DashboardRecurringStatus } from "../recurring-status";
+import { DashboardSavingsWins } from "../savings-wins";
 import { DashboardSkeleton } from "./DashboardSkeleton";
 import { DashboardStateMessage } from "./DashboardStateMessage";
 
@@ -37,7 +38,6 @@ export function ExpenseDashboardView({ state }: ExpenseDashboardViewProps) {
 	const { dashboard, view, comparison, actions } = state;
 	return (
 		<div className="space-y-16 px-6 py-6 md:px-10">
-			<DashboardDailySpending dashboard={dashboard} />
 			<section className="space-y-12">
 				<div>
 					<h2 className="font-semibold">Monthly review</h2>
@@ -52,6 +52,7 @@ export function ExpenseDashboardView({ state }: ExpenseDashboardViewProps) {
 					onMonthChange={actions.setMonth}
 					onComparisonChange={actions.setComparison}
 				/>
+				<DashboardSavingsWins dashboard={dashboard} view={view} />
 				<DashboardKeyMetrics view={view} dashboard={dashboard} />
 				<DashboardCategoryDistribution
 					view={view}
@@ -73,6 +74,8 @@ export function ExpenseDashboardView({ state }: ExpenseDashboardViewProps) {
 					onSelect={actions.openTrendHistory}
 				/>
 			</section>
+			<hr className="border-border" />
+			<DashboardDailySpending dashboard={dashboard} />
 		</div>
 	);
 }

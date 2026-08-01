@@ -18,6 +18,14 @@ describe("calculateExpenseDashboard", () => {
 					plannedMonthly: 10,
 					plannedCharge: 10,
 				},
+				{
+					expenseId: 11,
+					name: "Monthly savings",
+					category: "Savings",
+					rate: "Monthly",
+					plannedMonthly: 100,
+					plannedCharge: 100,
+				},
 			],
 			transactions: [
 				{
@@ -49,12 +57,28 @@ describe("calculateExpenseDashboard", () => {
 					category: null,
 					bookedAt: "2026-06-18",
 				},
+				{
+					expenseMonthId: 1,
+					expenseId: 11,
+					amount: 100,
+					category: "Savings",
+					bookedAt: "2026-05-20",
+				},
+				{
+					expenseMonthId: 2,
+					expenseId: 11,
+					amount: 150,
+					category: "Savings",
+					bookedAt: "2026-06-20",
+				},
 			],
 		});
 
 		expect(dashboard.typicalMonthlyTotal).toBe(30);
 		expect(dashboard.configuredMonthlyTotal).toBe(10);
+		expect(dashboard.configuredMonthlySavings).toBe(100);
 		expect(dashboard.months.map(({ total }) => total)).toEqual([40, 20]);
+		expect(dashboard.months.map(({ savings }) => savings)).toEqual([100, 150]);
 		expect(dashboard.days).toEqual([
 			{ date: "2026-05-02", total: 10, transactionCount: 1 },
 			{ date: "2026-05-04", total: 30, transactionCount: 1 },
@@ -66,9 +90,15 @@ describe("calculateExpenseDashboard", () => {
 			uncategorizedCount: 1,
 			reviewCount: 1,
 		});
+		expect(dashboard.months[0]).toMatchObject({
+			unmatchedCount: 1,
+			uncategorizedCount: 0,
+			reviewCount: 0,
+		});
 		expect(dashboard.latest).toMatchObject({
 			month: "2026-06",
 			total: 20,
+			savings: 150,
 			previousTotal: 40,
 			matched: 12,
 			unmatched: 8,
@@ -90,6 +120,7 @@ describe("calculateExpenseDashboard", () => {
 				{ month: "2026-06", total: 12, transactionCount: 1 },
 			],
 		});
+		expect(dashboard.recurring).toHaveLength(1);
 	});
 
 	test("returns an empty dashboard without imported months", () => {
