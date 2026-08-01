@@ -24,6 +24,7 @@ async function readTransaction(
 		.select({
 			id: expenseTransactions.id,
 			bookedAt: expenseTransactions.bookedAt,
+			occurredAt: expenseTransactions.occurredAt,
 			valueDate: expenseTransactions.valueDate,
 			description: expenseTransactions.description,
 			amount: expenseTransactions.amount,

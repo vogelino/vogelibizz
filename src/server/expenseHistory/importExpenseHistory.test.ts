@@ -19,6 +19,8 @@ const migrationNames = [
 	"0003_swift_nitro.sql",
 	"0004_abnormal_betty_brant.sql",
 	"0005_cynical_hellcat.sql",
+	"0006_wooden_firestar.sql",
+	"0007_grey_carnage.sql",
 ];
 const migrationSql = (
 	await Promise.all(
@@ -32,6 +34,7 @@ type WorkbookTransaction = {
 	description: string;
 	amount: number;
 	category?: string;
+	bookingText?: string;
 };
 
 function workbookRequest(
@@ -55,16 +58,18 @@ function workbookRequest(
 				"Kontoinhaber",
 				"Buchungstext",
 			],
-			...transactions.map(({ date, description, amount, category }) => [
-				new Date(`${date}T00:00:00Z`),
-				description,
-				amount,
-				"CHF",
-				"Private account",
-				category ?? "Allgemeines",
-				"Test User",
-				description,
-			]),
+			...transactions.map(
+				({ date, description, amount, category, bookingText }) => [
+					new Date(`${date}T00:00:00Z`),
+					description,
+					amount,
+					"CHF",
+					"Private account",
+					category ?? "Allgemeines",
+					"Test User",
+					bookingText ?? description,
+				],
+			),
 		]),
 		"Transactions",
 	);
@@ -143,14 +148,15 @@ class SqliteImportPersistence implements ExpenseHistoryImportPersistence {
 					this.database
 						.query(
 							`INSERT INTO expense_transactions (
-							expense_month_id, booked_at, value_date,
+							expense_month_id, booked_at, occurred_at, value_date,
 							original_description, description, original_amount, amount,
 							category, source_order, created_at, last_modified
-						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 						)
 						.run(
 							month.id,
 							debit.bookedAt,
+							debit.occurredAt,
 							debit.valueDate,
 							debit.description,
 							debit.description,
@@ -244,6 +250,8 @@ describe("expense history import", () => {
 				description: "Synthetic restaurant",
 				amount: -25,
 				category: "Gastronomie",
+				bookingText:
+					"Einkauf Synthetic restaurant\n15.07.2026, 20:15, Debit Mastercard-Nr. 557452xxxxxx9548",
 			},
 		]);
 		const preview = await previewExpenseHistoryImport(diningRequest, store);
@@ -255,12 +263,15 @@ describe("expense history import", () => {
 		await commitExpenseHistoryImport(diningRequest, store);
 		expect(
 			store.database
-				.query("SELECT description, amount, category FROM expense_transactions")
+				.query(
+					"SELECT description, amount, category, occurred_at AS occurredAt FROM expense_transactions",
+				)
 				.get(),
 		).toEqual({
 			description: "Synthetic restaurant",
 			amount: 25,
 			category: "Dining",
+			occurredAt: "2026-07-15T20:15",
 		});
 	});
 

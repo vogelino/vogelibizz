@@ -139,6 +139,7 @@ export const expenseTransactions = sqliteTable(
 			onDelete: "set null",
 		}),
 		bookedAt: text("booked_at").notNull(),
+		occurredAt: text("occurred_at"),
 		valueDate: text("value_date"),
 		originalDescription: text("original_description").notNull(),
 		description: text("description").notNull(),
@@ -171,6 +172,14 @@ export const expenseTransactions = sqliteTable(
 			"expense_transactions_booked_at_check",
 			sql`length(${table.bookedAt}) = 10
 				and ${table.bookedAt} glob '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`,
+		),
+		check(
+			"expense_transactions_occurred_at_check",
+			sql`${table.occurredAt} is null or (
+				length(${table.occurredAt}) = 16
+				and substr(${table.occurredAt}, 1, 10) glob '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+				and substr(${table.occurredAt}, 11, 6) glob 'T[0-9][0-9]:[0-9][0-9]'
+			)`,
 		),
 		check(
 			"expense_transactions_value_date_check",
@@ -216,6 +225,11 @@ const calendarMonthSchema = z
 		"Expected a calendar month in YYYY-MM form",
 	);
 const calendarDateSchema = z.iso.date();
+const localDateTimeSchema = z
+	.string()
+	.regex(
+		/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d$/,
+	);
 const nonEmptyTextSchema = z
 	.string()
 	.refine((value) => value.trim().length > 0, "Expected non-empty text");
@@ -243,6 +257,7 @@ export const expenseTransactionSelectSchema = createSelectSchema(
 	expenseTransactions,
 ).extend({
 	bookedAt: calendarDateSchema,
+	occurredAt: localDateTimeSchema.nullable(),
 	valueDate: calendarDateSchema.nullable(),
 	originalDescription: nonEmptyTextSchema,
 	description: nonEmptyTextSchema,
@@ -254,6 +269,7 @@ export const expenseTransactionInsertSchema = createInsertSchema(
 	expenseTransactions,
 ).extend({
 	bookedAt: calendarDateSchema,
+	occurredAt: localDateTimeSchema.nullable().optional(),
 	valueDate: calendarDateSchema.nullable().optional(),
 	originalDescription: nonEmptyTextSchema,
 	description: nonEmptyTextSchema,

@@ -43,6 +43,20 @@
 			"when": 1784235765102,
 			"tag": "0005_cynical_hellcat",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "6",
+			"when": 1785075867266,
+			"tag": "0006_wooden_firestar",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "6",
+			"when": 1785618557112,
+			"tag": "0007_grey_carnage",
+			"breakpoints": true
 		}
 	]
 }

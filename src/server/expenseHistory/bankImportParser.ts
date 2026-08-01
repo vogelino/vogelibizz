@@ -5,6 +5,7 @@ export type ImportedExpenseCategory =
 
 export type ParsedBankDebit = {
 	bookedAt: string;
+	occurredAt: string | null;
 	valueDate: string | null;
 	description: string;
 	amount: number;

@@ -56,9 +56,11 @@ function normalizeExcelDate(value: unknown, rowNumber: number) {
 	let month: number;
 	let day: number;
 	if (value instanceof Date) {
-		year = value.getUTCFullYear();
-		month = value.getUTCMonth() + 1;
-		day = value.getUTCDate();
+		// Excel dates have no timezone. SheetJS represents them as local-midnight
+		// Date objects, so UTC getters can move the calendar date back one day.
+		year = value.getFullYear();
+		month = value.getMonth() + 1;
+		day = value.getDate();
 	} else if (typeof value === "number") {
 		const parsed = SSF.parse_date_code(value);
 		if (!parsed) {
@@ -120,6 +122,31 @@ function normalizeAmount(value: unknown, rowNumber: number) {
 
 function normalizeText(value: unknown) {
 	return typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+}
+
+function extractOccurredAt(bookingText: string) {
+	const match =
+		/(?:^|\s)(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{2}):(\d{2}),\s*Debit Mastercard-Nr\./.exec(
+			bookingText,
+		);
+	if (!match) return null;
+	const [, dayText, monthText, yearText, hourText, minuteText] = match;
+	const year = Number(yearText);
+	const month = Number(monthText);
+	const day = Number(dayText);
+	const hour = Number(hourText);
+	const minute = Number(minuteText);
+	const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+	if (
+		date.getUTCFullYear() !== year ||
+		date.getUTCMonth() !== month - 1 ||
+		date.getUTCDate() !== day ||
+		date.getUTCHours() !== hour ||
+		date.getUTCMinutes() !== minute
+	) {
+		return null;
+	}
+	return `${yearText}-${monthText}-${dayText}T${hourText}:${minuteText}`;
 }
 
 export function parseBankXlsx(workbookBase64: string): ParsedBankImport {
@@ -199,6 +226,7 @@ export function parseBankXlsx(workbookBase64: string): ParsedBankImport {
 		}
 		transactions.push({
 			bookedAt: normalizeExcelDate(get("Datum"), rowNumber),
+			occurredAt: extractOccurredAt(bookingText),
 			valueDate: null,
 			description,
 			signedAmount: normalizeAmount(get("Betrag"), rowNumber),

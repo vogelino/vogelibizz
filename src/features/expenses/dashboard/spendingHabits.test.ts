@@ -43,4 +43,21 @@ describe("getSpendingHabits", () => {
 			}),
 		).toBeNull();
 	});
+
+	test("keeps purchases that occurred just before their imported posting month", () => {
+		const habits = getSpendingHabits({
+			...dashboard,
+			days: [
+				...dashboard.days,
+				{ date: "2026-04-30", total: 15, transactionCount: 1 },
+			],
+		});
+
+		expect(habits?.days).toContainEqual({
+			date: "2026-04-30",
+			total: 15,
+			transactionCount: 1,
+			intensity: 1,
+		});
+	});
 });

@@ -24,6 +24,7 @@ export async function getExpenseHistoryTransaction(
 			month: expenseMonths.month,
 			id: expenseTransactions.id,
 			bookedAt: expenseTransactions.bookedAt,
+			occurredAt: expenseTransactions.occurredAt,
 			valueDate: expenseTransactions.valueDate,
 			description: expenseTransactions.description,
 			amount: expenseTransactions.amount,
@@ -103,6 +104,7 @@ export async function getExpenseHistoryMonth(
 			.select({
 				id: expenseTransactions.id,
 				bookedAt: expenseTransactions.bookedAt,
+				occurredAt: expenseTransactions.occurredAt,
 				valueDate: expenseTransactions.valueDate,
 				description: expenseTransactions.description,
 				amount: expenseTransactions.amount,
@@ -273,6 +275,7 @@ export async function getExpenseDashboard(): Promise<ExpenseDashboard> {
 					amount: expenseTransactions.amount,
 					category: expenseTransactions.category,
 					bookedAt: expenseTransactions.bookedAt,
+					occurredAt: expenseTransactions.occurredAt,
 				})
 				.from(expenseTransactions),
 			getExchangeRates(),

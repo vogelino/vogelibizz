@@ -30,6 +30,7 @@ const detail: ExpenseHistoryMonthDetail = {
 		{
 			id: 7,
 			bookedAt: "2026-06-03",
+			occurredAt: "2026-06-01T18:42",
 			valueDate: "2026-06-04",
 			description: "Editable display value",
 			amount: 12.5,

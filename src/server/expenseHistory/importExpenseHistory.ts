@@ -95,16 +95,17 @@ export const d1ExpenseHistoryImportPersistence: ExpenseHistoryImportPersistence 
 						client
 							.prepare(`
 					insert into expense_transactions (
-						expense_month_id, expense_id, booked_at, value_date,
+						expense_month_id, expense_id, booked_at, occurred_at, value_date,
 						original_description, description, original_amount, amount,
 						category, type, source_order, created_at, last_modified
 					)
 					select
-						id, null, ?, ?, ?, ?, ?, ?, ?, null, ?, ?, ?
+						id, null, ?, ?, ?, ?, ?, ?, ?, ?, null, ?, ?, ?
 					from expense_months where month = ?
 				`)
 							.bind(
 								debit.bookedAt,
+								debit.occurredAt,
 								debit.valueDate,
 								debit.description,
 								debit.description,

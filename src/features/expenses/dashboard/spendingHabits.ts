@@ -68,9 +68,16 @@ export function getSpendingHabits(
 			.filter((month) => month >= range[0].slice(0, 7)),
 	);
 	const totalsByDate = new Map(dashboard.days.map((day) => [day.date, day]));
-	const coveredDates = datesBetween(...range).filter((date) =>
-		importedMonths.has(date.slice(0, 7)),
-	);
+	const coveredDates = [
+		...new Set([
+			...datesBetween(...range).filter((date) =>
+				importedMonths.has(date.slice(0, 7)),
+			),
+			...dashboard.days
+				.map(({ date }) => date)
+				.filter((date) => date >= range[0] && date <= range[1]),
+		]),
+	].sort();
 	const positiveTotals = coveredDates
 		.map((date) => totalsByDate.get(date)?.total ?? 0)
 		.filter((total) => total > 0)

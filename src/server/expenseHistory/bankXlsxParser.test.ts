@@ -31,6 +31,49 @@ const metadataRows = [
 ];
 
 describe("Finanzassistent Excel parser", () => {
+	test("preserves the calendar day of timezone-less Excel dates", () => {
+		const parsed = parseBankXlsx(
+			workbookBase64([
+				...metadataRows,
+				[
+					new Date(2026, 6, 17),
+					"Coop",
+					-17.95,
+					"CHF",
+					"Private account",
+					"Lebensmittel",
+					"Test User",
+					"Purchase",
+				],
+			]),
+		);
+
+		expect(parsed.months[0]?.debits[0]?.bookedAt).toBe("2026-07-17");
+	});
+
+	test("extracts the purchase timestamp embedded in card booking text", () => {
+		const parsed = parseBankXlsx(
+			workbookBase64([
+				...metadataRows,
+				[
+					new Date(2026, 6, 17),
+					"Coop",
+					-17.95,
+					"CHF",
+					"Private account",
+					"Lebensmittel",
+					"Test User",
+					"Einkauf Coop\n15.07.2026, 18:42, Debit Mastercard-Nr. 557452xxxxxx9548",
+				],
+			]),
+		);
+
+		expect(parsed.months[0]?.debits[0]).toMatchObject({
+			bookedAt: "2026-07-17",
+			occurredAt: "2026-07-15T18:42",
+		});
+	});
+
 	test("supports the complete Finanzassistent category list", () => {
 		const categoryMappings = [
 			["Allgemeines", "Administrative"],
@@ -187,6 +230,7 @@ describe("Finanzassistent Excel parser", () => {
 		expect(parsed.months[0]?.debits).toEqual([
 			{
 				bookedAt: "2026-07-17",
+				occurredAt: null,
 				valueDate: null,
 				description: "Coop",
 				amount: 17.95,
@@ -195,6 +239,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-17",
+				occurredAt: null,
 				valueDate: null,
 				description: "Restaurant",
 				amount: 25,
@@ -203,6 +248,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-16",
+				occurredAt: null,
 				valueDate: null,
 				description: "Landlord",
 				amount: 1200,
@@ -211,6 +257,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-15",
+				occurredAt: null,
 				valueDate: null,
 				description: "Hairdresser",
 				amount: 45,
@@ -219,6 +266,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-14",
+				occurredAt: null,
 				valueDate: null,
 				description: "Petrol station",
 				amount: 70,
@@ -227,6 +275,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-13",
+				occurredAt: null,
 				valueDate: null,
 				description: "Furniture store",
 				amount: 250,
@@ -235,6 +284,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-11",
+				occurredAt: null,
 				valueDate: null,
 				description: "Department store",
 				amount: 80,
@@ -243,6 +293,7 @@ describe("Finanzassistent Excel parser", () => {
 			},
 			{
 				bookedAt: "2026-07-10",
+				occurredAt: null,
 				valueDate: null,
 				description: "SBB",
 				amount: 32,

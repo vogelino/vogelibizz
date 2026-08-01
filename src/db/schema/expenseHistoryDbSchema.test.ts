@@ -25,6 +25,12 @@ const historyMigrationSql = await Bun.file(
 const performanceMigrationSql = await Bun.file(
 	new URL("0005_cynical_hellcat.sql", migrationDirectory),
 ).text();
+const occurredAtMigrationSql = await Bun.file(
+	new URL("0006_wooden_firestar.sql", migrationDirectory),
+).text();
+const occurredAtConstraintMigrationSql = await Bun.file(
+	new URL("0007_grey_carnage.sql", migrationDirectory),
+).text();
 const timestamp = "2026-07-16T12:00:00.000Z";
 
 function createMigratedDatabase() {
@@ -51,6 +57,8 @@ function createMigratedDatabase() {
 		);
 	database.exec(historyMigrationSql);
 	database.exec(performanceMigrationSql);
+	database.exec(occurredAtMigrationSql);
+	database.exec(occurredAtConstraintMigrationSql);
 	return database;
 }
 
@@ -283,6 +291,13 @@ describe("expense history migration constraints", () => {
 					.run(month.id),
 			).toThrow();
 			expect(() =>
+				database
+					.query(
+						"UPDATE expense_transactions SET occurred_at = '2026-06-05 10:00' WHERE expense_month_id = ?",
+					)
+					.run(month.id),
+			).toThrow();
+			expect(() =>
 				insertTransaction(database, {
 					expenseMonthId: month.id,
 					sourceOrder: 0,
@@ -339,6 +354,7 @@ describe("expense history validation schemas", () => {
 			expenseMonthId: 1,
 			expenseId: null,
 			bookedAt: "2026-06-05",
+			occurredAt: "2026-06-03T18:42",
 			valueDate: null,
 			originalDescription: "Bank value",
 			description: "Edited value",
@@ -351,6 +367,7 @@ describe("expense history validation schemas", () => {
 
 		expect(month.skippedCreditCount).toBe(0);
 		expect(transaction.originalAmount).toBe(20);
+		expect(transaction.occurredAt).toBe("2026-06-03T18:42");
 		expect(transaction.amount).toBe(0);
 		expect(transaction.category).toBeNull();
 		expect(transaction.type).toBeNull();
@@ -368,6 +385,7 @@ describe("expense history validation schemas", () => {
 			expenseTransactionInsertSchema.parse({
 				expenseMonthId: 1,
 				bookedAt: "not-a-date",
+				occurredAt: "2026-06-05 10:00",
 				originalDescription: " ",
 				description: "Edited value",
 				originalAmount: 0,

@@ -15,6 +15,7 @@ export type DashboardTransactionInput = {
 	amount: number;
 	category: ExpenseCategory | null;
 	bookedAt: string;
+	occurredAt?: string | null;
 };
 
 export type DashboardExpenseInput = {
@@ -80,13 +81,15 @@ export function calculateExpenseDashboard({
 			throw new Error("Dashboard transaction amounts must be non-negative");
 		}
 
-		const day = totalsByDay.get(transaction.bookedAt) ?? {
+		const spendingDate =
+			transaction.occurredAt?.slice(0, 10) ?? transaction.bookedAt;
+		const day = totalsByDay.get(spendingDate) ?? {
 			total: 0,
 			transactionCount: 0,
 		};
 		day.total += transaction.amount;
 		day.transactionCount += 1;
-		totalsByDay.set(transaction.bookedAt, day);
+		totalsByDay.set(spendingDate, day);
 
 		month.total += transaction.amount;
 		if (transaction.expenseId === null) {

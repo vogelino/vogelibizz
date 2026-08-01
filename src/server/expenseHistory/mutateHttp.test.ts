@@ -12,6 +12,7 @@ import {
 const transaction: ExpenseHistoryTransaction = {
 	id: 7,
 	bookedAt: "2026-06-03",
+	occurredAt: null,
 	valueDate: null,
 	description: "Edited",
 	amount: 0,

@@ -26,6 +26,7 @@ describe("calculateExpenseDashboard", () => {
 					amount: 10,
 					category: "Software",
 					bookedAt: "2026-05-04",
+					occurredAt: "2026-05-02T18:42",
 				},
 				{
 					expenseMonthId: 1,
@@ -55,7 +56,8 @@ describe("calculateExpenseDashboard", () => {
 		expect(dashboard.configuredMonthlyTotal).toBe(10);
 		expect(dashboard.months.map(({ total }) => total)).toEqual([40, 20]);
 		expect(dashboard.days).toEqual([
-			{ date: "2026-05-04", total: 40, transactionCount: 2 },
+			{ date: "2026-05-02", total: 10, transactionCount: 1 },
+			{ date: "2026-05-04", total: 30, transactionCount: 1 },
 			{ date: "2026-06-10", total: 12, transactionCount: 1 },
 			{ date: "2026-06-18", total: 8, transactionCount: 1 },
 		]);

@@ -9,6 +9,7 @@ const migrationNames = [
 	"0003_swift_nitro.sql",
 	"0004_abnormal_betty_brant.sql",
 	"0005_cynical_hellcat.sql",
+	"0006_wooden_firestar.sql",
 ];
 const migrationSql = (
 	await Promise.all(
