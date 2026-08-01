@@ -154,4 +154,46 @@ describe("getExpenseDashboardComparisonView", () => {
 		});
 		expect(due?.expectedRecurringRemaining).toBe(120);
 	});
+
+	test("does not make a full yearly charge due from an off-cycle partial match", () => {
+		const yearlyDashboard = {
+			...dashboard,
+			months: [
+				...dashboard.months,
+				month("2026-04", 70, 70, 0),
+				month("2026-05", 80, 80, 0),
+				month("2026-06", 90, 90, 0),
+				month("2026-07", 100, 82, 18),
+			],
+			recurring: [
+				{
+					expenseId: 3,
+					name: "Annual taxes",
+					category: "Taxes",
+					rate: "Yearly",
+					plannedMonthly: 760,
+					plannedCharge: 9_120,
+					actualMonthlyAverage: 9,
+					difference: -751,
+					monthlyActuals: [
+						{ month: "2026-02", total: 27.95, transactionCount: 1 },
+						{ month: "2026-07", total: 18, transactionCount: 1 },
+					],
+				},
+			],
+		} as ExpenseDashboard;
+
+		const view = getExpenseDashboardComparisonView(
+			yearlyDashboard,
+			"2026-07",
+			"3m",
+		);
+		expect(view?.recurringComparisons[0]).toMatchObject({
+			expectation: "not-due",
+			expectedThisMonth: 0,
+			currentActual: 18,
+			differenceFromPlan: null,
+		});
+		expect(view?.expectedRecurringRemaining).toBe(0);
+	});
 });

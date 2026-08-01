@@ -183,17 +183,15 @@ export function getExpenseDashboardComparisonView(
 					? currentActual > 0
 						? "one-time"
 						: "not-due"
-					: currentActual > 0
+					: intervalMonths === 1
 						? "due"
-						: intervalMonths === 1
-							? "due"
-							: anchorMonth === undefined
-								? "unknown"
-								: Math.abs(monthDistance(anchorMonth, current.month)) %
-											(intervalMonths ?? 1) ===
-										0
-									? "due"
-									: "not-due";
+						: anchorMonth === undefined
+							? "unknown"
+							: Math.abs(monthDistance(anchorMonth, current.month)) %
+										(intervalMonths ?? 1) ===
+									0
+								? "due"
+								: "not-due";
 			const expectedThisMonth =
 				expectation === "due"
 					? intervalMonths === 1

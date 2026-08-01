@@ -23,6 +23,15 @@ describe("monthly target-currency conversion", () => {
 		).toBe(100);
 		expect(
 			getValueInTargetCurrencyPerMonth({
+				value: 120,
+				currency: "CHF",
+				billingRate: "Quarterly",
+				rates,
+				targetCurrency: "CHF",
+			}),
+		).toBe(40);
+		expect(
+			getValueInTargetCurrencyPerMonth({
 				value: 75,
 				currency: "CHF",
 				billingRate: "Monthly",

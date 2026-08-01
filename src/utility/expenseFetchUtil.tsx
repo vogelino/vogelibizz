@@ -144,7 +144,7 @@ export function getValueInTargetCurrencyPerMonth({
 				monthlyPrice = (monthlyPrice * 24 * 365) / 12;
 				break;
 			case "Quarterly":
-				monthlyPrice /= 4;
+				monthlyPrice /= 3;
 				break;
 			case "Semester":
 				monthlyPrice /= 6;
