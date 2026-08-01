@@ -118,7 +118,6 @@ export function DailySpendingHeatmap({
 						total,
 						intensity,
 					]),
-					itemStyle: { borderRadius: 4 },
 				},
 			],
 		};
@@ -174,7 +173,7 @@ export function DailySpendingHeatmap({
 				{spendingIntensityLegend.map(({ value, label, color }) => (
 					<li key={value} className="flex items-center gap-2">
 						<span
-							className="size-3 rounded-sm"
+							className="size-3"
 							style={{ backgroundColor: color }}
 							aria-hidden="true"
 						/>
