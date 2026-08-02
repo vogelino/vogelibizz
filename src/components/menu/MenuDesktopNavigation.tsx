@@ -9,6 +9,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
+import { isCurrentMenuRoute } from "./isCurrentMenuRoute";
 
 export type MenuRoute = LinkProps["to"];
 
@@ -67,10 +68,12 @@ export const menuItems: MenuLinkType[] = [
 ];
 
 type MenuDesktopNavigationProps = {
+	currentPage: string;
 	onLinkClick?: (item: MenuLinkType) => void;
 };
 
 export function MenuDesktopNavigation({
+	currentPage,
 	onLinkClick,
 }: MenuDesktopNavigationProps) {
 	return (
@@ -83,9 +86,12 @@ export function MenuDesktopNavigation({
 				{menuItems.map((item) => {
 					const ItemIcon = resourceIconMap[item.key];
 					if ("routes" in item) {
+						const active = item.routes.some((subItem) =>
+							isCurrentMenuRoute(currentPage, subItem.route),
+						);
 						return (
 							<NavigationMenuItem key={item.key}>
-								<NavigationMenuTrigger>
+								<NavigationMenuTrigger data-active={active ? "" : undefined}>
 									<Link
 										to={item.routes[0].route}
 										title={item.label}
@@ -103,13 +109,21 @@ export function MenuDesktopNavigation({
 									<ul className="w-52">
 										{item.routes.map((subItem) => {
 											const SubItemIcon = resourceIconMap[subItem.key];
+											const active = isCurrentMenuRoute(
+												currentPage,
+												subItem.route,
+											);
 											return (
 												<li key={subItem.key}>
 													<NavigationMenuLink
 														asChild
+														active={active}
 														className="flex-row items-center gap-2 whitespace-nowrap"
 													>
-														<Link to={subItem.route}>
+														<Link
+															to={subItem.route}
+															aria-current={active ? "page" : undefined}
+														>
 															<SubItemIcon
 																className="size-5 shrink-0 text-muted-foreground"
 																aria-hidden="true"

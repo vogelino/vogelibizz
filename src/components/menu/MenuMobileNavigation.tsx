@@ -1,17 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { resourceIconMap } from "@/utility/resourceIcons";
+import { isCurrentMenuRoute } from "./isCurrentMenuRoute";
 import { type MenuLinkType, menuItems } from "./MenuDesktopNavigation";
 
 type MenuMobileNavigationProps = {
 	currentPage: string;
 	onLinkClick?: (item: MenuLinkType) => void;
 };
-
-function isCurrentPage(currentPage: string, route: string) {
-	const pathname = `/${currentPage}`;
-	if (route === "/expenses") return pathname === route;
-	return pathname === route || pathname.startsWith(`${route}/`);
-}
 
 export function MenuMobileNavigation({
 	currentPage,
@@ -32,9 +27,9 @@ export function MenuMobileNavigation({
 								<ul className="flex flex-col">
 									{item.routes.map((subItem) => {
 										const SubItemIcon = resourceIconMap[subItem.key];
-										const active = isCurrentPage(
+										const active = isCurrentMenuRoute(
 											currentPage,
-											String(subItem.route),
+											subItem.route,
 										);
 										return (
 											<li key={subItem.key}>
@@ -58,7 +53,7 @@ export function MenuMobileNavigation({
 						);
 					}
 
-					const active = isCurrentPage(currentPage, String(item.route));
+					const active = isCurrentMenuRoute(currentPage, item.route);
 					return (
 						<li key={item.key} className="border-b border-border">
 							<Link

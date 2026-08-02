@@ -69,7 +69,10 @@ export const Menu = ({ withBg = true, currentPage }: MenuProps) => {
 				</button>
 			</div>
 			<div className="hidden items-center gap-4 md:flex md:gap-6">
-				<MenuDesktopNavigation onLinkClick={() => setMobileOpen(false)} />
+				<MenuDesktopNavigation
+					currentPage={currentPage}
+					onLinkClick={() => setMobileOpen(false)}
+				/>
 				<SearchTrigger />
 				<MenuAuxiliaryItems />
 			</div>
