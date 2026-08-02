@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import type { ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +32,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/utility/classNames";
+import { updateRangeSelection } from "./rangeSelection";
 
 type ClassNames = {
 	table?: string;
@@ -154,6 +155,42 @@ export function DataTable<TData>({
 	);
 
 	const rows = table.getRowModel().rows;
+	const lastSelectedRowId = useRef<string | null>(null);
+	const handleRowSelectionClickCapture = (
+		event: ReactMouseEvent<HTMLTableSectionElement>,
+	) => {
+		if (!enableRowSelection || !(event.target instanceof Element)) return;
+		const checkbox = event.target.closest('[role="checkbox"]');
+		if (!checkbox) return;
+
+		const rowId = checkbox.closest("tr")?.dataset.rowId;
+		if (!rowId) {
+			lastSelectedRowId.current = null;
+			return;
+		}
+		if (!event.shiftKey) {
+			lastSelectedRowId.current = rowId;
+			return;
+		}
+
+		event.preventDefault();
+		event.stopPropagation();
+		const targetRow = rows.find((row) => row.id === rowId);
+		if (!targetRow) return;
+		const rowsById = new Map(rows.map((row) => [row.id, row]));
+		setRowSelection((selection) =>
+			updateRangeSelection(
+				selection,
+				rows.map((row) => row.id),
+				lastSelectedRowId.current,
+				rowId,
+				!targetRow.getIsSelected(),
+				(candidateRowId) =>
+					rowsById.get(candidateRowId)?.getCanSelect() ?? false,
+			),
+		);
+		lastSelectedRowId.current = rowId;
+	};
 	const loadingMoreSkeletonRows = 3;
 	const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 	const [scrollMargin, setScrollMargin] = useState(0);
@@ -303,6 +340,7 @@ export function DataTable<TData>({
 					</TableHeader>
 					<TableBody
 						ref={tableBodyRef}
+						onClickCapture={handleRowSelectionClickCapture}
 						className={cn(
 							"[&_td:first-child]:pl-6 md:[&_td:first-child]:pl-10 [&_td:last-child]:pr-6 md:[&_td:last-child]:pr-10",
 							classNames.body,
@@ -377,6 +415,7 @@ export function DataTable<TData>({
 									const rowElement = (
 										<TableRow
 											key={row.id}
+											data-row-id={row.id}
 											data-index={virtualItem?.index}
 											ref={
 												virtualized ? rowVirtualizer.measureElement : undefined
