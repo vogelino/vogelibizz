@@ -28,6 +28,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 	loading = false,
 	toolbar,
 	toolbarSkeleton,
+	tableClassName,
+	selectionColumnSize = 36,
 }: {
 	resource: ResourceType;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -37,6 +39,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 	loading?: boolean;
 	toolbar?: (table: TanstackTable<DataType>) => ReactNode;
 	toolbarSkeleton?: ReactNode;
+	tableClassName?: string;
+	selectionColumnSize?: number;
 }) {
 	const navigate = useNavigate();
 	const clientDeleteMutation = useClientDelete();
@@ -186,11 +190,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 						/>
 					</div>
 				),
-				size: 36,
+				size: selectionColumnSize,
 				enableSorting: false,
 				enableHiding: false,
 			}) as ColumnDef<DataType, unknown>,
-		[],
+		[selectionColumnSize],
 	);
 	const columns = [
 		selectionColumn,
@@ -269,7 +273,10 @@ export default function PageDataTable<DataType extends { id: number }>({
 						pagination: { pageIndex: 0, pageSize: 50 },
 					}}
 					toolbarSkeleton={toolbarSkeleton}
-					classNames={toolbar ? { header: "top-30 pt-3" } : undefined}
+					classNames={{
+						table: tableClassName,
+						header: toolbar ? "top-30 pt-3" : undefined,
+					}}
 					toolbar={(table) => {
 						tableRef.current = table;
 						return toolbar?.(table) ?? null;

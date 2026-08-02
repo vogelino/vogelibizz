@@ -118,6 +118,8 @@ export default function InvoicesList({
 			data={!error && filteredData.length > 0 ? filteredData : []}
 			defaultSortColumn="last_modified"
 			loading={isLoading}
+			tableClassName="table-fixed"
+			selectionColumnSize={72}
 			toolbarSkeleton={
 				<div className="px-6 pt-3 md:px-10">
 					<InvoiceFilter loading clients={[]} projects={[]} />

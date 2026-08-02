@@ -22,21 +22,6 @@ export function getProjectTableColumns(
 	relationsLoading = false,
 ) {
 	return [
-		columnHelper.accessor("id", {
-			size: 50,
-			minSize: 50,
-			maxSize: 50,
-			header: () => (
-				<span className="text-muted-foreground group-hover:text-inherit">
-					ID
-				</span>
-			),
-			cell: function render({ getValue }) {
-				return (
-					<span className="text-muted-foreground">{getValue<string>()}</span>
-				);
-			},
-		}),
 		columnHelper.accessor("name", {
 			size: 1000,
 			header: "Name",

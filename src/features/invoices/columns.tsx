@@ -6,10 +6,19 @@ import {
 	InlineMultiCombobox,
 } from "@/components/ui/inline-edit";
 import type { ClientType, InvoiceType, ProjectType } from "@/db/schema";
-import { formatCurrency } from "@/utility/formatUtil";
+import { formatCurrency, locale } from "@/utility/formatUtil";
 import { getInvoiceHours, getInvoiceTotal } from "./invoiceTotals";
 
 const columnHelper = createColumnHelper<InvoiceType>();
+
+function formatDate(date: string) {
+	return new Intl.DateTimeFormat(locale, {
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+		timeZone: "UTC",
+	}).format(new Date(date));
+}
 
 export function getInvoiceTableColumns(
 	onEdit: (invoice: InvoiceType, change: Partial<InvoiceType>) => void,
@@ -18,21 +27,25 @@ export function getInvoiceTableColumns(
 	relationsLoading = false,
 ) {
 	return [
-		columnHelper.accessor("id", {
-			size: 50,
-			minSize: 50,
-			maxSize: 50,
-			header: () => (
-				<span className="text-muted-foreground group-hover:text-inherit">
-					ID
-				</span>
-			),
-			cell: ({ getValue }) => (
-				<span className="text-muted-foreground">{getValue<number>()}</span>
-			),
+		columnHelper.accessor("date", {
+			size: 130,
+			header: "Date",
+			cell: ({ getValue, row }) => {
+				const value = getValue<string>();
+				return (
+					<InlineInput
+						type="date"
+						value={value.slice(0, 10)}
+						displayValue={formatDate(value)}
+						ariaLabel={`date for ${row.original.name}`}
+						displayClassName="text-muted-foreground text-nowrap"
+						onCommit={(date) => onEdit(row.original, { date })}
+					/>
+				);
+			},
 		}),
 		columnHelper.accessor("name", {
-			size: 420,
+			size: 250,
 			header: "Name",
 			cell: ({ getValue, row }) => {
 				const value = getValue<string>();
@@ -62,27 +75,9 @@ export function getInvoiceTableColumns(
 				/>
 			),
 		}),
-		columnHelper.accessor("date", {
-			size: 140,
-			header: "Date",
-			cell: ({ getValue, row }) => {
-				const value = getValue<string>();
-				return (
-					<InlineInput
-						type="date"
-						value={value.slice(0, 10)}
-						displayValue={new Intl.DateTimeFormat(row.original.language).format(
-							new Date(value),
-						)}
-						ariaLabel={`date for ${row.original.name}`}
-						onCommit={(date) => onEdit(row.original, { date })}
-					/>
-				);
-			},
-		}),
 		columnHelper.accessor((row) => row.clients?.[0]?.name ?? "", {
 			id: "client",
-			size: 220,
+			size: 240,
 			header: "Client",
 			cell: ({ row }) => (
 				<InlineCombobox
@@ -107,7 +102,7 @@ export function getInvoiceTableColumns(
 		}),
 		columnHelper.accessor((row) => row.projects?.[0]?.name ?? "", {
 			id: "project",
-			size: 220,
+			size: 260,
 			header: "Project",
 			cell: ({ row }) => (
 				<InlineMultiCombobox
