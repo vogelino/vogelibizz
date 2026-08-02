@@ -2,13 +2,11 @@
 
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
-import { PencilIcon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
-import { useResourceActions } from "@/components/ResourcePageLayout";
-import { Button } from "@/components/ui/button";
+import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import {
@@ -342,43 +340,26 @@ export default function ExpensesPage({
 		typeFilter,
 	]);
 
-	const selectionActions = useMemo(() => {
-		if (selectedRows.length === 0) return null;
-		return (
-			<>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					disabled={isLoading}
-					onClick={() => setBulkEditOpen(true)}
-				>
-					<PencilIcon />
-					Edit selected ({selectedRows.length})
-				</Button>
-				<Button
-					type="button"
-					variant="destructive"
-					size="sm"
-					disabled={isLoading}
-					onClick={() => {
-						batchDeleteMutation.mutate(
-							selectedRows.flatMap((row) =>
-								row.kind === "recurring" ? [row.id] : [],
-							),
-						);
-						setSelectedRows([]);
-						tableRef.current?.resetRowSelection();
-					}}
-				>
-					Delete selected ({selectedRows.length})
-				</Button>
-			</>
-		);
-	}, [batchDeleteMutation, isLoading, selectedRows]);
-	useResourceActions(selectionActions);
+	const clearSelection = useCallback(() => {
+		setSelectedRows([]);
+		tableRef.current?.resetRowSelection();
+	}, []);
 	return (
 		<>
+			<SelectionActionBar
+				selectedCount={selectedRows.length}
+				disabled={isLoading}
+				onClear={clearSelection}
+				onEdit={() => setBulkEditOpen(true)}
+				onDelete={() => {
+					batchDeleteMutation.mutate(
+						selectedRows.flatMap((row) =>
+							row.kind === "recurring" ? [row.id] : [],
+						),
+					);
+					clearSelection();
+				}}
+			/>
 			<BulkEditDrawer
 				resource="expenses"
 				rows={selectedRows.flatMap((row) =>

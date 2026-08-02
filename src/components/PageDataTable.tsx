@@ -2,12 +2,10 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
-import { PencilIcon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { DataTable } from "@/components/DataTable";
-import { useResourceActions } from "@/components/ResourcePageLayout";
-import { Button } from "@/components/ui/button";
+import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ResourceType } from "@/db/schema";
 import useClientDelete from "@/utility/data/useClientDelete";
@@ -225,42 +223,23 @@ export default function PageDataTable<DataType extends { id: number }>({
 			projectBatchDelete,
 		],
 	);
-	const selectionActions = useMemo(() => {
-		if (selectedRows.length === 0) return null;
-		return (
-			<>
-				{bulkResource && (
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						disabled={loading}
-						onClick={() => setBulkEditOpen(true)}
-					>
-						<PencilIcon />
-						Edit selected ({selectedRows.length})
-					</Button>
-				)}
-				<Button
-					type="button"
-					variant="destructive"
-					size="sm"
-					disabled={loading}
-					onClick={() => {
-						batchDeleteAction(selectedRows.map(({ id }) => id));
-						setSelectedRows([]);
-						tableRef.current?.resetRowSelection();
-					}}
-				>
-					Delete selected ({selectedRows.length})
-				</Button>
-			</>
-		);
-	}, [batchDeleteAction, bulkResource, loading, selectedRows]);
-	useResourceActions(selectionActions);
+	const clearSelection = useCallback(() => {
+		setSelectedRows([]);
+		tableRef.current?.resetRowSelection();
+	}, []);
 
 	return (
 		<div className="grow">
+			<SelectionActionBar
+				selectedCount={selectedRows.length}
+				disabled={loading}
+				onClear={clearSelection}
+				onEdit={bulkResource ? () => setBulkEditOpen(true) : undefined}
+				onDelete={() => {
+					batchDeleteAction(selectedRows.map(({ id }) => id));
+					clearSelection();
+				}}
+			/>
 			{bulkResource && (
 				<BulkEditDrawer
 					resource={bulkResource}

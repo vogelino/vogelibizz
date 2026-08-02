@@ -3,11 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
-import { FileUp, PencilIcon } from "lucide-react";
+import { FileUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
+import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Button } from "@/components/ui/button";
 import type { CurrencyIdType } from "@/db/schema";
 import {
@@ -401,53 +402,35 @@ export default function ExpenseHistoryPage() {
 			void monthQuery.fetchNextPage();
 		}
 	}, [monthQuery]);
-	const resourceActions = useMemo(() => {
-		return (
-			<>
-				{selectedRows.length > 0 ? (
-					<>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							disabled={deletePending}
-							onClick={() => setBulkEditOpen(true)}
-						>
-							<PencilIcon />
-							Edit selected ({selectedRows.length})
-						</Button>
-						<Button
-							type="button"
-							variant="destructive"
-							size="sm"
-							disabled={deletePending}
-							onClick={() => {
-								deleteTransactions(
-									selectedRows.map(({ id }) => id),
-									{
-										onSuccess: () => {
-											setSelectedRows([]);
-											tableRef.current?.resetRowSelection();
-										},
-									},
-								);
-							}}
-						>
-							Delete selected ({selectedRows.length})
-						</Button>
-					</>
-				) : null}
-				<Button type="button" onClick={() => setImportOpen(true)}>
-					<FileUp size={16} />
-					Import transactions
-				</Button>
-			</>
-		);
-	}, [deletePending, deleteTransactions, selectedRows]);
+	const resourceActions = useMemo(
+		() => (
+			<Button type="button" onClick={() => setImportOpen(true)}>
+				<FileUp size={16} />
+				Import transactions
+			</Button>
+		),
+		[],
+	);
 	useResourceActions(resourceActions);
+	const clearSelection = useCallback(() => {
+		setSelectedRows([]);
+		tableRef.current?.resetRowSelection();
+	}, []);
 
 	return (
 		<>
+			<SelectionActionBar
+				selectedCount={selectedRows.length}
+				disabled={deletePending}
+				onClear={clearSelection}
+				onEdit={() => setBulkEditOpen(true)}
+				onDelete={() => {
+					deleteTransactions(
+						selectedRows.map(({ id }) => id),
+						{ onSuccess: clearSelection },
+					);
+				}}
+			/>
 			<ExpenseHistoryBulkEditDrawer
 				rows={selectedRows}
 				open={bulkEditOpen}

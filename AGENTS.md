@@ -2,6 +2,7 @@
 
 ## Product intent and design principles
 
+- Keep the app's visual language square: do not use rounded corners on containers, controls, badges, or other interface elements.
 - This is a consumer-friendly app that should help people understand what their lifestyle costs, plan ahead, and avoid spending more than they can comfortably afford.
 - Turn expenses with different currencies and payment schedules into clear monthly amounts. When comparing plans with real spending, keep every value on the same time basis. Clearly separate the amount someone should set aside each month from the timing of the actual payment.
 - Treat predictable expenses and variable spending differently. Predictable expenses can be checked against their expected rhythm; irregular but categorized purchases are already useful and should not be presented as incomplete merely because they are not linked to a predictable expense.
