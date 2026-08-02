@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
 import { toast } from "sonner";
 import type { z } from "zod";
 import type { RoutedResource } from "@/utility/routedResources";
@@ -31,7 +30,6 @@ function createMutationHook<DataType, SchemaData>({
 }) {
 	return function hook() {
 		const queryClient = useQueryClient();
-		const toastId = useRef<string | number | undefined>(undefined);
 		return useMutation({
 			mutationKey: [resourceName, action],
 			mutationFn,
@@ -73,12 +71,12 @@ function createMutationHook<DataType, SchemaData>({
 					input && typeof input === "object" && "name" in input
 						? ` "${input.name}"`
 						: "";
-				toastId.current = toast.loading(
+				const toastId = toast.loading(
 					`${capitalizedPrinciple} ${singularAcrtion}${nameSuffix}...`,
 				);
-				return { previousData, previousSingleData };
+				return { previousData, previousSingleData, toastId };
 			},
-			onSuccess: (_data, data) => {
+			onSuccess: (_data, data, context) => {
 				const successMessage = getQueryCompletionMessage({
 					action,
 					resourceName,
@@ -86,10 +84,7 @@ function createMutationHook<DataType, SchemaData>({
 					resolution: "success",
 				});
 				toast.success(successMessage, {
-					id: toastId.current,
-					onAutoClose() {
-						toastId.current = undefined;
-					},
+					id: context.toastId,
 				});
 			},
 			onError: (err, data, context) => {
@@ -109,10 +104,7 @@ function createMutationHook<DataType, SchemaData>({
 				});
 				toast.error(errorMessage, {
 					description: String(err),
-					id: toastId.current,
-					onAutoClose() {
-						toastId.current = undefined;
-					},
+					id: context?.toastId,
 				});
 			},
 			onSettled: (_data, _error, variables) => {

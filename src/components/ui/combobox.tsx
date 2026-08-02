@@ -34,6 +34,7 @@ export type ComboboxProps<TData> = {
 	align?: PopoverContentProps["align"];
 	loading?: boolean;
 	disabled?: boolean;
+	placeholder?: ReactNode;
 	"aria-label"?: string;
 	"aria-describedby"?: string;
 };
@@ -49,6 +50,7 @@ export function Combobox<TData>({
 	align = "end",
 	loading = false,
 	disabled = false,
+	placeholder = "Select value...",
 	"aria-label": ariaLabel,
 	"aria-describedby": ariaDescribedBy,
 }: ComboboxProps<TData>) {
@@ -106,7 +108,7 @@ export function Combobox<TData>({
 					<div className="w-full flex gap-2 items-center">
 						{selectedOption
 							? selectedValueFormater(selectedOption.value)
-							: "Select value..."}
+							: placeholder}
 					</div>
 					<ChevronsUpDown size={16} className="ml-2 shrink-0 opacity-50" />
 				</Button>

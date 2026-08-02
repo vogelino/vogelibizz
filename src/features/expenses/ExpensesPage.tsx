@@ -2,7 +2,9 @@
 
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
+import { PencilIcon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
@@ -141,6 +143,7 @@ export default function ExpensesPage({
 	const rowActionsColumn = getRowActionsColumn<ExpenseOverviewRow>(rowActions);
 	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
+	const [bulkEditOpen, setBulkEditOpen] = useState(false);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
 	const categoryFilter = filters.category;
 	const typeFilter = filters.type;
@@ -340,26 +343,46 @@ export default function ExpensesPage({
 	const selectionActions = useMemo(() => {
 		if (selectedRows.length === 0) return null;
 		return (
-			<Button
-				type="button"
-				variant="destructive"
-				size="sm"
-				disabled={isLoading}
-				onClick={() => {
-					for (const row of selectedRows) {
-						if (row.kind === "recurring") deleteMutation.mutate(row.id);
-					}
-					setSelectedRows([]);
-					tableRef.current?.resetRowSelection();
-				}}
-			>
-				Delete selected ({selectedRows.length})
-			</Button>
+			<>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					disabled={isLoading}
+					onClick={() => setBulkEditOpen(true)}
+				>
+					<PencilIcon />
+					Edit selected ({selectedRows.length})
+				</Button>
+				<Button
+					type="button"
+					variant="destructive"
+					size="sm"
+					disabled={isLoading}
+					onClick={() => {
+						for (const row of selectedRows) {
+							if (row.kind === "recurring") deleteMutation.mutate(row.id);
+						}
+						setSelectedRows([]);
+						tableRef.current?.resetRowSelection();
+					}}
+				>
+					Delete selected ({selectedRows.length})
+				</Button>
+			</>
 		);
 	}, [deleteMutation, isLoading, selectedRows]);
 	useResourceActions(selectionActions);
 	return (
 		<>
+			<BulkEditDrawer
+				resource="expenses"
+				rows={selectedRows.flatMap((row) =>
+					row.kind === "recurring" ? [row.expense] : [],
+				)}
+				open={bulkEditOpen}
+				onClose={() => setBulkEditOpen(false)}
+			/>
 			<ExpensesOverviewPanel
 				loading={isLoading}
 				filteredTotal={showFilteredTotal ? filteredLabel : null}

@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowLeftToLine, Check, ChevronDown, X } from "lucide-react";
+import { ArrowLeftToLine, Check, ChevronDown, Undo2, X } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Command,
 	CommandEmpty,
@@ -25,13 +26,28 @@ export type MultiValueOption = {
 	value: string | number;
 };
 
+export type MultiValueIntent = "add" | "remove";
+type MultiValueDisplayState = "added" | "removed" | "partial";
+
 export type MultiValueInputProps<OptionValueType> = {
 	options: MultiValueOption[];
 	onChange?: (newOptions: MultiValueOption[]) => void;
 	values?: OptionValueType[];
 	className?: string;
 	placeholder?: string;
-	selectedValueFormater?: (value: string | number) => ReactNode;
+	selectedValueFormater?: (
+		value: string | number,
+		change?: "added" | "removed" | "partial",
+		coverage?: { count: number; total: number },
+	) => ReactNode;
+	changeBaselineValues?: OptionValueType[];
+	valueCounts?: Record<string, number>;
+	totalValueCount?: number;
+	valueIntents?: Record<string, MultiValueIntent>;
+	onValueIntentChange?: (
+		value: string | number,
+		intent?: MultiValueIntent,
+	) => void;
 	loading?: boolean;
 	variant?: "default" | "inline";
 	"aria-label"?: string;
@@ -44,6 +60,11 @@ export function MultiValueInput<OptionValueType extends string = string>({
 	className,
 	placeholder = "Select options",
 	selectedValueFormater,
+	changeBaselineValues,
+	valueCounts,
+	totalValueCount,
+	valueIntents = {},
+	onValueIntentChange,
 	loading = false,
 	variant = "default",
 	"aria-label": ariaLabel,
@@ -59,6 +80,77 @@ export function MultiValueInput<OptionValueType extends string = string>({
 		useState<MultiValueOption[]>(initialOptions);
 	const inline = variant === "inline";
 	const visibleOptionCount = inline ? 2 : 4;
+	const triState = Boolean(
+		valueCounts && totalValueCount && onValueIntentChange,
+	);
+	const baselineIds = new Set(
+		changeBaselineValues?.map((value) => String(value).toLowerCase()),
+	);
+	const changedOptions = [
+		...selectedOptions.map((option) => ({
+			option,
+			change:
+				changeBaselineValues &&
+				!baselineIds.has(String(option.value).toLowerCase())
+					? ("added" as const)
+					: undefined,
+		})),
+		...(changeBaselineValues ?? []).flatMap((value) => {
+			if (selectedOptions.some(getOptionComparator(value))) return [];
+			const option = options.find(getOptionComparator(value));
+			return option ? [{ option, change: "removed" as const }] : [];
+		}),
+	];
+	const displayedOptions = triState
+		? options.flatMap((option) => {
+				const key = String(option.value);
+				const count = valueCounts?.[key] ?? 0;
+				const intent = valueIntents[key];
+				if (count === 0 && intent !== "add") return [];
+				const change: MultiValueDisplayState | undefined = intent
+					? intent === "add"
+						? "added"
+						: "removed"
+					: count < (totalValueCount ?? 0)
+						? "partial"
+						: undefined;
+				return [
+					{
+						option,
+						change,
+						coverage: { count, total: totalValueCount ?? 0 },
+					},
+				];
+			})
+		: changedOptions.map((item) => ({ ...item, coverage: undefined }));
+
+	const getTriState = (value: string | number) => {
+		const key = String(value);
+		const intent = valueIntents[key];
+		if (intent === "add") return true;
+		if (intent === "remove") return false;
+		const count = valueCounts?.[key] ?? 0;
+		if (count === 0) return false;
+		return count === totalValueCount ? true : ("indeterminate" as const);
+	};
+
+	const advanceTriState = (value: string | number) => {
+		if (!onValueIntentChange) return;
+		const key = String(value);
+		const intent = valueIntents[key];
+		const count = valueCounts?.[key] ?? 0;
+		if (count > 0 && count < (totalValueCount ?? 0)) {
+			onValueIntentChange(
+				value,
+				intent === "add" ? "remove" : intent === "remove" ? undefined : "add",
+			);
+			return;
+		}
+		onValueIntentChange(
+			value,
+			intent ? undefined : count === totalValueCount ? "remove" : "add",
+		);
+	};
 
 	useEffect(() => {
 		const nextOptions = initialValues
@@ -143,7 +235,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 							inline && "border-r-transparent pl-2",
 						)}
 					>
-						{!selectedOptions.length && (
+						{!displayedOptions.length && (
 							<span
 								className={cn(
 									"text-muted-foreground pl-1.5 opacity-80 min-w-40 [text-box-trim:trim-both]",
@@ -153,7 +245,7 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								{placeholder}
 							</span>
 						)}
-						{selectedOptions.length > 0 && (
+						{displayedOptions.length > 0 && (
 							<div
 								className={cn(
 									"min-w-40 grow flex gap-4 justify-between items-center w-fit",
@@ -161,28 +253,48 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								)}
 							>
 								<div className="flex min-w-0 gap-x-1 gap-y-0.5 items-center overflow-hidden">
-									{[...selectedOptions]
+									{displayedOptions
 										.slice(0, visibleOptionCount)
-										.map((option) => (
+										.map(({ option, change, coverage }) => (
 											<button
 												key={option.value}
 												type="button"
-												className="focusable text-sm trim-both items-center h-7"
+												className={cn(
+													"focusable text-sm trim-both items-center h-7",
+												)}
+												aria-label={
+													change === "added" || change === "removed"
+														? `Undo ${change === "added" ? "adding" : "removing"} ${String(option.label)}`
+														: `Remove ${String(option.label)} from all selected rows`
+												}
 												onClick={(evt) => {
 													if (inline) return;
 													evt.stopPropagation();
+													if (triState && onValueIntentChange) {
+														onValueIntentChange(
+															option.value,
+															change === "added" || change === "removed"
+																? undefined
+																: "remove",
+														);
+														return;
+													}
 													onOptionSelect(option.value);
 												}}
 											>
-												{selectedValueFormaterFn(option.value)}
+												{selectedValueFormaterFn(
+													option.value,
+													change,
+													coverage,
+												)}
 											</button>
 										))}
 
-									{selectedOptions.length > visibleOptionCount && (
+									{displayedOptions.length > visibleOptionCount && (
 										<span className="bg-background">
 											<IconBadge
 												icon={null}
-												label={`+${selectedOptions.length - visibleOptionCount}`}
+												label={`+${displayedOptions.length - visibleOptionCount}`}
 												className="h-7 border-transparent bg-accent/0 hover:bg-accent"
 											/>
 										</span>
@@ -197,6 +309,18 @@ export function MultiValueInput<OptionValueType extends string = string>({
 									}}
 									onClick={(evt) => {
 										evt.stopPropagation();
+										if (triState && onValueIntentChange) {
+											for (const option of options) {
+												onValueIntentChange(
+													option.value,
+													(valueCounts?.[String(option.value)] ?? 0) > 0
+														? "remove"
+														: undefined,
+												);
+											}
+											setOpen(false);
+											return;
+										}
 										setSelectedOptions([]);
 										onChange([]);
 										setOpen(false);
@@ -232,18 +356,30 @@ export function MultiValueInput<OptionValueType extends string = string>({
 								<CommandItem
 									key={option.value}
 									value={String(option.value)}
-									onSelect={(newValue) =>
-										onOptionSelect(newValue as OptionValueType)
-									}
+									onSelect={(newValue) => {
+										if (triState) {
+											advanceTriState(option.value);
+											return;
+										}
+										onOptionSelect(newValue as OptionValueType);
+									}}
 								>
-									<Check
-										className={cn(
-											"size-5",
-											selectedOptions.find(getOptionComparator(option.value))
-												? "opacity-100"
-												: "opacity-0",
-										)}
-									/>
+									{triState ? (
+										<Checkbox
+											checked={getTriState(option.value)}
+											tabIndex={-1}
+											aria-label={`Change ${String(option.label)}`}
+										/>
+									) : (
+										<Check
+											className={cn(
+												"size-5",
+												selectedOptions.find(getOptionComparator(option.value))
+													? "opacity-100"
+													: "opacity-0",
+											)}
+										/>
+									)}
 
 									<div className="w-full flex gap-3 items-center">
 										{option.label}
@@ -282,21 +418,45 @@ function areOptionsEqual(a: MultiValueOption[], b: MultiValueOption[]) {
 }
 
 function getDefaultValueFormatter(options: MultiValueOption[]) {
-	return function defaultFormatter(value: string | number) {
+	return function defaultFormatter(
+		value: string | number,
+		change?: "added" | "removed" | "partial",
+		coverage?: { count: number; total: number },
+	) {
 		const option = options.find(
 			(option) => String(option.value) === String(value),
 		);
 		return (
 			<IconBadge
 				icon={
-					<X
-						size={18}
-						className="text-muted-foreground hover:text-foreground shrink-0"
-						aria-hidden="true"
-					/>
+					change === "added" || change === "removed" ? (
+						<Undo2 size={16} aria-hidden="true" />
+					) : (
+						<X
+							size={18}
+							className="text-muted-foreground hover:text-foreground shrink-0"
+							aria-hidden="true"
+						/>
+					)
 				}
-				label={option?.label}
-				className="flex-row-reverse pl-2.5 pr-1.5 h-7"
+				label={
+					<span className="flex items-center gap-1.5">
+						{option?.label}
+						{change === "partial" && coverage ? (
+							<span className="text-xs opacity-70">
+								{coverage.count}/{coverage.total}
+							</span>
+						) : null}
+					</span>
+				}
+				className={cn(
+					"flex-row-reverse pl-2.5 pr-1.5 h-7",
+					change === "added" &&
+						"border-green-500/60 bg-green-500/15 text-green-700 dark:text-green-400",
+					change === "removed" &&
+						"border-red-500/60 bg-red-500/15 text-red-700 dark:text-red-400",
+					change === "partial" && "border-dashed bg-muted/50",
+				)}
 			/>
 		);
 	};

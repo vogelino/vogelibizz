@@ -1,5 +1,10 @@
 import { Banknote } from "lucide-react";
-import { type HTMLProps, type PropsWithChildren, useMemo } from "react";
+import {
+	type HTMLProps,
+	type PropsWithChildren,
+	type ReactNode,
+	useMemo,
+} from "react";
 import ReactCurrencyInput, {
 	type CurrencyInputProps,
 } from "react-currency-input-field";
@@ -20,20 +25,24 @@ function CurrencyInput({
 	value,
 	onCurrencyChange,
 	onValueChange,
+	onValueClear,
 	label = "Amount",
 	loading = false,
 	currencyReadOnly = false,
+	currencyPlaceholder,
 }: PropsWithChildren<{
 	inputProps?: CurrencyInputProps;
 	currencyProps?: HTMLProps<HTMLInputElement>;
 	onCurrencyChange: (currency: ExpenseType["originalCurrency"]) => void;
 	onValueChange: (value: number) => void;
+	onValueClear?: () => void;
 	currency: ExpenseType["originalCurrency"];
 	value: number | undefined;
 	label?: string;
 	className?: string;
 	loading?: boolean;
 	currencyReadOnly?: boolean;
+	currencyPlaceholder?: ReactNode;
 }>) {
 	const options = useMemo(
 		() =>
@@ -79,11 +88,16 @@ function CurrencyInput({
 								className,
 							)}
 							placeholder="0.00"
-							required
+							required={inputProps?.required ?? true}
 							value={value}
-							onValueChange={(_value, _name, values) =>
-								onValueChange(values?.float ?? 0)
-							}
+							onValueChange={(nextValue, _name, values) => {
+								if (!nextValue && nextValue !== "0") {
+									if (onValueClear) onValueClear();
+									else onValueChange(0);
+									return;
+								}
+								onValueChange(values?.float ?? 0);
+							}}
 							intlConfig={{ locale }}
 							decimalScale={2}
 						/>
@@ -100,6 +114,7 @@ function CurrencyInput({
 							className={className}
 							options={options}
 							value={currency}
+							placeholder={currencyPlaceholder}
 							onChange={(currency) =>
 								onCurrencyChange(currency as ExpenseType["originalCurrency"])
 							}

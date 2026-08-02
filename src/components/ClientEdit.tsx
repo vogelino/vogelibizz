@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
@@ -12,6 +12,17 @@ import {
 	clientLanguageEnum,
 	type ProjectType,
 } from "@/db/schema";
+import {
+	applyRelationIntents,
+	commonValue,
+	getRelationCounts,
+	hasCommonValue,
+	pickChanged,
+	type RelationIntent,
+	relationsFromOptionValues,
+	runBulkEditsSequentially,
+	unionRelations,
+} from "@/utility/bulkEdit";
 import useClient from "@/utility/data/useClient";
 import useClientCreate from "@/utility/data/useClientCreate";
 import useClientEdit from "@/utility/data/useClientEdit";
@@ -31,17 +42,55 @@ export default function ClientEdit({
 	formId,
 	initialData,
 	initialProjects,
+	bulkItems,
+	onBulkComplete,
 	loading = false,
 }: {
 	id?: number | undefined;
 	formId: string;
 	initialData?: ClientType;
 	initialProjects?: ProjectType[];
+	bulkItems?: ClientType[];
+	onBulkComplete?: () => void;
 	loading?: boolean;
 }) {
+	const isBulk = Boolean(bulkItems?.length);
+	const changedFields = useRef(
+		new Set<
+			| "name"
+			| "clientNumber"
+			| "language"
+			| "legalName"
+			| "addressLine1"
+			| "addressLine2"
+			| "addressLine3"
+			| "taxId"
+			| "projects"
+		>(),
+	);
 	const navigate = useNavigate();
 	const clientQuery = useClient(id, id ? initialData : undefined);
-	const client = id ? clientQuery.data : initialData;
+	const bulkClient = useMemo(() => {
+		if (!bulkItems?.length) return undefined;
+		return {
+			...bulkItems[0],
+			name: commonValue(bulkItems, "name") ?? "",
+			clientNumber: commonValue(bulkItems, "clientNumber") ?? "",
+			language:
+				commonValue(bulkItems, "language") ?? ("" as ClientType["language"]),
+			legalName: commonValue(bulkItems, "legalName") ?? "",
+			addressLine1: commonValue(bulkItems, "addressLine1") ?? "",
+			addressLine2: commonValue(bulkItems, "addressLine2") ?? "",
+			addressLine3: commonValue(bulkItems, "addressLine3") ?? "",
+			taxId: commonValue(bulkItems, "taxId") ?? "",
+			projects: unionRelations(
+				bulkItems.map((item) => ({ relations: item.projects })),
+			),
+		};
+	}, [bulkItems]);
+	const client = isBulk ? bulkClient : id ? clientQuery.data : initialData;
+	const mixed = (key: keyof ClientType) =>
+		Boolean(isBulk && bulkItems && !hasCommonValue(bulkItems, key));
 	const isLoading = loading || (Boolean(id) && clientQuery.isPending);
 	const projectsQuery = useProjects({ initialData: initialProjects });
 	const editMutation = useClientEdit();
@@ -51,6 +100,14 @@ export default function ClientEdit({
 			name: string;
 		}[]
 	>(client?.projects || []);
+	const [projectIntents, setProjectIntents] = useState<
+		Record<string, RelationIntent>
+	>({});
+	const projectCounts = useMemo(
+		() =>
+			getRelationCounts((bulkItems ?? []).map((item) => item.projects ?? [])),
+		[bulkItems],
+	);
 	const createMutation = useClientCreate();
 
 	const form = useForm({
@@ -65,11 +122,27 @@ export default function ClientEdit({
 			taxId: client?.taxId ?? "",
 		},
 		onSubmit: async ({ value }) => {
-			navigate({ to: "/clients" });
 			const clientData = {
 				...value,
 				projects: clientProjects,
 			};
+			if (isBulk && bulkItems) {
+				const changes = pickChanged(clientData, changedFields.current);
+				await runBulkEditsSequentially(bulkItems, (item) => {
+					const itemChanges = { ...changes };
+					if (Object.keys(projectIntents).length > 0) {
+						itemChanges.projects = applyRelationIntents(
+							item.projects ?? [],
+							projectsQuery.data ?? [],
+							projectIntents,
+						);
+					}
+					return editMutation.mutateAsync({ id: item.id, ...itemChanges });
+				});
+				onBulkComplete?.();
+				return;
+			}
+			navigate({ to: "/clients" });
 			if (id) editMutation.mutate({ ...clientData, id });
 			else createMutation.mutate([clientData]);
 		},
@@ -77,6 +150,8 @@ export default function ClientEdit({
 
 	useEffect(() => {
 		if (!client) return;
+		changedFields.current.clear();
+		setProjectIntents({});
 		setClientProjects(client?.projects || []);
 		form.setFieldValue("name", client.name ?? "");
 		form.setFieldValue("clientNumber", client.clientNumber ?? "");
@@ -104,20 +179,25 @@ export default function ClientEdit({
 
 	const onProjectsChange = useCallback(
 		(newValues: OptionType[]) => {
+			changedFields.current.add("projects");
 			setClientProjects(
-				newValues.reduce(
-					(acc, option) => {
-						const project = projectsQuery.data?.find(
-							(project) => String(project.id) === option.value,
-						);
-						if (project) acc.push(project);
-						return acc;
-					},
-					[] as { id: number; name: string }[],
-				),
+				relationsFromOptionValues(newValues, projectsQuery.data ?? []),
 			);
 		},
 		[projectsQuery.data],
+	);
+	const onProjectIntentChange = useCallback(
+		(value: string | number, intent?: RelationIntent) => {
+			setProjectIntents((current) => {
+				const next = { ...current };
+				if (intent) next[String(value)] = intent;
+				else delete next[String(value)];
+				if (Object.keys(next).length > 0) changedFields.current.add("projects");
+				else changedFields.current.delete("projects");
+				return next;
+			});
+		},
+		[],
 	);
 
 	return (
@@ -134,7 +214,9 @@ export default function ClientEdit({
 					name="name"
 					validators={{
 						onSubmit: ({ value }) =>
-							!value ? "This field is required" : undefined,
+							!value && (!isBulk || changedFields.current.has("name"))
+								? "This field is required"
+								: undefined,
 					}}
 				>
 					{(field) => (
@@ -150,7 +232,11 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("name");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={mixed("name") ? "Multiple values" : undefined}
 									className="form-input"
 									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
 									autoFocus
@@ -172,7 +258,13 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("clientNumber");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={
+										mixed("clientNumber") ? "Multiple values" : undefined
+									}
 									className="form-input"
 								/>
 							)}
@@ -185,9 +277,13 @@ export default function ClientEdit({
 							label="Language"
 							value={field.state.value}
 							onChange={(value) => {
-								if (isClientLanguageValue(value)) field.handleChange(value);
+								if (isClientLanguageValue(value)) {
+									changedFields.current.add("language");
+									field.handleChange(value);
+								}
 							}}
 							options={languageOptions}
+							placeholder={mixed("language") ? "Multiple values" : undefined}
 							className="w-full"
 							loading={isLoading}
 						/>
@@ -206,7 +302,13 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("legalName");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={
+										mixed("legalName") ? "Multiple values" : undefined
+									}
 									className="form-input"
 								/>
 							)}
@@ -226,7 +328,13 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("addressLine1");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={
+										mixed("addressLine1") ? "Multiple values" : undefined
+									}
 									className="form-input"
 								/>
 							)}
@@ -246,7 +354,13 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("addressLine2");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={
+										mixed("addressLine2") ? "Multiple values" : undefined
+									}
 									className="form-input"
 								/>
 							)}
@@ -266,7 +380,13 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("addressLine3");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={
+										mixed("addressLine3") ? "Multiple values" : undefined
+									}
 									className="form-input"
 								/>
 							)}
@@ -286,7 +406,11 @@ export default function ClientEdit({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("taxId");
+										field.handleChange(e.target.value);
+									}}
+									placeholder={mixed("taxId") ? "Multiple values" : undefined}
 									className="form-input"
 								/>
 							)}
@@ -298,6 +422,15 @@ export default function ClientEdit({
 					<MultiValueInput
 						options={projectsOptions}
 						values={clientProjects.map((project) => String(project.id)) || []}
+						changeBaselineValues={
+							isBulk
+								? bulkClient?.projects?.map((project) => String(project.id))
+								: undefined
+						}
+						valueCounts={isBulk ? projectCounts : undefined}
+						totalValueCount={isBulk ? bulkItems?.length : undefined}
+						valueIntents={isBulk ? projectIntents : undefined}
+						onValueIntentChange={isBulk ? onProjectIntentChange : undefined}
 						placeholder="Select the clients' projects"
 						className="w-full"
 						onChange={onProjectsChange}

@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExpenseCategoryLabel } from "@/components/ExpenseCategoryBadge";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
@@ -15,6 +15,12 @@ import {
 	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
+import {
+	commonValue,
+	hasCommonValue,
+	pickChanged,
+	runBulkEditsSequentially,
+} from "@/utility/bulkEdit";
 import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
@@ -26,17 +32,49 @@ export default function ExpenseEdit({
 	id,
 	formId,
 	initialData,
+	bulkItems,
+	onBulkComplete,
 	loading = false,
 }: {
 	id?: number;
 	formId: string;
 	initialData?: ExpenseWithMonthlyCLPPriceType;
+	bulkItems?: ExpenseWithMonthlyCLPPriceType[];
+	onBulkComplete?: () => void;
 	loading?: boolean;
 }) {
+	const isBulk = Boolean(bulkItems?.length);
+	const changedFields = useRef(
+		new Set<
+			| "name"
+			| "type"
+			| "category"
+			| "rate"
+			| "originalPrice"
+			| "originalCurrency"
+		>(),
+	);
 	const editMutation = useExpenseEdit();
 	const createMutation = useExpenseCreate();
 	const expenseQuery = useExpense(id, id ? initialData : undefined);
-	const expense = id ? expenseQuery.data : initialData;
+	const bulkExpense = useMemo(() => {
+		if (!bulkItems?.length) return undefined;
+		return {
+			...bulkItems[0],
+			name: commonValue(bulkItems, "name") ?? "",
+			type: commonValue(bulkItems, "type") ?? ("" as ExpenseType["type"]),
+			category:
+				commonValue(bulkItems, "category") ?? ("" as ExpenseType["category"]),
+			rate: commonValue(bulkItems, "rate") ?? ("" as ExpenseType["rate"]),
+			originalPrice: commonValue(bulkItems, "originalPrice"),
+			originalCurrency:
+				commonValue(bulkItems, "originalCurrency") ??
+				("" as ExpenseType["originalCurrency"]),
+		};
+	}, [bulkItems]);
+	const expense = isBulk ? bulkExpense : id ? expenseQuery.data : initialData;
+	const mixed = (key: keyof ExpenseType) =>
+		Boolean(isBulk && bulkItems && !hasCommonValue(bulkItems, key));
 	const navigate = useNavigate();
 	const isLoading = loading || (Boolean(id) && !expense);
 	const [type, setType] = useState(expense?.type ?? "Freelance");
@@ -45,7 +83,7 @@ export default function ExpenseEdit({
 	);
 	const [rate, setRate] = useState(expense?.rate ?? "Monthly");
 	const [originalPrice, setOriginalPrice] = useState(
-		expense?.originalPrice ?? 0,
+		expense?.originalPrice ?? (isBulk ? undefined : 0),
 	);
 	const [originalCurrency, setOriginalCurrency] = useState(
 		expense?.originalCurrency ?? "USD",
@@ -56,18 +94,36 @@ export default function ExpenseEdit({
 			name: expense?.name ?? "",
 		},
 		onSubmit: async ({ value }) => {
-			navigate({
-				to: "/expenses",
-				search: (previous) => ({ ...previous, duplicateId: undefined }),
-			});
 			const expenseData = {
 				name: value.name,
 				type,
 				category,
 				rate,
-				originalPrice,
+				originalPrice: originalPrice ?? 0,
 				originalCurrency,
 			};
+			if (isBulk && bulkItems) {
+				const changes = pickChanged(expenseData, changedFields.current);
+				await runBulkEditsSequentially(bulkItems, async (item) => {
+					const {
+						clpMonthlyPrice: _clpMonthlyPrice,
+						created_at: _createdAt,
+						last_modified: _lastModified,
+						...editableItem
+					} = item;
+					await editMutation.mutateAsync({
+						...editableItem,
+						...changes,
+						id: item.id,
+					});
+				});
+				onBulkComplete?.();
+				return;
+			}
+			navigate({
+				to: "/expenses",
+				search: (previous) => ({ ...previous, duplicateId: undefined }),
+			});
 			if (id) {
 				editMutation.mutate({
 					...expenseData,
@@ -80,13 +136,14 @@ export default function ExpenseEdit({
 
 	useEffect(() => {
 		if (!expense) return;
+		changedFields.current.clear();
 		setType(expense.type ?? "Freelance");
 		setCategory(expense.category ?? "Administrative");
 		setRate(expense.rate ?? "Monthly");
-		setOriginalPrice(expense.originalPrice ?? 0);
+		setOriginalPrice(expense.originalPrice ?? (isBulk ? undefined : 0));
 		setOriginalCurrency(expense.originalCurrency ?? "USD");
 		form.setFieldValue("name", expense.name ?? "");
-	}, [expense, form.setFieldValue]);
+	}, [expense, form.setFieldValue, isBulk]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -123,7 +180,9 @@ export default function ExpenseEdit({
 					name="name"
 					validators={{
 						onSubmit: ({ value }) =>
-							!value ? "This field is required" : undefined,
+							!value && (!isBulk || changedFields.current.has("name"))
+								? "This field is required"
+								: undefined,
 					}}
 				>
 					{(field) => (
@@ -136,12 +195,17 @@ export default function ExpenseEdit({
 							{!isLoading && (
 								<input
 									className="form-input dark:bg-card"
-									placeholder="Expense name"
+									placeholder={
+										mixed("name") ? "Multiple values" : "Expense name"
+									}
 									type="text"
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) => {
+										changedFields.current.add("name");
+										field.handleChange(e.target.value);
+									}}
 									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
 									autoFocus
 								/>
@@ -154,7 +218,11 @@ export default function ExpenseEdit({
 						options={categoryOptions}
 						label="Category"
 						value={category}
-						onChange={(val) => setCategory(val as ExpenseType["category"])}
+						placeholder={mixed("category") ? "Multiple values" : undefined}
+						onChange={(val) => {
+							changedFields.current.add("category");
+							setCategory(val as ExpenseType["category"]);
+						}}
 						className="w-full"
 						loading={isLoading}
 					/>
@@ -162,23 +230,52 @@ export default function ExpenseEdit({
 						options={typeOptions}
 						label="Type"
 						value={type}
-						onChange={(val) => setType(val as ExpenseType["type"])}
+						placeholder={mixed("type") ? "Multiple values" : undefined}
+						onChange={(val) => {
+							changedFields.current.add("type");
+							setType(val as ExpenseType["type"]);
+						}}
 						className="w-full"
 						loading={isLoading}
 					/>
 					<CurrencyInput
 						label="Original price"
-						onCurrencyChange={setOriginalCurrency}
-						onValueChange={setOriginalPrice}
+						onCurrencyChange={(value) => {
+							changedFields.current.add("originalCurrency");
+							setOriginalCurrency(value);
+						}}
+						onValueChange={(value) => {
+							changedFields.current.add("originalPrice");
+							setOriginalPrice(value);
+						}}
+						onValueClear={
+							isBulk
+								? () => {
+										changedFields.current.delete("originalPrice");
+										setOriginalPrice(bulkExpense?.originalPrice);
+									}
+								: undefined
+						}
 						currency={originalCurrency}
 						value={originalPrice}
+						inputProps={{
+							placeholder: mixed("originalPrice") ? "Multiple values" : "0.00",
+							required: !isBulk,
+						}}
+						currencyPlaceholder={
+							mixed("originalCurrency") ? "Multiple values" : undefined
+						}
 						loading={isLoading}
 					/>
 					<FormInputCombobox
 						options={rateOptions}
 						label="Billing Rate"
 						value={rate}
-						onChange={(val) => setRate(val as ExpenseType["rate"])}
+						placeholder={mixed("rate") ? "Multiple values" : undefined}
+						onChange={(val) => {
+							changedFields.current.add("rate");
+							setRate(val as ExpenseType["rate"]);
+						}}
 						className="w-full"
 						loading={isLoading}
 					/>

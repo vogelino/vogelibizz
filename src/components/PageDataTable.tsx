@@ -2,7 +2,9 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
+import { PencilIcon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { Button } from "@/components/ui/button";
@@ -194,30 +196,57 @@ export default function PageDataTable<DataType extends { id: number }>({
 
 	const tableRef = useRef<TanstackTable<DataType> | null>(null);
 	const [selectedRows, setSelectedRows] = useState<DataType[]>([]);
+	const [bulkEditOpen, setBulkEditOpen] = useState(false);
+	const bulkResource =
+		resource === "clients" || resource === "projects" || resource === "expenses"
+			? resource
+			: null;
 	const selectionActions = useMemo(() => {
 		if (selectedRows.length === 0) return null;
 		return (
-			<Button
-				type="button"
-				variant="destructive"
-				size="sm"
-				disabled={loading}
-				onClick={() => {
-					for (const row of selectedRows) {
-						deleteAction(row.id);
-					}
-					setSelectedRows([]);
-					tableRef.current?.resetRowSelection();
-				}}
-			>
-				Delete selected ({selectedRows.length})
-			</Button>
+			<>
+				{bulkResource && (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						disabled={loading}
+						onClick={() => setBulkEditOpen(true)}
+					>
+						<PencilIcon />
+						Edit selected ({selectedRows.length})
+					</Button>
+				)}
+				<Button
+					type="button"
+					variant="destructive"
+					size="sm"
+					disabled={loading}
+					onClick={() => {
+						for (const row of selectedRows) {
+							deleteAction(row.id);
+						}
+						setSelectedRows([]);
+						tableRef.current?.resetRowSelection();
+					}}
+				>
+					Delete selected ({selectedRows.length})
+				</Button>
+			</>
 		);
-	}, [deleteAction, loading, selectedRows]);
+	}, [bulkResource, deleteAction, loading, selectedRows]);
 	useResourceActions(selectionActions);
 
 	return (
 		<div className="grow">
+			{bulkResource && (
+				<BulkEditDrawer
+					resource={bulkResource}
+					rows={selectedRows}
+					open={bulkEditOpen}
+					onClose={() => setBulkEditOpen(false)}
+				/>
+			)}
 			{(loading || data?.length > 0) && (
 				<DataTable
 					columns={columns}
