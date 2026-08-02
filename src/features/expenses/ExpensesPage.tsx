@@ -394,7 +394,7 @@ export default function ExpensesPage({
 				open={bulkEditOpen}
 				onClose={() => setBulkEditOpen(false)}
 			/>
-			<CollapsibleRegion open={overview.visible}>
+			<CollapsibleRegion open={overview.visible} className="sticky left-0">
 				<ExpensesOverviewPanel
 					loading={isLoading}
 					filteredTotal={showFilteredTotal ? filteredLabel : null}
@@ -477,7 +477,8 @@ export default function ExpensesPage({
 					],
 				}}
 				classNames={{
-					header: filterControls.visible ? "top-30 pt-3" : undefined,
+					toolbarContainer: "top-26",
+					header: filterControls.visible ? "top-40 pt-3" : "top-26",
 				}}
 				toolbar={(table) => (
 					<div className="px-6 md:px-10 sticky left-0 pt-3 flex justify-between items-center gap-8 flex-wrap">

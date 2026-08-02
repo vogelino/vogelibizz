@@ -41,7 +41,9 @@ export function MiniPieChart({
 		return (
 			<div className="flex flex-col gap-2">
 				<span className="text-xs text-muted-foreground">{title}</span>
-				<Skeleton className="h-10 w-28" />
+				<div className="h-15 w-16 bg-background/70 p-1.5">
+					<Skeleton className="h-full w-full bg-muted-foreground/20" />
+				</div>
 			</div>
 		);
 	}

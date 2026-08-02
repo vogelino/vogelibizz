@@ -52,8 +52,8 @@ function ResourcePageLayout({
 						{showCreate && <ResourceCreateButton resource={resource} />}
 					</div>
 				</div>
-				{headerContent}
 			</div>
+			{headerContent}
 
 			{children}
 		</ResourceActionsContext.Provider>

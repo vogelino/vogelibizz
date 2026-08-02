@@ -26,7 +26,10 @@ export function ExpensesSubnavigation({
 	active: "dashboard" | "recurring" | "history";
 }) {
 	return (
-		<nav aria-label="Expenses sections" className="border-b border-border">
+		<nav
+			aria-label="Expenses sections"
+			className="sticky left-0 top-16 z-30 border-b border-border bg-background px-6 md:px-10"
+		>
 			<ul className="flex gap-6 overflow-x-auto">
 				{links.map((link) => {
 					const Icon = resourceIconMap[link.icon];

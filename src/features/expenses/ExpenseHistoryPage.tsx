@@ -553,7 +553,10 @@ export default function ExpenseHistoryPage() {
 					</output>
 				) : (
 					<>
-						<CollapsibleRegion open={overview.visible}>
+						<CollapsibleRegion
+							open={overview.visible}
+							className="sticky left-0"
+						>
 							{historyLoading || filteredSummaryLoading ? (
 								<ExpenseHistoryOverviewPanel loading />
 							) : monthDetail ? (
@@ -609,7 +612,8 @@ export default function ExpenseHistoryPage() {
 							}}
 							classNames={{
 								table: "min-w-240",
-								header: filterControls.visible ? "top-32" : undefined,
+								toolbarContainer: "top-26",
+								header: filterControls.visible ? "top-42" : "top-26",
 								toolbar: "pb-0",
 							}}
 							toolbarVisible={filterControls.visible}

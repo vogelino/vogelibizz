@@ -38,6 +38,7 @@ import { updateRangeSelection } from "./rangeSelection";
 type ClassNames = {
 	table?: string;
 	container?: string;
+	toolbarContainer?: string;
 	toolbar?: string;
 	caption?: string;
 	header?: string;
@@ -288,6 +289,7 @@ export function DataTable<TData>({
 						toolbarVisible
 							? "grid-rows-[1fr] opacity-100"
 							: "grid-rows-[0fr] opacity-0",
+						classNames.toolbarContainer,
 					)}
 					aria-hidden={!toolbarVisible}
 					inert={!toolbarVisible}

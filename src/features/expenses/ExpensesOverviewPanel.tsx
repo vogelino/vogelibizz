@@ -13,7 +13,7 @@ export function ExpensesOverviewValue({
 	emphasized?: boolean;
 }) {
 	return (
-		<div className="flex flex-col">
+		<div className="flex min-w-24 flex-col">
 			<span className="text-sm text-muted-foreground">{label}</span>
 			<span className="text-lg">
 				{loading ? (
@@ -21,7 +21,7 @@ export function ExpensesOverviewValue({
 						className={
 							emphasized
 								? "mt-1.5 mb-1 h-6 w-24 bg-accent-foreground/20"
-								: "h-6 w-24"
+								: "h-6 w-24 bg-muted-foreground/20"
 						}
 					/>
 				) : (
@@ -40,7 +40,7 @@ export function ExpensesOverviewPanelLayout({
 	aside?: ReactNode;
 }) {
 	return (
-		<div className="sticky left-0 px-6 md:px-10">
+		<div className="px-6 md:px-10">
 			<div className="my-4 bg-muted p-4">
 				<div className="flex flex-wrap items-start justify-between gap-6">
 					<div className="flex flex-wrap gap-6">{children}</div>
