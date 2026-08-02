@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Table as TanstackTable } from "@tanstack/react-table";
-import { FileUp } from "lucide-react";
+import { FileUp, PencilIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
@@ -48,6 +48,7 @@ import {
 } from "@/utility/expenseHistoryImportContracts";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { ExpenseFilter } from "./ExpenseFilter";
+import ExpenseHistoryBulkEditDrawer from "./ExpenseHistoryBulkEditDrawer";
 import {
 	ExpenseHistoryImportDialog,
 	ExpenseHistoryMonthNavigation,
@@ -163,6 +164,7 @@ export default function ExpenseHistoryPage() {
 	const [selectedRows, setSelectedRows] = useState<ExpenseHistoryTransaction[]>(
 		[],
 	);
+	const [bulkEditOpen, setBulkEditOpen] = useState(false);
 	const tableRef = useRef<TanstackTable<ExpenseHistoryTransaction> | null>(
 		null,
 	);
@@ -397,25 +399,37 @@ export default function ExpenseHistoryPage() {
 		return (
 			<>
 				{selectedRows.length > 0 ? (
-					<Button
-						type="button"
-						variant="destructive"
-						size="sm"
-						disabled={deletePending}
-						onClick={() => {
-							deleteTransactions(
-								selectedRows.map(({ id }) => id),
-								{
-									onSuccess: () => {
-										setSelectedRows([]);
-										tableRef.current?.resetRowSelection();
+					<>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							disabled={deletePending}
+							onClick={() => setBulkEditOpen(true)}
+						>
+							<PencilIcon />
+							Edit selected ({selectedRows.length})
+						</Button>
+						<Button
+							type="button"
+							variant="destructive"
+							size="sm"
+							disabled={deletePending}
+							onClick={() => {
+								deleteTransactions(
+									selectedRows.map(({ id }) => id),
+									{
+										onSuccess: () => {
+											setSelectedRows([]);
+											tableRef.current?.resetRowSelection();
+										},
 									},
-								},
-							);
-						}}
-					>
-						Delete selected ({selectedRows.length})
-					</Button>
+								);
+							}}
+						>
+							Delete selected ({selectedRows.length})
+						</Button>
+					</>
 				) : null}
 				<Button type="button" onClick={() => setImportOpen(true)}>
 					<FileUp size={16} />
@@ -428,6 +442,15 @@ export default function ExpenseHistoryPage() {
 
 	return (
 		<>
+			<ExpenseHistoryBulkEditDrawer
+				rows={selectedRows}
+				open={bulkEditOpen}
+				onClose={() => {
+					setBulkEditOpen(false);
+					setSelectedRows([]);
+					tableRef.current?.resetRowSelection();
+				}}
+			/>
 			<ExpenseHistoryImportDialog
 				open={importOpen}
 				onOpenChange={setImportOpen}
