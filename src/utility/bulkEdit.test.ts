@@ -7,7 +7,6 @@ import {
 	hasCommonValue,
 	pickChanged,
 	relationsFromOptionValues,
-	runBulkEditsSequentially,
 	unionRelations,
 } from "./bulkEdit";
 
@@ -97,20 +96,5 @@ describe("bulk edit values", () => {
 			status: "done",
 			rate: 100,
 		});
-	});
-
-	test("runs edits sequentially so relation writes cannot overlap", async () => {
-		const completed: number[] = [];
-		let activeEdits = 0;
-		let maximumActiveEdits = 0;
-		await runBulkEditsSequentially([1, 2, 3], async (id) => {
-			activeEdits += 1;
-			maximumActiveEdits = Math.max(maximumActiveEdits, activeEdits);
-			await Promise.resolve();
-			completed.push(id);
-			activeEdits -= 1;
-		});
-		expect(completed).toEqual([1, 2, 3]);
-		expect(maximumActiveEdits).toBe(1);
 	});
 });

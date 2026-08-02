@@ -11,13 +11,8 @@ import CurrencyInput from "@/components/ui/currency-input";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import type { ExpenseType } from "@/db/schema";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
-import {
-	commonValue,
-	hasCommonValue,
-	pickChanged,
-	runBulkEditsSequentially,
-} from "@/utility/bulkEdit";
-import { useExpenseHistoryTransactionInlineEdit } from "@/utility/data/useExpenseHistoryTransactionMutations";
+import { commonValue, hasCommonValue, pickChanged } from "@/utility/bulkEdit";
+import { useExpenseHistoryTransactionBatchEdit } from "@/utility/data/useExpenseHistoryTransactionMutations";
 import useExpenses from "@/utility/data/useExpenses";
 import type {
 	ExpenseHistoryTransaction,
@@ -42,7 +37,7 @@ export default function ExpenseHistoryBulkEditDrawer({
 	open: boolean;
 	onClose: () => void;
 }) {
-	const editMutation = useExpenseHistoryTransactionInlineEdit();
+	const editMutation = useExpenseHistoryTransactionBatchEdit();
 	const { data: expenses = [], isPending: expensesPending } = useExpenses();
 	const changedFields = useRef(new Set<EditableField>());
 	const expenseIds = useMemo(
@@ -76,13 +71,13 @@ export default function ExpenseHistoryBulkEditDrawer({
 				onClose();
 				return;
 			}
-			await runBulkEditsSequentially(rows, async (transaction) => {
+			const items = rows.map((transaction) => {
 				const selectedExpense =
 					changes.expenseId === undefined
 						? undefined
 						: expenses.find((expense) => expense.id === changes.expenseId);
 				const { expenseId: _expenseId, ...optimisticFields } = changes;
-				await editMutation.mutateAsync({
+				return {
 					transaction,
 					change: changes,
 					optimisticChange: {
@@ -101,8 +96,9 @@ export default function ExpenseHistoryBulkEditDrawer({
 								}
 							: {}),
 					},
-				});
+				};
 			});
+			await editMutation.mutateAsync(items);
 			onClose();
 		},
 	});

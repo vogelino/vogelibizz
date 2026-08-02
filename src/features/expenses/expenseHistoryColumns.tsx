@@ -227,6 +227,10 @@ export function getExpenseHistoryColumns(
 		columnHelper.accessor("type", {
 			header: "Type",
 			size: 160,
+			filterFn: (row, columnId, filterValue) =>
+				filterValue === "Unclassified"
+					? row.original.type === null
+					: row.getValue(columnId) === filterValue,
 			cell: ({ getValue, row }) => {
 				const type = getValue();
 				return (

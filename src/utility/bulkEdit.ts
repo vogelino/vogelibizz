@@ -107,10 +107,3 @@ export function pickChanged<Value extends object>(
 		[...changedFields].map((key) => [key, value[key]]),
 	) as Partial<Value>;
 }
-
-export async function runBulkEditsSequentially<Row>(
-	rows: Row[],
-	edit: (row: Row) => Promise<unknown>,
-): Promise<void> {
-	for (const row of rows) await edit(row);
-}

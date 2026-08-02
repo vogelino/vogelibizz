@@ -24,13 +24,13 @@ import {
 	pickChanged,
 	type RelationIntent,
 	relationsFromOptionValues,
-	runBulkEditsSequentially,
 	unionRelations,
 } from "@/utility/bulkEdit";
 import useClients from "@/utility/data/useClients";
 import useProject from "@/utility/data/useProject";
 import useProjectCreate from "@/utility/data/useProjectCreate";
 import useProjectEdit from "@/utility/data/useProjectEdit";
+import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
 import { statusList } from "@/utility/statusUtil";
 import useComboboxOptions, {
 	type OptionType,
@@ -68,6 +68,7 @@ export default function ProjectEdit({
 	const navigate = useNavigate();
 	const clientsQuery = useClients({ initialData: initialClients });
 	const editMutation = useProjectEdit();
+	const batchMutation = useResourceBatchMutations("projects").edit;
 	const createMutation = useProjectCreate();
 	const projectQuery = useProject(id, id ? initialData : undefined);
 	const bulkProject = useMemo(() => {
@@ -121,7 +122,7 @@ export default function ProjectEdit({
 			};
 			if (isBulk && bulkItems) {
 				const changes = pickChanged(projectData, changedFields.current);
-				await runBulkEditsSequentially(bulkItems, async (item) => {
+				const items = bulkItems.map((item) => {
 					const itemChanges = { ...changes };
 					if (Object.keys(clientIntents).length > 0) {
 						itemChanges.clients = applyRelationIntents(
@@ -135,12 +136,13 @@ export default function ProjectEdit({
 						last_modified: _lastModified,
 						...editableItem
 					} = item;
-					await editMutation.mutateAsync({
+					return {
 						...editableItem,
 						...itemChanges,
 						id: item.id,
-					});
+					};
 				});
+				await batchMutation.mutateAsync(items);
 				onBulkComplete?.();
 				return;
 			}

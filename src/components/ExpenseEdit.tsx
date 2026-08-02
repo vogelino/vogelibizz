@@ -15,15 +15,11 @@ import {
 	expenseRateEnum,
 	expenseTypeEnum,
 } from "@/db/schema";
-import {
-	commonValue,
-	hasCommonValue,
-	pickChanged,
-	runBulkEditsSequentially,
-} from "@/utility/bulkEdit";
+import { commonValue, hasCommonValue, pickChanged } from "@/utility/bulkEdit";
 import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
+import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import { getNowInUTC } from "@/utility/timeUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
@@ -55,6 +51,7 @@ export default function ExpenseEdit({
 		>(),
 	);
 	const editMutation = useExpenseEdit();
+	const batchMutation = useResourceBatchMutations("expenses").edit;
 	const createMutation = useExpenseCreate();
 	const expenseQuery = useExpense(id, id ? initialData : undefined);
 	const bulkExpense = useMemo(() => {
@@ -104,19 +101,20 @@ export default function ExpenseEdit({
 			};
 			if (isBulk && bulkItems) {
 				const changes = pickChanged(expenseData, changedFields.current);
-				await runBulkEditsSequentially(bulkItems, async (item) => {
+				const items = bulkItems.map((item) => {
 					const {
 						clpMonthlyPrice: _clpMonthlyPrice,
 						created_at: _createdAt,
 						last_modified: _lastModified,
 						...editableItem
 					} = item;
-					await editMutation.mutateAsync({
+					return {
 						...editableItem,
 						...changes,
 						id: item.id,
-					});
+					};
 				});
+				await batchMutation.mutateAsync(items);
 				onBulkComplete?.();
 				return;
 			}

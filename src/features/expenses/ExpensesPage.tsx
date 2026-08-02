@@ -19,6 +19,7 @@ import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import useExpenseOverviewSummary from "@/utility/data/useExpenseOverviewSummary";
 import useExpenses from "@/utility/data/useExpenses";
+import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
 import useSettings from "@/utility/data/useSettings";
 import { formatCurrency } from "@/utility/formatUtil";
 import {
@@ -107,6 +108,7 @@ export default function ExpensesPage({
 		[setUrlFilters],
 	);
 	const deleteMutation = useExpenseDelete();
+	const batchDeleteMutation = useResourceBatchMutations("expenses").remove;
 	const editMutation = useExpenseEdit();
 	const rowActions: RowActionOptions<ExpenseOverviewRow> = {
 		onEdit: (row) => {
@@ -360,9 +362,11 @@ export default function ExpensesPage({
 					size="sm"
 					disabled={isLoading}
 					onClick={() => {
-						for (const row of selectedRows) {
-							if (row.kind === "recurring") deleteMutation.mutate(row.id);
-						}
+						batchDeleteMutation.mutate(
+							selectedRows.flatMap((row) =>
+								row.kind === "recurring" ? [row.id] : [],
+							),
+						);
 						setSelectedRows([]);
 						tableRef.current?.resetRowSelection();
 					}}
@@ -371,7 +375,7 @@ export default function ExpensesPage({
 				</Button>
 			</>
 		);
-	}, [deleteMutation, isLoading, selectedRows]);
+	}, [batchDeleteMutation, isLoading, selectedRows]);
 	useResourceActions(selectionActions);
 	return (
 		<>

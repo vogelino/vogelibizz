@@ -197,3 +197,89 @@ export function useExpenseHistoryTransactionInlineEdit() {
 		},
 	});
 }
+
+export function useExpenseHistoryTransactionBatchEdit() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (items: InlineTransactionEdit[]) => {
+			const response = await apiFetch(
+				"/api/expense-history/transactions/batch",
+				{
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						items: items.map(({ transaction, change }) => ({
+							id: transaction.id,
+							change: {
+								lastModified: transaction.lastModified,
+								...change,
+							},
+						})),
+					}),
+				},
+			);
+			if (!response.ok) {
+				const result = (await response.json()) as { error?: string };
+				throw new Error(result.error || "Transactions could not be updated.");
+			}
+		},
+		onMutate: async (items) => {
+			await queryClient.cancelQueries({
+				queryKey: expenseHistoryMonthQueriesKey,
+			});
+			const previous = queryClient.getQueriesData<
+				InfiniteData<ExpenseHistoryMonthDetail, number>
+			>({ queryKey: expenseHistoryMonthQueriesKey });
+			const changes = new Map(
+				items.map(({ transaction, change, optimisticChange }) => [
+					transaction.id,
+					optimisticChange ?? change,
+				]),
+			);
+			queryClient.setQueriesData<
+				InfiniteData<ExpenseHistoryMonthDetail, number>
+			>({ queryKey: expenseHistoryMonthQueriesKey }, (old) => {
+				if (!old) return old;
+				return {
+					...old,
+					pages: old.pages.map((page) => ({
+						...page,
+						transactions: page.transactions.map((transaction) => {
+							const change = changes.get(transaction.id);
+							return change
+								? {
+										...transaction,
+										...change,
+										lastModified: new Date().toISOString(),
+									}
+								: transaction;
+						}),
+					})),
+				};
+			});
+			return { previous };
+		},
+		onSuccess: (_result, items) =>
+			toast.success(`${items.length} transactions updated.`),
+		onError: (error, _items, context) => {
+			for (const [queryKey, data] of context?.previous ?? [])
+				queryClient.setQueryData(queryKey, data);
+			toast.error("Transactions were not updated.", {
+				description: error.message,
+			});
+		},
+		onSettled: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: expenseHistoryMonthQueriesKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseOverviewSummaryQueryOptions().queryKey,
+				}),
+				queryClient.invalidateQueries({
+					queryKey: expenseDashboardQueryOptions().queryKey,
+				}),
+			]);
+		},
+	});
+}

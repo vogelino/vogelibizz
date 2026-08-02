@@ -2,6 +2,7 @@ import {
 	Banknote,
 	CarFront,
 	CircleDollarSign,
+	CircleHelp,
 	ClipboardList,
 	Code2,
 	Cpu,
@@ -241,12 +242,13 @@ const typeToOptionClass = <CatType extends string = ExpenseType["type"]>(
 	}
 };
 
-type IconKeyType = ExpenseType["type"] | "All types" | "Mixed";
+type IconKeyType = ExpenseType["type"] | "All types" | "Mixed" | "Unclassified";
 const typeToIconMap: Record<IconKeyType, LucideIcon> = {
 	"All types": ListChecks,
 	Freelance: Handshake,
 	Personal: User,
 	Mixed: Ellipsis,
+	Unclassified: CircleHelp,
 };
 
 export const mapTypeToIcon = (type: IconKeyType, size = 16): ReactNode => {

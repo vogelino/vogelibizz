@@ -14,6 +14,7 @@ import useClientDelete from "@/utility/data/useClientDelete";
 import useExpenseDelete from "@/utility/data/useExpenseDelete";
 import useInvoiceDelete from "@/utility/data/useInvoiceDelete";
 import useProjectDelete from "@/utility/data/useProjectDelete";
+import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
 import {
 	getRowActionsColumn,
 	type RowActionOptions,
@@ -40,6 +41,9 @@ export default function PageDataTable<DataType extends { id: number }>({
 	const projectDeleteMutation = useProjectDelete();
 	const expenseDeleteMutation = useExpenseDelete();
 	const invoiceDeleteMutation = useInvoiceDelete();
+	const clientBatchDelete = useResourceBatchMutations("clients").remove;
+	const projectBatchDelete = useResourceBatchMutations("projects").remove;
+	const expenseBatchDelete = useResourceBatchMutations("expenses").remove;
 	const deleteAction = useCallback(
 		(id: number) => {
 			switch (resource) {
@@ -201,6 +205,26 @@ export default function PageDataTable<DataType extends { id: number }>({
 		resource === "clients" || resource === "projects" || resource === "expenses"
 			? resource
 			: null;
+	const batchDeleteAction = useCallback(
+		(ids: number[]) => {
+			switch (bulkResource) {
+				case "clients":
+					return clientBatchDelete.mutate(ids);
+				case "projects":
+					return projectBatchDelete.mutate(ids);
+				case "expenses":
+					return expenseBatchDelete.mutate(ids);
+			}
+			for (const id of ids) deleteAction(id);
+		},
+		[
+			bulkResource,
+			clientBatchDelete,
+			deleteAction,
+			expenseBatchDelete,
+			projectBatchDelete,
+		],
+	);
 	const selectionActions = useMemo(() => {
 		if (selectedRows.length === 0) return null;
 		return (
@@ -223,9 +247,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 					size="sm"
 					disabled={loading}
 					onClick={() => {
-						for (const row of selectedRows) {
-							deleteAction(row.id);
-						}
+						batchDeleteAction(selectedRows.map(({ id }) => id));
 						setSelectedRows([]);
 						tableRef.current?.resetRowSelection();
 					}}
@@ -234,7 +256,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 				</Button>
 			</>
 		);
-	}, [bulkResource, deleteAction, loading, selectedRows]);
+	}, [batchDeleteAction, bulkResource, loading, selectedRows]);
 	useResourceActions(selectionActions);
 
 	return (

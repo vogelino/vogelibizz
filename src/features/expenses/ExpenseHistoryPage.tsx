@@ -64,7 +64,10 @@ type ImportSource = {
 
 type ExpenseHistoryFilterState = {
 	category: NonNullable<ExpenseHistoryTransaction["category"]>[];
-	type: NonNullable<ExpenseHistoryTransaction["type"]> | "All types";
+	type:
+		| NonNullable<ExpenseHistoryTransaction["type"]>
+		| "All types"
+		| "Unclassified";
 	otherOnly: boolean;
 	uncategorizedOnly: boolean;
 };
@@ -338,7 +341,10 @@ export default function ExpenseHistoryPage() {
 				(filters.category.length === 0 ||
 					(transaction.category !== null &&
 						filters.category.includes(transaction.category))) &&
-				(filters.type === "All types" || transaction.type === filters.type) &&
+				(filters.type === "All types" ||
+					(filters.type === "Unclassified"
+						? transaction.type === null
+						: transaction.type === filters.type)) &&
 				(!filters.otherOnly || transaction.expense === null) &&
 				(!search.fromMonth || transactionMonth >= search.fromMonth) &&
 				(!search.toMonth || transactionMonth <= search.toMonth)
@@ -564,6 +570,7 @@ export default function ExpenseHistoryPage() {
 									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 										<ExpenseFilter
 											loading={false}
+											showUnclassified
 											table={table}
 											filters={filters}
 											onFiltersChange={(nextFilters) =>

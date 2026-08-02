@@ -12,7 +12,7 @@ const expensesSearchSchema = z.object({
 		.optional()
 		.catch(undefined),
 	expenseType: z
-		.enum(["All types", ...expenseTypeEnum.enumValues, "Mixed"])
+		.enum(["All types", ...expenseTypeEnum.enumValues, "Mixed", "Unclassified"])
 		.optional()
 		.catch(undefined),
 	expenseOtherOnly: z.boolean().optional().catch(undefined),

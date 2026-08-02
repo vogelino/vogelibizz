@@ -20,13 +20,13 @@ import {
 	pickChanged,
 	type RelationIntent,
 	relationsFromOptionValues,
-	runBulkEditsSequentially,
 	unionRelations,
 } from "@/utility/bulkEdit";
 import useClient from "@/utility/data/useClient";
 import useClientCreate from "@/utility/data/useClientCreate";
 import useClientEdit from "@/utility/data/useClientEdit";
 import useProjects from "@/utility/data/useProjects";
+import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
 import useComboboxOptions, {
 	type OptionType,
 } from "@/utility/useComboboxOptions";
@@ -94,6 +94,7 @@ export default function ClientEdit({
 	const isLoading = loading || (Boolean(id) && clientQuery.isPending);
 	const projectsQuery = useProjects({ initialData: initialProjects });
 	const editMutation = useClientEdit();
+	const batchMutation = useResourceBatchMutations("clients").edit;
 	const [clientProjects, setClientProjects] = useState<
 		{
 			id: number;
@@ -128,7 +129,7 @@ export default function ClientEdit({
 			};
 			if (isBulk && bulkItems) {
 				const changes = pickChanged(clientData, changedFields.current);
-				await runBulkEditsSequentially(bulkItems, (item) => {
+				const items = bulkItems.map((item) => {
 					const itemChanges = { ...changes };
 					if (Object.keys(projectIntents).length > 0) {
 						itemChanges.projects = applyRelationIntents(
@@ -137,8 +138,9 @@ export default function ClientEdit({
 							projectIntents,
 						);
 					}
-					return editMutation.mutateAsync({ id: item.id, ...itemChanges });
+					return { id: item.id, ...itemChanges };
 				});
+				await batchMutation.mutateAsync(items);
 				onBulkComplete?.();
 				return;
 			}

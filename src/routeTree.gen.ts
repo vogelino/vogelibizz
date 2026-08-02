@@ -28,12 +28,15 @@ import { Route as ResourceProjectsIndexRouteImport } from './routes/_resource/pr
 import { Route as ResourceInvoicesIndexRouteImport } from './routes/_resource/invoices/index'
 import { Route as ResourceExpensesIndexRouteImport } from './routes/_resource/expenses/index'
 import { Route as ResourceClientsIndexRouteImport } from './routes/_resource/clients/index'
+import { Route as ApiProjectsBatchRouteImport } from './routes/api/projects/batch'
 import { Route as ApiProjectsIdRouteImport } from './routes/api/projects/$id'
 import { Route as ApiInvoicesIdRouteImport } from './routes/api/invoices/$id'
+import { Route as ApiExpensesBatchRouteImport } from './routes/api/expenses/batch'
 import { Route as ApiExpensesIdRouteImport } from './routes/api/expenses/$id'
 import { Route as ApiExpenseHistoryOverviewRouteImport } from './routes/api/expense-history/overview'
 import { Route as ApiExpenseHistoryMonthsRouteImport } from './routes/api/expense-history/months'
 import { Route as ApiExpenseHistoryDashboardRouteImport } from './routes/api/expense-history/dashboard'
+import { Route as ApiClientsBatchRouteImport } from './routes/api/clients/batch'
 import { Route as ApiClientsIdRouteImport } from './routes/api/clients/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ResourceProjectsCreateRouteImport } from './routes/_resource/projects/create'
@@ -158,6 +161,11 @@ const ResourceClientsIndexRoute = ResourceClientsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ResourceClientsRoute,
 } as any)
+const ApiProjectsBatchRoute = ApiProjectsBatchRouteImport.update({
+  id: '/batch',
+  path: '/batch',
+  getParentRoute: () => ApiProjectsRoute,
+} as any)
 const ApiProjectsIdRoute = ApiProjectsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -167,6 +175,11 @@ const ApiInvoicesIdRoute = ApiInvoicesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiInvoicesRoute,
+} as any)
+const ApiExpensesBatchRoute = ApiExpensesBatchRouteImport.update({
+  id: '/batch',
+  path: '/batch',
+  getParentRoute: () => ApiExpensesRoute,
 } as any)
 const ApiExpensesIdRoute = ApiExpensesIdRouteImport.update({
   id: '/$id',
@@ -190,6 +203,11 @@ const ApiExpenseHistoryDashboardRoute =
     path: '/api/expense-history/dashboard',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiClientsBatchRoute = ApiClientsBatchRouteImport.update({
+  id: '/batch',
+  path: '/batch',
+  getParentRoute: () => ApiClientsRoute,
+} as any)
 const ApiClientsIdRoute = ApiClientsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -378,12 +396,15 @@ export interface FileRoutesByFullPath {
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/clients/batch': typeof ApiClientsBatchRoute
   '/api/expense-history/dashboard': typeof ApiExpenseHistoryDashboardRoute
   '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/expenses/batch': typeof ApiExpensesBatchRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
+  '/api/projects/batch': typeof ApiProjectsBatchRoute
   '/clients/': typeof ResourceClientsIndexRoute
   '/expenses/': typeof ResourceExpensesIndexRoute
   '/invoices/': typeof ResourceInvoicesIndexRoute
@@ -429,12 +450,15 @@ export interface FileRoutesByTo {
   '/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/clients/batch': typeof ApiClientsBatchRoute
   '/api/expense-history/dashboard': typeof ApiExpenseHistoryDashboardRoute
   '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/expenses/batch': typeof ApiExpensesBatchRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
+  '/api/projects/batch': typeof ApiProjectsBatchRoute
   '/clients': typeof ResourceClientsIndexRoute
   '/expenses': typeof ResourceExpensesIndexRoute
   '/invoices': typeof ResourceInvoicesIndexRoute
@@ -486,12 +510,15 @@ export interface FileRoutesById {
   '/_resource/projects/create': typeof ResourceProjectsCreateRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/clients/$id': typeof ApiClientsIdRoute
+  '/api/clients/batch': typeof ApiClientsBatchRoute
   '/api/expense-history/dashboard': typeof ApiExpenseHistoryDashboardRoute
   '/api/expense-history/months': typeof ApiExpenseHistoryMonthsRouteWithChildren
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
+  '/api/expenses/batch': typeof ApiExpensesBatchRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
+  '/api/projects/batch': typeof ApiProjectsBatchRoute
   '/_resource/clients/': typeof ResourceClientsIndexRoute
   '/_resource/expenses/': typeof ResourceExpensesIndexRoute
   '/_resource/invoices/': typeof ResourceInvoicesIndexRoute
@@ -543,12 +570,15 @@ export interface FileRouteTypes {
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/clients/batch'
     | '/api/expense-history/dashboard'
     | '/api/expense-history/months'
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
+    | '/api/expenses/batch'
     | '/api/invoices/$id'
     | '/api/projects/$id'
+    | '/api/projects/batch'
     | '/clients/'
     | '/expenses/'
     | '/invoices/'
@@ -594,12 +624,15 @@ export interface FileRouteTypes {
     | '/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/clients/batch'
     | '/api/expense-history/dashboard'
     | '/api/expense-history/months'
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
+    | '/api/expenses/batch'
     | '/api/invoices/$id'
     | '/api/projects/$id'
+    | '/api/projects/batch'
     | '/clients'
     | '/expenses'
     | '/invoices'
@@ -650,12 +683,15 @@ export interface FileRouteTypes {
     | '/_resource/projects/create'
     | '/api/auth/$'
     | '/api/clients/$id'
+    | '/api/clients/batch'
     | '/api/expense-history/dashboard'
     | '/api/expense-history/months'
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
+    | '/api/expenses/batch'
     | '/api/invoices/$id'
     | '/api/projects/$id'
+    | '/api/projects/batch'
     | '/_resource/clients/'
     | '/_resource/expenses/'
     | '/_resource/invoices/'
@@ -839,6 +875,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourceClientsIndexRouteImport
       parentRoute: typeof ResourceClientsRoute
     }
+    '/api/projects/batch': {
+      id: '/api/projects/batch'
+      path: '/batch'
+      fullPath: '/api/projects/batch'
+      preLoaderRoute: typeof ApiProjectsBatchRouteImport
+      parentRoute: typeof ApiProjectsRoute
+    }
     '/api/projects/$id': {
       id: '/api/projects/$id'
       path: '/$id'
@@ -852,6 +895,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/invoices/$id'
       preLoaderRoute: typeof ApiInvoicesIdRouteImport
       parentRoute: typeof ApiInvoicesRoute
+    }
+    '/api/expenses/batch': {
+      id: '/api/expenses/batch'
+      path: '/batch'
+      fullPath: '/api/expenses/batch'
+      preLoaderRoute: typeof ApiExpensesBatchRouteImport
+      parentRoute: typeof ApiExpensesRoute
     }
     '/api/expenses/$id': {
       id: '/api/expenses/$id'
@@ -880,6 +930,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/expense-history/dashboard'
       preLoaderRoute: typeof ApiExpenseHistoryDashboardRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/clients/batch': {
+      id: '/api/clients/batch'
+      path: '/batch'
+      fullPath: '/api/clients/batch'
+      preLoaderRoute: typeof ApiClientsBatchRouteImport
+      parentRoute: typeof ApiClientsRoute
     }
     '/api/clients/$id': {
       id: '/api/clients/$id'
@@ -1304,10 +1361,12 @@ const ResourceRouteWithChildren = ResourceRoute._addFileChildren(
 
 interface ApiClientsRouteChildren {
   ApiClientsIdRoute: typeof ApiClientsIdRoute
+  ApiClientsBatchRoute: typeof ApiClientsBatchRoute
 }
 
 const ApiClientsRouteChildren: ApiClientsRouteChildren = {
   ApiClientsIdRoute: ApiClientsIdRoute,
+  ApiClientsBatchRoute: ApiClientsBatchRoute,
 }
 
 const ApiClientsRouteWithChildren = ApiClientsRoute._addFileChildren(
@@ -1316,10 +1375,12 @@ const ApiClientsRouteWithChildren = ApiClientsRoute._addFileChildren(
 
 interface ApiExpensesRouteChildren {
   ApiExpensesIdRoute: typeof ApiExpensesIdRoute
+  ApiExpensesBatchRoute: typeof ApiExpensesBatchRoute
 }
 
 const ApiExpensesRouteChildren: ApiExpensesRouteChildren = {
   ApiExpensesIdRoute: ApiExpensesIdRoute,
+  ApiExpensesBatchRoute: ApiExpensesBatchRoute,
 }
 
 const ApiExpensesRouteWithChildren = ApiExpensesRoute._addFileChildren(
@@ -1340,10 +1401,12 @@ const ApiInvoicesRouteWithChildren = ApiInvoicesRoute._addFileChildren(
 
 interface ApiProjectsRouteChildren {
   ApiProjectsIdRoute: typeof ApiProjectsIdRoute
+  ApiProjectsBatchRoute: typeof ApiProjectsBatchRoute
 }
 
 const ApiProjectsRouteChildren: ApiProjectsRouteChildren = {
   ApiProjectsIdRoute: ApiProjectsIdRoute,
+  ApiProjectsBatchRoute: ApiProjectsBatchRoute,
 }
 
 const ApiProjectsRouteWithChildren = ApiProjectsRoute._addFileChildren(

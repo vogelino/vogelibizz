@@ -105,6 +105,51 @@ export async function mutateExpenseHistoryTransaction(
 	return result;
 }
 
+export async function mutateExpenseHistoryTransactions(
+	items: { id: number; change: ExpenseHistoryTransactionMutation }[],
+) {
+	type BatchStatement = Parameters<typeof db.batch>[0][number];
+	const statements: BatchStatement[] = [];
+	for (const { id, change } of items) {
+		await requireCurrent(id, change.lastModified);
+		const values: Partial<typeof expenseTransactions.$inferInsert> = {
+			last_modified: nextToken(change.lastModified),
+		};
+		if (change.description !== undefined)
+			values.description = change.description;
+		if (change.amount !== undefined) values.amount = change.amount;
+		if (change.category !== undefined) values.category = change.category;
+		if (change.type !== undefined) values.type = change.type;
+		if (change.expenseId !== undefined) {
+			values.expenseId = change.expenseId;
+			if (change.expenseId !== null) {
+				const [expense] = await db
+					.select({ category: expenses.category, type: expenses.type })
+					.from(expenses)
+					.where(eq(expenses.id, change.expenseId))
+					.limit(1);
+				if (!expense)
+					throw new ExpenseHistoryNotFoundError("Recurring expense not found.");
+				values.category = expense.category;
+				values.type = expense.type;
+			}
+		}
+		statements.push(
+			db
+				.update(expenseTransactions)
+				.set(values)
+				.where(
+					and(
+						eq(expenseTransactions.id, id),
+						eq(expenseTransactions.last_modified, change.lastModified),
+					),
+				),
+		);
+	}
+	await db.batch(statements as [BatchStatement, ...BatchStatement[]]);
+	return { ids: items.map(({ id }) => id) };
+}
+
 export async function deleteExpenseHistoryTransaction(id: number) {
 	const deleted = await db
 		.delete(expenseTransactions)

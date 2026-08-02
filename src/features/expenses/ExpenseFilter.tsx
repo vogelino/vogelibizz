@@ -14,7 +14,6 @@ import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 import {
 	type ExpenseOverviewCategory,
-	type ExpenseOverviewType,
 	mixedClassification,
 } from "./expenseOverviewRows";
 
@@ -22,6 +21,7 @@ const OPTION_VALUES = [
 	"All types" as const,
 	...expenseTypeEnum.enumValues,
 	mixedClassification,
+	"Unclassified" as const,
 ] as const;
 
 export type ExpenseFilterValue = (typeof OPTION_VALUES)[number];
@@ -36,8 +36,6 @@ function MixedCategoryLabel() {
 	return <IconBadge icon={mapTypeToIcon("Mixed")} label="Mixed" />;
 }
 
-type TypeFilterType = ExpenseOverviewType | "All types";
-
 type ExpenseFilterProps<TData> =
 	| {
 			loading: true;
@@ -45,6 +43,7 @@ type ExpenseFilterProps<TData> =
 			filters?: never;
 			onFiltersChange?: never;
 			showMixedClassification?: boolean;
+			showUnclassified?: boolean;
 	  }
 	| {
 			loading: false;
@@ -52,10 +51,15 @@ type ExpenseFilterProps<TData> =
 			filters: ExpenseFilterState;
 			onFiltersChange: (filters: ExpenseFilterState) => void;
 			showMixedClassification?: boolean;
+			showUnclassified?: boolean;
 	  };
 
 export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
-	const { loading, showMixedClassification = false } = props;
+	const {
+		loading,
+		showMixedClassification = false,
+		showUnclassified = false,
+	} = props;
 	const categoryFilter = loading ? [] : props.filters.category;
 	const typeFilter = loading ? "All types" : props.filters.type;
 	const otherOnly = loading ? false : props.filters.otherOnly;
@@ -71,9 +75,11 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	});
 
 	const typeOptions = useComboboxOptions<ExpenseFilterValue>({
-		optionValues: showMixedClassification
-			? OPTION_VALUES
-			: OPTION_VALUES.filter((v) => v !== "Mixed"),
+		optionValues: OPTION_VALUES.filter(
+			(value) =>
+				(showMixedClassification || value !== "Mixed") &&
+				(showUnclassified || value !== "Unclassified"),
+		),
 		renderer: (type) => (
 			<>
 				{mapTypeToIcon(type, 24)}
@@ -141,7 +147,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 			onChange={
 				loading
 					? undefined
-					: (value: TypeFilterType) => {
+					: (value: ExpenseFilterValue) => {
 							props.onFiltersChange({ ...props.filters, type: value });
 							const column = props.table.getColumn("type");
 							if (!column) return;
