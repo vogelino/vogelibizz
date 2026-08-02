@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
 import type { ClientType } from "@/db/schema";
@@ -8,11 +8,29 @@ import { filterRowsByText } from "@/features/search/searchEngine";
 import useClientEdit from "@/utility/data/useClientEdit";
 import useClients from "@/utility/data/useClients";
 import useProjects from "@/utility/data/useProjects";
+import { useUrlSearchState } from "@/utility/useUrlSearchState";
+import { ClientFilter, type ClientFilterState } from "./ClientFilter";
 import { getClientTableColumns } from "./columns";
+
+const clientFilterDefaults: ClientFilterState = {
+	languages: [],
+	projectIds: [],
+};
 
 export default function ClientList({ loading = false }: { loading?: boolean }) {
 	const { data = [], error, isPending } = useClients();
-	const { q } = useSearch({ from: "/_resource/clients" });
+	const search = useSearch({ from: "/_resource/clients" });
+	const navigate = useNavigate({ from: "/clients" });
+	const updateSearch = useCallback(
+		(nextSearch: typeof search) =>
+			navigate({ search: nextSearch, replace: true }),
+		[navigate],
+	);
+	const [filters, setFilters] = useUrlSearchState(
+		search,
+		clientFilterDefaults,
+		updateSearch,
+	);
 	const { data: projects = [], isPending: projectsPending } = useProjects();
 	const editMutation = useClientEdit();
 	const isLoading = loading || isPending;
@@ -30,7 +48,7 @@ export default function ClientList({ loading = false }: { loading?: boolean }) {
 		() =>
 			filterRowsByText(
 				data,
-				q,
+				search.q,
 				(client) => client.id,
 				(client) =>
 					[
@@ -44,16 +62,43 @@ export default function ClientList({ loading = false }: { loading?: boolean }) {
 						.filter(Boolean)
 						.join(" "),
 			),
-		[data, q],
+		[data, search.q],
 	);
+	const filteredData = useMemo(() => {
+		const selectedLanguages = new Set(filters.languages);
+		const selectedProjectIds = new Set(filters.projectIds);
+		return visibleData.filter(
+			(client) =>
+				(!selectedLanguages.size || selectedLanguages.has(client.language)) &&
+				(!selectedProjectIds.size ||
+					client.projects?.some((project) =>
+						selectedProjectIds.has(String(project.id)),
+					)),
+		);
+	}, [filters, visibleData]);
 
 	return (
 		<PageDataTable<ClientType>
 			resource="clients"
 			columns={columns}
-			data={!error && visibleData.length > 0 ? visibleData : []}
+			data={!error && filteredData.length > 0 ? filteredData : []}
 			defaultSortColumn="last_modified"
 			loading={isLoading}
+			toolbarSkeleton={
+				<div className="px-6 pt-3 md:px-10">
+					<ClientFilter loading projects={[]} />
+				</div>
+			}
+			toolbar={() => (
+				<div className="sticky left-0 flex flex-wrap items-center gap-4 px-6 pt-3 md:px-10">
+					<ClientFilter
+						loading={false}
+						projects={projects}
+						filters={filters}
+						onFiltersChange={setFilters}
+					/>
+				</div>
+			)}
 		/>
 	);
 }

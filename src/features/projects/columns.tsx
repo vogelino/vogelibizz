@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/inline-edit";
 import type { ClientType, ProjectType } from "@/db/schema";
 import {
+	mapStatusToColorClass,
 	mapStatusToIcon,
 	mapStatusToLabel,
 	type StatusType,
@@ -69,6 +70,7 @@ export function getProjectTableColumns(
 								<IconBadge
 									icon={mapStatusToIcon(option.value)}
 									label={option.label}
+									className={mapStatusToColorClass(option.value)}
 								/>
 							),
 							searchValue: option.label,
@@ -77,6 +79,7 @@ export function getProjectTableColumns(
 							<IconBadge
 								icon={mapStatusToIcon(status)}
 								label={mapStatusToLabel(status)}
+								className={mapStatusToColorClass(status)}
 							/>
 						)}
 						onChange={(status) => onEdit(row.original, { status })}

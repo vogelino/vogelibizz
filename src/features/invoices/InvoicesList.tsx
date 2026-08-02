@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
 import type { InvoiceType } from "@/db/schema";
@@ -12,8 +12,16 @@ import useClients from "@/utility/data/useClients";
 import useInvoiceEdit from "@/utility/data/useInvoiceEdit";
 import useInvoices from "@/utility/data/useInvoices";
 import useProjects from "@/utility/data/useProjects";
+import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getInvoiceTableColumns } from "./columns";
+import { InvoiceFilter, type InvoiceFilterState } from "./InvoiceFilter";
 import { getInvoiceHours, getInvoiceTotal } from "./invoiceTotals";
+
+const invoiceFilterDefaults: InvoiceFilterState = {
+	clientIds: [],
+	projectIds: [],
+	currencies: [],
+};
 
 export default function InvoicesList({
 	loading = false,
@@ -21,7 +29,18 @@ export default function InvoicesList({
 	loading?: boolean;
 }) {
 	const { data = [], error, isPending } = useInvoices();
-	const { q } = useSearch({ from: "/_resource/invoices" });
+	const search = useSearch({ from: "/_resource/invoices" });
+	const navigate = useNavigate({ from: "/invoices" });
+	const updateSearch = useCallback(
+		(nextSearch: typeof search) =>
+			navigate({ search: nextSearch, replace: true }),
+		[navigate],
+	);
+	const [filters, setFilters] = useUrlSearchState(
+		search,
+		invoiceFilterDefaults,
+		updateSearch,
+	);
 	const { data: clients = [], isPending: clientsPending } = useClients();
 	const { data: projects = [], isPending: projectsPending } = useProjects();
 	const editMutation = useInvoiceEdit();
@@ -46,7 +65,7 @@ export default function InvoicesList({
 		() =>
 			filterRowsByText(
 				data,
-				q,
+				search.q,
 				(invoice) => invoice.id,
 				(invoice) =>
 					[
@@ -73,16 +92,48 @@ export default function InvoicesList({
 						.filter(Boolean)
 						.join(" "),
 			),
-		[data, q],
+		[data, search.q],
 	);
+	const filteredData = useMemo(() => {
+		const selectedClientIds = new Set(filters.clientIds);
+		const selectedProjectIds = new Set(filters.projectIds);
+		const selectedCurrencies = new Set(filters.currencies);
+		return visibleData.filter(
+			(invoice) =>
+				(!selectedClientIds.size ||
+					(invoice.clientId !== null &&
+						selectedClientIds.has(String(invoice.clientId)))) &&
+				(!selectedProjectIds.size ||
+					invoice.projects?.some((project) =>
+						selectedProjectIds.has(String(project.id)),
+					)) &&
+				(!selectedCurrencies.size || selectedCurrencies.has(invoice.currency)),
+		);
+	}, [filters, visibleData]);
 
 	return (
 		<PageDataTable<InvoiceType>
 			resource="invoices"
 			columns={columns}
-			data={!error && visibleData.length > 0 ? visibleData : []}
+			data={!error && filteredData.length > 0 ? filteredData : []}
 			defaultSortColumn="last_modified"
 			loading={isLoading}
+			toolbarSkeleton={
+				<div className="px-6 pt-3 md:px-10">
+					<InvoiceFilter loading clients={[]} projects={[]} />
+				</div>
+			}
+			toolbar={() => (
+				<div className="sticky left-0 flex flex-wrap items-center gap-4 px-6 pt-3 md:px-10">
+					<InvoiceFilter
+						loading={false}
+						clients={clients}
+						projects={projects}
+						filters={filters}
+						onFiltersChange={setFilters}
+					/>
+				</div>
+			)}
 		/>
 	);
 }

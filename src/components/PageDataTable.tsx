@@ -2,7 +2,7 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { DataTable } from "@/components/DataTable";
 import { SelectionActionBar } from "@/components/SelectionActionBar";
@@ -26,6 +26,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 	data,
 	defaultSortColumn = "last_modified",
 	loading = false,
+	toolbar,
+	toolbarSkeleton,
 }: {
 	resource: ResourceType;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -33,6 +35,8 @@ export default function PageDataTable<DataType extends { id: number }>({
 	data: DataType[];
 	defaultSortColumn: string;
 	loading?: boolean;
+	toolbar?: (table: TanstackTable<DataType>) => ReactNode;
+	toolbarSkeleton?: ReactNode;
 }) {
 	const navigate = useNavigate();
 	const clientDeleteMutation = useClientDelete();
@@ -248,7 +252,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 					onClose={() => setBulkEditOpen(false)}
 				/>
 			)}
-			{(loading || data?.length > 0) && (
+			{(loading || data?.length > 0 || toolbar) && (
 				<DataTable
 					columns={columns}
 					data={data}
@@ -264,9 +268,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 						sorting: [{ id: defaultSortColumn, desc: true }],
 						pagination: { pageIndex: 0, pageSize: 50 },
 					}}
+					toolbarSkeleton={toolbarSkeleton}
+					classNames={toolbar ? { header: "top-30 pt-3" } : undefined}
 					toolbar={(table) => {
 						tableRef.current = table;
-						return null;
+						return toolbar?.(table) ?? null;
 					}}
 				/>
 			)}
