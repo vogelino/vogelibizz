@@ -1,5 +1,6 @@
 import { ArrowLeftToLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import type { ClientType } from "@/db/schema";
@@ -46,7 +47,7 @@ export function ProjectFilter(props: ProjectFilterProps) {
 	const hasFilters = statuses.length > 0 || clientIds.length > 0;
 
 	return (
-		<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+		<FilterBar active={hasFilters}>
 			<MultiValueInput<StatusType>
 				options={statusList.map((status) => ({
 					value: status.value,
@@ -112,6 +113,6 @@ export function ProjectFilter(props: ProjectFilterProps) {
 					Clear filters
 				</Button>
 			) : null}
-		</div>
+		</FilterBar>
 	);
 }

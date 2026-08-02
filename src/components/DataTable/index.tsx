@@ -67,6 +67,7 @@ type DataTableProps<TData> = {
 	manualSorting?: boolean;
 	enableMultiSort?: boolean;
 	toolbar?: (table: TanstackTable<TData>) => ReactNode;
+	toolbarVisible?: boolean;
 	loading?: boolean;
 	skeletonRows?: number;
 	toolbarSkeleton?: ReactNode;
@@ -93,6 +94,7 @@ export function DataTable<TData>({
 	manualSorting = false,
 	enableMultiSort,
 	toolbar,
+	toolbarVisible = true,
 	loading = false,
 	skeletonRows = 6,
 	toolbarSkeleton,
@@ -281,11 +283,18 @@ export function DataTable<TData>({
 			{toolbar ? (
 				<div
 					className={cn(
-						"sticky left-0 top-16 z-20 bg-background pb-3",
-						classNames.toolbar,
+						"sticky left-0 top-16 z-20 grid overflow-clip bg-background",
+						"transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none",
+						toolbarVisible
+							? "grid-rows-[1fr] opacity-100"
+							: "grid-rows-[0fr] opacity-0",
 					)}
+					aria-hidden={!toolbarVisible}
+					inert={!toolbarVisible}
 				>
-					{loading ? (toolbarSkeleton ?? null) : toolbar(table)}
+					<div className={cn("min-h-0 overflow-clip pb-3", classNames.toolbar)}>
+						{loading ? (toolbarSkeleton ?? null) : toolbar(table)}
+					</div>
 				</div>
 			) : null}
 			<section
@@ -301,7 +310,7 @@ export function DataTable<TData>({
 					) : null}
 					<TableHeader
 						className={cn(
-							"sticky top-16 bg-background z-10",
+							"sticky top-16 bg-background z-10 transition-[top] duration-300 ease-out motion-reduce:transition-none",
 							"[&_th:first-child]:pl-6 md:[&_th:first-child]:pl-10 [&_th:last-child]:pr-6 md:[&_th:last-child]:pr-10",
 							"shadow shadow-black/5",
 							classNames.header,

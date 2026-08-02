@@ -3,6 +3,8 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
+import { useResourceActions } from "@/components/ResourcePageLayout";
+import { useFilterControls } from "@/components/ui/filter-bar";
 import type { ProjectType } from "@/db/schema";
 import {
 	amountSearchText,
@@ -38,6 +40,10 @@ export default function ProjectList({
 		projectFilterDefaults,
 		updateSearch,
 	);
+	const hasActiveFilters =
+		filters.statuses.length > 0 || filters.clientIds.length > 0;
+	const filterControls = useFilterControls(hasActiveFilters);
+	useResourceActions(filterControls.action);
 	const { data: clients = [], isPending: clientsPending } = useClients();
 	const editMutation = useProjectEdit();
 	const isLoading = loading || isPending;
@@ -97,6 +103,7 @@ export default function ProjectList({
 			data={!error && filteredData.length > 0 ? filteredData : []}
 			defaultSortColumn="last_modified"
 			loading={isLoading}
+			toolbarVisible={filterControls.visible}
 			toolbarSkeleton={
 				<div className="px-6 pt-3 md:px-10">
 					<ProjectFilter loading clients={[]} />

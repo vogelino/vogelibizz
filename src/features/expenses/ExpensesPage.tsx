@@ -6,8 +6,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
+import { useResourceActions } from "@/components/ResourcePageLayout";
 import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useFilterControls } from "@/components/ui/filter-bar";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import {
 	amountSearchText,
@@ -147,6 +149,12 @@ export default function ExpensesPage({
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
 	const categoryFilter = filters.category;
 	const typeFilter = filters.type;
+	const hasActiveFilters =
+		categoryFilter.length > 0 ||
+		typeFilter !== "All types" ||
+		filters.otherOnly;
+	const filterControls = useFilterControls(hasActiveFilters);
+	useResourceActions(filterControls.action);
 
 	const { data = [], error, isPending } = useExpenses();
 	const overviewQuery = useExpenseOverviewSummary();
@@ -430,6 +438,7 @@ export default function ExpensesPage({
 						trigger
 					)
 				}
+				toolbarVisible={filterControls.visible}
 				toolbarSkeleton={
 					<div className="px-6 md:px-10 sticky left-0 pt-3">
 						<ExpenseFilter loading showMixedClassification />
@@ -448,7 +457,7 @@ export default function ExpensesPage({
 					],
 				}}
 				classNames={{
-					header: "top-30 pt-3",
+					header: filterControls.visible ? "top-30 pt-3" : undefined,
 				}}
 				toolbar={(table) => (
 					<div className="px-6 md:px-10 sticky left-0 pt-3 flex justify-between items-center gap-8 flex-wrap">

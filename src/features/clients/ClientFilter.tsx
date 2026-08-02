@@ -1,5 +1,6 @@
 import { ArrowLeftToLine, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import {
@@ -51,7 +52,7 @@ export function ClientFilter(props: ClientFilterProps) {
 	const hasFilters = languages.length > 0 || projectIds.length > 0;
 
 	return (
-		<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+		<FilterBar active={hasFilters}>
 			<MultiValueInput<ClientLanguage>
 				options={clientLanguageEnum.enumValues.map((language) => ({
 					value: language,
@@ -126,6 +127,6 @@ export function ClientFilter(props: ClientFilterProps) {
 					Clear filters
 				</Button>
 			) : null}
-		</div>
+		</FilterBar>
 	);
 }

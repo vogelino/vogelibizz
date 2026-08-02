@@ -27,6 +27,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	defaultSortColumn = "last_modified",
 	loading = false,
 	toolbar,
+	toolbarVisible = true,
 	toolbarSkeleton,
 	tableClassName,
 	selectionColumnSize = 36,
@@ -38,6 +39,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	defaultSortColumn: string;
 	loading?: boolean;
 	toolbar?: (table: TanstackTable<DataType>) => ReactNode;
+	toolbarVisible?: boolean;
 	toolbarSkeleton?: ReactNode;
 	tableClassName?: string;
 	selectionColumnSize?: number;
@@ -273,9 +275,10 @@ export default function PageDataTable<DataType extends { id: number }>({
 						pagination: { pageIndex: 0, pageSize: 50 },
 					}}
 					toolbarSkeleton={toolbarSkeleton}
+					toolbarVisible={toolbarVisible}
 					classNames={{
 						table: tableClassName,
-						header: toolbar ? "top-30 pt-3" : undefined,
+						header: toolbar && toolbarVisible ? "top-30 pt-3" : undefined,
 					}}
 					toolbar={(table) => {
 						tableRef.current = table;

@@ -7,6 +7,7 @@ import ExpenseCategoryBadge, {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { MultiValueInput } from "@/components/ui/multi-value-input";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
@@ -44,6 +45,7 @@ type ExpenseFilterProps<TData> =
 			onFiltersChange?: never;
 			showMixedClassification?: boolean;
 			showUnclassified?: boolean;
+			forceVisible?: boolean;
 	  }
 	| {
 			loading: false;
@@ -52,6 +54,7 @@ type ExpenseFilterProps<TData> =
 			onFiltersChange: (filters: ExpenseFilterState) => void;
 			showMixedClassification?: boolean;
 			showUnclassified?: boolean;
+			forceVisible?: boolean;
 	  };
 
 export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
@@ -59,6 +62,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		loading,
 		showMixedClassification = false,
 		showUnclassified = false,
+		forceVisible = false,
 	} = props;
 	const categoryFilter = loading ? [] : props.filters.category;
 	const typeFilter = loading ? "All types" : props.filters.type;
@@ -190,7 +194,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	);
 
 	return (
-		<div className="flex items-center gap-x-4 gap-y-1 flex-wrap">
+		<FilterBar active={showFilteredTotal || forceVisible}>
 			{categoryInput}
 			{typeInput}
 			{otherOnlyInput}
@@ -214,6 +218,6 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 					Clear filters
 				</Button>
 			) : null}
-		</div>
+		</FilterBar>
 	);
 }

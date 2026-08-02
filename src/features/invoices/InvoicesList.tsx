@@ -3,6 +3,8 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import PageDataTable from "@/components/PageDataTable";
+import { useResourceActions } from "@/components/ResourcePageLayout";
+import { useFilterControls } from "@/components/ui/filter-bar";
 import type { InvoiceType } from "@/db/schema";
 import {
 	amountSearchText,
@@ -41,6 +43,12 @@ export default function InvoicesList({
 		invoiceFilterDefaults,
 		updateSearch,
 	);
+	const hasActiveFilters =
+		filters.clientIds.length > 0 ||
+		filters.projectIds.length > 0 ||
+		filters.currencies.length > 0;
+	const filterControls = useFilterControls(hasActiveFilters);
+	useResourceActions(filterControls.action);
 	const { data: clients = [], isPending: clientsPending } = useClients();
 	const { data: projects = [], isPending: projectsPending } = useProjects();
 	const editMutation = useInvoiceEdit();
@@ -120,6 +128,7 @@ export default function InvoicesList({
 			loading={isLoading}
 			tableClassName="table-fixed"
 			selectionColumnSize={72}
+			toolbarVisible={filterControls.visible}
 			toolbarSkeleton={
 				<div className="px-6 pt-3 md:px-10">
 					<InvoiceFilter loading clients={[]} projects={[]} />

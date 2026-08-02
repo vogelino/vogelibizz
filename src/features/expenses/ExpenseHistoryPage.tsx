@@ -13,6 +13,7 @@ import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Button } from "@/components/ui/button";
+import { useFilterControls } from "@/components/ui/filter-bar";
 import type { CurrencyIdType } from "@/db/schema";
 import {
 	amountSearchText,
@@ -418,6 +419,7 @@ export default function ExpenseHistoryPage() {
 		filters.otherOnly ||
 		filters.uncategorizedOnly ||
 		Boolean(search.q || search.fromMonth || search.toMonth);
+	const filterControls = useFilterControls(hasActiveHistoryFilters);
 	const filteredSummary = useMemo(
 		() => calculateExpenseHistoryMonthlySummary(visibleTransactions),
 		[visibleTransactions],
@@ -455,12 +457,15 @@ export default function ExpenseHistoryPage() {
 	}, [monthQuery]);
 	const resourceActions = useMemo(
 		() => (
-			<Button type="button" onClick={() => setImportOpen(true)}>
-				<FileUp size={16} />
-				Import transactions
-			</Button>
+			<>
+				{filterControls.action}
+				<Button type="button" onClick={() => setImportOpen(true)}>
+					<FileUp size={16} />
+					Import transactions
+				</Button>
+			</>
 		),
-		[],
+		[filterControls.action],
 	);
 	useResourceActions(resourceActions);
 	const clearSelection = useCallback(() => {
@@ -588,9 +593,10 @@ export default function ExpenseHistoryPage() {
 							}}
 							classNames={{
 								table: "min-w-240",
-								header: "top-32",
+								header: filterControls.visible ? "top-32" : undefined,
 								toolbar: "pb-0",
 							}}
+							toolbarVisible={filterControls.visible}
 							toolbarSkeleton={
 								<div className="flex flex-col gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
 									<ExpenseFilter loading />
@@ -614,6 +620,7 @@ export default function ExpenseHistoryPage() {
 										<ExpenseFilter
 											loading={false}
 											showUnclassified
+											forceVisible={filters.uncategorizedOnly}
 											table={table}
 											filters={filters}
 											onFiltersChange={(nextFilters) =>
