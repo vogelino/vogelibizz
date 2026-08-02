@@ -147,6 +147,29 @@ describe("expense history mutation HTTP API", () => {
 		});
 	});
 
+	test("duplicates any selected transaction without a request body", async () => {
+		let duplicatedId: number | undefined;
+		const handlers = createExpenseHistoryMutationHandlers({
+			authorize: async () => true,
+			mutate: async () => transaction,
+			createAndAssociate: async () => transaction,
+			duplicate: async (id) => {
+				duplicatedId = id;
+				return { ...transaction, id: 8 };
+			},
+			delete: async () => ({ id: 7 }),
+		});
+		const response = await handlers.duplicate(
+			new Request("https://example.test/api/expense-history/transactions/7", {
+				method: "POST",
+			}),
+			"7",
+		);
+		expect(response.status).toBe(200);
+		expect(duplicatedId).toBe(7);
+		expect((await response.json()).id).toBe(8);
+	});
+
 	test("deletes a selected transaction without requiring a request body", async () => {
 		let deletedId: number | undefined;
 		const handlers = createExpenseHistoryMutationHandlers({

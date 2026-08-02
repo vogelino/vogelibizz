@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import {
+	CalendarPlusIcon,
 	CopyIcon,
 	MoreHorizontalIcon,
 	PencilIcon,
@@ -37,7 +38,10 @@ import { cn } from "@/utility/classNames";
 
 export type RowActionOptions<RowType> = {
 	onEdit: (row: RowType) => void;
-	onDuplicate: (row: RowType) => void;
+	onDuplicate?: (row: RowType) => void;
+	canDuplicate?: (row: RowType) => boolean;
+	onCreateRecurringExpense?: (row: RowType) => void;
+	canCreateRecurringExpense?: (row: RowType) => boolean;
 	onDelete: (row: RowType) => void;
 	canShowActions?: (row: RowType) => boolean;
 };
@@ -45,6 +49,9 @@ export type RowActionOptions<RowType> = {
 export function getRowActionsColumn<RowType extends { id: string | number }>({
 	onEdit,
 	onDuplicate,
+	canDuplicate,
+	onCreateRecurringExpense,
+	canCreateRecurringExpense,
 	onDelete,
 	canShowActions = () => true,
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -61,6 +68,9 @@ export function getRowActionsColumn<RowType extends { id: string | number }>({
 					row={row.original}
 					onEdit={onEdit}
 					onDuplicate={onDuplicate}
+					canDuplicate={canDuplicate}
+					onCreateRecurringExpense={onCreateRecurringExpense}
+					canCreateRecurringExpense={canCreateRecurringExpense}
 					onDelete={onDelete}
 				/>
 			) : null,
@@ -71,6 +81,9 @@ export function RowActionsContextMenu<RowType>({
 	row,
 	onEdit,
 	onDuplicate,
+	canDuplicate,
+	onCreateRecurringExpense,
+	canCreateRecurringExpense,
 	onDelete,
 	children,
 }: RowActionOptions<RowType> & { row: RowType; children: ReactNode }) {
@@ -91,10 +104,19 @@ export function RowActionsContextMenu<RowType>({
 						<PencilIcon className="size-4" />
 						Edit
 					</ContextMenuItem>
-					<ContextMenuItem onSelect={() => onDuplicate(row)}>
-						<CopyIcon className="size-4" />
-						Duplicate
-					</ContextMenuItem>
+					{onDuplicate && (canDuplicate?.(row) ?? true) ? (
+						<ContextMenuItem onSelect={() => onDuplicate(row)}>
+							<CopyIcon className="size-4" />
+							Duplicate
+						</ContextMenuItem>
+					) : null}
+					{onCreateRecurringExpense &&
+					(canCreateRecurringExpense?.(row) ?? true) ? (
+						<ContextMenuItem onSelect={() => onCreateRecurringExpense(row)}>
+							<CalendarPlusIcon className="size-4" />
+							Create recurring expense
+						</ContextMenuItem>
+					) : null}
 					<ContextMenuSeparator />
 					<ContextMenuItem
 						className="text-destructive focus:text-destructive"
@@ -118,13 +140,11 @@ function RowActions<RowType extends { id: string | number }>({
 	row,
 	onEdit,
 	onDuplicate,
+	canDuplicate,
+	onCreateRecurringExpense,
+	canCreateRecurringExpense,
 	onDelete,
-}: {
-	row: RowType;
-	onEdit: (row: RowType) => void;
-	onDuplicate: (row: RowType) => void;
-	onDelete: (row: RowType) => void;
-}) {
+}: RowActionOptions<RowType> & { row: RowType }) {
 	const [confirmDelete, setConfirmDelete] = useState(false);
 
 	return (
@@ -140,10 +160,19 @@ function RowActions<RowType extends { id: string | number }>({
 						<PencilIcon className="size-4" />
 						Edit
 					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={() => onDuplicate(row)}>
-						<CopyIcon className="size-4" />
-						Duplicate
-					</DropdownMenuItem>
+					{onDuplicate && (canDuplicate?.(row) ?? true) ? (
+						<DropdownMenuItem onSelect={() => onDuplicate(row)}>
+							<CopyIcon className="size-4" />
+							Duplicate
+						</DropdownMenuItem>
+					) : null}
+					{onCreateRecurringExpense &&
+					(canCreateRecurringExpense?.(row) ?? true) ? (
+						<DropdownMenuItem onSelect={() => onCreateRecurringExpense(row)}>
+							<CalendarPlusIcon className="size-4" />
+							Create recurring expense
+						</DropdownMenuItem>
+					) : null}
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className="text-destructive focus:text-destructive"

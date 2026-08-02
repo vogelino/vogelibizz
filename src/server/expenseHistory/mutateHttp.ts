@@ -9,6 +9,7 @@ import {
 	createAndAssociateExpense,
 	deleteExpenseHistoryTransaction,
 	deleteExpenseHistoryTransactions,
+	duplicateExpenseHistoryTransaction,
 	ExpenseHistoryConflictError,
 	ExpenseHistoryNotFoundError,
 	mutateExpenseHistoryTransaction,
@@ -18,6 +19,7 @@ type Dependencies = {
 	authorize: (request: Request) => Promise<boolean>;
 	mutate: typeof mutateExpenseHistoryTransaction;
 	createAndAssociate: typeof createAndAssociateExpense;
+	duplicate?: typeof duplicateExpenseHistoryTransaction;
 	delete: typeof deleteExpenseHistoryTransaction;
 };
 
@@ -26,11 +28,12 @@ export function createExpenseHistoryMutationHandlers(
 		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
 		mutate: mutateExpenseHistoryTransaction,
 		createAndAssociate: createAndAssociateExpense,
+		duplicate: duplicateExpenseHistoryTransaction,
 		delete: deleteExpenseHistoryTransaction,
 	},
 ) {
 	const handle =
-		(kind: "mutate" | "create" | "delete") =>
+		(kind: "mutate" | "create" | "duplicate" | "delete") =>
 		async (request: Request, idParam: string) => {
 			if (!(await dependencies.authorize(request)))
 				return json({ error: "Unauthorized" }, { status: 401 });
@@ -41,17 +44,23 @@ export function createExpenseHistoryMutationHandlers(
 				const result =
 					kind === "delete"
 						? await dependencies.delete(id.data)
-						: kind === "mutate"
-							? await dependencies.mutate(
-									id.data,
-									expenseHistoryTransactionMutationSchema.parse(
-										await request.json(),
-									),
-								)
-							: await dependencies.createAndAssociate(
-									id.data,
-									expenseHistoryCreateExpenseSchema.parse(await request.json()),
-								);
+						: kind === "duplicate"
+							? await (
+									dependencies.duplicate ?? duplicateExpenseHistoryTransaction
+								)(id.data)
+							: kind === "mutate"
+								? await dependencies.mutate(
+										id.data,
+										expenseHistoryTransactionMutationSchema.parse(
+											await request.json(),
+										),
+									)
+								: await dependencies.createAndAssociate(
+										id.data,
+										expenseHistoryCreateExpenseSchema.parse(
+											await request.json(),
+										),
+									);
 				return json(result);
 			} catch (error) {
 				if (error instanceof SyntaxError)
@@ -77,6 +86,7 @@ export function createExpenseHistoryMutationHandlers(
 	return {
 		patch: handle("mutate"),
 		createExpense: handle("create"),
+		duplicate: handle("duplicate"),
 		delete: handle("delete"),
 	};
 }
@@ -84,6 +94,7 @@ export function createExpenseHistoryMutationHandlers(
 const handlers = createExpenseHistoryMutationHandlers();
 export const patchExpenseHistoryTransactionHandler = handlers.patch;
 export const createExpenseFromTransactionHandler = handlers.createExpense;
+export const duplicateExpenseHistoryTransactionHandler = handlers.duplicate;
 export const deleteExpenseHistoryTransactionHandler = handlers.delete;
 
 const batchDeleteSchema = z

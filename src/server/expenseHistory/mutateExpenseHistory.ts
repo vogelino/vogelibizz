@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, max } from "drizzle-orm";
 import db from "@/db";
 import { expenses, expenseTransactions } from "@/db/schema";
 import type {
@@ -159,6 +159,38 @@ export async function deleteExpenseHistoryTransaction(id: number) {
 		throw new ExpenseHistoryNotFoundError("Transaction not found.");
 	}
 	return deleted[0];
+}
+
+export async function duplicateExpenseHistoryTransaction(id: number) {
+	const [source] = await db
+		.select()
+		.from(expenseTransactions)
+		.where(eq(expenseTransactions.id, id))
+		.limit(1);
+	if (!source) throw new ExpenseHistoryNotFoundError("Transaction not found.");
+	const [order] = await db
+		.select({ value: max(expenseTransactions.sourceOrder) })
+		.from(expenseTransactions)
+		.where(eq(expenseTransactions.expenseMonthId, source.expenseMonthId));
+	const token = new Date().toISOString();
+	const {
+		id: _id,
+		sourceOrder: _sourceOrder,
+		created_at: _createdAt,
+		...copy
+	} = source;
+	const [created] = await db
+		.insert(expenseTransactions)
+		.values({
+			...copy,
+			sourceOrder: (order?.value ?? -1) + 1,
+			created_at: token,
+			last_modified: token,
+		})
+		.returning({ id: expenseTransactions.id });
+	const result = await readTransaction(created.id);
+	if (!result) throw new ExpenseHistoryNotFoundError("Transaction not found.");
+	return result;
 }
 
 export async function deleteExpenseHistoryTransactions(ids: number[]) {

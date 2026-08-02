@@ -26,6 +26,7 @@ import {
 import useExpenseHistoryMonth from "@/utility/data/useExpenseHistoryMonth";
 import useExpenseHistoryMonths from "@/utility/data/useExpenseHistoryMonths";
 import useExpenseHistoryTransactionDelete from "@/utility/data/useExpenseHistoryTransactionDelete";
+import useExpenseHistoryTransactionDuplicate from "@/utility/data/useExpenseHistoryTransactionDuplicate";
 import { useExpenseHistoryTransactionInlineEdit } from "@/utility/data/useExpenseHistoryTransactionMutations";
 import useExpenses from "@/utility/data/useExpenses";
 import { apiFetch } from "@/utility/dataHookUtil";
@@ -47,6 +48,10 @@ import {
 	expenseHistoryImportCommitResultSchema,
 	expenseHistoryImportPreviewSchema,
 } from "@/utility/expenseHistoryImportContracts";
+import {
+	type RowActionOptions,
+	RowActionsContextMenu,
+} from "@/utility/getRowActionsColumn";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { ExpenseFilter } from "./ExpenseFilter";
 import ExpenseHistoryBulkEditDrawer from "./ExpenseHistoryBulkEditDrawer";
@@ -174,6 +179,38 @@ export default function ExpenseHistoryPage() {
 	);
 	const { isPending: deletePending, mutate: deleteTransactions } =
 		useExpenseHistoryTransactionDelete();
+	const duplicateTransaction = useExpenseHistoryTransactionDuplicate();
+	const rowActions: RowActionOptions<ExpenseHistoryTransaction> = {
+		onEdit: (transaction) => {
+			const id = String(transaction.id);
+			navigate({
+				to: "/expenses/history/edit/$id/modal",
+				params: { id },
+				search: true,
+				mask: {
+					to: "/expenses/history/edit/$id",
+					params: { id },
+					unmaskOnReload: true,
+				},
+			});
+		},
+		onDuplicate: (transaction) => duplicateTransaction.mutate(transaction.id),
+		onCreateRecurringExpense: (transaction) => {
+			const id = String(transaction.id);
+			navigate({
+				to: "/expenses/history/create-expense/$id/modal",
+				params: { id },
+				search: true,
+				mask: {
+					to: "/expenses/history/create-expense/$id",
+					params: { id },
+					unmaskOnReload: true,
+				},
+			});
+		},
+		canCreateRecurringExpense: (transaction) => transaction.expense === null,
+		onDelete: (transaction) => deleteTransactions([transaction.id]),
+	};
 
 	const previewMutation = useMutation({
 		mutationFn: async (input: ImportSource) =>
@@ -513,6 +550,11 @@ export default function ExpenseHistoryPage() {
 							getRowId={(transaction) => String(transaction.id)}
 							enableRowSelection
 							onSelectionChange={setSelectedRows}
+							rowContextMenu={(row, trigger) => (
+								<RowActionsContextMenu key={row.id} row={row} {...rowActions}>
+									{trigger}
+								</RowActionsContextMenu>
+							)}
 							initialState={{
 								columnFilters: [
 									...(filters.category.length
