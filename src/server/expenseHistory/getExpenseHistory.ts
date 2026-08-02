@@ -12,6 +12,7 @@ import type {
 	ExpenseDashboard,
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseHistorySort,
 	ExpenseHistoryTransactionDetail,
 	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
@@ -82,7 +83,11 @@ export async function getExpenseHistoryMonths(): Promise<
 
 export async function getExpenseHistoryMonth(
 	month: string | null,
-	{ offset = 0, limit = 50 }: { offset?: number; limit?: number } = {},
+	{
+		offset = 0,
+		limit = 50,
+		sort,
+	}: { offset?: number; limit?: number; sort?: ExpenseHistorySort } = {},
 ): Promise<ExpenseHistoryMonthDetail | null> {
 	const [monthRow] = month
 		? await db
@@ -98,6 +103,18 @@ export async function getExpenseHistoryMonth(
 		: [null];
 	if (month && !monthRow) return null;
 	const monthCondition = month ? eq(expenseMonths.month, month) : undefined;
+	const sortColumns = {
+		bookedAt: expenseTransactions.bookedAt,
+		description: expenseTransactions.description,
+		amount: expenseTransactions.amount,
+		association: expenses.name,
+		category: expenseTransactions.category,
+		type: expenseTransactions.type,
+	};
+	const defaultDirection = month ? asc : desc;
+	const primaryOrder = sort
+		? (sort.direction === "asc" ? asc : desc)(sortColumns[sort.field])
+		: defaultDirection(expenseTransactions.bookedAt);
 
 	const [rows, aggregateRows, rates, currency] = await Promise.all([
 		db
@@ -124,12 +141,10 @@ export async function getExpenseHistoryMonth(
 			.leftJoin(expenses, eq(expenseTransactions.expenseId, expenses.id))
 			.where(monthCondition)
 			.orderBy(
-				month
-					? asc(expenseTransactions.bookedAt)
-					: desc(expenseTransactions.bookedAt),
-				month
-					? asc(expenseTransactions.sourceOrder)
-					: desc(expenseTransactions.sourceOrder),
+				primaryOrder,
+				defaultDirection(expenseTransactions.bookedAt),
+				defaultDirection(expenseTransactions.sourceOrder),
+				defaultDirection(expenseTransactions.id),
 			)
 			.limit(limit)
 			.offset(offset),

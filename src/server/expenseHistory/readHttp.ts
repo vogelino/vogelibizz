@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { isAuthenticatedAndAdmin } from "@/auth";
 import { json } from "@/utility/apiUtil";
-import { expenseHistoryMonthKeySchema } from "@/utility/expenseHistoryContracts";
+import {
+	expenseHistoryMonthKeySchema,
+	expenseHistorySortSchema,
+} from "@/utility/expenseHistoryContracts";
 import {
 	getExpenseDashboard,
 	getExpenseHistoryMonth,
@@ -83,10 +86,27 @@ export function createExpenseHistoryReadHandlers(
 					{ status: 400 },
 				);
 			}
-			const result = await dependencies.getMonth(
-				parsedMonth?.data ?? null,
-				pagination.data,
-			);
+			const hasSort = url.searchParams.has("sort");
+			const hasDirection = url.searchParams.has("direction");
+			const sort =
+				hasSort || hasDirection
+					? expenseHistorySortSchema.safeParse({
+							field: url.searchParams.get("sort"),
+							direction: url.searchParams.get("direction"),
+						})
+					: null;
+			if (sort !== null && !sort.success) {
+				return json(
+					{
+						error: "Sort requires a supported field and asc or desc direction.",
+					},
+					{ status: 400 },
+				);
+			}
+			const result = await dependencies.getMonth(parsedMonth?.data ?? null, {
+				...pagination.data,
+				sort: sort?.data,
+			});
 			if (!result) {
 				return json(
 					{

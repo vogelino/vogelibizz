@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type { Table as TanstackTable } from "@tanstack/react-table";
+import type {
+	SortingState,
+	Table as TanstackTable,
+} from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
@@ -39,6 +42,7 @@ import {
 	calculateExpenseHistoryMonthlySummary,
 } from "@/utility/expenseHistoryCalculations";
 import type {
+	ExpenseHistorySort,
 	ExpenseHistoryTransaction,
 	ExpenseHistoryTransactionMutation,
 } from "@/utility/expenseHistoryContracts";
@@ -148,6 +152,15 @@ export default function ExpenseHistoryPage() {
 	const selectedMonth = search.month ?? null;
 	const monthIndex = months.findIndex(({ month }) => month === selectedMonth);
 	const selectedMonthIsValid = selectedMonth === null || monthIndex >= 0;
+	const [sorting, setSorting] = useState<SortingState>([]);
+	const backendSort = useMemo<ExpenseHistorySort | undefined>(() => {
+		const [sort] = sorting;
+		if (!sort) return undefined;
+		return {
+			field: sort.id as ExpenseHistorySort["field"],
+			direction: sort.desc ? "desc" : "asc",
+		};
+	}, [sorting]);
 	const monthQuery = useExpenseHistoryMonth(
 		monthsQuery.isPending ||
 			monthsQuery.error ||
@@ -155,6 +168,7 @@ export default function ExpenseHistoryPage() {
 			!selectedMonthIsValid
 			? undefined
 			: selectedMonth,
+		backendSort,
 	);
 	const monthDetail = monthQuery.data?.pages[0];
 	const targetCurrency = monthDetail?.currency ?? "CLP";
@@ -544,6 +558,10 @@ export default function ExpenseHistoryPage() {
 							data={visibleTransactions}
 							loading={historyLoading}
 							virtualized
+							manualSorting
+							enableMultiSort={false}
+							sorting={sorting}
+							onSortingChange={setSorting}
 							hasMore={monthQuery.hasNextPage}
 							loadingMore={monthQuery.isFetchingNextPage}
 							onEndReached={loadMoreTransactions}

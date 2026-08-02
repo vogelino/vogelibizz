@@ -8,6 +8,7 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type OnChangeFn,
 	type PaginationState,
 	type Row,
 	type RowSelectionState,
@@ -61,6 +62,10 @@ type DataTableProps<TData> = {
 		columnFilters?: ColumnFiltersState;
 		pagination?: PaginationState;
 	};
+	sorting?: SortingState;
+	onSortingChange?: OnChangeFn<SortingState>;
+	manualSorting?: boolean;
+	enableMultiSort?: boolean;
 	toolbar?: (table: TanstackTable<TData>) => ReactNode;
 	loading?: boolean;
 	skeletonRows?: number;
@@ -83,6 +88,10 @@ export function DataTable<TData>({
 	columns,
 	data,
 	initialState,
+	sorting: controlledSorting,
+	onSortingChange,
+	manualSorting = false,
+	enableMultiSort,
 	toolbar,
 	loading = false,
 	skeletonRows = 6,
@@ -100,9 +109,14 @@ export function DataTable<TData>({
 	onEndReached,
 	rowContextMenu,
 }: DataTableProps<TData>) {
-	const [sorting, setSorting] = useState<SortingState>(
+	const [internalSorting, setInternalSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
 	);
+	const sorting = controlledSorting ?? internalSorting;
+	const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+		setInternalSorting(updater);
+		onSortingChange?.(updater);
+	};
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
 		initialState?.columnFilters ?? [],
 	);
@@ -117,8 +131,10 @@ export function DataTable<TData>({
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		...(virtualized ? {} : { getPaginationRowModel: getPaginationRowModel() }),
-		getSortedRowModel: getSortedRowModel(),
-		onSortingChange: setSorting,
+		...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
+		onSortingChange: handleSortingChange,
+		manualSorting,
+		enableMultiSort,
 		onColumnFiltersChange: setColumnFilters,
 		onPaginationChange: setPagination,
 		onRowSelectionChange: setRowSelection,

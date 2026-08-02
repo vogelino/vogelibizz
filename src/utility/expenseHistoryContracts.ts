@@ -10,6 +10,18 @@ export const expenseHistoryMonthKeySchema = z
 	.string()
 	.regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
+export const expenseHistorySortSchema = z.object({
+	field: z.enum([
+		"bookedAt",
+		"description",
+		"amount",
+		"association",
+		"category",
+		"type",
+	]),
+	direction: z.enum(["asc", "desc"]),
+});
+
 export const expenseHistoryMonthSummarySchema = z.object({
 	month: expenseHistoryMonthKeySchema,
 	importedAt: z.string(),
@@ -187,6 +199,7 @@ export type ExpenseHistoryCreateExpense = z.infer<
 export type ExpenseHistoryMonthSummary = z.infer<
 	typeof expenseHistoryMonthSummarySchema
 >;
+export type ExpenseHistorySort = z.infer<typeof expenseHistorySortSchema>;
 export type ExpenseHistoryMonthDetail = z.infer<
 	typeof expenseHistoryMonthDetailSchema
 >;

@@ -23,6 +23,7 @@ import {
 	type ExpenseDashboard,
 	type ExpenseHistoryMonthDetail,
 	type ExpenseHistoryMonthSummary,
+	type ExpenseHistorySort,
 	type ExpenseHistoryTransactionDetail,
 	type ExpenseOverviewSummary,
 	expenseDashboardSchema,
@@ -60,7 +61,11 @@ const queryKeys = mergeQueryKeys(
 	}),
 	createQueryKeys("expenseHistory", {
 		months: null,
-		month: (month: string | null) => [month ?? "all"],
+		month: (month: string | null, sort?: ExpenseHistorySort) => [
+			month ?? "all",
+			sort?.field ?? "default",
+			sort?.direction ?? "default",
+		],
 		transaction: (id: string | number) => ["transaction", String(id)],
 		overview: null,
 		dashboard: null,
@@ -308,9 +313,9 @@ export const expenseHistoryQuery = {
 				);
 			},
 		}),
-	month: (month: string | null) =>
+	month: (month: string | null, sort?: ExpenseHistorySort) =>
 		infiniteQueryOptions({
-			...queryKeys.expenseHistory.month(month),
+			...queryKeys.expenseHistory.month(month, sort),
 			initialPageParam: 0,
 			queryFn: async ({ pageParam }): Promise<ExpenseHistoryMonthDetail> => {
 				if (import.meta.env.SSR) {
@@ -320,14 +325,18 @@ export const expenseHistoryQuery = {
 					const result = await getExpenseHistoryMonth(month, {
 						offset: pageParam,
 						limit: 50,
+						sort,
 					});
 					if (!result)
 						throw new Error(`No expense history exists for ${month}.`);
 					return result;
 				}
+				const sortParams = sort
+					? `&sort=${sort.field}&direction=${sort.direction}`
+					: "";
 				return expenseHistoryMonthDetailSchema.parse(
 					await apiGetJson(
-						`/api/expense-history/months/${month ? encodeURIComponent(month) : "all"}?offset=${pageParam}&limit=50`,
+						`/api/expense-history/months/${month ? encodeURIComponent(month) : "all"}?offset=${pageParam}&limit=50${sortParams}`,
 					),
 				);
 			},

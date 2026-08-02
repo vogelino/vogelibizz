@@ -3,6 +3,7 @@ import type {
 	ExpenseDashboard,
 	ExpenseHistoryMonthDetail,
 	ExpenseHistoryMonthSummary,
+	ExpenseHistorySort,
 	ExpenseHistoryTransactionDetail,
 	ExpenseOverviewSummary,
 } from "@/utility/expenseHistoryContracts";
@@ -207,6 +208,46 @@ describe("expense history read HTTP API", () => {
 			"2026-06",
 		);
 		expect(invalid.status).toBe(400);
+	});
+
+	test("validates and forwards backend sorting", async () => {
+		let receivedOptions:
+			| { offset?: number; limit?: number; sort?: ExpenseHistorySort }
+			| undefined;
+		const handlers = createExpenseHistoryReadHandlers({
+			authorize: async () => true,
+			getMonth: async (_month, options) => {
+				receivedOptions = options;
+				return detail;
+			},
+		});
+		const response = await handlers.month(
+			new Request(
+				"https://example.test/api/expense-history/months/2026-06?sort=amount&direction=desc",
+			),
+			"2026-06",
+		);
+		expect(response.status).toBe(200);
+		expect(receivedOptions).toEqual({
+			offset: 0,
+			limit: 50,
+			sort: { field: "amount", direction: "desc" },
+		});
+
+		for (const query of [
+			"sort=unknown&direction=asc",
+			"sort=amount",
+			"direction=desc",
+			"sort=amount&direction=sideways",
+		]) {
+			const invalid = await handlers.month(
+				new Request(
+					`https://example.test/api/expense-history/months/2026-06?${query}`,
+				),
+				"2026-06",
+			);
+			expect(invalid.status).toBe(400);
+		}
 	});
 
 	test("uses a null month filter for the all-transactions feed", async () => {
