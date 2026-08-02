@@ -9,6 +9,7 @@ import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CollapsibleRegion } from "@/components/ui/collapsible-region";
 import { useFilterControls } from "@/components/ui/filter-bar";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import {
@@ -31,6 +32,10 @@ import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getExpensesTableColumns } from "./columns";
 import { ExpenseFilter, type ExpenseFilterState } from "./ExpenseFilter";
+import {
+	ExpenseOverviewToggle,
+	useExpenseOverviewVisibility,
+} from "./ExpenseOverviewToggle";
 import { ExpensesOverviewPanel } from "./ExpensesOverviewPanel";
 import {
 	createExpenseOverviewRows,
@@ -154,7 +159,20 @@ export default function ExpensesPage({
 		typeFilter !== "All types" ||
 		filters.otherOnly;
 	const filterControls = useFilterControls(hasActiveFilters);
-	useResourceActions(filterControls.action);
+	const overview = useExpenseOverviewVisibility();
+	const resourceActions = useMemo(
+		() => (
+			<>
+				{filterControls.action}
+				<ExpenseOverviewToggle
+					visible={overview.visible}
+					onToggle={overview.toggle}
+				/>
+			</>
+		),
+		[filterControls.action, overview.toggle, overview.visible],
+	);
+	useResourceActions(resourceActions);
 
 	const { data = [], error, isPending } = useExpenses();
 	const overviewQuery = useExpenseOverviewSummary();
@@ -376,53 +394,55 @@ export default function ExpensesPage({
 				open={bulkEditOpen}
 				onClose={() => setBulkEditOpen(false)}
 			/>
-			<ExpensesOverviewPanel
-				loading={isLoading}
-				filteredTotal={showFilteredTotal ? filteredLabel : null}
-				configuredTotal={configuredTotalLabel}
-				livingCost={livingCostLabel}
-				observedAverage={observedAverageLabel}
-				categoryChart={
-					<MiniPieChart
-						title="By category"
-						series={categorySeries}
-						colorForLabel={getCategoryStrokeColor}
-						loading={isLoading}
-						onSegmentClick={(label) => {
-							const nextCategory = [
-								...expenseCategoryEnum.enumValues,
-								mixedClassification,
-							].find((value) => value === label);
-							if (!nextCategory) return;
-							setFilters((previous) => ({
-								...previous,
-								category: [nextCategory],
-								type: "All types",
-							}));
-						}}
-					/>
-				}
-				typeChart={
-					<MiniPieChart
-						title="By type"
-						series={typeSeries}
-						colorForLabel={getTypeStrokeColor}
-						loading={isLoading}
-						onSegmentClick={(label) => {
-							const nextType = [
-								...expenseTypeEnum.enumValues,
-								mixedClassification,
-							].find((value) => value === label);
-							if (!nextType) return;
-							setFilters((previous) => ({
-								...previous,
-								category: [],
-								type: nextType,
-							}));
-						}}
-					/>
-				}
-			/>
+			<CollapsibleRegion open={overview.visible}>
+				<ExpensesOverviewPanel
+					loading={isLoading}
+					filteredTotal={showFilteredTotal ? filteredLabel : null}
+					configuredTotal={configuredTotalLabel}
+					livingCost={livingCostLabel}
+					observedAverage={observedAverageLabel}
+					categoryChart={
+						<MiniPieChart
+							title="By category"
+							series={categorySeries}
+							colorForLabel={getCategoryStrokeColor}
+							loading={isLoading}
+							onSegmentClick={(label) => {
+								const nextCategory = [
+									...expenseCategoryEnum.enumValues,
+									mixedClassification,
+								].find((value) => value === label);
+								if (!nextCategory) return;
+								setFilters((previous) => ({
+									...previous,
+									category: [nextCategory],
+									type: "All types",
+								}));
+							}}
+						/>
+					}
+					typeChart={
+						<MiniPieChart
+							title="By type"
+							series={typeSeries}
+							colorForLabel={getTypeStrokeColor}
+							loading={isLoading}
+							onSegmentClick={(label) => {
+								const nextType = [
+									...expenseTypeEnum.enumValues,
+									mixedClassification,
+								].find((value) => value === label);
+								if (!nextType) return;
+								setFilters((previous) => ({
+									...previous,
+									category: [],
+									type: nextType,
+								}));
+							}}
+						/>
+					}
+				/>
+			</CollapsibleRegion>
 			<DataTable
 				columns={columns}
 				data={!error && tableRows.length > 0 ? tableRows : []}

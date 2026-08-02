@@ -13,6 +13,7 @@ import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { SelectionActionBar } from "@/components/SelectionActionBar";
 import { Button } from "@/components/ui/button";
+import { CollapsibleRegion } from "@/components/ui/collapsible-region";
 import { useFilterControls } from "@/components/ui/filter-bar";
 import type { CurrencyIdType } from "@/db/schema";
 import {
@@ -66,6 +67,10 @@ import {
 	ExpenseHistoryOverviewPanel,
 	formatExpenseHistoryMonth,
 } from "./ExpenseHistoryPresentation";
+import {
+	ExpenseOverviewToggle,
+	useExpenseOverviewVisibility,
+} from "./ExpenseOverviewToggle";
 import { getExpenseHistoryColumns } from "./expenseHistoryColumns";
 
 type ImportSource = {
@@ -420,6 +425,7 @@ export default function ExpenseHistoryPage() {
 		filters.uncategorizedOnly ||
 		Boolean(search.q || search.fromMonth || search.toMonth);
 	const filterControls = useFilterControls(hasActiveHistoryFilters);
+	const overview = useExpenseOverviewVisibility();
 	const filteredSummary = useMemo(
 		() => calculateExpenseHistoryMonthlySummary(visibleTransactions),
 		[visibleTransactions],
@@ -459,13 +465,21 @@ export default function ExpenseHistoryPage() {
 		() => (
 			<>
 				{filterControls.action}
-				<Button type="button" onClick={() => setImportOpen(true)}>
+				<ExpenseOverviewToggle
+					visible={overview.visible}
+					onToggle={overview.toggle}
+				/>
+				<Button
+					variant="outline"
+					type="button"
+					onClick={() => setImportOpen(true)}
+				>
 					<FileUp size={16} />
 					Import transactions
 				</Button>
 			</>
 		),
-		[filterControls.action],
+		[filterControls.action, overview.toggle, overview.visible],
 	);
 	useResourceActions(resourceActions);
 	const clearSelection = useCallback(() => {
@@ -539,24 +553,26 @@ export default function ExpenseHistoryPage() {
 					</output>
 				) : (
 					<>
-						{historyLoading || filteredSummaryLoading ? (
-							<ExpenseHistoryOverviewPanel loading />
-						) : monthDetail ? (
-							<ExpenseHistoryOverviewPanel
-								loading={false}
-								summary={
-									hasActiveHistoryFilters
-										? filteredSummary
-										: monthDetail.summary
-								}
-								currency={monthDetail.currency}
-								categorySeries={historyChartSeries.categories}
-								typeSeries={historyChartSeries.types}
-								chartsLoading={
-									monthQuery.hasNextPage || monthQuery.isFetchingNextPage
-								}
-							/>
-						) : null}
+						<CollapsibleRegion open={overview.visible}>
+							{historyLoading || filteredSummaryLoading ? (
+								<ExpenseHistoryOverviewPanel loading />
+							) : monthDetail ? (
+								<ExpenseHistoryOverviewPanel
+									loading={false}
+									summary={
+										hasActiveHistoryFilters
+											? filteredSummary
+											: monthDetail.summary
+									}
+									currency={monthDetail.currency}
+									categorySeries={historyChartSeries.categories}
+									typeSeries={historyChartSeries.types}
+									chartsLoading={
+										monthQuery.hasNextPage || monthQuery.isFetchingNextPage
+									}
+								/>
+							) : null}
+						</CollapsibleRegion>
 						<DataTable
 							key={`${selectedMonth ?? "all-expense-history"}-${filters.uncategorizedOnly ? "uncategorized" : "all"}-${search.fromMonth ?? "start"}-${search.toMonth ?? "end"}`}
 							columns={columns}
