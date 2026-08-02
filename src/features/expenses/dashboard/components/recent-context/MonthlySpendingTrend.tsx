@@ -18,6 +18,7 @@ import {
 	otherCategoriesLabel,
 	uncategorizedLabel,
 } from "../../expenseDashboardPresentation";
+import { chartTextStyle, chartTooltipStyle } from "../chartTooltipStyle";
 import type { MonthlySpendingTrendProps } from "./recentContextTypes";
 
 echarts.use([
@@ -108,7 +109,16 @@ export function MonthlySpendingTrend({
 
 		return {
 			animationDuration: 350,
-			grid: { left: 16, right: 16, top: 48, bottom: 30, containLabel: true },
+			grid: {
+				left: 16,
+				right: 16,
+				top: 48,
+				bottom: 30,
+				show: true,
+				backgroundColor: "var(--chart-plot-background)",
+				borderWidth: 0,
+				containLabel: true,
+			},
 			legend: {
 				type: "scroll",
 				top: 0,
@@ -116,9 +126,10 @@ export function MonthlySpendingTrend({
 				icon: "circle",
 				itemWidth: 9,
 				itemHeight: 9,
-				textStyle: { color: "#98a2b3", fontSize: 11 },
+				textStyle: chartTextStyle,
 			},
 			tooltip: {
+				...chartTooltipStyle,
 				trigger: "axis",
 				axisPointer: { type: "shadow" },
 				valueFormatter: (value: unknown) =>
@@ -130,7 +141,7 @@ export function MonthlySpendingTrend({
 				axisLine: { lineStyle: { color: "#98a2b3" } },
 				axisTick: { show: false },
 				axisLabel: {
-					color: "#98a2b3",
+					...chartTextStyle,
 					formatter: (value: string) => {
 						const [year, month] = value.split("-");
 						return `${month}/${year.slice(2)}`;
@@ -140,10 +151,13 @@ export function MonthlySpendingTrend({
 			yAxis: {
 				type: "value",
 				splitLine: {
-					lineStyle: { color: "rgba(152, 162, 179, 0.25)", type: "dashed" },
+					lineStyle: { color: "var(--color-border)" },
 				},
 				axisLabel: {
-					color: "#98a2b3",
+					...chartTextStyle,
+					align: "left",
+					margin: 32,
+					width: 24,
 					formatter: (value: number) =>
 						new Intl.NumberFormat("en-GB", {
 							notation: "compact",
@@ -157,7 +171,8 @@ export function MonthlySpendingTrend({
 					name: referenceLabel,
 					type: "line",
 					symbol: "none",
-					lineStyle: { color: "#98a2b3", width: 2, type: "dashed" },
+					itemStyle: { color: "#98a2b3" },
+					lineStyle: { color: "#98a2b3", width: 2 },
 					tooltip: { show: false },
 					data: visibleMonths.map(() => data.typicalMonthlyTotal ?? 0),
 				},

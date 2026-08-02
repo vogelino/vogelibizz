@@ -12,6 +12,7 @@ import { SVGRenderer } from "echarts/renderers";
 import { useEffect, useMemo, useRef } from "react";
 import { formatCurrency, locale } from "@/utility/formatUtil";
 import type { SpendingHabits } from "../../spendingHabits";
+import { chartTextStyle, chartTooltipStyle } from "../chartTooltipStyle";
 
 echarts.use([
 	HeatmapChart,
@@ -34,6 +35,7 @@ const spendingIntensityLegend = spendingIntensityLevels.map(
 		color: `rgba(37, 99, 235, ${strength})`,
 	}),
 );
+const emptyCellColor = "var(--chart-plot-background)";
 
 function datesBetween(start: string, end: string) {
 	const dates: string[] = [];
@@ -68,6 +70,7 @@ export function DailySpendingHeatmap({
 		return {
 			animationDuration: 350,
 			tooltip: {
+				...chartTooltipStyle,
 				formatter: (parameters: { value?: unknown }) => {
 					const value = Array.isArray(parameters.value) ? parameters.value : [];
 					const date = String(value[0] ?? "");
@@ -84,7 +87,7 @@ export function DailySpendingHeatmap({
 					return [
 						`<strong>${formattedDate}</strong>`,
 						formatCurrency(total, currency),
-						`${count} ${count === 1 ? "transaction" : "transactions"}`,
+						`<span class="text-muted-foreground">${count} ${count === 1 ? "transaction" : "transactions"}</span>`,
 					].join("<br/>");
 				},
 			},
@@ -93,7 +96,7 @@ export function DailySpendingHeatmap({
 					type: "piecewise",
 					show: false,
 					seriesIndex: 0,
-					pieces: [{ value: 0, color: "rgba(152, 162, 179, 0.12)" }],
+					pieces: [{ value: 0, color: emptyCellColor }],
 				},
 				{
 					type: "piecewise",
@@ -106,7 +109,7 @@ export function DailySpendingHeatmap({
 					itemWidth: 12,
 					itemHeight: 12,
 					itemGap: 12,
-					textStyle: { color: "#98a2b3", fontSize: 11 },
+					textStyle: chartTextStyle,
 					seriesIndex: 1,
 					pieces: spendingIntensityLegend,
 				},
@@ -127,14 +130,12 @@ export function DailySpendingHeatmap({
 				dayLabel: {
 					firstDay: 1,
 					nameMap: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-					color: "#98a2b3",
-					fontSize: 11,
+					...chartTextStyle,
 				},
 				monthLabel: {
 					show: true,
 					nameMap: "en",
-					color: "#98a2b3",
-					fontSize: 11,
+					...chartTextStyle,
 				},
 				yearLabel: { show: false },
 			},
@@ -143,7 +144,7 @@ export function DailySpendingHeatmap({
 					type: "heatmap",
 					coordinateSystem: "calendar",
 					silent: true,
-					itemStyle: { color: "rgba(152, 162, 179, 0.12)" },
+					itemStyle: { color: emptyCellColor },
 					data: missingDates.map((date) => [date, 0]),
 				},
 				{
@@ -203,7 +204,7 @@ export function DailySpendingHeatmap({
 				/>
 			</div>
 			<ul
-				className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground"
+				className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-foreground"
 				aria-label="Spending intensity legend"
 			>
 				{spendingIntensityLegend.map(({ value, label, color }) => (

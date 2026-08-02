@@ -121,6 +121,11 @@
 		--selection-text: hsl(var(--secondary));
 		--stroke-muted: hsl(var(--muted-foreground));
 		--stroke-strong: hsl(var(--foreground));
+		--chart-plot-background: color-mix(
+			in oklab,
+			var(--color-border) 20%,
+			transparent
+		);
 	}
 
 	:root[data-theme="dark"] {
@@ -161,6 +166,11 @@
 		--selection-text: hsl(var(--accent-foreground));
 		--stroke-muted: hsl(var(--muted-foreground));
 		--stroke-strong: hsl(var(--foreground));
+		--chart-plot-background: color-mix(
+			in oklab,
+			var(--color-border) 10%,
+			transparent
+		);
 	}
 
 	@media (prefers-contrast: more) {

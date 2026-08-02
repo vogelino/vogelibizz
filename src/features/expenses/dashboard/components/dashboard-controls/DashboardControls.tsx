@@ -62,12 +62,24 @@ export function DashboardControls({
 					>
 						<ChevronLeft className="size-5" />
 					</Button>
-					<Combobox
-						options={monthOptions}
-						value={view.current.month}
-						onChange={onMonthChange}
-						className="text-xl h-12 font-semibold"
-					/>
+					<div className="grid">
+						{monthOptions.map((option) => (
+							<span
+								key={option.value}
+								aria-hidden="true"
+								className="invisible col-start-1 row-start-1 flex h-12 items-center whitespace-nowrap pl-3 pr-4 text-xl font-semibold"
+							>
+								{option.label}
+								<span className="ml-2 size-4" />
+							</span>
+						))}
+						<Combobox
+							options={monthOptions}
+							value={view.current.month}
+							onChange={onMonthChange}
+							className="col-start-1 row-start-1 h-12 w-full text-xl font-semibold"
+						/>
+					</div>
 					<Button
 						disabled={!view.nextMonth}
 						onClick={() => onMonthChange(view.nextMonth)}
