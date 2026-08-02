@@ -9,7 +9,7 @@ type DistributionBarsProps = CategoryDistributionProps;
 const distributionBarWrapperClass = cn(
 	"grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-3",
 );
-const distributionBarLabelClass = cn("truncate text-xs");
+const distributionBarLabelClass = cn("truncate text-sm text-foreground");
 
 export function DistributionBars({
 	view,
@@ -44,9 +44,7 @@ export function DistributionBars({
 				/>
 			</div>
 			<div className={distributionBarWrapperClass}>
-				<p className={cn(distributionBarLabelClass, "text-muted-foreground")}>
-					Comparison
-				</p>
+				<p className={distributionBarLabelClass}>Comparison</p>
 				<DistributionBar
 					categories={baselineCategories}
 					currency={dashboard.currency}

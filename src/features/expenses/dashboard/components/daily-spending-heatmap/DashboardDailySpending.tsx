@@ -25,7 +25,7 @@ export function DashboardDailySpending({
 			title="Spending habits"
 			description={`${rangeStart}–${rangeEnd} · savings are not counted as spending`}
 		>
-			<div className="space-y-8">
+			<div className="space-y-8 pb-24">
 				<DailySpendingHeatmap habits={habits} currency={dashboard.currency} />
 				<div className="grid gap-x-10 gap-y-8 sm:grid-cols-3">
 					<DashboardMetric

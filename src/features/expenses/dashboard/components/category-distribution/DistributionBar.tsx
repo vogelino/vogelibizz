@@ -61,13 +61,13 @@ export function DistributionBar({
 								aria-label={`${categoryLabel}: ${formatCurrency(item.total, currency)}, ${percentage.toFixed(1)}%. View transactions.`}
 							/>
 						</TooltipTrigger>
-						<TooltipContent className="bg-popover text-popover-foreground">
+						<TooltipContent className="text-sm text-foreground">
 							<p className="font-medium">{categoryLabel}</p>
 							<p>
 								{formatCurrency(item.total, currency)} · {percentage.toFixed(1)}
 								%
 							</p>
-							<p className="mt-1 text-xs opacity-75">Click to view</p>
+							<p className="mt-1 opacity-75">Click to view</p>
 						</TooltipContent>
 					</Tooltip>
 				);

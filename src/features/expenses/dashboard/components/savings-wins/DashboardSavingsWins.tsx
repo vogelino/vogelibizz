@@ -1,5 +1,6 @@
 import { Flame, PiggyBank, Trophy } from "lucide-react";
 import { useMemo } from "react";
+import { cn } from "@/utility/classNames";
 import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
 import { formatCurrency } from "@/utility/formatUtil";
 import { formatExpenseHistoryMonth } from "../../../ExpenseHistoryPresentation";
@@ -50,7 +51,13 @@ export function DashboardSavingsWins({
 			description="Small steps add up. Celebrate what you put away."
 		>
 			<div className="grid border border-border xl:grid-cols-[2fr_1fr_1fr_1fr]">
-				<div className="bg-green-500/5 p-5 sm:p-6 md:px-8 ring-1 ring-green-500/30 relative z-10 col-span-2">
+				<div
+					className={cn(
+						"p-5 sm:p-6 md:px-8 relative z-10 col-span-2",
+						wins.currentSavings > 0 &&
+							"ring-1 bg-green-500/10 ring-green-500/50",
+					)}
+				>
 					<DashboardMetric
 						label={`Saved in ${currentTitle}`}
 						value={formatCurrency(wins.currentSavings, dashboard.currency)}

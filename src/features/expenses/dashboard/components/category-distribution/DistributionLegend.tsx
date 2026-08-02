@@ -16,7 +16,7 @@ export function DistributionLegend({
 	onSelectCurrent,
 }: DistributionLegendProps) {
 	return (
-		<ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+		<ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 pb-6 text-foreground">
 			{currentCategories.map((item) => {
 				const label = getExpenseCategoryLabel(item.category);
 				return (

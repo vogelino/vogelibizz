@@ -16,6 +16,7 @@ export function DashboardCategoryDistribution({
 		<DashboardSection
 			title="Where the money went"
 			description={`${currentTitle} compared with ${view.baselineLabel}. Hover for details; click to inspect transactions.`}
+			className="pb-8 pt-4"
 		>
 			<DashboardDistribution
 				view={view}

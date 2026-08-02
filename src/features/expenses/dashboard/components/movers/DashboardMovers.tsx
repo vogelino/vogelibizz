@@ -33,8 +33,8 @@ export function DashboardMovers({
 
 	return (
 		<DashboardSection
-			title="What changed"
-			description={`Categories driving the difference from ${view.baselineLabel}`}
+			title="How spending changed"
+			description={`${currentTitle} compared with ${view.baselineLabel}`}
 		>
 			{view.baselineTotal === null ? (
 				<DashboardSectionMessage>

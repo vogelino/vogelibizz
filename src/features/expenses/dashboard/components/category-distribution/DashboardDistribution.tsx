@@ -20,16 +20,16 @@ export function DashboardDistribution({
 
 	return (
 		<TooltipProvider delayDuration={100}>
+			<DistributionLegend
+				currentCategories={view.current.categories}
+				total={total}
+				onSelectCurrent={onSelectCurrent}
+			/>
 			<DistributionBars
 				view={view}
 				dashboard={dashboard}
 				onSelectCurrent={onSelectCurrent}
 				onSelectBaseline={onSelectBaseline}
-			/>
-			<DistributionLegend
-				currentCategories={view.current.categories}
-				total={total}
-				onSelectCurrent={onSelectCurrent}
 			/>
 		</TooltipProvider>
 	);
