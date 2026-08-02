@@ -28,6 +28,11 @@ import {
 	ExpensesOverviewPanelLayout,
 	ExpensesOverviewValue,
 } from "./ExpensesOverviewPanel";
+import {
+	getCategoryStrokeColor,
+	getTypeStrokeColor,
+	MiniPieChart,
+} from "./MiniPieChart";
 
 export function formatExpenseHistoryMonth(month: string) {
 	const [year, monthNumber] = month.split("-").map(Number);
@@ -295,6 +300,9 @@ type ExpenseHistoryOverviewPanelProps =
 			loading: false;
 			summary: ExpenseHistoryMonthDetail["summary"];
 			currency: CurrencyIdType;
+			categorySeries: { label: string; value: number }[];
+			typeSeries: { label: string; value: number }[];
+			chartsLoading: boolean;
 	  };
 
 export function ExpenseHistoryOverviewPanel(
@@ -302,16 +310,51 @@ export function ExpenseHistoryOverviewPanel(
 ) {
 	if (props.loading) {
 		return (
-			<ExpensesOverviewPanelLayout>
+			<ExpensesOverviewPanelLayout
+				aside={
+					<>
+						<MiniPieChart
+							title="By category"
+							series={[]}
+							colorForLabel={getCategoryStrokeColor}
+							loading
+						/>
+						<MiniPieChart
+							title="By type"
+							series={[]}
+							colorForLabel={getTypeStrokeColor}
+							loading
+						/>
+					</>
+				}
+			>
 				<ExpensesOverviewValue label="Total" value="" loading />
 				<ExpensesOverviewValue label="Matched" value="" loading />
 				<ExpensesOverviewValue label="Other" value="" loading />
 			</ExpensesOverviewPanelLayout>
 		);
 	}
-	const { currency, summary } = props;
+	const { categorySeries, chartsLoading, currency, summary, typeSeries } =
+		props;
 	return (
-		<ExpensesOverviewPanelLayout>
+		<ExpensesOverviewPanelLayout
+			aside={
+				<>
+					<MiniPieChart
+						title="By category"
+						series={categorySeries}
+						colorForLabel={getCategoryStrokeColor}
+						loading={chartsLoading}
+					/>
+					<MiniPieChart
+						title="By type"
+						series={typeSeries}
+						colorForLabel={getTypeStrokeColor}
+						loading={chartsLoading}
+					/>
+				</>
+			}
+		>
 			<div className="contents" aria-live="polite">
 				<ExpensesOverviewValue
 					label="Total"

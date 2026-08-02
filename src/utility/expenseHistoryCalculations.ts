@@ -31,6 +31,55 @@ export type ExpenseHistorySummary = {
 	observedMonthlyAverage: number | null;
 };
 
+export type ExpenseHistoryMonthlySummary = {
+	total: number;
+	matched: number;
+	other: number;
+};
+
+export function calculateExpenseHistoryMonthlySummary(
+	transactions: readonly {
+		amount: number;
+		expense: unknown | null;
+	}[],
+): ExpenseHistoryMonthlySummary {
+	let total = 0;
+	let matched = 0;
+	let other = 0;
+
+	for (const transaction of transactions) {
+		assertNonNegativeFiniteAmount(transaction.amount, "Transaction amount");
+		total += transaction.amount;
+		if (transaction.expense === null) {
+			other += transaction.amount;
+		} else {
+			matched += transaction.amount;
+		}
+	}
+
+	return { total, matched, other };
+}
+
+export function calculateExpenseHistoryClassificationTotals<
+	Transaction extends { amount: number },
+>(
+	transactions: readonly Transaction[],
+	getClassification: (transaction: Transaction) => string | null,
+) {
+	const totals = new Map<string, number>();
+	for (const transaction of transactions) {
+		assertNonNegativeFiniteAmount(transaction.amount, "Transaction amount");
+		const classification = getClassification(transaction) ?? "Unclassified";
+		totals.set(
+			classification,
+			(totals.get(classification) ?? 0) + transaction.amount,
+		);
+	}
+	return [...totals.entries()]
+		.map(([label, value]) => ({ label, value }))
+		.sort((a, b) => b.value - a.value);
+}
+
 export function calculateExpenseHistorySummary({
 	importedMonths,
 	transactions,

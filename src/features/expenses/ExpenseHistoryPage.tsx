@@ -32,6 +32,10 @@ import {
 	getValueInTargetCurrencyPerMonth,
 	type RatesMapType,
 } from "@/utility/expenseFetchUtil";
+import {
+	calculateExpenseHistoryClassificationTotals,
+	calculateExpenseHistoryMonthlySummary,
+} from "@/utility/expenseHistoryCalculations";
 import type {
 	ExpenseHistoryTransaction,
 	ExpenseHistoryTransactionMutation,
@@ -329,37 +333,60 @@ export default function ExpenseHistoryPage() {
 		return matchingCategory.filter((transaction) => {
 			const transactionMonth = transaction.bookedAt.slice(0, 7);
 			return (
+				(filters.category.length === 0 ||
+					(transaction.category !== null &&
+						filters.category.includes(transaction.category))) &&
+				(filters.type === "All types" || transaction.type === filters.type) &&
+				(!filters.otherOnly || transaction.expense === null) &&
 				(!search.fromMonth || transactionMonth >= search.fromMonth) &&
 				(!search.toMonth || transactionMonth <= search.toMonth)
 			);
 		});
 	}, [
+		filters.category,
+		filters.otherOnly,
+		filters.type,
 		filters.uncategorizedOnly,
 		search.fromMonth,
 		search.q,
 		search.toMonth,
 		transactions,
 	]);
+	const hasActiveHistoryFilters =
+		filters.category.length > 0 ||
+		filters.type !== "All types" ||
+		filters.otherOnly ||
+		filters.uncategorizedOnly ||
+		Boolean(search.q || search.fromMonth || search.toMonth);
+	const filteredSummary = useMemo(
+		() => calculateExpenseHistoryMonthlySummary(visibleTransactions),
+		[visibleTransactions],
+	);
+	const historyChartSeries = useMemo(
+		() => ({
+			categories: calculateExpenseHistoryClassificationTotals(
+				visibleTransactions,
+				(transaction) => transaction.category,
+			),
+			types: calculateExpenseHistoryClassificationTotals(
+				visibleTransactions,
+				(transaction) => transaction.type,
+			),
+		}),
+		[visibleTransactions],
+	);
+	const filteredSummaryLoading =
+		hasActiveHistoryFilters &&
+		(monthQuery.hasNextPage || monthQuery.isFetchingNextPage);
 	useEffect(() => {
-		if (
-			(!search.q &&
-				!filters.uncategorizedOnly &&
-				!search.fromMonth &&
-				!search.toMonth) ||
-			!monthQuery.hasNextPage ||
-			monthQuery.isFetchingNextPage
-		) {
+		if (!monthQuery.hasNextPage || monthQuery.isFetchingNextPage) {
 			return;
 		}
 		void monthQuery.fetchNextPage();
 	}, [
-		filters.uncategorizedOnly,
 		monthQuery.fetchNextPage,
 		monthQuery.hasNextPage,
 		monthQuery.isFetchingNextPage,
-		search.fromMonth,
-		search.q,
-		search.toMonth,
 	]);
 	const loadMoreTransactions = useCallback(() => {
 		if (monthQuery.hasNextPage && !monthQuery.isFetchingNextPage) {
@@ -444,13 +471,22 @@ export default function ExpenseHistoryPage() {
 					</output>
 				) : (
 					<>
-						{historyLoading ? (
+						{historyLoading || filteredSummaryLoading ? (
 							<ExpenseHistoryOverviewPanel loading />
 						) : monthDetail ? (
 							<ExpenseHistoryOverviewPanel
 								loading={false}
-								summary={monthDetail.summary}
+								summary={
+									hasActiveHistoryFilters
+										? filteredSummary
+										: monthDetail.summary
+								}
 								currency={monthDetail.currency}
+								categorySeries={historyChartSeries.categories}
+								typeSeries={historyChartSeries.types}
+								chartsLoading={
+									monthQuery.hasNextPage || monthQuery.isFetchingNextPage
+								}
 							/>
 						) : null}
 						<DataTable

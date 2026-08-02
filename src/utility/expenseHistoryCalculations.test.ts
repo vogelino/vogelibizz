@@ -1,5 +1,47 @@
 import { describe, expect, test } from "bun:test";
-import { calculateExpenseHistorySummary } from "./expenseHistoryCalculations";
+import {
+	calculateExpenseHistoryClassificationTotals,
+	calculateExpenseHistoryMonthlySummary,
+	calculateExpenseHistorySummary,
+} from "./expenseHistoryCalculations";
+
+describe("calculateExpenseHistoryMonthlySummary", () => {
+	test("totals the filtered transactions by association", () => {
+		expect(
+			calculateExpenseHistoryMonthlySummary([
+				{ amount: 20, expense: { id: 1 } },
+				{ amount: 7.5, expense: null },
+				{ amount: 2.5, expense: { id: 2 } },
+			]),
+		).toEqual({ total: 30, matched: 22.5, other: 7.5 });
+	});
+
+	test("returns zero values when filters match no transactions", () => {
+		expect(calculateExpenseHistoryMonthlySummary([])).toEqual({
+			total: 0,
+			matched: 0,
+			other: 0,
+		});
+	});
+
+	test("builds sorted chart totals and keeps unclassified spending visible", () => {
+		const transactions = [
+			{ amount: 5, category: "Home" },
+			{ amount: 12, category: null },
+			{ amount: 10, category: "Home" },
+		];
+
+		expect(
+			calculateExpenseHistoryClassificationTotals(
+				transactions,
+				(transaction) => transaction.category,
+			),
+		).toEqual([
+			{ label: "Home", value: 15 },
+			{ label: "Unclassified", value: 12 },
+		]);
+	});
+});
 
 describe("calculateExpenseHistorySummary", () => {
 	test("uses every imported month, including zero-spend months, and ignores calendar gaps", () => {
