@@ -93,7 +93,7 @@
 		"typescript": "6.0.3",
 		"vite": "^6.0.0",
 		"vite-tsconfig-paths": "^5.1.4",
-		"wrangler": "4.63.0"
+		"wrangler": "4.136.3"
 	},
 	"type": "module"
 }
