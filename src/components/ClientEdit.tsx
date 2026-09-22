@@ -144,7 +144,7 @@ export default function ClientEdit({
 				onBulkComplete?.();
 				return;
 			}
-			navigate({ to: "/clients" });
+			navigate({ to: "/clients", search: true });
 			if (id) editMutation.mutate({ ...clientData, id });
 			else createMutation.mutate([clientData]);
 		},

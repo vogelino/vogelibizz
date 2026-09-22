@@ -210,6 +210,7 @@ export default function ExpenseHistoryPage() {
 				mask: {
 					to: "/expenses/history/edit/$id",
 					params: { id },
+					search: true,
 					unmaskOnReload: true,
 				},
 			});
@@ -224,6 +225,7 @@ export default function ExpenseHistoryPage() {
 				mask: {
 					to: "/expenses/history/create-expense/$id",
 					params: { id },
+					search: true,
 					unmaskOnReload: true,
 				},
 			});

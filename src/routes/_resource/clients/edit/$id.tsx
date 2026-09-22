@@ -48,7 +48,7 @@ function ClientEditPageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to="/clients">
+						<Link to="/clients" search>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

@@ -44,6 +44,7 @@ export const Menu = ({ withBg = true, currentPage }: MenuProps) => {
 		>
 			<Link
 				to="/projects"
+				search
 				className={cn(
 					"group",
 					"px-4 -ml-4 py-2",

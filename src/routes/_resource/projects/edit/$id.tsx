@@ -48,7 +48,7 @@ function ProjectEditPageRoute() {
 			footerButtons={
 				<>
 					<Button asChild variant="outline">
-						<Link to="/projects">
+						<Link to="/projects" search>
 							<span>{"Cancel"}</span>
 						</Link>
 					</Button>

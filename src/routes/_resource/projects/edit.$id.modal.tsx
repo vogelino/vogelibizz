@@ -35,13 +35,13 @@ function ProjectEditModal() {
 			<ResponsiveModal
 				open
 				title={<PageHeaderTitle name="Edit project" id={parsedId} />}
-				onClose={() => navigate({ to: "/projects" })}
+				onClose={() => navigate({ to: "/projects", search: true })}
 				footer={
 					<>
 						<Button asChild variant="outline">
 							<button
 								type="button"
-								onClick={() => navigate({ to: "/projects" })}
+								onClick={() => navigate({ to: "/projects", search: true })}
 							>
 								Cancel
 							</button>

@@ -61,13 +61,13 @@ export default function EditResourceModal({
 function getListRoute(resource: RoutedResource) {
 	switch (resource) {
 		case "clients":
-			return linkOptions({ to: "/clients" });
+			return linkOptions({ to: "/clients", search: true });
 		case "expenses":
-			return linkOptions({ to: "/expenses" });
+			return linkOptions({ to: "/expenses", search: true });
 		case "projects":
-			return linkOptions({ to: "/projects" });
+			return linkOptions({ to: "/projects", search: true });
 		case "invoices":
-			return linkOptions({ to: "/invoices" });
+			return linkOptions({ to: "/invoices", search: true });
 		default: {
 			const _exhaustive: never = resource;
 			throw new Error(`Unhandled resource ${_exhaustive}`);

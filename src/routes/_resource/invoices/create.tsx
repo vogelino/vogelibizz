@@ -58,7 +58,11 @@ function InvoiceCreateRoute() {
 				queryKey: invoicesQueryOptions().queryKey,
 			});
 			await queryClient.prefetchQuery(invoiceQueryOptions(createdId));
-			navigate({ to: "/invoices/$id", params: { id: String(createdId) } });
+			navigate({
+				to: "/invoices/$id",
+				params: { id: String(createdId) },
+				search: true,
+			});
 		},
 	});
 
@@ -138,7 +142,9 @@ function InvoiceCreateRoute() {
 							Try again
 						</Button>
 						<Button asChild variant="outline">
-							<Link to="/invoices">Back to invoices</Link>
+							<Link to="/invoices" search>
+								Back to invoices
+							</Link>
 						</Button>
 					</div>
 				</div>

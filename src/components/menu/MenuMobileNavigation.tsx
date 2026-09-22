@@ -35,6 +35,7 @@ export function MenuMobileNavigation({
 											<li key={subItem.key}>
 												<Link
 													to={subItem.route}
+													search
 													aria-current={active ? "page" : undefined}
 													onClick={() => onLinkClick?.(subItem)}
 													className="flex items-center gap-3 px-8 py-3 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring aria-[current=page]:bg-accent aria-[current=page]:font-semibold"
@@ -58,6 +59,7 @@ export function MenuMobileNavigation({
 						<li key={item.key} className="border-b border-border">
 							<Link
 								to={item.route}
+								search
 								aria-current={active ? "page" : undefined}
 								onClick={() => onLinkClick?.(item)}
 								className="flex items-center gap-3 px-4 py-4 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring aria-[current=page]:bg-accent aria-[current=page]:font-semibold"

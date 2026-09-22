@@ -38,13 +38,13 @@ function ProjectCreateModal() {
 						name={duplicate ? "Duplicate project" : "Create project"}
 					/>
 				}
-				onClose={() => navigate({ to: "/projects" })}
+				onClose={() => navigate({ to: "/projects", search: true })}
 				footer={
 					<>
 						<Button asChild variant="outline">
 							<button
 								type="button"
-								onClick={() => navigate({ to: "/projects" })}
+								onClick={() => navigate({ to: "/projects", search: true })}
 							>
 								Cancel
 							</button>

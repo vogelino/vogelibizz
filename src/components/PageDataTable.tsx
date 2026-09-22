@@ -81,9 +81,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 					return navigate({
 						to: "/clients/edit/$id/modal",
 						params: { id },
+						search: true,
 						mask: {
 							to: "/clients/edit/$id",
 							params: { id },
+							search: true,
 							unmaskOnReload: true,
 						},
 					});
@@ -91,9 +93,11 @@ export default function PageDataTable<DataType extends { id: number }>({
 					return navigate({
 						to: "/projects/edit/$id/modal",
 						params: { id },
+						search: true,
 						mask: {
 							to: "/projects/edit/$id",
 							params: { id },
+							search: true,
 							unmaskOnReload: true,
 						},
 					});
@@ -105,11 +109,16 @@ export default function PageDataTable<DataType extends { id: number }>({
 						mask: {
 							to: "/expenses/edit/$id",
 							params: { id },
+							search: true,
 							unmaskOnReload: true,
 						},
 					});
 				case "invoices":
-					return navigate({ to: "/invoices/$id", params: { id } });
+					return navigate({
+						to: "/invoices/$id",
+						params: { id },
+						search: true,
+					});
 			}
 		},
 		onDuplicate: (row) => {
@@ -118,20 +127,20 @@ export default function PageDataTable<DataType extends { id: number }>({
 				case "clients":
 					return navigate({
 						to: "/clients/create/modal",
-						search: { duplicateId },
+						search: (previous) => ({ ...previous, duplicateId }),
 						mask: {
 							to: "/clients/create",
-							search: { duplicateId },
+							search: (previous) => ({ ...previous, duplicateId }),
 							unmaskOnReload: true,
 						},
 					});
 				case "projects":
 					return navigate({
 						to: "/projects/create/modal",
-						search: { duplicateId },
+						search: (previous) => ({ ...previous, duplicateId }),
 						mask: {
 							to: "/projects/create",
-							search: { duplicateId },
+							search: (previous) => ({ ...previous, duplicateId }),
 							unmaskOnReload: true,
 						},
 					});
@@ -149,9 +158,10 @@ export default function PageDataTable<DataType extends { id: number }>({
 					return navigate({
 						to: "/invoices/duplicate/$id/modal",
 						params: { id: String(duplicateId) },
+						search: true,
 						mask: {
 							to: "/invoices/create",
-							search: { duplicateId },
+							search: (previous) => ({ ...previous, duplicateId }),
 							unmaskOnReload: true,
 						},
 					});

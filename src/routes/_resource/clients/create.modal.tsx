@@ -38,13 +38,13 @@ function ClientCreateModal() {
 						name={duplicate ? "Duplicate client" : "Create client"}
 					/>
 				}
-				onClose={() => navigate({ to: "/clients" })}
+				onClose={() => navigate({ to: "/clients", search: true })}
 				footer={
 					<>
 						<Button asChild variant="outline">
 							<button
 								type="button"
-								onClick={() => navigate({ to: "/clients" })}
+								onClick={() => navigate({ to: "/clients", search: true })}
 							>
 								Cancel
 							</button>

@@ -94,6 +94,7 @@ export function MenuDesktopNavigation({
 								<NavigationMenuTrigger data-active={active ? "" : undefined}>
 									<Link
 										to={item.routes[0].route}
+										search
 										title={item.label}
 										onClick={() => onLinkClick?.(item)}
 										className="inline-flex items-center gap-2 whitespace-nowrap"
@@ -122,6 +123,7 @@ export function MenuDesktopNavigation({
 													>
 														<Link
 															to={subItem.route}
+															search
 															aria-current={active ? "page" : undefined}
 														>
 															<SubItemIcon
@@ -148,6 +150,7 @@ export function MenuDesktopNavigation({
 							>
 								<Link
 									to={item.route}
+									search
 									title={item.label ?? "-"}
 									onClick={() => onLinkClick?.(item)}
 								>

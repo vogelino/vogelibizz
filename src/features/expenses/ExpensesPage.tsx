@@ -126,6 +126,7 @@ export default function ExpensesPage({
 				mask: {
 					to: "/expenses/edit/$id",
 					params: { id },
+					search: true,
 					unmaskOnReload: true,
 				},
 			});

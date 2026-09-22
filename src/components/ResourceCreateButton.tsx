@@ -31,13 +31,13 @@ function ResourceCreateButton({ resource }: { resource: RoutedResource }) {
 function getCreateRoute(resource: RoutedResource) {
 	switch (resource) {
 		case "clients":
-			return linkOptions({ to: "/clients/create/modal" });
+			return linkOptions({ to: "/clients/create/modal", search: true });
 		case "expenses":
 			return linkOptions({ to: "/expenses/create/modal", search: true });
 		case "projects":
-			return linkOptions({ to: "/projects/create/modal" });
+			return linkOptions({ to: "/projects/create/modal", search: true });
 		case "invoices":
-			return linkOptions({ to: "/invoices/create" });
+			return linkOptions({ to: "/invoices/create", search: true });
 		default: {
 			const _exhaustive: never = resource;
 			throw new Error(`Unhandled resource ${_exhaustive}`);
@@ -48,11 +48,11 @@ function getCreateRoute(resource: RoutedResource) {
 function getCreateMaskRoute(resource: RoutedResource) {
 	switch (resource) {
 		case "clients":
-			return linkOptions({ to: "/clients/create" });
+			return linkOptions({ to: "/clients/create", search: true });
 		case "expenses":
-			return linkOptions({ to: "/expenses/create" });
+			return linkOptions({ to: "/expenses/create", search: true });
 		case "projects":
-			return linkOptions({ to: "/projects/create" });
+			return linkOptions({ to: "/projects/create", search: true });
 		case "invoices":
 			return null;
 		default: {

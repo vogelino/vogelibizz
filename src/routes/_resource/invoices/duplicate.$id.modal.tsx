@@ -61,7 +61,11 @@ function InvoiceDuplicateModal() {
 			await queryClient.invalidateQueries({
 				queryKey: invoicesQueryOptions().queryKey,
 			});
-			navigate({ to: "/invoices/$id", params: { id: String(createdId) } });
+			navigate({
+				to: "/invoices/$id",
+				params: { id: String(createdId) },
+				search: true,
+			});
 		},
 	});
 
@@ -71,13 +75,13 @@ function InvoiceDuplicateModal() {
 			<ResponsiveModal
 				open
 				title={<PageHeaderTitle name="Duplicate invoice" />}
-				onClose={() => navigate({ to: "/invoices" })}
+				onClose={() => navigate({ to: "/invoices", search: true })}
 				footer={
 					<>
 						<Button
 							type="button"
 							variant="outline"
-							onClick={() => navigate({ to: "/invoices" })}
+							onClick={() => navigate({ to: "/invoices", search: true })}
 						>
 							Cancel
 						</Button>

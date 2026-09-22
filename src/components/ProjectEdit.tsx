@@ -146,7 +146,7 @@ export default function ProjectEdit({
 				onBulkComplete?.();
 				return;
 			}
-			navigate({ to: "/projects" });
+			navigate({ to: "/projects", search: true });
 			if (id) editMutation.mutate({ ...projectData, id: Number(id) });
 			else createMutation.mutate([projectData]);
 		},
