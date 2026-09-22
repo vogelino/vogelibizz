@@ -31,6 +31,7 @@ const translatedCategories = {
 	"Öffentlicher Verkehr": "Transport",
 	Persönliches: "Essentials",
 	Reisen: "Travel",
+	Rückerstattungen: "Other Income",
 	Shopping: "Shopping",
 	"Sparen & Anlegen": "Savings",
 	Steuern: "Taxes",
