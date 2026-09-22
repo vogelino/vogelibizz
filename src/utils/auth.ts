@@ -9,6 +9,7 @@ export const authConfig: StartAuthJSConfig = {
 		GitHub({
 			clientId: env.server.AUTH_GITHUB_ID,
 			clientSecret: env.server.AUTH_GITHUB_SECRET,
+			issuer: "https://github.com/login/oauth",
 		}),
 	],
 };
