@@ -21,29 +21,29 @@ export function FilterBar({ children, className }: FilterBarProps) {
 }
 
 export function useFilterControls(active: boolean) {
-	const [open, setOpen] = useState(false);
-
+	const [open, setOpen] = useState<boolean | null>(null);
 	useEffect(() => {
-		if (active) setOpen(false);
+		if (active) setOpen(true);
 	}, [active]);
-
-	const visible = active || open;
-	const toggle = useCallback(() => setOpen((current) => !current), []);
+	const visible = open ?? active;
+	const toggle = useCallback(
+		() => setOpen((current) => !(current ?? active)),
+		[active],
+	);
 	const action = useMemo(
-		() =>
-			active ? null : (
-				<Button
-					variant={visible ? "default" : "ghost"}
-					size="icon"
-					aria-label={visible ? "Hide table controls" : "Show table controls"}
-					aria-expanded={visible}
-					title={visible ? "Hide table controls" : "Show table controls"}
-					onClick={toggle}
-				>
-					<ListFilter size={20} aria-hidden="true" />
-				</Button>
-			),
-		[active, toggle, visible],
+		() => (
+			<Button
+				variant={visible ? "default" : "ghost"}
+				size="icon"
+				aria-label={visible ? "Hide table controls" : "Show table controls"}
+				aria-expanded={visible}
+				title={visible ? "Hide table controls" : "Show table controls"}
+				onClick={toggle}
+			>
+				<ListFilter size={20} aria-hidden="true" />
+			</Button>
+		),
+		[toggle, visible],
 	);
 
 	return { action, visible };
