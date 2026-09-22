@@ -257,8 +257,7 @@ export default function ExpenseHistoryTransactionEditor({
 			{!transaction.expense ? (
 				<div className="border border-border bg-muted/30 p-4">
 					<p className="text-sm text-muted-foreground">
-						Create a Monthly CHF recurring expense from this transaction and
-						associate it atomically.
+						Create a recurring expense from this transaction and link them.
 					</p>
 					<Button asChild type="button" variant="outline" className="mt-3">
 						<Link

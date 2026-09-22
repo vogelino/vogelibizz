@@ -113,7 +113,7 @@ describe("expense history mutation HTTP API", () => {
 		).toBe(404);
 	});
 
-	test("create-and-associate contract fixes Monthly CHF fields server-side", async () => {
+	test("create-and-associate accepts a chosen billing frequency and currency", async () => {
 		let received: unknown;
 		const handlers = createExpenseHistoryMutationHandlers({
 			authorize: async () => true,
@@ -130,6 +130,8 @@ describe("expense history mutation HTTP API", () => {
 					lastModified: "old",
 					name: "Edited",
 					originalPrice: 0,
+					originalCurrency: "EUR",
+					rate: "Quarterly",
 					category: "Software",
 					type: "Personal",
 				},
@@ -142,6 +144,8 @@ describe("expense history mutation HTTP API", () => {
 			lastModified: "old",
 			name: "Edited",
 			originalPrice: 0,
+			originalCurrency: "EUR",
+			rate: "Quarterly",
 			category: "Software",
 			type: "Personal",
 		});

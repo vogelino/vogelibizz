@@ -224,13 +224,15 @@ export async function createAndAssociateExpense(
 		client
 			.prepare(`insert into expenses (
 				name, category, type, rate, original_price, original_currency, created_at, last_modified
-			) select ?, ?, ?, 'Monthly', ?, 'CHF', ?, ?
+			) select ?, ?, ?, ?, ?, ?, ?, ?
 			where exists (select 1 from expense_transactions where id = ? and last_modified = ?)`)
 			.bind(
 				input.name,
 				input.category,
 				input.type,
+				input.rate,
 				input.originalPrice,
+				input.originalCurrency,
 				createdAt,
 				createdAt,
 				id,

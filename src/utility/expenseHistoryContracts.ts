@@ -185,6 +185,8 @@ export const expenseHistoryCreateExpenseSchema = z.strictObject({
 	lastModified: z.string().min(1),
 	name: z.string().trim().min(1),
 	originalPrice: z.number().nonnegative(),
+	originalCurrency: z.enum(currencyEnum.enumValues),
+	rate: z.enum(expenseRateEnum.enumValues),
 	category: z.enum(expenseCategoryEnum.enumValues),
 	type: z.enum(expenseTypeEnum.enumValues),
 });

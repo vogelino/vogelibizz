@@ -8,7 +8,11 @@ import FormInputWrapper from "@/components/FormInputWrapper";
 import { Badge } from "@/components/ui/badge";
 import CurrencyInput from "@/components/ui/currency-input";
 import type { ExpenseType } from "@/db/schema";
-import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
+import {
+	expenseCategoryEnum,
+	expenseRateEnum,
+	expenseTypeEnum,
+} from "@/db/schema";
 import useExpenseHistoryTransaction from "@/utility/data/useExpenseHistoryTransaction";
 import { useExpenseHistoryTransactionMutations } from "@/utility/data/useExpenseHistoryTransactionMutations";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
@@ -34,6 +38,8 @@ export default function ExpenseHistoryCreateExpenseEditor({
 		defaultValues: {
 			name: transaction?.description ?? "",
 			originalPrice: transaction?.amount ?? 0,
+			originalCurrency: "CHF" as ExpenseType["originalCurrency"],
+			rate: "Monthly" as ExpenseType["rate"],
 			category: transaction?.category ?? "",
 			type: transaction?.type ?? "",
 		},
@@ -44,6 +50,8 @@ export default function ExpenseHistoryCreateExpenseEditor({
 					lastModified: transaction.lastModified,
 					name: value.name.trim(),
 					originalPrice: value.originalPrice,
+					originalCurrency: value.originalCurrency,
+					rate: value.rate,
 					category: value.category as ExpenseType["category"],
 					type: value.type as ExpenseType["type"],
 				});
@@ -59,6 +67,8 @@ export default function ExpenseHistoryCreateExpenseEditor({
 		form.reset({
 			name: transaction.description,
 			originalPrice: transaction.amount,
+			originalCurrency: "CHF",
+			rate: "Monthly",
 			category: transaction.category ?? "",
 			type: transaction.type ?? "",
 		});
@@ -84,6 +94,9 @@ export default function ExpenseHistoryCreateExpenseEditor({
 			) : (
 				<Badge variant="outline">Choose type</Badge>
 			),
+	});
+	const rateOptions = useComboboxOptions<ExpenseType["rate"]>({
+		optionValues: expenseRateEnum.enumValues,
 	});
 
 	if (detailQuery.isPending) return <output>Loading transaction…</output>;
@@ -114,8 +127,8 @@ export default function ExpenseHistoryCreateExpenseEditor({
 			}}
 		>
 			<p className="text-sm text-muted-foreground">
-				The recurring expense will use Monthly billing and CHF. It will be
-				created and associated with this transaction in one atomic operation.
+				Set the amount for each payment and how often you pay it. The new
+				expense will be linked to this transaction.
 			</p>
 			<form.Field
 				name="name"
@@ -141,28 +154,45 @@ export default function ExpenseHistoryCreateExpenseEditor({
 					</FormInputWrapper>
 				)}
 			</form.Field>
-			<form.Field
-				name="originalPrice"
-				validators={{
-					onSubmit: ({ value }) =>
-						Number.isFinite(value) && value >= 0
-							? undefined
-							: "Amount must be CHF 0 or greater.",
-				}}
-			>
-				{(field) => (
-					<CurrencyInput
-						label="Monthly amount"
-						currency="CHF"
-						currencyReadOnly
-						value={field.state.value}
-						onCurrencyChange={() => undefined}
-						onValueChange={field.handleChange}
-						inputProps={{
-							name: field.name,
-							onBlur: field.handleBlur,
-							disabled: pending,
+			<form.Field name="originalCurrency">
+				{(currencyField) => (
+					<form.Field
+						name="originalPrice"
+						validators={{
+							onSubmit: ({ value }) =>
+								Number.isFinite(value) && value >= 0
+									? undefined
+									: "Amount must be 0 or greater.",
 						}}
+					>
+						{(priceField) => (
+							<CurrencyInput
+								label="Amount per payment"
+								currency={currencyField.state.value}
+								value={priceField.state.value}
+								onCurrencyChange={currencyField.handleChange}
+								onValueChange={priceField.handleChange}
+								inputProps={{
+									name: priceField.name,
+									onBlur: priceField.handleBlur,
+									disabled: pending,
+								}}
+							/>
+						)}
+					</form.Field>
+				)}
+			</form.Field>
+			<form.Field name="rate">
+				{(field) => (
+					<FormInputCombobox
+						label="Billing frequency"
+						options={rateOptions}
+						value={field.state.value}
+						onChange={(value) =>
+							field.handleChange(value as ExpenseType["rate"])
+						}
+						className="w-full"
+						disabled={pending}
 					/>
 				)}
 			</form.Field>
