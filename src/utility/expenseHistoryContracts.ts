@@ -189,6 +189,19 @@ export const expenseHistoryCreateExpenseSchema = z.strictObject({
 	rate: z.enum(expenseRateEnum.enumValues),
 	category: z.enum(expenseCategoryEnum.enumValues),
 	type: z.enum(expenseTypeEnum.enumValues),
+	matches: z
+		.array(
+			z.strictObject({
+				id: z.number().int().positive(),
+				lastModified: z.string().min(1),
+			}),
+		)
+		.max(99)
+		.refine(
+			(matches) => new Set(matches.map(({ id }) => id)).size === matches.length,
+			"Choose each transaction only once.",
+		)
+		.optional(),
 });
 
 export type ExpenseHistoryTransactionMutation = z.infer<

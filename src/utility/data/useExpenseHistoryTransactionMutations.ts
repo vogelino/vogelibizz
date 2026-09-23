@@ -81,6 +81,12 @@ export function useExpenseHistoryTransactionMutations({
 				queryClient.invalidateQueries({
 					queryKey: expensesQueryOptions().queryKey,
 				}),
+				queryClient.invalidateQueries({
+					queryKey: ["expenseHistory", "transaction"],
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["expenseMatchSuggestions"],
+				}),
 			);
 		}
 		await Promise.all(invalidations);

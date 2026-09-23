@@ -61,6 +61,17 @@ export default defineConfig(() => {
 
   return {
     define: publicDefines,
+    resolve: {
+      dedupe: ["react", "react-dom", "echarts", "zrender"],
+    },
+    optimizeDeps: {
+      include: [
+        "echarts/charts",
+        "echarts/components",
+        "echarts/core",
+        "echarts/renderers",
+      ],
+    },
     plugins: [
       clientOnlyAliases(),
       cloudflare({ viteEnvironment: { name: "ssr" } }),

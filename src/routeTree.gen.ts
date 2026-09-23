@@ -31,6 +31,9 @@ import { Route as ResourceClientsIndexRouteImport } from './routes/_resource/cli
 import { Route as ApiProjectsBatchRouteImport } from './routes/api/projects/batch'
 import { Route as ApiProjectsIdRouteImport } from './routes/api/projects/$id'
 import { Route as ApiInvoicesIdRouteImport } from './routes/api/invoices/$id'
+import { Route as ApiExpensesWithMatchesRouteImport } from './routes/api/expenses/with-matches'
+import { Route as ApiExpensesMatchesRouteImport } from './routes/api/expenses/matches'
+import { Route as ApiExpensesEditWithMatchesRouteImport } from './routes/api/expenses/edit-with-matches'
 import { Route as ApiExpensesBatchRouteImport } from './routes/api/expenses/batch'
 import { Route as ApiExpensesIdRouteImport } from './routes/api/expenses/$id'
 import { Route as ApiExpenseHistoryOverviewRouteImport } from './routes/api/expense-history/overview'
@@ -176,6 +179,22 @@ const ApiInvoicesIdRoute = ApiInvoicesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiInvoicesRoute,
 } as any)
+const ApiExpensesWithMatchesRoute = ApiExpensesWithMatchesRouteImport.update({
+  id: '/with-matches',
+  path: '/with-matches',
+  getParentRoute: () => ApiExpensesRoute,
+} as any)
+const ApiExpensesMatchesRoute = ApiExpensesMatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
+  getParentRoute: () => ApiExpensesRoute,
+} as any)
+const ApiExpensesEditWithMatchesRoute =
+  ApiExpensesEditWithMatchesRouteImport.update({
+    id: '/edit-with-matches',
+    path: '/edit-with-matches',
+    getParentRoute: () => ApiExpensesRoute,
+  } as any)
 const ApiExpensesBatchRoute = ApiExpensesBatchRouteImport.update({
   id: '/batch',
   path: '/batch',
@@ -402,6 +421,9 @@ export interface FileRoutesByFullPath {
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/expenses/batch': typeof ApiExpensesBatchRoute
+  '/api/expenses/edit-with-matches': typeof ApiExpensesEditWithMatchesRoute
+  '/api/expenses/matches': typeof ApiExpensesMatchesRoute
+  '/api/expenses/with-matches': typeof ApiExpensesWithMatchesRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/api/projects/batch': typeof ApiProjectsBatchRoute
@@ -456,6 +478,9 @@ export interface FileRoutesByTo {
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/expenses/batch': typeof ApiExpensesBatchRoute
+  '/api/expenses/edit-with-matches': typeof ApiExpensesEditWithMatchesRoute
+  '/api/expenses/matches': typeof ApiExpensesMatchesRoute
+  '/api/expenses/with-matches': typeof ApiExpensesWithMatchesRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/api/projects/batch': typeof ApiProjectsBatchRoute
@@ -516,6 +541,9 @@ export interface FileRoutesById {
   '/api/expense-history/overview': typeof ApiExpenseHistoryOverviewRoute
   '/api/expenses/$id': typeof ApiExpensesIdRoute
   '/api/expenses/batch': typeof ApiExpensesBatchRoute
+  '/api/expenses/edit-with-matches': typeof ApiExpensesEditWithMatchesRoute
+  '/api/expenses/matches': typeof ApiExpensesMatchesRoute
+  '/api/expenses/with-matches': typeof ApiExpensesWithMatchesRoute
   '/api/invoices/$id': typeof ApiInvoicesIdRoute
   '/api/projects/$id': typeof ApiProjectsIdRoute
   '/api/projects/batch': typeof ApiProjectsBatchRoute
@@ -576,6 +604,9 @@ export interface FileRouteTypes {
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
     | '/api/expenses/batch'
+    | '/api/expenses/edit-with-matches'
+    | '/api/expenses/matches'
+    | '/api/expenses/with-matches'
     | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/api/projects/batch'
@@ -630,6 +661,9 @@ export interface FileRouteTypes {
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
     | '/api/expenses/batch'
+    | '/api/expenses/edit-with-matches'
+    | '/api/expenses/matches'
+    | '/api/expenses/with-matches'
     | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/api/projects/batch'
@@ -689,6 +723,9 @@ export interface FileRouteTypes {
     | '/api/expense-history/overview'
     | '/api/expenses/$id'
     | '/api/expenses/batch'
+    | '/api/expenses/edit-with-matches'
+    | '/api/expenses/matches'
+    | '/api/expenses/with-matches'
     | '/api/invoices/$id'
     | '/api/projects/$id'
     | '/api/projects/batch'
@@ -895,6 +932,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/invoices/$id'
       preLoaderRoute: typeof ApiInvoicesIdRouteImport
       parentRoute: typeof ApiInvoicesRoute
+    }
+    '/api/expenses/with-matches': {
+      id: '/api/expenses/with-matches'
+      path: '/with-matches'
+      fullPath: '/api/expenses/with-matches'
+      preLoaderRoute: typeof ApiExpensesWithMatchesRouteImport
+      parentRoute: typeof ApiExpensesRoute
+    }
+    '/api/expenses/matches': {
+      id: '/api/expenses/matches'
+      path: '/matches'
+      fullPath: '/api/expenses/matches'
+      preLoaderRoute: typeof ApiExpensesMatchesRouteImport
+      parentRoute: typeof ApiExpensesRoute
+    }
+    '/api/expenses/edit-with-matches': {
+      id: '/api/expenses/edit-with-matches'
+      path: '/edit-with-matches'
+      fullPath: '/api/expenses/edit-with-matches'
+      preLoaderRoute: typeof ApiExpensesEditWithMatchesRouteImport
+      parentRoute: typeof ApiExpensesRoute
     }
     '/api/expenses/batch': {
       id: '/api/expenses/batch'
@@ -1376,11 +1434,17 @@ const ApiClientsRouteWithChildren = ApiClientsRoute._addFileChildren(
 interface ApiExpensesRouteChildren {
   ApiExpensesIdRoute: typeof ApiExpensesIdRoute
   ApiExpensesBatchRoute: typeof ApiExpensesBatchRoute
+  ApiExpensesEditWithMatchesRoute: typeof ApiExpensesEditWithMatchesRoute
+  ApiExpensesMatchesRoute: typeof ApiExpensesMatchesRoute
+  ApiExpensesWithMatchesRoute: typeof ApiExpensesWithMatchesRoute
 }
 
 const ApiExpensesRouteChildren: ApiExpensesRouteChildren = {
   ApiExpensesIdRoute: ApiExpensesIdRoute,
   ApiExpensesBatchRoute: ApiExpensesBatchRoute,
+  ApiExpensesEditWithMatchesRoute: ApiExpensesEditWithMatchesRoute,
+  ApiExpensesMatchesRoute: ApiExpensesMatchesRoute,
+  ApiExpensesWithMatchesRoute: ApiExpensesWithMatchesRoute,
 }
 
 const ApiExpensesRouteWithChildren = ApiExpensesRoute._addFileChildren(

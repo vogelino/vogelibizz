@@ -6,6 +6,8 @@ import type {
 	ExpenseHistoryTransaction,
 	ExpenseHistoryTransactionMutation,
 } from "@/utility/expenseHistoryContracts";
+import { isHighConfidenceExpenseMatch } from "@/utility/expenseMatchSuggestions";
+import { expectedChfAmount } from "./expenseMatches";
 
 export class ExpenseHistoryConflictError extends Error {}
 export class ExpenseHistoryNotFoundError extends Error {}
@@ -211,10 +213,64 @@ export async function createAndAssociateExpense(
 			"This transaction is already associated. Reload before creating an expense.",
 		);
 	}
+	const matches = input.matches ?? [];
+	if (matches.some(({ id: matchId }) => matchId === id)) {
+		throw new ExpenseHistoryConflictError(
+			"The starting transaction is already included.",
+		);
+	}
+	if (matches.length > 0) {
+		const expectedAmount = await expectedChfAmount(input);
+		const rows = await db
+			.select({
+				id: expenseTransactions.id,
+				lastModified: expenseTransactions.last_modified,
+				expenseId: expenseTransactions.expenseId,
+				description: expenseTransactions.description,
+				amount: expenseTransactions.amount,
+			})
+			.from(expenseTransactions)
+			.where(
+				inArray(
+					expenseTransactions.id,
+					matches.map(({ id: matchId }) => matchId),
+				),
+			);
+		const byId = new Map(rows.map((row) => [row.id, row]));
+		if (
+			input.rate === "One-time" ||
+			!expectedAmount ||
+			matches.some(({ id: matchId, lastModified }) => {
+				const row = byId.get(matchId);
+				return (
+					!row ||
+					row.expenseId !== null ||
+					row.lastModified !== lastModified ||
+					!isHighConfidenceExpenseMatch({
+						name: current.description,
+						expectedChfAmount: expectedAmount,
+						description: row.description,
+						amount: row.amount,
+						foreignCurrency: input.originalCurrency !== "CHF",
+					})
+				);
+			})
+		) {
+			throw new ExpenseHistoryConflictError(
+				"Suggested transactions changed. Review the matches and try again.",
+			);
+		}
+	}
 	const claimedToken = nextToken(input.lastModified);
 	const finalToken = nextToken(claimedToken);
 	const createdAt = new Date().toISOString();
 	const client = db.$client;
+	const matchConditions = matches
+		.map(() => "(id = ? and last_modified = ?)")
+		.join(" or ");
+	const matchGuard = matches.length
+		? ` and (select count(*) from expense_transactions where expense_id is null and (${matchConditions})) = ?`
+		: "";
 	await client.batch([
 		client
 			.prepare(`update expense_transactions
@@ -225,7 +281,7 @@ export async function createAndAssociateExpense(
 			.prepare(`insert into expenses (
 				name, category, type, rate, original_price, original_currency, created_at, last_modified
 			) select ?, ?, ?, ?, ?, ?, ?, ?
-			where exists (select 1 from expense_transactions where id = ? and last_modified = ?)`)
+			where exists (select 1 from expense_transactions where id = ? and last_modified = ?)${matchGuard}`)
 			.bind(
 				input.name,
 				input.category,
@@ -237,6 +293,11 @@ export async function createAndAssociateExpense(
 				createdAt,
 				id,
 				claimedToken,
+				...matches.flatMap(({ id: matchId, lastModified }) => [
+					matchId,
+					lastModified,
+				]),
+				...(matches.length ? [matches.length] : []),
 			),
 		client
 			.prepare(`update expense_transactions
@@ -251,6 +312,25 @@ export async function createAndAssociateExpense(
 				id,
 				claimedToken,
 			),
+		...matches.map(({ id: matchId, lastModified }) =>
+			client
+				.prepare(`update expense_transactions set
+			expense_id = (select id from expenses where name = ? and created_at = ?),
+			category = ?, type = ?, last_modified = ?
+			where id = ? and last_modified = ? and expense_id is null
+			and exists (select 1 from expenses where name = ? and created_at = ?)`)
+				.bind(
+					input.name,
+					createdAt,
+					input.category,
+					input.type,
+					createdAt,
+					matchId,
+					lastModified,
+					input.name,
+					createdAt,
+				),
+		),
 	]);
 	const result = await readTransaction(id);
 	if (!result) throw new ExpenseHistoryNotFoundError("Transaction not found.");

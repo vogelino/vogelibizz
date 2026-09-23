@@ -1,8 +1,10 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
+import ExpenseMatchSuggestions from "@/components/ExpenseMatchSuggestions";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +17,8 @@ import {
 } from "@/db/schema";
 import useExpenseHistoryTransaction from "@/utility/data/useExpenseHistoryTransaction";
 import { useExpenseHistoryTransactionMutations } from "@/utility/data/useExpenseHistoryTransactionMutations";
+import { apiFetch } from "@/utility/dataHookUtil";
+import { expenseMatchSuggestionsSchema } from "@/utility/expenseMatchSuggestions";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
 
@@ -30,10 +34,40 @@ export default function ExpenseHistoryCreateExpenseEditor({
 	const detailQuery = useExpenseHistoryTransaction(id);
 	const detail = detailQuery.data;
 	const transaction = detail?.transaction;
+	const initializedTransactionId = useRef<number | null>(null);
 	const mutations = useExpenseHistoryTransactionMutations({
 		transactionId: id,
 		month: detail?.month ?? "",
 	});
+	const [criteria, setCriteria] = useState({
+		name: "",
+		originalPrice: 0,
+		originalCurrency: "CHF" as ExpenseType["originalCurrency"],
+		rate: "Monthly" as ExpenseType["rate"],
+	});
+	const [selectedMatchIds, setSelectedMatchIds] = useState<Set<number>>(
+		() => new Set(),
+	);
+	const matchesQuery = useQuery({
+		queryKey: ["expenseMatchSuggestions", criteria],
+		enabled: Boolean(
+			transaction &&
+				criteria.name.trim().length >= 6 &&
+				criteria.originalPrice > 0 &&
+				criteria.rate !== "One-time",
+		),
+		queryFn: async () => {
+			const response = await apiFetch("/api/expenses/matches", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(criteria),
+			});
+			if (!response.ok) throw new Error("Matches could not be loaded.");
+			return expenseMatchSuggestionsSchema.parse(await response.json());
+		},
+	});
+	const suggestions =
+		matchesQuery.data?.filter((match) => match.id !== id) ?? [];
 	const form = useForm({
 		defaultValues: {
 			name: transaction?.description ?? "",
@@ -54,6 +88,12 @@ export default function ExpenseHistoryCreateExpenseEditor({
 					rate: value.rate,
 					category: value.category as ExpenseType["category"],
 					type: value.type as ExpenseType["type"],
+					matches: suggestions
+						.filter((match) => selectedMatchIds.has(match.id))
+						.map(({ id: matchId, lastModified }) => ({
+							id: matchId,
+							lastModified,
+						})),
 				});
 				onCreated?.(detail.month);
 			} catch {
@@ -63,7 +103,8 @@ export default function ExpenseHistoryCreateExpenseEditor({
 	});
 
 	useEffect(() => {
-		if (!transaction) return;
+		if (!transaction || initializedTransactionId.current === id) return;
+		initializedTransactionId.current = id;
 		form.reset({
 			name: transaction.description,
 			originalPrice: transaction.amount,
@@ -72,7 +113,14 @@ export default function ExpenseHistoryCreateExpenseEditor({
 			category: transaction.category ?? "",
 			type: transaction.type ?? "",
 		});
-	}, [form, transaction]);
+		setCriteria({
+			name: transaction.description,
+			originalPrice: transaction.amount,
+			originalCurrency: "CHF",
+			rate: "Monthly",
+		});
+		setSelectedMatchIds(new Set());
+	}, [form, id, transaction]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: ["", ...expenseCategoryEnum.enumValues],
@@ -170,8 +218,22 @@ export default function ExpenseHistoryCreateExpenseEditor({
 								label="Amount per payment"
 								currency={currencyField.state.value}
 								value={priceField.state.value}
-								onCurrencyChange={currencyField.handleChange}
-								onValueChange={priceField.handleChange}
+								onCurrencyChange={(value) => {
+									currencyField.handleChange(value);
+									setCriteria((previous) => ({
+										...previous,
+										originalCurrency: value,
+									}));
+									setSelectedMatchIds(new Set());
+								}}
+								onValueChange={(value) => {
+									priceField.handleChange(value);
+									setCriteria((previous) => ({
+										...previous,
+										originalPrice: value ?? 0,
+									}));
+									setSelectedMatchIds(new Set());
+								}}
 								inputProps={{
 									name: priceField.name,
 									onBlur: priceField.handleBlur,
@@ -188,9 +250,14 @@ export default function ExpenseHistoryCreateExpenseEditor({
 						label="Billing frequency"
 						options={rateOptions}
 						value={field.state.value}
-						onChange={(value) =>
-							field.handleChange(value as ExpenseType["rate"])
-						}
+						onChange={(value) => {
+							field.handleChange(value as ExpenseType["rate"]);
+							setCriteria((previous) => ({
+								...previous,
+								rate: value as ExpenseType["rate"],
+							}));
+							setSelectedMatchIds(new Set());
+						}}
 						className="w-full"
 						disabled={pending}
 					/>
@@ -235,6 +302,20 @@ export default function ExpenseHistoryCreateExpenseEditor({
 					)}
 				</form.Field>
 			</div>
+			{criteria.name.trim().length >= 6 &&
+			criteria.originalPrice > 0 &&
+			criteria.rate !== "One-time" ? (
+				<ExpenseMatchSuggestions
+					matches={suggestions}
+					selectedIds={selectedMatchIds}
+					setSelectedIds={setSelectedMatchIds}
+					isFetching={matchesQuery.isFetching}
+					hasError={Boolean(matchesQuery.error)}
+					disabled={pending}
+					description="Matches use the original transaction name. Choose any other bank transactions to link."
+					idPrefix="history-expense-match"
+				/>
+			) : null}
 			{mutations.createExpense.error ? (
 				<p role="alert" className="text-sm text-destructive">
 					{mutations.createExpense.error.message}

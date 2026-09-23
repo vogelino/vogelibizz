@@ -1,9 +1,13 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import type { z } from "zod";
 import { ExpenseCategoryLabel } from "@/components/ExpenseCategoryBadge";
+import ExpenseMatchSuggestions from "@/components/ExpenseMatchSuggestions";
 import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import CurrencyInput from "@/components/ui/currency-input";
@@ -16,10 +20,20 @@ import {
 	expenseTypeEnum,
 } from "@/db/schema";
 import { commonValue, hasCommonValue, pickChanged } from "@/utility/bulkEdit";
+import {
+	expenseQueryOptions,
+	expensesQueryOptions,
+} from "@/utility/data/queryOptions";
 import useExpense from "@/utility/data/useExpense";
 import useExpenseCreate from "@/utility/data/useExpenseCreate";
 import useExpenseEdit from "@/utility/data/useExpenseEdit";
 import useResourceBatchMutations from "@/utility/data/useResourceBatchMutations";
+import { apiFetch } from "@/utility/dataHookUtil";
+import {
+	createExpenseWithMatchesSchema,
+	editExpenseWithMatchesSchema,
+	expenseMatchSuggestionsSchema,
+} from "@/utility/expenseMatchSuggestions";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
 import { getNowInUTC } from "@/utility/timeUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
@@ -50,9 +64,11 @@ export default function ExpenseEdit({
 			| "originalCurrency"
 		>(),
 	);
+	const initializedCreateExpenseId = useRef<number | null>(null);
 	const editMutation = useExpenseEdit();
 	const batchMutation = useResourceBatchMutations("expenses").edit;
 	const createMutation = useExpenseCreate();
+	const queryClient = useQueryClient();
 	const expenseQuery = useExpense(id, id ? initialData : undefined);
 	const bulkExpense = useMemo(() => {
 		if (!bulkItems?.length) return undefined;
@@ -85,6 +101,99 @@ export default function ExpenseEdit({
 	const [originalCurrency, setOriginalCurrency] = useState(
 		expense?.originalCurrency ?? "USD",
 	);
+	const [name, setName] = useState(expense?.name ?? "");
+	const [debouncedName, setDebouncedName] = useState(name.trim());
+	const [selectedMatchIds, setSelectedMatchIds] = useState<Set<number>>(
+		() => new Set(),
+	);
+	const matchRequest = {
+		name: debouncedName,
+		originalPrice: originalPrice ?? 0,
+		originalCurrency,
+		rate,
+	};
+	const matchesQuery = useQuery({
+		queryKey: ["expenseMatchSuggestions", matchRequest],
+		enabled:
+			!isBulk &&
+			debouncedName.length >= 6 &&
+			(originalPrice ?? 0) > 0 &&
+			rate !== "One-time",
+		queryFn: async () => {
+			const response = await apiFetch("/api/expenses/matches", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(matchRequest),
+			});
+			if (!response.ok) throw new Error("Matches could not be loaded.");
+			return expenseMatchSuggestionsSchema.parse(await response.json());
+		},
+	});
+	const createWithMatches = useMutation({
+		mutationFn: async (
+			input: z.infer<typeof createExpenseWithMatchesSchema>,
+		) => {
+			const parsed = createExpenseWithMatchesSchema.parse(input);
+			const response = await apiFetch("/api/expenses/with-matches", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(parsed),
+			});
+			if (!response.ok) {
+				const result = (await response.json()) as { error?: string };
+				throw new Error(result.error ?? "Expense could not be created.");
+			}
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: expensesQueryOptions().queryKey,
+				}),
+				queryClient.invalidateQueries({ queryKey: ["expenseHistory"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["expenseMatchSuggestions"],
+				}),
+			]);
+			toast.success("Expense created and selected transactions linked.");
+		},
+	});
+	const editWithMatches = useMutation({
+		mutationFn: async (input: z.infer<typeof editExpenseWithMatchesSchema>) => {
+			const response = await apiFetch("/api/expenses/edit-with-matches", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(editExpenseWithMatchesSchema.parse(input)),
+			});
+			if (!response.ok) {
+				const result = (await response.json()) as { error?: string };
+				throw new Error(result.error ?? "Expense could not be saved.");
+			}
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: expensesQueryOptions().queryKey,
+				}),
+				queryClient.invalidateQueries({ queryKey: ["expenseHistory"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["expenseMatchSuggestions"],
+				}),
+				...(id
+					? [
+							queryClient.invalidateQueries({
+								queryKey: expenseQueryOptions(id).queryKey,
+							}),
+						]
+					: []),
+			]);
+			toast.success("Expense saved and selected transactions linked.");
+		},
+	});
+
+	useEffect(() => {
+		const timer = window.setTimeout(() => setDebouncedName(name.trim()), 300);
+		return () => window.clearTimeout(timer);
+	}, [name]);
 
 	const form = useForm({
 		defaultValues: {
@@ -118,30 +227,71 @@ export default function ExpenseEdit({
 				onBulkComplete?.();
 				return;
 			}
-			navigate({
-				to: "/expenses",
-				search: (previous) => ({ ...previous, duplicateId: undefined }),
-			});
+			const matches = (
+				name.trim() === debouncedName ? (matchesQuery.data ?? []) : []
+			)
+				.filter(({ id }) => selectedMatchIds.has(id))
+				.map(({ id, lastModified }) => ({ id, lastModified }));
 			if (id) {
-				editMutation.mutate({
-					...expenseData,
-					id,
-					last_modified: getNowInUTC(),
-				});
-			} else createMutation.mutate([expenseData]);
+				try {
+					if (matches.length > 0 && expense) {
+						await editWithMatches.mutateAsync({
+							...expenseData,
+							id,
+							lastModified: expense.last_modified,
+							matches,
+						});
+					} else {
+						await editMutation.mutateAsync({
+							...expenseData,
+							id,
+							last_modified: getNowInUTC(),
+						});
+					}
+					navigate({
+						to: "/expenses",
+						search: (previous) => ({ ...previous, duplicateId: undefined }),
+					});
+				} catch {
+					// Keep the form open so the user can review the error and retry.
+				}
+			} else {
+				try {
+					if (matches.length > 0) {
+						await createWithMatches.mutateAsync({
+							...expenseData,
+							matches,
+						});
+					} else {
+						await createMutation.mutateAsync([expenseData]);
+					}
+					navigate({
+						to: "/expenses",
+						search: (previous) => ({ ...previous, duplicateId: undefined }),
+					});
+				} catch {
+					// Keep the form open so the user can review the error and retry.
+				}
+			}
 		},
 	});
 
 	useEffect(() => {
 		if (!expense) return;
+		if (!id && !isBulk) {
+			if (initializedCreateExpenseId.current === expense.id) return;
+			initializedCreateExpenseId.current = expense.id;
+		}
 		changedFields.current.clear();
 		setType(expense.type ?? "Freelance");
 		setCategory(expense.category ?? "Administrative");
 		setRate(expense.rate ?? "Monthly");
 		setOriginalPrice(expense.originalPrice ?? (isBulk ? undefined : 0));
 		setOriginalCurrency(expense.originalCurrency ?? "USD");
+		setName(expense.name ?? "");
+		setSelectedMatchIds(new Set());
 		form.setFieldValue("name", expense.name ?? "");
-	}, [expense, form.setFieldValue, isBulk]);
+	}, [expense, form.setFieldValue, id, isBulk]);
 
 	const categoryOptions = useComboboxOptions({
 		optionValues: expenseCategoryEnum.enumValues,
@@ -203,6 +353,8 @@ export default function ExpenseEdit({
 									onChange={(e) => {
 										changedFields.current.add("name");
 										field.handleChange(e.target.value);
+										setName(e.target.value);
+										setSelectedMatchIds(new Set());
 									}}
 									// biome-ignore lint/a11y/noAutofocus: intentional focus on modal open
 									autoFocus
@@ -241,10 +393,12 @@ export default function ExpenseEdit({
 						onCurrencyChange={(value) => {
 							changedFields.current.add("originalCurrency");
 							setOriginalCurrency(value);
+							setSelectedMatchIds(new Set());
 						}}
 						onValueChange={(value) => {
 							changedFields.current.add("originalPrice");
 							setOriginalPrice(value);
+							setSelectedMatchIds(new Set());
 						}}
 						onValueClear={
 							isBulk
@@ -273,11 +427,42 @@ export default function ExpenseEdit({
 						onChange={(val) => {
 							changedFields.current.add("rate");
 							setRate(val as ExpenseType["rate"]);
+							setSelectedMatchIds(new Set());
 						}}
 						className="w-full"
 						loading={isLoading}
 					/>
 				</div>
+				{!isBulk && rate !== "One-time" ? (
+					<ExpenseMatchSuggestions
+						matches={
+							name.trim() === debouncedName ? (matchesQuery.data ?? []) : []
+						}
+						selectedIds={selectedMatchIds}
+						setSelectedIds={setSelectedMatchIds}
+						isFetching={
+							matchesQuery.isFetching || name.trim() !== debouncedName
+						}
+						hasError={Boolean(matchesQuery.error)}
+						description="Matches follow the current name and amount. Choose bank transactions to link when you save."
+						emptyMessage={
+							!name.trim() || !originalPrice
+								? "Enter a name and amount to find matching transactions."
+								: undefined
+						}
+						idPrefix="expense-match"
+					/>
+				) : null}
+				{createWithMatches.error ? (
+					<p role="alert" className="text-sm text-destructive">
+						{createWithMatches.error.message}
+					</p>
+				) : null}
+				{editWithMatches.error ? (
+					<p role="alert" className="text-sm text-destructive">
+						{editWithMatches.error.message}
+					</p>
+				) : null}
 			</div>
 		</form>
 	);
