@@ -78,7 +78,7 @@ export function DashboardKeyMetrics({
 					/>
 					<DashboardMetric
 						className="bg-card p-5 sm:p-6 md:px-8"
-						label={`Expected total for ${currentTitle}`}
+						label={`Expected for ${currentTitle}`}
 						value={formatCurrency(view.committedOutlook, dashboard.currency)}
 						detail="Spent so far, plus bills still to come"
 						icon={WalletCards}

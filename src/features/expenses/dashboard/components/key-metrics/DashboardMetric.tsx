@@ -22,7 +22,7 @@ export function DashboardMetric({
 }: DashboardMetricProps) {
 	return (
 		<div className={cn("flex min-w-0 flex-col gap-2", className)}>
-			<p className="flex items-center gap-2 text-sm text-muted-foreground">
+			<p className="flex items-center gap-2 text-sm text-muted-foreground text-balance">
 				<Icon className={cn("size-4", iconClassName)} aria-hidden="true" />
 				{label}
 			</p>
