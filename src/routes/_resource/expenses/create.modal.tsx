@@ -5,21 +5,39 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ExpensesPage from "@/features/expenses/ExpensesPage";
-import { expenseQueryOptions } from "@/utility/data/queryOptions";
+import {
+	expenseOverviewSummaryQueryOptions,
+	expenseQueryOptions,
+	expensesQueryOptions,
+} from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/expenses/create/modal")({
 	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
-	loader: ({ context, deps }) =>
-		deps.duplicateId
-			? context.queryClient.ensureQueryData(
-					expenseQueryOptions(deps.duplicateId),
-				)
-			: undefined,
+	loader: async ({ context, deps }) => {
+		const [duplicate] = await Promise.all([
+			deps.duplicateId
+				? context.queryClient.ensureQueryData(
+						expenseQueryOptions(deps.duplicateId),
+					)
+				: undefined,
+			context.queryClient.ensureQueryData(expensesQueryOptions()),
+			context.queryClient.ensureQueryData(expenseOverviewSummaryQueryOptions()),
+		]);
+		return duplicate;
+	},
 	component: ExpenseCreateModal,
 });
 
 function ExpenseCreateModal() {
 	const duplicate = Route.useLoaderData();
+	return <ExpenseCreateOverlay duplicate={duplicate} />;
+}
+
+export function ExpenseCreateOverlay({
+	duplicate,
+}: {
+	duplicate: ReturnType<typeof Route.useLoaderData>;
+}) {
 	const navigate = useNavigate();
 	const formId = "expense-create-form";
 

@@ -1,6 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import InvoiceEditorPage from "@/features/invoices/InvoiceEditorPage";
-import { invoiceQueryOptions } from "@/utility/data/queryOptions";
+import InvoicesList from "@/features/invoices/InvoicesList";
+import {
+	invoiceQueryOptions,
+	invoicesQueryOptions,
+} from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/invoices/$id")({
@@ -15,9 +20,13 @@ export const Route = createFileRoute("/_resource/invoices/$id")({
 				invoiceQueryOptions(parsedId).queryKey,
 				invoice,
 			);
+			await context.queryClient.ensureQueryData(invoicesQueryOptions());
 			return { invoice };
 		}
-		void context.queryClient.prefetchQuery(invoiceQueryOptions(parsedId));
+		await Promise.all([
+			context.queryClient.ensureQueryData(invoiceQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(invoicesQueryOptions()),
+		]);
 		return {};
 	},
 	component: InvoiceDetailRoute,
@@ -26,5 +35,18 @@ export const Route = createFileRoute("/_resource/invoices/$id")({
 function InvoiceDetailRoute() {
 	const { id } = Route.useParams();
 	const { invoice } = Route.useLoaderData();
-	return <InvoiceEditorPage id={parseId(id)} initialData={invoice} />;
+	const navigate = useNavigate();
+	return (
+		<>
+			<InvoicesList />
+			<ResponsiveModal
+				open
+				wide
+				onClose={() => navigate({ to: "/invoices", search: true })}
+				title={invoice?.name || `Invoice ${id}`}
+			>
+				<InvoiceEditorPage id={parseId(id)} initialData={invoice} />
+			</ResponsiveModal>
+		</>
+	);
 }

@@ -5,19 +5,37 @@ import PageHeaderTitle from "@/components/PageHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ExpensesPage from "@/features/expenses/ExpensesPage";
-import { expenseQueryOptions } from "@/utility/data/queryOptions";
+import {
+	expenseOverviewSummaryQueryOptions,
+	expenseQueryOptions,
+	expensesQueryOptions,
+} from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
 
 export const Route = createFileRoute("/_resource/expenses/edit/$id/modal")({
 	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		await context.queryClient.prefetchQuery(expenseQueryOptions(parsedId));
+		await Promise.all([
+			context.queryClient.prefetchQuery(expenseQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(expensesQueryOptions()),
+			context.queryClient.ensureQueryData(expenseOverviewSummaryQueryOptions()),
+		]);
 	},
 	component: ExpenseEditModal,
 });
 
 function ExpenseEditModal() {
 	const { id } = Route.useParams();
+	return <ExpenseEditOverlay id={id} />;
+}
+
+export function ExpenseEditOverlay({
+	id,
+	expense,
+}: {
+	id: string;
+	expense?: Parameters<typeof ExpenseEdit>[0]["initialData"];
+}) {
 	const navigate = useNavigate();
 	const parsedId = parseId(id);
 	if (!parsedId) return <ExpensesPage />;
@@ -47,7 +65,7 @@ function ExpenseEditModal() {
 					</>
 				}
 			>
-				<ExpenseEdit id={parsedId} formId={formId} />
+				<ExpenseEdit id={parsedId} formId={formId} initialData={expense} />
 			</ResponsiveModal>
 		</>
 	);

@@ -4,7 +4,9 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import { type InvoiceInsertType, invoiceInsertSchema } from "@/db/schema";
+import InvoicesList from "@/features/invoices/InvoicesList";
 import createQueryFunction from "@/utility/data/createQueryFunction";
 import {
 	invoiceQueryOptions,
@@ -123,41 +125,44 @@ function InvoiceCreateRoute() {
 		invoicesQuery.isPending,
 	]);
 
-	if (createMutation.isError) {
-		return (
-			<div className="px-6 py-10 md:px-10">
-				<div className="mx-auto flex max-w-xl flex-col gap-4 border border-border bg-card p-6">
-					<h2 className="text-lg font-semibold">Could not create invoice</h2>
-					<p className="text-sm text-muted-foreground">
-						{String(createMutation.error)}
-					</p>
-					<div className="flex gap-2">
-						<Button
-							type="button"
-							onClick={() => {
-								startedRef.current = false;
-								createMutation.reset();
-							}}
-						>
-							Try again
-						</Button>
-						<Button asChild variant="outline">
-							<Link to="/invoices" search>
-								Back to invoices
-							</Link>
-						</Button>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
 	return (
-		<div className="px-6 py-10 md:px-10">
-			<div className="mx-auto flex max-w-xl items-center gap-3 border border-border bg-card p-6 text-sm text-muted-foreground">
-				<LoaderCircleIcon className="size-4 animate-spin" />
-				{duplicateId ? "Duplicating invoice..." : "Creating invoice..."}
-			</div>
-		</div>
+		<>
+			<InvoicesList />
+			<ResponsiveModal
+				open
+				title={duplicateId ? "Duplicate invoice" : "Create invoice"}
+				onClose={() => navigate({ to: "/invoices", search: true })}
+			>
+				{createMutation.isError ? (
+					<div className="flex flex-col gap-4">
+						<h2 className="text-lg font-semibold">Could not create invoice</h2>
+						<p className="text-sm text-muted-foreground">
+							{String(createMutation.error)}
+						</p>
+						<div className="flex gap-2">
+							<Button
+								type="button"
+								onClick={() => {
+									startedRef.current = false;
+									createMutation.reset();
+								}}
+							>
+								Try again
+							</Button>
+							<Button asChild variant="outline">
+								<Link to="/invoices" search>
+									Back to invoices
+								</Link>
+							</Button>
+						</div>
+					</div>
+				) : (
+					<div className="flex items-center gap-3 text-sm text-muted-foreground">
+						<LoaderCircleIcon className="size-4 animate-spin" />
+						{duplicateId ? "Duplicating invoice..." : "Creating invoice..."}
+					</div>
+				)}
+			</ResponsiveModal>
+		</>
 	);
 }

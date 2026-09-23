@@ -28,15 +28,25 @@ export const Route = createFileRoute(
 });
 
 function ExpenseHistoryTransactionEditModal() {
-	const navigate = useNavigate();
 	const { id } = Route.useParams();
 	const { detail } = Route.useLoaderData();
+	return <ExpenseHistoryEditOverlay id={id} month={detail.month} />;
+}
+
+export function ExpenseHistoryEditOverlay({
+	id,
+	month,
+}: {
+	id: string;
+	month: string;
+}) {
+	const navigate = useNavigate();
 	const parsedId = parseId(id);
 	const formId = `expense-history-transaction-${parsedId}`;
 	const close = () =>
 		navigate({
 			to: "/expenses/history",
-			search: (previous) => ({ ...previous, month: detail.month }),
+			search: (previous) => ({ ...previous, month }),
 		});
 
 	return (

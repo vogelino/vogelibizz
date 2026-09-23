@@ -7,6 +7,7 @@ import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ClientList from "@/features/clients/ClientsList";
 import {
 	clientQueryOptions,
+	clientsQueryOptions,
 	projectsQueryOptions,
 } from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_resource/clients/edit/$id/modal")({
 		const parsedId = parseId(params.id);
 		await Promise.all([
 			context.queryClient.prefetchQuery(clientQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(clientsQueryOptions()),
 			context.queryClient.prefetchQuery(projectsQueryOptions()),
 		]);
 	},
@@ -24,6 +26,18 @@ export const Route = createFileRoute("/_resource/clients/edit/$id/modal")({
 
 function ClientEditModal() {
 	const { id } = Route.useParams();
+	return <ClientEditOverlay id={id} />;
+}
+
+export function ClientEditOverlay({
+	id,
+	client,
+	projects,
+}: {
+	id: string;
+	client?: Parameters<typeof ClientEdit>[0]["initialData"];
+	projects?: Parameters<typeof ClientEdit>[0]["initialProjects"];
+}) {
 	const navigate = useNavigate();
 	const parsedId = parseId(id);
 	if (!parsedId) return <ClientList />;
@@ -53,7 +67,12 @@ function ClientEditModal() {
 					</>
 				}
 			>
-				<ClientEdit id={parsedId} formId={formId} />
+				<ClientEdit
+					id={parsedId}
+					formId={formId}
+					initialData={client}
+					initialProjects={projects}
+				/>
 			</ResponsiveModal>
 		</>
 	);

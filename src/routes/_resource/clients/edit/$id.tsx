@@ -1,32 +1,25 @@
 import {
 	createFileRoute,
-	Link,
 	Outlet,
 	useChildMatches,
 } from "@tanstack/react-router";
-import { SaveIcon } from "lucide-react";
-import ClientEdit from "@/components/ClientEdit";
-import FormPageLayout from "@/components/FormPageLayout";
-import { Button } from "@/components/ui/button";
 import {
 	clientQueryOptions,
+	clientsQueryOptions,
 	projectsQueryOptions,
 } from "@/utility/data/queryOptions";
 import { parseId } from "@/utility/resourceUtil";
+import { ClientEditOverlay } from "../edit.$id.modal";
 
 export const Route = createFileRoute("/_resource/clients/edit/$id")({
 	loader: async ({ context, params }) => {
 		const parsedId = parseId(params.id);
-		if (import.meta.env.SSR) {
-			const [client, projects] = await Promise.all([
-				context.queryClient.ensureQueryData(clientQueryOptions(parsedId)),
-				context.queryClient.ensureQueryData(projectsQueryOptions()),
-			]);
-			return { client, projects };
-		}
-		void context.queryClient.prefetchQuery(clientQueryOptions(parsedId));
-		void context.queryClient.prefetchQuery(projectsQueryOptions());
-		return {};
+		const [client, projects] = await Promise.all([
+			context.queryClient.ensureQueryData(clientQueryOptions(parsedId)),
+			context.queryClient.ensureQueryData(projectsQueryOptions()),
+			context.queryClient.ensureQueryData(clientsQueryOptions()),
+		]);
+		return { client, projects };
 	},
 	component: ClientEditPageRoute,
 });
@@ -34,37 +27,9 @@ export const Route = createFileRoute("/_resource/clients/edit/$id")({
 function ClientEditPageRoute() {
 	const childMatches = useChildMatches();
 	const { id } = Route.useParams();
-	const { client, projects } = Route.useLoaderData();
+	const data = Route.useLoaderData();
 	if (childMatches.length > 0) return <Outlet />;
-	const parsedId = parseId(id);
-	if (!parsedId) return null;
-	const formId = `client-edit-form-${parsedId}`;
-
 	return (
-		<FormPageLayout
-			id={parsedId}
-			title="Edit client"
-			allLink="/clients"
-			footerButtons={
-				<>
-					<Button asChild variant="outline">
-						<Link to="/clients" search>
-							<span>{"Cancel"}</span>
-						</Link>
-					</Button>
-					<Button type="submit" form={formId}>
-						<SaveIcon />
-						{"Save"}
-					</Button>
-				</>
-			}
-		>
-			<ClientEdit
-				id={parsedId}
-				formId={formId}
-				initialData={client}
-				initialProjects={projects}
-			/>
-		</FormPageLayout>
+		<ClientEditOverlay id={id} client={data.client} projects={data.projects} />
 	);
 }

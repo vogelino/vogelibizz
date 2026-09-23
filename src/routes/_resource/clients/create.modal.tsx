@@ -7,12 +7,14 @@ import { ResponsiveModal } from "@/components/ui/responsive-dialog";
 import ClientList from "@/features/clients/ClientsList";
 import {
 	clientQueryOptions,
+	clientsQueryOptions,
 	projectsQueryOptions,
 } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/clients/create/modal")({
 	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
 	loader: async ({ context, deps }) => ({
+		clients: await context.queryClient.ensureQueryData(clientsQueryOptions()),
 		projects: await context.queryClient.ensureQueryData(projectsQueryOptions()),
 		duplicate: deps.duplicateId
 			? await context.queryClient.ensureQueryData(
@@ -25,6 +27,16 @@ export const Route = createFileRoute("/_resource/clients/create/modal")({
 
 function ClientCreateModal() {
 	const { duplicate, projects } = Route.useLoaderData();
+	return <ClientCreateOverlay duplicate={duplicate} projects={projects} />;
+}
+
+export function ClientCreateOverlay({
+	duplicate,
+	projects,
+}: {
+	duplicate: ReturnType<typeof Route.useLoaderData>["duplicate"];
+	projects: ReturnType<typeof Route.useLoaderData>["projects"];
+}) {
 	const navigate = useNavigate();
 	const formId = "client-create-form";
 

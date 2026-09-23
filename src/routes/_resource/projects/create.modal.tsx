@@ -8,11 +8,13 @@ import ProjectList from "@/features/projects/ProjectsList";
 import {
 	clientsQueryOptions,
 	projectQueryOptions,
+	projectsQueryOptions,
 } from "@/utility/data/queryOptions";
 
 export const Route = createFileRoute("/_resource/projects/create/modal")({
 	loaderDeps: ({ search }) => ({ duplicateId: search.duplicateId }),
 	loader: async ({ context, deps }) => ({
+		projects: await context.queryClient.ensureQueryData(projectsQueryOptions()),
 		clients: await context.queryClient.ensureQueryData(clientsQueryOptions()),
 		duplicate: deps.duplicateId
 			? await context.queryClient.ensureQueryData(
@@ -25,6 +27,16 @@ export const Route = createFileRoute("/_resource/projects/create/modal")({
 
 function ProjectCreateModal() {
 	const { clients, duplicate } = Route.useLoaderData();
+	return <ProjectCreateOverlay clients={clients} duplicate={duplicate} />;
+}
+
+export function ProjectCreateOverlay({
+	clients,
+	duplicate,
+}: {
+	clients: ReturnType<typeof Route.useLoaderData>["clients"];
+	duplicate: ReturnType<typeof Route.useLoaderData>["duplicate"];
+}) {
 	const navigate = useNavigate();
 	const formId = "project-create-form";
 
