@@ -9,7 +9,7 @@ import {
 import type { EChartsCoreOption, EChartsType } from "echarts/core";
 import * as echarts from "echarts/core";
 import { SVGRenderer } from "echarts/renderers";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCurrency, locale } from "@/utility/formatUtil";
 import type { SpendingHabits } from "../../spendingHabits";
 import { chartTextStyle, chartTooltipStyle } from "../chartTooltipStyle";
@@ -36,6 +36,22 @@ const spendingIntensityLegend = spendingIntensityLevels.map(
 	}),
 );
 const emptyCellColor = "var(--chart-plot-background)";
+const minimumCellSize = 18;
+const maximumCellSize = 40;
+const monthGap = 20;
+const chartLeft = 44;
+const chartRight = 16;
+
+function monthEnd(month: string) {
+	const [year, monthNumber] = month.split("-").map(Number);
+	return new Date(Date.UTC(year, monthNumber, 0)).toISOString().slice(0, 10);
+}
+
+function monthWeekCount(month: string) {
+	const firstDay = new Date(`${month}-01T00:00:00Z`).getUTCDay();
+	const mondayOffset = (firstDay + 6) % 7;
+	return Math.ceil((mondayOffset + Number(monthEnd(month).slice(-2))) / 7);
+}
 
 function datesBetween(start: string, end: string) {
 	const dates: string[] = [];
@@ -60,11 +76,53 @@ export function DailySpendingHeatmap({
 	const scrollerRef = useRef<HTMLDivElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const chartRef = useRef<EChartsType | null>(null);
+	const [availableWidth, setAvailableWidth] = useState(0);
+	const totalWeeks = habits.months.reduce(
+		(weeks, month) => weeks + monthWeekCount(month),
+		0,
+	);
+	const cellSize = Math.min(
+		maximumCellSize,
+		Math.max(
+			minimumCellSize,
+			(availableWidth -
+				chartLeft -
+				chartRight -
+				monthGap * (habits.months.length - 1)) /
+				(totalWeeks || 1),
+		),
+	);
+	const calendarPositions = useMemo(() => {
+		let left = chartLeft;
+		return habits.months.map((month) => {
+			const position = { month, left };
+			left += monthWeekCount(month) * cellSize + monthGap;
+			return position;
+		});
+	}, [cellSize, habits.months]);
+	const chartWidth =
+		(calendarPositions.at(-1)?.left ?? chartLeft) +
+		monthWeekCount(habits.months.at(-1) ?? habits.range[1].slice(0, 7)) *
+			cellSize +
+		chartRight;
+	const chartHeight = Math.max(192, cellSize * 7 + 40);
+
+	useEffect(() => {
+		const scroller = scrollerRef.current;
+		if (!scroller) return;
+		const resizeObserver = new ResizeObserver(() => {
+			setAvailableWidth(scroller.clientWidth);
+		});
+		resizeObserver.observe(scroller);
+		setAvailableWidth(scroller.clientWidth);
+		return () => resizeObserver.disconnect();
+	}, []);
 
 	const option = useMemo<EChartsCoreOption>(() => {
 		const daysByDate = new Map(habits.days.map((day) => [day.date, day]));
-		const missingDates = datesBetween(...habits.range).filter(
-			(date) => !daysByDate.has(date),
+		const missingSeriesIndexes = calendarPositions.map((_, index) => index * 2);
+		const spendingSeriesIndexes = calendarPositions.map(
+			(_, index) => index * 2 + 1,
 		);
 
 		return {
@@ -95,7 +153,7 @@ export function DailySpendingHeatmap({
 				{
 					type: "piecewise",
 					show: false,
-					seriesIndex: 0,
+					seriesIndex: missingSeriesIndexes,
 					pieces: [{ value: 0, color: emptyCellColor }],
 				},
 				{
@@ -110,17 +168,16 @@ export function DailySpendingHeatmap({
 					itemHeight: 12,
 					itemGap: 12,
 					textStyle: chartTextStyle,
-					seriesIndex: 1,
+					seriesIndex: spendingSeriesIndexes,
 					pieces: spendingIntensityLegend,
 				},
 			],
-			calendar: {
+			calendar: calendarPositions.map(({ month, left }, index) => ({
 				top: 28,
-				left: 44,
-				right: 16,
+				left,
 				bottom: 12,
-				range: habits.range,
-				cellSize: ["auto", 18],
+				range: [`${month}-01`, monthEnd(month)],
+				cellSize: [cellSize, cellSize],
 				splitLine: { show: false },
 				itemStyle: {
 					color: "transparent",
@@ -128,6 +185,7 @@ export function DailySpendingHeatmap({
 					borderColor: "transparent",
 				},
 				dayLabel: {
+					show: index === 0,
 					firstDay: 1,
 					nameMap: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
 					...chartTextStyle,
@@ -138,27 +196,38 @@ export function DailySpendingHeatmap({
 					...chartTextStyle,
 				},
 				yearLabel: { show: false },
-			},
-			series: [
-				{
-					type: "heatmap",
-					coordinateSystem: "calendar",
-					silent: true,
-					itemStyle: { color: emptyCellColor },
-					data: missingDates.map((date) => [date, 0]),
-				},
-				{
-					type: "heatmap",
-					coordinateSystem: "calendar",
-					data: habits.days.map(({ date, total, intensity }) => [
-						date,
-						total,
-						intensity,
-					]),
-				},
-			],
+			})),
+			series: calendarPositions.flatMap(({ month }, index) => {
+				const monthDays = habits.days.filter(({ date }) =>
+					date.startsWith(month),
+				);
+				const missingDates = datesBetween(
+					`${month}-01`,
+					monthEnd(month),
+				).filter((date) => !daysByDate.has(date));
+				return [
+					{
+						type: "heatmap",
+						coordinateSystem: "calendar",
+						calendarIndex: index,
+						silent: true,
+						itemStyle: { color: emptyCellColor },
+						data: missingDates.map((date) => [date, 0]),
+					},
+					{
+						type: "heatmap",
+						coordinateSystem: "calendar",
+						calendarIndex: index,
+						data: monthDays.map(({ date, total, intensity }) => [
+							date,
+							total,
+							intensity,
+						]),
+					},
+				];
+			}),
 		};
-	}, [currency, habits]);
+	}, [calendarPositions, cellSize, currency, habits]);
 
 	useEffect(() => {
 		const container = containerRef.current;
@@ -182,8 +251,6 @@ export function DailySpendingHeatmap({
 			alignToLatest();
 		});
 		resizeObserver.observe(container);
-		const scroller = scrollerRef.current;
-		if (scroller) resizeObserver.observe(scroller);
 		return () => {
 			window.cancelAnimationFrame(scrollFrame);
 			window.clearTimeout(scrollTimeout);
@@ -198,9 +265,9 @@ export function DailySpendingHeatmap({
 			<div ref={scrollerRef} className="overflow-x-auto pb-2">
 				<div
 					ref={containerRef}
-					className="h-48 min-w-3xl"
+					style={{ width: chartWidth, height: chartHeight }}
 					role="img"
-					aria-label={`Daily spending calendar heatmap from ${habits.range[0]} to ${habits.range[1]}. Stronger blue indicates more spending; grey days have no imported data.`}
+					aria-label={`Daily spending calendar heatmap for imported months ${habits.months.join(", ")}. Stronger blue indicates more spending; grey days have no imported data.`}
 				/>
 			</div>
 			<ul

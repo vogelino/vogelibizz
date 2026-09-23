@@ -7,6 +7,7 @@ export type SpendingHabitDay = ExpenseDashboard["days"][number] & {
 
 export type SpendingHabits = {
 	range: readonly [string, string];
+	months: string[];
 	days: SpendingHabitDay[];
 	typicalSpendingDay: number;
 	spendingDayCount: number;
@@ -55,29 +56,24 @@ function median(values: readonly number[]) {
 export function getSpendingHabits(
 	dashboard: ExpenseDashboard,
 ): SpendingHabits | null {
-	const latestMonth = dashboard.months.at(-1)?.month;
+	const latestMonth = dashboard.months
+		.map(({ month }) => month)
+		.sort()
+		.at(-1);
 	if (!latestMonth) return null;
 
 	const range = [
 		monthStartOffset(latestMonth, -11),
 		monthEnd(latestMonth),
 	] as const;
-	const importedMonths = new Set(
-		dashboard.months
-			.map(({ month }) => month)
-			.filter((month) => month >= range[0].slice(0, 7)),
-	);
+	const months = dashboard.months
+		.map(({ month }) => month)
+		.filter((month) => month >= range[0].slice(0, 7) && month <= latestMonth)
+		.sort();
 	const totalsByDate = new Map(dashboard.days.map((day) => [day.date, day]));
-	const coveredDates = [
-		...new Set([
-			...datesBetween(...range).filter((date) =>
-				importedMonths.has(date.slice(0, 7)),
-			),
-			...dashboard.days
-				.map(({ date }) => date)
-				.filter((date) => date >= range[0] && date <= range[1]),
-		]),
-	].sort();
+	const coveredDates = months.flatMap((month) =>
+		datesBetween(`${month}-01`, monthEnd(month)),
+	);
 	const positiveTotals = coveredDates
 		.map((date) => totalsByDate.get(date)?.total ?? 0)
 		.filter((total) => total > 0)
@@ -133,6 +129,7 @@ export function getSpendingHabits(
 
 	return {
 		range,
+		months,
 		days,
 		typicalSpendingDay: median(positiveTotals),
 		spendingDayCount: positiveTotals.length,

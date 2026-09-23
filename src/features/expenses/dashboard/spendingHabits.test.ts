@@ -19,6 +19,7 @@ describe("getSpendingHabits", () => {
 		const habits = getSpendingHabits(dashboard);
 
 		expect(habits?.range).toEqual(["2025-07-01", "2026-06-30"]);
+		expect(habits?.months).toEqual(["2026-05", "2026-06"]);
 		expect(habits?.typicalSpendingDay).toBe(25);
 		expect(habits?.spendingDayCount).toBe(4);
 		expect(habits?.highestSpendWeekday).toBe("Monday");
@@ -44,7 +45,7 @@ describe("getSpendingHabits", () => {
 		).toBeNull();
 	});
 
-	test("keeps purchases that occurred just before their imported posting month", () => {
+	test("excludes purchase dates outside the imported months", () => {
 		const habits = getSpendingHabits({
 			...dashboard,
 			days: [
@@ -53,11 +54,26 @@ describe("getSpendingHabits", () => {
 			],
 		});
 
+		expect(habits?.months).toEqual(["2026-05", "2026-06"]);
+		expect(habits?.days.some(({ date }) => date === "2026-04-30")).toBe(false);
+		expect(habits?.spendingDayCount).toBe(4);
+	});
+
+	test("includes imported months with no spending", () => {
+		const habits = getSpendingHabits({
+			...dashboard,
+			months: [
+				...dashboard.months,
+				{ ...dashboard.months[1], month: "2026-04" },
+			],
+		});
+
+		expect(habits?.months).toEqual(["2026-04", "2026-05", "2026-06"]);
 		expect(habits?.days).toContainEqual({
 			date: "2026-04-30",
-			total: 15,
-			transactionCount: 1,
-			intensity: 1,
+			total: 0,
+			transactionCount: 0,
+			intensity: 0,
 		});
 	});
 });

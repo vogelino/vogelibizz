@@ -17,13 +17,16 @@ export function DashboardDailySpending({
 }: DashboardDailySpendingProps) {
 	const habits = useMemo(() => getSpendingHabits(dashboard), [dashboard]);
 	if (!habits) return null;
-	const rangeStart = formatExpenseHistoryMonth(habits.range[0].slice(0, 7));
-	const rangeEnd = formatExpenseHistoryMonth(habits.range[1].slice(0, 7));
+	const rangeStart = formatExpenseHistoryMonth(habits.months[0]);
+	const rangeEnd = formatExpenseHistoryMonth(
+		habits.months.at(-1) ?? habits.months[0],
+	);
+	const monthLabel = `${habits.months.length} imported ${habits.months.length === 1 ? "month" : "months"}`;
 
 	return (
 		<DashboardSection
 			title="Spending habits"
-			description={`${rangeStart}–${rangeEnd} · savings are not counted as spending`}
+			description={`${rangeStart}${rangeStart === rangeEnd ? "" : `–${rangeEnd}`} · ${monthLabel} · savings are not counted as spending`}
 		>
 			<div className="space-y-8 pb-24">
 				<DailySpendingHeatmap habits={habits} currency={dashboard.currency} />
