@@ -18,7 +18,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight } from "lucide-react";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,9 @@ type DataTableProps<TData> = {
 	loadingMore?: boolean;
 	onEndReached?: () => void;
 	rowContextMenu?: (row: TData, trigger: ReactNode) => ReactNode;
+	onOpenRow?: (row: TData) => void;
+	canOpenRow?: (row: TData) => boolean;
+	openRowColumnId?: string;
 };
 
 export function DataTable<TData>({
@@ -111,6 +114,9 @@ export function DataTable<TData>({
 	loadingMore = false,
 	onEndReached,
 	rowContextMenu,
+	onOpenRow,
+	canOpenRow,
+	openRowColumnId = "name",
 }: DataTableProps<TData>) {
 	const [internalSorting, setInternalSorting] = useState<SortingState>(
 		initialState?.sorting ?? [],
@@ -447,7 +453,7 @@ export function DataTable<TData>({
 											ref={
 												virtualized ? rowVirtualizer.measureElement : undefined
 											}
-											className={cn("relative", classNames.row)}
+											className={cn("group/row relative", classNames.row)}
 											data-state={row.getIsSelected() ? "selected" : undefined}
 										>
 											{row.getVisibleCells().map((cell) => (
@@ -456,9 +462,31 @@ export function DataTable<TData>({
 													style={{ width: `${cell.column.getSize()}px` }}
 													className={classNames.cell}
 												>
-													{flexRender(
-														cell.column.columnDef.cell,
-														cell.getContext(),
+													{onOpenRow &&
+													cell.column.id === openRowColumnId &&
+													(canOpenRow?.(row.original) ?? true) ? (
+														<div className="flex min-w-0 items-center gap-1">
+															<div className="min-w-0 flex-1">
+																{flexRender(
+																	cell.column.columnDef.cell,
+																	cell.getContext(),
+																)}
+															</div>
+															<Button
+																variant="ghost"
+																size="icon"
+																aria-label={`Open ${String(cell.getValue() ?? "item")}`}
+																onClick={() => onOpenRow(row.original)}
+																className="size-9 shrink-0 opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-within/row:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none [@media(hover:none)]:opacity-100"
+															>
+																<ChevronRight className="size-4" />
+															</Button>
+														</div>
+													) : (
+														flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext(),
+														)
 													)}
 												</TableCell>
 											))}

@@ -448,6 +448,8 @@ export default function ExpensesPage({
 				columns={columns}
 				data={!error && tableRows.length > 0 ? tableRows : []}
 				loading={isLoading}
+				onOpenRow={rowActions.onEdit}
+				canOpenRow={(row) => row.kind === "recurring"}
 				enableRowSelection={(row) => row.original.kind === "recurring"}
 				onSelectionChange={setSelectedRows}
 				rowContextMenu={(row, trigger) =>

@@ -273,6 +273,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 					columns={columns}
 					data={data}
 					loading={loading}
+					onOpenRow={rowActions.onEdit}
 					enableRowSelection
 					onSelectionChange={setSelectedRows}
 					rowContextMenu={(row, trigger) => (

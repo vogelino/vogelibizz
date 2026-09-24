@@ -583,6 +583,8 @@ export default function ExpenseHistoryPage() {
 							columns={columns}
 							data={visibleTransactions}
 							loading={historyLoading}
+							onOpenRow={rowActions.onEdit}
+							openRowColumnId="description"
 							virtualized
 							manualSorting
 							enableMultiSort={false}
