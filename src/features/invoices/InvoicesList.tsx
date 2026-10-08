@@ -2,6 +2,7 @@
 
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
+import { ActiveSearchFilter } from "@/components/ActiveSearchFilter";
 import PageDataTable from "@/components/PageDataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { useFilterControls } from "@/components/ui/filter-bar";
@@ -46,7 +47,8 @@ export default function InvoicesList({
 	const hasActiveFilters =
 		filters.clientIds.length > 0 ||
 		filters.projectIds.length > 0 ||
-		filters.currencies.length > 0;
+		filters.currencies.length > 0 ||
+		Boolean(search.q);
 	const filterControls = useFilterControls(hasActiveFilters);
 	useResourceActions(filterControls.action);
 	const { data: clients = [], isPending: clientsPending } = useClients();
@@ -124,10 +126,11 @@ export default function InvoicesList({
 			resource="invoices"
 			columns={columns}
 			data={!error && filteredData.length > 0 ? filteredData : []}
-			defaultSortColumn="last_modified"
+			defaultSortColumn="date"
 			loading={isLoading}
 			tableClassName="table-fixed"
 			selectionColumnSize={72}
+			showLastModifiedColumn={false}
 			toolbarVisible={filterControls.visible}
 			toolbarSkeleton={
 				<div className="px-6 pt-3 md:px-10">
@@ -142,6 +145,15 @@ export default function InvoicesList({
 						projects={projects}
 						filters={filters}
 						onFiltersChange={setFilters}
+					/>
+					<ActiveSearchFilter
+						query={search.q}
+						onClear={() =>
+							void navigate({
+								search: (previous) => ({ ...previous, q: undefined }),
+								replace: true,
+							})
+						}
 					/>
 				</div>
 			)}

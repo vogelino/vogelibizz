@@ -2,7 +2,11 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ExpenseCategoryBadge from "@/components/ExpenseCategoryBadge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconBadge } from "@/components/ui/icon-badge";
-import { InlineCombobox, InlineInput } from "@/components/ui/inline-edit";
+import {
+	InlineCombobox,
+	InlineDatePickerInput,
+	InlineInput,
+} from "@/components/ui/inline-edit";
 import {
 	type CurrencyIdType,
 	type ExpenseWithMonthlyCLPPriceType,
@@ -67,11 +71,15 @@ export function getExpenseHistoryColumns(
 		}),
 		columnHelper.accessor("bookedAt", {
 			header: "Booked",
-			size: 180,
-			cell: ({ getValue }) => (
-				<span className="text-muted-foreground text-nowrap">
-					{formatDate(getValue())}
-				</span>
+			size: 220,
+			cell: ({ getValue, row }) => (
+				<InlineDatePickerInput
+					value={getValue()}
+					displayValue={formatDate(getValue())}
+					ariaLabel={`booked date for ${row.original.description}`}
+					displayClassName="text-muted-foreground text-nowrap"
+					onCommit={(bookedAt) => onEdit(row.original, { bookedAt })}
+				/>
 			),
 		}),
 		columnHelper.accessor("description", {

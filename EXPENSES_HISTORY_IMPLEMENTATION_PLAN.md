@@ -79,7 +79,7 @@ The recurring-expenses overview will compare configured monthly costs with histo
 - [x] **R35** — The recurring table preserves its existing columns and adds real monthly average and configured-versus-real difference. It also renders the synthetic Other row.
 - [x] **R36** — The recurring page shows both the living-cost estimate and observed monthly average.
 - [x] **R37** — Expenses History shows booked date, editable description, editable effective amount, recurring-expense association or Other, Category, Type, and access to original bank details.
-- [x] **R38** — Expenses History provides an **Other only** filter and monthly summary values for total, matched, and Other spending.
+- [x] **R38** — Expenses History provides monthly summary values for total, matched, and Other spending.
 - [x] **R39** — Replacing a month uses a confirmation modal that clearly warns that existing edits and associations for that month will be lost.
 
 ### Development seed data

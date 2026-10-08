@@ -52,7 +52,6 @@ export function createSearchIndex(documents: readonly SearchDocument[]) {
 			"type",
 			"status",
 			"month",
-			"otherOnly",
 		],
 		searchOptions,
 	});
@@ -71,7 +70,6 @@ function matchesFilters(
 		return false;
 	}
 	if (filters.type && result.type !== filters.type) return false;
-	if (filters.otherOnly && result.otherOnly !== true) return false;
 	return true;
 }
 
@@ -100,7 +98,6 @@ export function searchDocuments(
 		type: typeof result.type === "string" ? result.type : undefined,
 		status: typeof result.status === "string" ? result.status : undefined,
 		month: typeof result.month === "string" ? result.month : undefined,
-		otherOnly: result.otherOnly === true,
 	}));
 }
 

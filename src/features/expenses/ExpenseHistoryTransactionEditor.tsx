@@ -8,23 +8,15 @@ import FormInputCombobox from "@/components/FormInputCombobox";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Button } from "@/components/ui/button";
 import CurrencyInput from "@/components/ui/currency-input";
+import { DatePickerInput } from "@/components/ui/date-picker-input";
 import type { ExpenseType } from "@/db/schema";
 import { expenseCategoryEnum, expenseTypeEnum } from "@/db/schema";
 import useExpenseHistoryTransaction from "@/utility/data/useExpenseHistoryTransaction";
 import { useExpenseHistoryTransactionMutations } from "@/utility/data/useExpenseHistoryTransactionMutations";
 import useExpenses from "@/utility/data/useExpenses";
 import { mapTypeToIcon } from "@/utility/expensesIconUtil";
-import { formatCurrency, locale } from "@/utility/formatUtil";
+import { formatCurrency } from "@/utility/formatUtil";
 import useComboboxOptions from "@/utility/useComboboxOptions";
-
-function formatDate(date: string) {
-	return new Intl.DateTimeFormat(locale, {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(new Date(`${date}T00:00:00Z`));
-}
 
 export default function ExpenseHistoryTransactionEditor({
 	id,
@@ -45,6 +37,7 @@ export default function ExpenseHistoryTransactionEditor({
 	});
 	const form = useForm({
 		defaultValues: {
+			bookedAt: transaction?.bookedAt ?? "",
 			description: transaction?.description ?? "",
 			amount: transaction?.amount ?? 0,
 			category: transaction?.category ?? "",
@@ -60,6 +53,7 @@ export default function ExpenseHistoryTransactionEditor({
 			try {
 				await mutations.update.mutateAsync({
 					lastModified: transaction.lastModified,
+					bookedAt: value.bookedAt,
 					description: value.description.trim(),
 					amount: value.amount,
 					...(associationChanged && value.expenseId
@@ -72,7 +66,7 @@ export default function ExpenseHistoryTransactionEditor({
 								type: (value.type || null) as ExpenseType["type"] | null,
 							}),
 				});
-				onSaved?.(detail.month);
+				onSaved?.(value.bookedAt.slice(0, 7));
 			} catch {
 				// The mutation hook presents and safely refetches every failure.
 			}
@@ -82,6 +76,7 @@ export default function ExpenseHistoryTransactionEditor({
 	useEffect(() => {
 		if (!transaction) return;
 		form.reset({
+			bookedAt: transaction.bookedAt,
 			description: transaction.description,
 			amount: transaction.amount,
 			category: transaction.category ?? "",
@@ -149,10 +144,6 @@ export default function ExpenseHistoryTransactionEditor({
 		>
 			<div className="grid gap-4 border border-border bg-muted/30 p-4 text-sm sm:grid-cols-2">
 				<div>
-					<span className="text-muted-foreground">Booked</span>
-					<p>{formatDate(transaction.bookedAt)}</p>
-				</div>
-				<div>
 					<span className="text-muted-foreground">Original amount</span>
 					<p>{formatCurrency(transaction.originalAmount, "CHF")}</p>
 				</div>
@@ -161,6 +152,29 @@ export default function ExpenseHistoryTransactionEditor({
 					<p>{transaction.originalDescription}</p>
 				</div>
 			</div>
+
+			<form.Field
+				name="bookedAt"
+				validators={{
+					onSubmit: ({ value }) => (value ? undefined : "Date is required."),
+				}}
+			>
+				{(field) => (
+					<FormInputWrapper
+						label={<label htmlFor={field.name}>Date</label>}
+						error={field.state.meta.errors[0]?.toString()}
+					>
+						<DatePickerInput
+							id={field.name}
+							name={field.name}
+							value={field.state.value}
+							onBlur={field.handleBlur}
+							onChange={field.handleChange}
+							disabled={pending}
+						/>
+					</FormInputWrapper>
+				)}
+			</form.Field>
 
 			<form.Field
 				name="description"

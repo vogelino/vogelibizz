@@ -3,6 +3,7 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ColumnDef, Table as TanstackTable } from "@tanstack/react-table";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { ActiveSearchFilter } from "@/components/ActiveSearchFilter";
 import BulkEditDrawer from "@/components/BulkEditDrawer";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
@@ -28,7 +29,6 @@ import {
 	type RowActionOptions,
 	RowActionsContextMenu,
 } from "@/utility/getRowActionsColumn";
-import { useLastModifiedColumn } from "@/utility/useLastModifiedColumn";
 import { useUrlSearchState } from "@/utility/useUrlSearchState";
 import { getExpensesTableColumns } from "./columns";
 import { ExpenseFilter, type ExpenseFilterState } from "./ExpenseFilter";
@@ -58,13 +58,11 @@ type TypeFilterType = ExpenseOverviewType | "All types";
 type ExpenseUrlFilterState = {
 	categories: ExpenseFilterState["category"];
 	expenseType: ExpenseFilterState["type"];
-	expenseOtherOnly: boolean;
 };
 
 const expenseFilterDefaults: ExpenseUrlFilterState = {
 	categories: [],
 	expenseType: "All types",
-	expenseOtherOnly: false,
 };
 
 export default function ExpensesPage({
@@ -87,7 +85,6 @@ export default function ExpensesPage({
 	const filters: ExpenseFilterState = {
 		category: urlFilters.categories,
 		type: urlFilters.expenseType,
-		otherOnly: urlFilters.expenseOtherOnly,
 	};
 	const setFilters = useCallback(
 		(
@@ -99,14 +96,12 @@ export default function ExpensesPage({
 				const previousFilters: ExpenseFilterState = {
 					category: previous.categories,
 					type: previous.expenseType,
-					otherOnly: previous.expenseOtherOnly,
 				};
 				const nextFilters =
 					typeof update === "function" ? update(previousFilters) : update;
 				return {
 					categories: nextFilters.category,
 					expenseType: nextFilters.type,
-					expenseOtherOnly: nextFilters.otherOnly,
 				};
 			});
 		},
@@ -149,7 +144,6 @@ export default function ExpensesPage({
 		canShowActions: (row) => row.kind === "recurring",
 	};
 	const rowActionsColumn = getRowActionsColumn<ExpenseOverviewRow>(rowActions);
-	const lastModifiedColumn = useLastModifiedColumn<ExpenseOverviewRow>();
 	const [selectedRows, setSelectedRows] = useState<ExpenseOverviewRow[]>([]);
 	const [bulkEditOpen, setBulkEditOpen] = useState(false);
 	const tableRef = useRef<TanstackTable<ExpenseOverviewRow> | null>(null);
@@ -158,7 +152,7 @@ export default function ExpensesPage({
 	const hasActiveFilters =
 		categoryFilter.length > 0 ||
 		typeFilter !== "All types" ||
-		filters.otherOnly;
+		Boolean(search.q);
 	const filterControls = useFilterControls(hasActiveFilters);
 	const overview = useExpenseOverviewVisibility();
 	const resourceActions = useMemo(
@@ -216,13 +210,7 @@ export default function ExpensesPage({
 			),
 		[rows, search.q],
 	);
-	const tableRows = useMemo(
-		() =>
-			filters.otherOnly
-				? visibleRows.filter((row) => row.kind === "other")
-				: visibleRows,
-		[filters.otherOnly, visibleRows],
-	);
+	const tableRows = visibleRows;
 	const editExpenseCell = useCallback(
 		(
 			row: Extract<ExpenseOverviewRow, { kind: "recurring" }>,
@@ -282,17 +270,10 @@ export default function ExpensesPage({
 			[
 				selectionColumn,
 				...getExpensesTableColumns(targetCurrency, editExpenseCell),
-				lastModifiedColumn,
 				rowActionsColumn,
 				// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 			] as ColumnDef<ExpenseOverviewRow, any>[],
-		[
-			targetCurrency,
-			selectionColumn,
-			rowActionsColumn,
-			lastModifiedColumn,
-			editExpenseCell,
-		],
+		[targetCurrency, selectionColumn, rowActionsColumn, editExpenseCell],
 	);
 
 	const {
@@ -306,7 +287,7 @@ export default function ExpensesPage({
 	} = useMemo(() => {
 		const hasCategoryFilter = categoryFilter.length > 0;
 		const hasTypeFilter = typeFilter !== "All types";
-		const hasSearchFilter = Boolean(search.q) || filters.otherOnly;
+		const hasSearchFilter = Boolean(search.q);
 		const filteredData = filterExpenseOverviewRows(
 			tableRows,
 			categoryFilter,
@@ -360,7 +341,6 @@ export default function ExpensesPage({
 		categoryFilter,
 		data,
 		overviewQuery.data,
-		filters.otherOnly,
 		search.q,
 		tableRows,
 		targetCurrency,
@@ -489,13 +469,24 @@ export default function ExpensesPage({
 							tableRef.current = table;
 							return null;
 						})()}
-						<ExpenseFilter
-							loading={false}
-							table={table}
-							filters={filters}
-							onFiltersChange={setFilters}
-							showMixedClassification
-						/>
+						<div className="flex flex-wrap items-center gap-4">
+							<ExpenseFilter
+								loading={false}
+								table={table}
+								filters={filters}
+								onFiltersChange={setFilters}
+								showMixedClassification
+							/>
+							<ActiveSearchFilter
+								query={search.q}
+								onClear={() =>
+									void navigate({
+										search: (previous) => ({ ...previous, q: undefined }),
+										replace: true,
+									})
+								}
+							/>
+						</div>
 						<CurrencySettingSelect />
 					</div>
 				)}

@@ -31,6 +31,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	toolbarSkeleton,
 	tableClassName,
 	selectionColumnSize = 36,
+	showLastModifiedColumn = true,
 }: {
 	resource: ResourceType;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
@@ -43,6 +44,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	toolbarSkeleton?: ReactNode;
 	tableClassName?: string;
 	selectionColumnSize?: number;
+	showLastModifiedColumn?: boolean;
 }) {
 	const navigate = useNavigate();
 	const clientDeleteMutation = useClientDelete();
@@ -211,7 +213,7 @@ export default function PageDataTable<DataType extends { id: number }>({
 	const columns = [
 		selectionColumn,
 		...pageSpecificColumns,
-		lastModifiedColumn,
+		...(showLastModifiedColumn ? [lastModifiedColumn] : []),
 		rowActionsColumn,
 		// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
 	] as ColumnDef<DataType, any>[];

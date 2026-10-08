@@ -92,7 +92,11 @@ export function RowActionsContextMenu<RowType>({
 
 	return (
 		<>
-			<ContextMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+			<ContextMenu
+				modal={false}
+				open={contextMenuOpen}
+				onOpenChange={setContextMenuOpen}
+			>
 				<ContextMenuTrigger
 					asChild
 					data-context-menu-open={contextMenuOpen ? "" : undefined}
@@ -149,7 +153,7 @@ function RowActions<RowType extends { id: string | number }>({
 
 	return (
 		<>
-			<DropdownMenu>
+			<DropdownMenu modal={false}>
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" size="icon" aria-label="Open row actions">
 						<MoreHorizontalIcon className="size-4" />
@@ -216,7 +220,11 @@ function DeleteConfirmation({
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction
 						className={cn(buttonVariants({ variant: "destructive" }))}
-						onClick={onDelete}
+						onClick={() => {
+							// Let Radix release the dialog's focus and scroll locks before the
+							// mutation can remove the row that owns this dialog.
+							requestAnimationFrame(onDelete);
+						}}
 					>
 						Delete
 					</AlertDialogAction>

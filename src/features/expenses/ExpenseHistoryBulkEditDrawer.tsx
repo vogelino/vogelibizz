@@ -24,7 +24,7 @@ import useComboboxOptions from "@/utility/useComboboxOptions";
 const formId = "bulk-edit-expense-history-form";
 type EditableTransaction = Omit<
 	ExpenseHistoryTransactionMutation,
-	"lastModified"
+	"lastModified" | "bookedAt"
 >;
 type EditableField = keyof EditableTransaction;
 

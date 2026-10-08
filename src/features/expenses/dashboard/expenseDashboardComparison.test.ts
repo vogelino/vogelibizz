@@ -58,6 +58,24 @@ const dashboard = {
 } as ExpenseDashboard;
 
 describe("getExpenseDashboardComparisonView", () => {
+	test("compares with every other available month in the selected calendar year", () => {
+		const view = getExpenseDashboardComparisonView(
+			dashboard,
+			"2026-02",
+			"current-year",
+		);
+
+		expect(view?.baselineMonths.map(({ month: key }) => key)).toEqual([
+			"2026-01",
+			"2026-03",
+		]);
+		expect(view).toMatchObject({
+			baselineLabel: "average of other available months in 2026",
+			baselineTotal: (100 + 200) / 2,
+			difference: 140 - (100 + 200) / 2,
+		});
+	});
+
 	test("compares one month with the trailing average without including itself", () => {
 		const view = getExpenseDashboardComparisonView(dashboard, "2026-03", "3m");
 		expect(view).toMatchObject({

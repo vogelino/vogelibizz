@@ -15,7 +15,6 @@ const expensesSearchSchema = z.object({
 		.enum(["All types", ...expenseTypeEnum.enumValues, "Mixed", "Unclassified"])
 		.optional()
 		.catch(undefined),
-	expenseOtherOnly: z.boolean().optional().catch(undefined),
 	uncategorizedOnly: z.boolean().optional().catch(undefined),
 	fromMonth: z
 		.string()

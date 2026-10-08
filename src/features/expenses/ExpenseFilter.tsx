@@ -5,7 +5,6 @@ import ExpenseCategoryBadge, {
 	ExpenseCategoryLabel,
 } from "@/components/ExpenseCategoryBadge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
 import { FilterBar } from "@/components/ui/filter-bar";
 import { IconBadge } from "@/components/ui/icon-badge";
@@ -30,7 +29,6 @@ export type ExpenseFilterValue = (typeof OPTION_VALUES)[number];
 export type ExpenseFilterState = {
 	category: ExpenseOverviewCategory[];
 	type: ExpenseFilterValue;
-	otherOnly: boolean;
 };
 
 function MixedCategoryLabel() {
@@ -66,7 +64,6 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	} = props;
 	const categoryFilter = loading ? [] : props.filters.category;
 	const typeFilter = loading ? "All types" : props.filters.type;
-	const otherOnly = loading ? false : props.filters.otherOnly;
 	const table = loading ? undefined : props.table;
 	const categoryOptions = useComboboxOptions({
 		optionValues: [...expenseCategoryEnum.enumValues, mixedClassification],
@@ -95,9 +92,8 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 	const showFilteredTotal = useMemo(() => {
 		const hasCategoryFilter = categoryFilter.length > 0;
 		const hasTypeFilter = typeFilter !== "All types";
-		const hasOtherOnlyFilter = otherOnly;
-		return hasCategoryFilter || hasTypeFilter || hasOtherOnlyFilter;
-	}, [categoryFilter, typeFilter, otherOnly]);
+		return hasCategoryFilter || hasTypeFilter;
+	}, [categoryFilter, typeFilter]);
 
 	useEffect(() => {
 		if (!table) return;
@@ -107,8 +103,7 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		table
 			.getColumn("type")
 			?.setFilterValue(typeFilter === "All types" ? undefined : typeFilter);
-		table.getColumn("association")?.setFilterValue(otherOnly || undefined);
-	}, [categoryFilter, otherOnly, table, typeFilter]);
+	}, [categoryFilter, table, typeFilter]);
 
 	const categoryInput = (
 		<MultiValueInput<ExpenseOverviewCategory>
@@ -166,38 +161,10 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 		/>
 	);
 
-	const otherOnlyInput = (
-		<label
-			htmlFor="expense-history-other-only"
-			className="flex items-center gap-2 text-sm"
-		>
-			<Checkbox
-				id="expense-history-other-only"
-				checked={otherOnly}
-				onCheckedChange={
-					loading
-						? undefined
-						: (checked) => {
-								const next = Boolean(checked);
-								props.onFiltersChange({
-									...props.filters,
-									otherOnly: next,
-								});
-								props.table
-									.getColumn("association")
-									?.setFilterValue(next || undefined);
-							}
-				}
-			/>
-			Other only
-		</label>
-	);
-
 	return (
 		<FilterBar active={showFilteredTotal || forceVisible}>
 			{categoryInput}
 			{typeInput}
-			{otherOnlyInput}
 			{!loading && showFilteredTotal ? (
 				<Button
 					type="button"
@@ -206,11 +173,9 @@ export function ExpenseFilter<TData>(props: ExpenseFilterProps<TData>) {
 						props.onFiltersChange({
 							category: [],
 							type: "All types",
-							otherOnly: false,
 						});
 						props.table.getColumn("category")?.setFilterValue(undefined);
 						props.table.getColumn("type")?.setFilterValue(undefined);
-						props.table.getColumn("association")?.setFilterValue(undefined);
 					}}
 					className="h-9"
 				>

@@ -2,6 +2,7 @@
 
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
+import { ActiveSearchFilter } from "@/components/ActiveSearchFilter";
 import PageDataTable from "@/components/PageDataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
 import { useFilterControls } from "@/components/ui/filter-bar";
@@ -34,7 +35,9 @@ export default function ClientList({ loading = false }: { loading?: boolean }) {
 		updateSearch,
 	);
 	const hasActiveFilters =
-		filters.languages.length > 0 || filters.projectIds.length > 0;
+		filters.languages.length > 0 ||
+		filters.projectIds.length > 0 ||
+		Boolean(search.q);
 	const filterControls = useFilterControls(hasActiveFilters);
 	useResourceActions(filterControls.action);
 	const { data: projects = [], isPending: projectsPending } = useProjects();
@@ -103,6 +106,15 @@ export default function ClientList({ loading = false }: { loading?: boolean }) {
 						projects={projects}
 						filters={filters}
 						onFiltersChange={setFilters}
+					/>
+					<ActiveSearchFilter
+						query={search.q}
+						onClear={() =>
+							void navigate({
+								search: (previous) => ({ ...previous, q: undefined }),
+								replace: true,
+							})
+						}
 					/>
 				</div>
 			)}

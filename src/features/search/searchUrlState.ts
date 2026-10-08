@@ -9,19 +9,16 @@ export type SearchRecord = Record<string, unknown>;
 type ScopeSearchKeys = {
 	categories: string;
 	type: string;
-	otherOnly: string;
 };
 
 const scopeSearchKeys: Partial<Record<SearchScopeId, ScopeSearchKeys>> = {
 	expenses: {
 		categories: "categories",
 		type: "expenseType",
-		otherOnly: "expenseOtherOnly",
 	},
 	"expense-history": {
 		categories: "category",
 		type: "type",
-		otherOnly: "otherOnly",
 	},
 };
 
@@ -60,15 +57,6 @@ export function getSearchTokens(
 		});
 	}
 
-	if (search[keys.otherOnly] === true) {
-		tokens.push({
-			id: "association:other",
-			filter: "otherOnly",
-			value: "true",
-			label: "Association: Other only",
-		});
-	}
-
 	return tokens;
 }
 
@@ -90,8 +78,26 @@ export function addSearchFilter(
 		];
 	}
 	if (option.filter === "type") next[keys.type] = option.value;
-	if (option.filter === "otherOnly") next[keys.otherOnly] = true;
 	return next;
+}
+
+export function createSearchRecord(
+	scope: SearchScopeId,
+	tokens: readonly SearchToken[],
+): SearchRecord {
+	let search: SearchRecord = {};
+	for (const token of tokens) {
+		if ("filter" in token) {
+			search = addSearchFilter(search, scope, {
+				...token,
+				keywords: "",
+				scopes: [scope],
+			});
+		} else {
+			search.q = token.value;
+		}
+	}
+	return search;
 }
 
 export function removeSearchToken(
@@ -118,6 +124,5 @@ export function removeSearchToken(
 		else delete next[keys.categories];
 	}
 	if (token.filter === "type") delete next[keys.type];
-	if (token.filter === "otherOnly") delete next[keys.otherOnly];
 	return next;
 }

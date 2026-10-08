@@ -16,6 +16,7 @@ export function SearchCommandList({ view, actions }: SearchCommandListProps) {
 		<CommandList className="max-h-[min(65vh,32rem)] max-sm:max-h-none max-sm:flex-1">
 			<SearchTextFilterAction
 				query={view.query}
+				scope={view.scope}
 				enabled={view.canApplyTextFilter}
 				onApply={actions.applyTextFilter}
 			/>

@@ -20,7 +20,6 @@ const historySearchSchema = z.object({
 		.enum(["All types", ...expenseTypeEnum.enumValues, "Unclassified"])
 		.optional()
 		.catch(undefined),
-	otherOnly: z.boolean().optional().catch(undefined),
 	uncategorizedOnly: z.boolean().optional().catch(undefined),
 	fromMonth: expenseHistoryMonthKeySchema.optional().catch(undefined),
 	toMonth: expenseHistoryMonthKeySchema.optional().catch(undefined),

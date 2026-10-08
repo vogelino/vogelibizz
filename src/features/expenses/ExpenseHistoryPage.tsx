@@ -8,6 +8,7 @@ import type {
 } from "@tanstack/react-table";
 import { FileUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActiveSearchFilter } from "@/components/ActiveSearchFilter";
 import { CurrencySettingSelect } from "@/components/CurrencySettingSelect";
 import { DataTable } from "@/components/DataTable";
 import { useResourceActions } from "@/components/ResourcePageLayout";
@@ -84,14 +85,12 @@ type ExpenseHistoryFilterState = {
 		| NonNullable<ExpenseHistoryTransaction["type"]>
 		| "All types"
 		| "Unclassified";
-	otherOnly: boolean;
 	uncategorizedOnly: boolean;
 };
 
 const expenseHistoryFilterDefaults: ExpenseHistoryFilterState = {
 	category: [],
 	type: "All types",
-	otherOnly: false,
 	uncategorizedOnly: false,
 };
 
@@ -405,14 +404,12 @@ export default function ExpenseHistoryPage() {
 					(filters.type === "Unclassified"
 						? transaction.type === null
 						: transaction.type === filters.type)) &&
-				(!filters.otherOnly || transaction.expense === null) &&
 				(!search.fromMonth || transactionMonth >= search.fromMonth) &&
 				(!search.toMonth || transactionMonth <= search.toMonth)
 			);
 		});
 	}, [
 		filters.category,
-		filters.otherOnly,
 		filters.type,
 		filters.uncategorizedOnly,
 		search.fromMonth,
@@ -423,7 +420,6 @@ export default function ExpenseHistoryPage() {
 	const hasActiveHistoryFilters =
 		filters.category.length > 0 ||
 		filters.type !== "All types" ||
-		filters.otherOnly ||
 		filters.uncategorizedOnly ||
 		Boolean(search.q || search.fromMonth || search.toMonth);
 	const filterControls = useFilterControls(hasActiveHistoryFilters);
@@ -609,9 +605,6 @@ export default function ExpenseHistoryPage() {
 									...(filters.type !== "All types"
 										? [{ id: "type", value: filters.type }]
 										: []),
-									...(filters.otherOnly
-										? [{ id: "association", value: true }]
-										: []),
 								],
 							}}
 							classNames={{
@@ -641,71 +634,84 @@ export default function ExpenseHistoryPage() {
 										return null;
 									})()}
 									<div className="flex flex-col flex-wrap gap-3 py-4 px-6 md:px-10 md:flex-row md:items-center md:justify-between sticky left-0">
-										<ExpenseFilter
-											loading={false}
-											showUnclassified
-											forceVisible={filters.uncategorizedOnly}
-											table={table}
-											filters={filters}
-											onFiltersChange={(nextFilters) =>
-												setFilters({
-													category: nextFilters.category.filter(
-														(
-															category,
-														): category is NonNullable<
-															ExpenseHistoryTransaction["category"]
-														> => category !== "Mixed",
-													),
-													type:
-														nextFilters.type === "Mixed"
-															? "All types"
-															: nextFilters.type,
-													otherOnly: nextFilters.otherOnly,
-													uncategorizedOnly: filters.uncategorizedOnly,
-												})
-											}
-										/>
-										{filters.uncategorizedOnly ? (
-											<Button
-												type="button"
-												variant="outline"
-												size="sm"
-												onClick={() =>
-													setFilters((previous) => ({
-														...previous,
-														uncategorizedOnly: false,
-													}))
+										<div className="flex flex-wrap items-center gap-3">
+											<ExpenseFilter
+												loading={false}
+												showUnclassified
+												forceVisible={filters.uncategorizedOnly}
+												table={table}
+												filters={filters}
+												onFiltersChange={(nextFilters) =>
+													setFilters({
+														category: nextFilters.category.filter(
+															(
+																category,
+															): category is NonNullable<
+																ExpenseHistoryTransaction["category"]
+															> => category !== "Mixed",
+														),
+														type:
+															nextFilters.type === "Mixed"
+																? "All types"
+																: nextFilters.type,
+														uncategorizedOnly: filters.uncategorizedOnly,
+													})
 												}
-											>
-												Uncategorized only · Clear
-											</Button>
-										) : null}
-										{search.fromMonth || search.toMonth ? (
-											<Button
-												type="button"
-												variant="outline"
-												size="sm"
-												onClick={() =>
-													navigate({
+											/>
+											<ActiveSearchFilter
+												query={search.q}
+												onClear={() =>
+													void navigate({
 														search: (previous) => ({
 															...previous,
-															fromMonth: undefined,
-															toMonth: undefined,
+															q: undefined,
 														}),
 														replace: true,
 													})
 												}
-											>
-												{search.fromMonth
-													? formatExpenseHistoryMonth(search.fromMonth)
-													: "First import"}{" "}
-												–{" "}
-												{search.toMonth
-													? formatExpenseHistoryMonth(search.toMonth)
-													: "Latest"}{" "}
-												· Clear
-											</Button>
-										) : null}
+											/>
+											{filters.uncategorizedOnly ? (
+												<Button
+													type="button"
+													variant="outline"
+													size="sm"
+													onClick={() =>
+														setFilters((previous) => ({
+															...previous,
+															uncategorizedOnly: false,
+														}))
+													}
+												>
+													Uncategorized only · Clear
+												</Button>
+											) : null}
+											{search.fromMonth || search.toMonth ? (
+												<Button
+													type="button"
+													variant="outline"
+													size="sm"
+													onClick={() =>
+														navigate({
+															search: (previous) => ({
+																...previous,
+																fromMonth: undefined,
+																toMonth: undefined,
+															}),
+															replace: true,
+														})
+													}
+												>
+													{search.fromMonth
+														? formatExpenseHistoryMonth(search.fromMonth)
+														: "First import"}{" "}
+													–{" "}
+													{search.toMonth
+														? formatExpenseHistoryMonth(search.toMonth)
+														: "Latest"}{" "}
+													· Clear
+												</Button>
+											) : null}
+										</div>
 										<div className="flex items-center gap-3">
 											<CurrencySettingSelect />
 											<ExpenseHistoryMonthNavigation

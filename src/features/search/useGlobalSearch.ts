@@ -23,9 +23,11 @@ import {
 	type SearchScopeId,
 	type SearchTextToken,
 	type SearchToken,
+	searchScopePaths,
 } from "./searchTypes";
 import {
 	addSearchFilter,
+	createSearchRecord,
 	getSearchTokens,
 	removeSearchToken,
 	type SearchRecord,
@@ -177,7 +179,7 @@ export function useGlobalSearch(): GlobalSearchState {
 			};
 			setTokens((previous) => {
 				const withoutSameSingleValue =
-					option.filter === "type" || option.filter === "otherOnly"
+					option.filter === "type"
 						? previous.filter(
 								(item) => !("filter" in item) || item.filter !== option.filter,
 							)
@@ -218,19 +220,25 @@ export function useGlobalSearch(): GlobalSearchState {
 
 	const applyTextFilter = useCallback(() => {
 		const value = query.trim();
-		if (!value || scope !== currentScope) return;
+		if (!value || !scope) return;
 		const token: SearchTextToken = {
 			id: "text",
 			value,
 			label: `Text: ${value}`,
 		};
-		setTokens((previous) => [
-			...previous.filter((item) => item.id !== "text"),
-			token,
-		]);
+		const nextTokens = [...tokens.filter((item) => item.id !== "text"), token];
+		setTokens(nextTokens);
 		setQuery("");
-		updateUrl((previous) => ({ ...previous, q: value }));
-	}, [currentScope, query, scope, updateUrl]);
+		if (scope === currentScope) {
+			updateUrl((previous) => ({ ...previous, q: value }));
+			return;
+		}
+		setOpen(false);
+		void navigate({
+			to: searchScopePaths[scope] as never,
+			search: createSearchRecord(scope, nextTokens) as never,
+		});
+	}, [currentScope, navigate, query, scope, setOpen, tokens, updateUrl]);
 
 	const openDocument = useCallback(
 		(document: SearchDocument) => {
@@ -258,12 +266,6 @@ export function useGlobalSearch(): GlobalSearchState {
 						to: "/expenses/history/edit/$id",
 						params: { id },
 						search: document.month ? { month: document.month } : {},
-					});
-					break;
-				case "expense-overview":
-					void navigate({
-						to: "/expenses",
-						search: { expenseOtherOnly: true },
 					});
 					break;
 			}

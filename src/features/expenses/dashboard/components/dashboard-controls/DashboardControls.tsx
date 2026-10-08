@@ -14,14 +14,6 @@ type ComparisonOption = {
 	label: string;
 };
 
-const comparisonOptions: ComparisonOption[] = [
-	{ value: "previous", label: "Previous month" },
-	{ value: "3m", label: "Previous 3-month average" },
-	{ value: "6m", label: "Previous 6-month average" },
-	{ value: "12m", label: "Previous 12-month average" },
-	{ value: "year", label: "Same month last year" },
-];
-
 type DashboardControlsProps = {
 	dashboard: ExpenseDashboard;
 	view: ExpenseDashboardComparisonView;
@@ -37,6 +29,18 @@ export function DashboardControls({
 	onMonthChange,
 	onComparisonChange,
 }: DashboardControlsProps) {
+	const selectedYear = view.current.month.slice(0, 4);
+	const comparisonOptions: ComparisonOption[] = [
+		{
+			value: "current-year",
+			label: `Other months in ${selectedYear} (average)`,
+		},
+		{ value: "previous", label: "Previous month" },
+		{ value: "3m", label: "Previous 3-month average" },
+		{ value: "6m", label: "Previous 6-month average" },
+		{ value: "12m", label: "Previous 12-month average" },
+		{ value: "year", label: "Same month last year" },
+	];
 	const monthOptions = useMemo(
 		() =>
 			dashboard.months.map(({ month }) => ({

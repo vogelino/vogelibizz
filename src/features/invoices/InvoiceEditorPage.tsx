@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import FormInputWrapper from "@/components/FormInputWrapper";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
+import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	currencyEnum,
@@ -360,11 +361,10 @@ export default function InvoiceEditorPage({
 
 						<div className="grid gap-4 md:grid-cols-2">
 							<FormInputWrapper label="Date" loading={isLoading}>
-								<input
-									type="date"
+								<DatePickerInput
 									value={draft?.date || ""}
-									onChange={(event) => updateDraft("date", event.target.value)}
-									className="form-input"
+									onChange={(date) => updateDraft("date", date)}
+									disabled={isLoading}
 								/>
 							</FormInputWrapper>
 							<FormInputWrapper label="Invoice #" loading={isLoading}>

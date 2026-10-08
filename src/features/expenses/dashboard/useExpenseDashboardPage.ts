@@ -37,7 +37,7 @@ export function useExpenseDashboardPage(): ExpenseDashboardPageState {
 	const dashboardQuery = useExpenseDashboard();
 	const search = Route.useSearch();
 	const dashboard = dashboardQuery.data;
-	const comparison = search.compare ?? "3m";
+	const comparison = search.compare ?? "current-year";
 	const view = useMemo(
 		() =>
 			dashboard
@@ -66,7 +66,8 @@ export function useExpenseDashboardPage(): ExpenseDashboardPageState {
 			navigate({
 				search: (previous) => ({
 					...previous,
-					compare: nextComparison === "3m" ? undefined : nextComparison,
+					compare:
+						nextComparison === "current-year" ? undefined : nextComparison,
 				}),
 				replace: true,
 			}),

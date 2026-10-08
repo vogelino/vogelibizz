@@ -6,22 +6,22 @@ describe("mergeUrlSearchState", () => {
 		expect(
 			mergeUrlSearchState(
 				{ month: "2026-06", category: ["Food"] },
-				{ category: ["Travel"], otherOnly: true },
-				{ category: [], otherOnly: false },
+				{ category: ["Travel"], archivedOnly: true },
+				{ category: [], archivedOnly: false },
 			),
 		).toEqual({
 			month: "2026-06",
 			category: ["Travel"],
-			otherOnly: true,
+			archivedOnly: true,
 		});
 	});
 
 	test("removes values that match defaults", () => {
 		expect(
 			mergeUrlSearchState(
-				{ month: "2026-06", category: ["Food"], otherOnly: true },
-				{ category: [], otherOnly: false },
-				{ category: [], otherOnly: false },
+				{ month: "2026-06", category: ["Food"], archivedOnly: true },
+				{ category: [], archivedOnly: false },
+				{ category: [], archivedOnly: false },
 			),
 		).toEqual({ month: "2026-06" });
 	});

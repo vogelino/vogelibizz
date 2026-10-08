@@ -1,6 +1,6 @@
 import { and, eq, inArray, max } from "drizzle-orm";
 import db from "@/db";
-import { expenses, expenseTransactions } from "@/db/schema";
+import { expenseMonths, expenses, expenseTransactions } from "@/db/schema";
 import type {
 	ExpenseHistoryCreateExpense,
 	ExpenseHistoryTransaction,
@@ -64,6 +64,53 @@ async function requireCurrent(id: number, expected: string) {
 	return current;
 }
 
+async function getBookedAtLocationChange(
+	id: number,
+	bookedAt: string,
+	nextSourceOrderByMonth?: Map<number, number>,
+) {
+	const targetMonth = bookedAt.slice(0, 7);
+	const [currentLocation] = await db
+		.select({
+			expenseMonthId: expenseTransactions.expenseMonthId,
+			month: expenseMonths.month,
+		})
+		.from(expenseTransactions)
+		.innerJoin(
+			expenseMonths,
+			eq(expenseTransactions.expenseMonthId, expenseMonths.id),
+		)
+		.where(eq(expenseTransactions.id, id))
+		.limit(1);
+	if (!currentLocation)
+		throw new ExpenseHistoryNotFoundError("Transaction not found.");
+	if (currentLocation.month === targetMonth) return {};
+
+	const [targetLocation] = await db
+		.select({ id: expenseMonths.id })
+		.from(expenseMonths)
+		.where(eq(expenseMonths.month, targetMonth))
+		.limit(1);
+	if (!targetLocation) {
+		throw new ExpenseHistoryNotFoundError(
+			`Import ${targetMonth} before moving a transaction into that month.`,
+		);
+	}
+	let sourceOrder = nextSourceOrderByMonth?.get(targetLocation.id);
+	if (sourceOrder === undefined) {
+		const [order] = await db
+			.select({ value: max(expenseTransactions.sourceOrder) })
+			.from(expenseTransactions)
+			.where(eq(expenseTransactions.expenseMonthId, targetLocation.id));
+		sourceOrder = (order?.value ?? -1) + 1;
+	}
+	nextSourceOrderByMonth?.set(targetLocation.id, sourceOrder + 1);
+	return {
+		expenseMonthId: targetLocation.id,
+		sourceOrder,
+	};
+}
+
 export async function mutateExpenseHistoryTransaction(
 	id: number,
 	input: ExpenseHistoryTransactionMutation,
@@ -73,6 +120,10 @@ export async function mutateExpenseHistoryTransaction(
 	const values: Partial<typeof expenseTransactions.$inferInsert> = {
 		last_modified: token,
 	};
+	if (input.bookedAt !== undefined) {
+		values.bookedAt = input.bookedAt;
+		Object.assign(values, await getBookedAtLocationChange(id, input.bookedAt));
+	}
 	if (input.description !== undefined) values.description = input.description;
 	if (input.amount !== undefined) values.amount = input.amount;
 	if (input.category !== undefined) values.category = input.category;
@@ -112,11 +163,23 @@ export async function mutateExpenseHistoryTransactions(
 ) {
 	type BatchStatement = Parameters<typeof db.batch>[0][number];
 	const statements: BatchStatement[] = [];
+	const nextSourceOrderByMonth = new Map<number, number>();
 	for (const { id, change } of items) {
 		await requireCurrent(id, change.lastModified);
 		const values: Partial<typeof expenseTransactions.$inferInsert> = {
 			last_modified: nextToken(change.lastModified),
 		};
+		if (change.bookedAt !== undefined) {
+			values.bookedAt = change.bookedAt;
+			Object.assign(
+				values,
+				await getBookedAtLocationChange(
+					id,
+					change.bookedAt,
+					nextSourceOrderByMonth,
+				),
+			);
+		}
 		if (change.description !== undefined)
 			values.description = change.description;
 		if (change.amount !== undefined) values.amount = change.amount;

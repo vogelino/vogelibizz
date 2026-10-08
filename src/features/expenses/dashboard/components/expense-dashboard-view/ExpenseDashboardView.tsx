@@ -5,7 +5,6 @@ import { DashboardControls } from "../dashboard-controls";
 import { DashboardKeyMetrics } from "../key-metrics";
 import { DashboardMovers } from "../movers";
 import { DashboardRecentContext } from "../recent-context";
-import { DashboardSavingsWins } from "../savings-wins";
 import { DashboardSkeleton } from "./DashboardSkeleton";
 import { DashboardStateMessage } from "./DashboardStateMessage";
 
@@ -45,7 +44,6 @@ export function ExpenseDashboardView({ state }: ExpenseDashboardViewProps) {
 					onMonthChange={actions.setMonth}
 					onComparisonChange={actions.setComparison}
 				/>
-				<DashboardSavingsWins dashboard={dashboard} view={view} />
 				<DashboardKeyMetrics view={view} dashboard={dashboard} />
 				<DashboardCategoryDistribution
 					view={view}

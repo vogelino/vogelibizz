@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	addSearchFilter,
+	createSearchRecord,
 	getSearchTokens,
 	removeSearchToken,
 } from "./searchUrlState";
@@ -12,7 +13,6 @@ describe("search URL state", () => {
 				q: "hosting",
 				categories: ["Software"],
 				expenseType: "Business",
-				expenseOtherOnly: true,
 			}),
 		).toEqual([
 			{ id: "text", value: "hosting", label: "Text: hosting" },
@@ -28,21 +28,14 @@ describe("search URL state", () => {
 				value: "Business",
 				label: "Type: Business",
 			},
-			{
-				id: "association:other",
-				filter: "otherOnly",
-				value: "true",
-				label: "Association: Other only",
-			},
 		]);
 
 		expect(
 			getSearchTokens("expense-history", {
 				category: ["Travel"],
 				type: "Personal",
-				otherOnly: true,
 			}).map(({ id }) => id),
-		).toEqual(["category:Travel", "type:Personal", "association:other"]);
+		).toEqual(["category:Travel", "type:Personal"]);
 	});
 
 	test("preserves unrelated keys and omits an empty canonical default", () => {
@@ -72,5 +65,19 @@ describe("search URL state", () => {
 				label: option.label,
 			}),
 		).toEqual({ fromMonth: "2026-01" });
+	});
+
+	test("creates destination search state from scoped search tokens", () => {
+		expect(
+			createSearchRecord("expense-history", [
+				{ id: "text", value: "coffee", label: "Text: coffee" },
+				{
+					id: "category:Food",
+					filter: "category",
+					value: "Food",
+					label: "Category: Food",
+				},
+			]),
+		).toEqual({ q: "coffee", category: ["Food"] });
 	});
 });

@@ -173,7 +173,6 @@ export function MonthlySpendingTrend({
 					symbol: "none",
 					itemStyle: { color: "#98a2b3" },
 					lineStyle: { color: "#98a2b3", width: 2 },
-					tooltip: { show: false },
 					data: visibleMonths.map(() => data.typicalMonthlyTotal ?? 0),
 				},
 			],

@@ -43,10 +43,10 @@ export function ExpenseHistoryEditOverlay({
 	const navigate = useNavigate();
 	const parsedId = parseId(id);
 	const formId = `expense-history-transaction-${parsedId}`;
-	const close = () =>
+	const close = (selectedMonth = month) =>
 		navigate({
 			to: "/expenses/history",
-			search: (previous) => ({ ...previous, month }),
+			search: (previous) => ({ ...previous, month: selectedMonth }),
 		});
 
 	return (
@@ -55,10 +55,10 @@ export function ExpenseHistoryEditOverlay({
 			<ResponsiveModal
 				open
 				title={<PageHeaderTitle name="Edit bank transaction" id={parsedId} />}
-				onClose={close}
+				onClose={() => close()}
 				footer={
 					<>
-						<Button type="button" variant="outline" onClick={close}>
+						<Button type="button" variant="outline" onClick={() => close()}>
 							Cancel
 						</Button>
 						<Button type="submit" form={formId}>

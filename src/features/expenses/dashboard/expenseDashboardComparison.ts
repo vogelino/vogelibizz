@@ -1,6 +1,7 @@
 import type { ExpenseDashboard } from "@/utility/expenseHistoryContracts";
 
 export const expenseDashboardComparisonValues = [
+	"current-year",
 	"previous",
 	"3m",
 	"6m",
@@ -61,6 +62,10 @@ function monthOneYearEarlier(month: string) {
 	return `${Number(year) - 1}-${monthNumber}`;
 }
 
+function calendarYear(month: string) {
+	return month.slice(0, 4);
+}
+
 function monthDistance(from: string, to: string) {
 	const [fromYear, fromMonth] = from.split("-").map(Number);
 	const [toYear, toMonth] = to.split("-").map(Number);
@@ -104,21 +109,29 @@ export function getExpenseDashboardComparisonView(
 	const current = dashboard.months[currentIndex];
 	const earlierMonths = dashboard.months.slice(0, currentIndex);
 	const requestedCount =
-		comparison === "previous"
-			? 1
-			: comparison === "3m"
-				? 3
-				: comparison === "6m"
-					? 6
-					: comparison === "12m"
-						? 12
-						: null;
+		comparison === "current-year" || comparison === "year"
+			? null
+			: comparison === "previous"
+				? 1
+				: comparison === "3m"
+					? 3
+					: comparison === "6m"
+						? 6
+						: comparison === "12m"
+							? 12
+							: null;
 	const baselineMonths =
-		requestedCount === null
+		comparison === "current-year"
 			? dashboard.months.filter(
-					({ month }) => month === monthOneYearEarlier(current.month),
+					({ month }) =>
+						month !== current.month &&
+						calendarYear(month) === calendarYear(current.month),
 				)
-			: earlierMonths.slice(-requestedCount);
+			: requestedCount === null
+				? dashboard.months.filter(
+						({ month }) => month === monthOneYearEarlier(current.month),
+					)
+				: earlierMonths.slice(-requestedCount);
 	const baselineTotal = average(baselineMonths.map(({ total }) => total));
 	const difference =
 		baselineTotal === null ? null : current.total - baselineTotal;
@@ -236,11 +249,13 @@ export function getExpenseDashboardComparisonView(
 	);
 
 	const baselineLabel =
-		comparison === "previous"
-			? "previous imported month"
-			: comparison === "year"
-				? "same month last year"
-				: `previous ${comparison.slice(0, -1)}-month average`;
+		comparison === "current-year"
+			? `average of other available months in ${calendarYear(current.month)}`
+			: comparison === "previous"
+				? "previous imported month"
+				: comparison === "year"
+					? "same month last year"
+					: `previous ${comparison.slice(0, -1)}-month average`;
 
 	return {
 		current,

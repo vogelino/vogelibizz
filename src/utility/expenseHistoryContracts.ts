@@ -170,6 +170,7 @@ export const expenseDashboardSchema = z.object({
 export const expenseHistoryTransactionMutationSchema = z
 	.strictObject({
 		lastModified: z.string().min(1),
+		bookedAt: z.iso.date().optional(),
 		description: z.string().trim().min(1).optional(),
 		amount: z.number().nonnegative().optional(),
 		category: z.enum(expenseCategoryEnum.enumValues).nullable().optional(),

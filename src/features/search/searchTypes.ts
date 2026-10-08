@@ -13,8 +13,7 @@ export type SearchDocumentKind =
 	| "project"
 	| "invoice"
 	| "expense"
-	| "expense-transaction"
-	| "expense-overview";
+	| "expense-transaction";
 
 export type SearchDocument = {
 	id: string;
@@ -28,10 +27,9 @@ export type SearchDocument = {
 	type?: string;
 	status?: string;
 	month?: string;
-	otherOnly?: boolean;
 };
 
-export type SearchFilterId = "category" | "type" | "otherOnly";
+export type SearchFilterId = "category" | "type";
 
 export type SearchFilterToken = {
 	id: string;
@@ -51,7 +49,6 @@ export type SearchToken = SearchFilterToken | SearchTextToken;
 export type SearchFilters = {
 	category: string[];
 	type?: string;
-	otherOnly?: boolean;
 };
 
 export type SearchFilterOption = {
@@ -71,6 +68,14 @@ export const searchScopeLabels: Record<SearchScopeId, string> = {
 	"expense-history": "Expense history",
 };
 
+export const searchScopePaths: Record<SearchScopeId, string> = {
+	clients: "/clients",
+	projects: "/projects",
+	invoices: "/invoices",
+	expenses: "/expenses",
+	"expense-history": "/expenses/history",
+};
+
 export function getSearchScope(pathname: string): SearchScopeId | null {
 	if (pathname.startsWith("/expenses/history")) return "expense-history";
 	if (pathname.startsWith("/expenses")) return "expenses";
@@ -88,7 +93,6 @@ export function filtersFromTokens(
 		if (!("filter" in token)) continue;
 		if (token.filter === "category") filters.category.push(token.value);
 		if (token.filter === "type") filters.type = token.value;
-		if (token.filter === "otherOnly") filters.otherOnly = true;
 	}
 	return filters;
 }

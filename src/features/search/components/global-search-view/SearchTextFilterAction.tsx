@@ -4,24 +4,29 @@ import {
 	CommandItem,
 	CommandShortcut,
 } from "@/components/ui/command";
+import { type SearchScopeId, searchScopeLabels } from "../../searchTypes";
 
 type SearchTextFilterActionProps = {
 	query: string;
+	scope: SearchScopeId | null;
 	enabled: boolean;
 	onApply: () => void;
 };
 
 export function SearchTextFilterAction({
 	query,
+	scope,
 	enabled,
 	onApply,
 }: SearchTextFilterActionProps) {
-	if (!enabled) return null;
+	if (!enabled || !scope) return null;
 	return (
 		<CommandGroup heading="Actions">
 			<CommandItem value={`apply:${query}`} onSelect={onApply}>
 				<SlidersHorizontal className="text-muted-foreground" />
-				<span>Filter this table for “{query.trim()}”</span>
+				<span>
+					Filter {searchScopeLabels[scope].toLowerCase()} for “{query.trim()}”
+				</span>
 				<CommandShortcut>Enter</CommandShortcut>
 			</CommandItem>
 		</CommandGroup>

@@ -90,7 +90,7 @@ describe("expense overview rows", () => {
 		expect(getRealMonthlyAverageStatus(100, null)).toBe("unavailable");
 	});
 
-	test("filters and pie classifications include Other only when Mixed applies", () => {
+	test("filters and pie classifications include Other when Mixed applies", () => {
 		const rows = createExpenseOverviewRows([expense], summary);
 		expect(
 			filterExpenseOverviewRows(rows, [mixedClassification], "All types"),

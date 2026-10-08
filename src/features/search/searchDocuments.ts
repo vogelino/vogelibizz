@@ -151,21 +151,8 @@ export function createSearchDocuments({
 				category: transaction.category ?? undefined,
 				type: transaction.type ?? undefined,
 				month: transaction.bookedAt.slice(0, 7),
-				otherOnly: transaction.expense === null,
 			}),
 		),
-		{
-			id: "expense-overview:other",
-			resourceId: "other",
-			kind: "expense-overview",
-			scope: "expenses",
-			title: "Other expenses",
-			subtitle: "Unassociated imported expenses",
-			keywords: "other unassociated unmatched mixed",
-			category: "Mixed",
-			type: "Mixed",
-			otherOnly: true,
-		},
 	];
 }
 
@@ -196,13 +183,5 @@ export function createSearchFilterOptions(
 					? (["expenses"] as const)
 					: (["expenses", "expense-history"] as const),
 		})),
-		{
-			id: "association:other",
-			filter: "otherOnly",
-			value: "true",
-			label: "Association: Other only",
-			keywords: "filter association other only unmatched unassociated",
-			scopes: ["expenses", "expense-history"],
-		},
 	];
 }

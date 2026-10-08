@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cn } from "@/utility/classNames";
 import { Combobox, type ComboboxProps } from "./combobox";
+import { DatePickerInput } from "./date-picker-input";
 import {
 	MultiValueInput,
 	type MultiValueInputProps,
@@ -139,6 +140,120 @@ export function InlineInput<Value extends InlineEditValue>({
 				</button>
 			)}
 		</div>
+	);
+}
+
+export function InlineDatePickerInput({
+	value,
+	displayValue,
+	onCommit,
+	ariaLabel,
+	className,
+	displayClassName,
+}: {
+	value: string;
+	displayValue: ReactNode;
+	onCommit: (value: string) => void;
+	ariaLabel: string;
+	className?: string;
+	displayClassName?: string;
+}) {
+	const [editing, setEditing] = useState(false);
+	const [draft, setDraft] = useState(value);
+	const [calendarOpen, setCalendarOpen] = useState(false);
+	const draftRef = useRef(value);
+	const calendarSelectionRef = useRef(false);
+
+	useEffect(() => {
+		if (editing) return;
+		setDraft(value);
+		draftRef.current = value;
+	}, [editing, value]);
+
+	const finishEditing = (nextValue = draftRef.current) => {
+		const trimmedValue = nextValue.trim();
+		if (trimmedValue && trimmedValue !== value) onCommit(trimmedValue);
+		setEditing(false);
+	};
+
+	return (
+		<fieldset
+			className={cn("relative m-0 h-9 min-w-0 w-full border-0 p-0", className)}
+			onBlur={(event) => {
+				if (
+					editing &&
+					!calendarOpen &&
+					!event.currentTarget.contains(event.relatedTarget)
+				) {
+					finishEditing();
+				}
+			}}
+		>
+			{editing ? (
+				<DatePickerInput
+					autoFocus
+					value={draft}
+					dateFormat="dd.MM.yyyy"
+					placeholder="DD.MM.YYYY"
+					defaultCalendarOpen
+					showCalendarButton={false}
+					keepInputFocusOnOpen
+					aria-label={ariaLabel}
+					calendarLabel={`Select ${ariaLabel}`}
+					commitEmpty={false}
+					containerClassName="absolute inset-y-0 -left-2 z-10 h-9 w-[calc(100%+0.5rem)] min-w-32"
+					className="px-2 pr-2 text-sm tabular-nums"
+					onChange={(nextValue) => {
+						draftRef.current = nextValue;
+						setDraft(nextValue);
+					}}
+					onDateSelect={(nextValue) => {
+						calendarSelectionRef.current = true;
+						finishEditing(nextValue);
+					}}
+					onCalendarOpenChange={(open) => {
+						setCalendarOpen(open);
+						if (open) return;
+						queueMicrotask(() => {
+							if (calendarSelectionRef.current) {
+								calendarSelectionRef.current = false;
+								return;
+							}
+							finishEditing();
+						});
+					}}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							event.preventDefault();
+							finishEditing();
+						}
+						if (event.key === "Escape" && !calendarOpen) {
+							event.preventDefault();
+							draftRef.current = value;
+							setDraft(value);
+							setEditing(false);
+						}
+					}}
+				/>
+			) : (
+				<button
+					type="button"
+					aria-label={`Edit ${ariaLabel}`}
+					className={cn(
+						"absolute inset-y-0 -left-2 flex h-9 w-[calc(100%+0.5rem)] min-w-0 items-center px-2 text-left",
+						"cursor-text border border-transparent bg-transparent outline-none",
+						"hover:border-border focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+						displayClassName,
+					)}
+					onClick={() => {
+						setCalendarOpen(true);
+						setEditing(true);
+					}}
+				>
+					<span className="block min-w-0 truncate">{displayValue}</span>
+				</button>
+			)}
+		</fieldset>
 	);
 }
 

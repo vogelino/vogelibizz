@@ -2,6 +2,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { IconBadge } from "@/components/ui/icon-badge";
 import {
 	InlineCombobox,
+	InlineDatePickerInput,
 	InlineInput,
 	InlineMultiCombobox,
 } from "@/components/ui/inline-edit";
@@ -33,8 +34,7 @@ export function getInvoiceTableColumns(
 			cell: ({ getValue, row }) => {
 				const value = getValue<string>();
 				return (
-					<InlineInput
-						type="date"
+					<InlineDatePickerInput
 						value={value.slice(0, 10)}
 						displayValue={formatDate(value)}
 						ariaLabel={`date for ${row.original.name}`}

@@ -58,12 +58,18 @@ describe("expense history mutation HTTP API", () => {
 			delete: async () => ({ id: 7 }),
 		});
 		const response = await handlers.patch(
-			request({ lastModified: "old-token", amount: 0, expenseId: 4 }),
+			request({
+				lastModified: "old-token",
+				bookedAt: "2026-06-04",
+				amount: 0,
+				expenseId: 4,
+			}),
 			"7",
 		);
 		expect(response.status).toBe(200);
 		expect(received).toEqual({
 			lastModified: "old-token",
+			bookedAt: "2026-06-04",
 			amount: 0,
 			expenseId: 4,
 		});
@@ -79,6 +85,7 @@ describe("expense history mutation HTTP API", () => {
 		for (const body of [
 			{ lastModified: "token", amount: -1 },
 			{ lastModified: "token", amount: "nope" },
+			{ lastModified: "token", bookedAt: "2026-02-30" },
 			{ lastModified: "token", originalAmount: 0 },
 			{ lastModified: "token", originalDescription: "changed" },
 		]) {

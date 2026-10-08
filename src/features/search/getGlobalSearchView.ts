@@ -113,7 +113,7 @@ export function getGlobalSearchView({
 		placeholder: scope
 			? `Search ${searchScopeLabels[scope].toLowerCase()}…`
 			: "Search everything…",
-		canApplyTextFilter: Boolean(query.trim()) && scope === currentScope,
+		canApplyTextFilter: Boolean(query.trim()) && scope !== null,
 		matchingFilters,
 		matchingScopes,
 		results: resultState,
