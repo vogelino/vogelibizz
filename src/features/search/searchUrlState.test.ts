@@ -1,83 +1,80 @@
 import { describe, expect, test } from "bun:test";
+
 import {
-	addSearchFilter,
-	createSearchRecord,
-	getSearchTokens,
-	removeSearchToken,
+  addSearchFilter,
+  createSearchRecord,
+  getSearchTokens,
+  removeSearchToken,
 } from "./searchUrlState";
 
 describe("search URL state", () => {
-	test("maps each expense scope to its validated search keys", () => {
-		expect(
-			getSearchTokens("expenses", {
-				q: "hosting",
-				categories: ["Software"],
-				expenseType: "Business",
-			}),
-		).toEqual([
-			{ id: "text", value: "hosting", label: "Text: hosting" },
-			{
-				id: "category:Software",
-				filter: "category",
-				value: "Software",
-				label: "Category: Software",
-			},
-			{
-				id: "type:Business",
-				filter: "type",
-				value: "Business",
-				label: "Type: Business",
-			},
-		]);
+  test("maps each expense scope to its validated search keys", () => {
+    expect(
+      getSearchTokens("expenses", {
+        q: "hosting",
+        categories: ["Software"],
+        expenseType: "Business",
+      }),
+    ).toEqual([
+      { id: "text", value: "hosting", label: "Text: hosting" },
+      {
+        id: "category:Software",
+        filter: "category",
+        value: "Software",
+        label: "Category: Software",
+      },
+      {
+        id: "type:Business",
+        filter: "type",
+        value: "Business",
+        label: "Type: Business",
+      },
+    ]);
 
-		expect(
-			getSearchTokens("expense-history", {
-				category: ["Travel"],
-				type: "Personal",
-			}).map(({ id }) => id),
-		).toEqual(["category:Travel", "type:Personal"]);
-	});
+    expect(
+      getSearchTokens("expense-history", {
+        category: ["Travel"],
+        type: "Personal",
+      }).map(({ id }) => id),
+    ).toEqual(["category:Travel", "type:Personal"]);
+  });
 
-	test("preserves unrelated keys and omits an empty canonical default", () => {
-		const option = {
-			id: "category:Software",
-			filter: "category" as const,
-			value: "Software",
-			label: "Category: Software",
-			keywords: "filter category software",
-			scopes: ["expenses"] as const,
-		};
-		const withCategory = addSearchFilter(
-			{ fromMonth: "2026-01" },
-			"expenses",
-			option,
-		);
+  test("preserves unrelated keys and omits an empty canonical default", () => {
+    const option = {
+      id: "category:Software",
+      filter: "category" as const,
+      value: "Software",
+      label: "Category: Software",
+      keywords: "filter category software",
+      scopes: ["expenses"] as const,
+    };
+    const withCategory = addSearchFilter({ fromMonth: "2026-01" }, "expenses", option);
 
-		expect(withCategory).toEqual({
-			fromMonth: "2026-01",
-			categories: ["Software"],
-		});
-		expect(
-			removeSearchToken(withCategory, "expenses", {
-				id: option.id,
-				filter: option.filter,
-				value: option.value,
-				label: option.label,
-			}),
-		).toEqual({ fromMonth: "2026-01" });
-	});
+    expect(withCategory).toEqual({
+      fromMonth: "2026-01",
+      categories: ["Software"],
+    });
+    expect(
+      removeSearchToken(withCategory, "expenses", {
+        id: option.id,
+        filter: option.filter,
+        value: option.value,
+        label: option.label,
+      }),
+    ).toEqual({ fromMonth: "2026-01" });
+  });
 
-	test("creates destination search state from scoped search tokens", () => {
-		expect(
-			createSearchRecord("expense-history", [
-				{ id: "text", value: "coffee", label: "Text: coffee" },
-				{
-					id: "category:Food",
-					filter: "category",
-					value: "Food",
-					label: "Category: Food",
-				},
-			]),
-		).toEqual({ q: "coffee", category: ["Food"] });
-	});
+  test("creates destination search state from scoped search tokens", () => {
+    expect(
+      createSearchRecord("expense-history", [
+        { id: "text", value: "coffee", label: "Text: coffee" },
+        {
+          id: "category:Food",
+          filter: "category",
+          value: "Food",
+          label: "Category: Food",
+        },
+      ]),
+    ).toEqual({ q: "coffee", category: ["Food"] });
+  });
 });

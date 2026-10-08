@@ -1,34 +1,30 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatRelative, parseISO } from "date-fns";
+
 import { getNowInUTC } from "./timeUtil";
 
 export function useLastModifiedColumn<
-	ColumnType,
-	// biome-ignore lint/suspicious/noExplicitAny: tanstack column typing
+  ColumnType,
+  // TanStack column typing requires an unconstrained row value here.
 >(): ColumnDef<ColumnType, any> {
-	return {
-		id: "last_modified",
-		accessorKey: "last_modified",
-		size: 100,
-		header: "Last modified",
-		sortingFn: "datetime",
-		sortUndefined: "last",
-		cell: function render({ getValue }) {
-			const value = getValue<string | null>();
-			if (!value) return <span>–</span>;
-			const formattedDateWithTime = formatRelative(
-				parseISO(value),
-				getNowInUTC(),
-			);
-			return (
-				<span className="text-muted-foreground text-nowrap">
-					{ucFirst(formattedDateWithTime)}
-				</span>
-			);
-		},
-	};
+  return {
+    id: "last_modified",
+    accessorKey: "last_modified",
+    size: 100,
+    header: "Last modified",
+    sortingFn: "datetime",
+    sortUndefined: "last",
+    cell: function render({ getValue }) {
+      const value = getValue<string | null>();
+      if (!value) return <span>–</span>;
+      const formattedDateWithTime = formatRelative(parseISO(value), getNowInUTC());
+      return (
+        <span className="text-muted-foreground text-nowrap">{ucFirst(formattedDateWithTime)}</span>
+      );
+    },
+  };
 }
 
 function ucFirst(str: string) {
-	return str.charAt(0).toUpperCase() + str.slice(1);
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

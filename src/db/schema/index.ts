@@ -10,10 +10,10 @@ export * from "./quotesDbSchema";
 export * from "./settingsDbSchema";
 
 export type ResourceType =
-	| "projects"
-	| "currencies"
-	| "clients"
-	| "expenses"
-	| "quotes"
-	| "settings"
-	| "invoices";
+  | "projects"
+  | "currencies"
+  | "clients"
+  | "expenses"
+  | "quotes"
+  | "settings"
+  | "invoices";

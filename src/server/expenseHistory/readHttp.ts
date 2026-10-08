@@ -1,139 +1,133 @@
 import { z } from "zod";
+
 import { isAuthenticatedAndAdmin } from "@/auth";
 import { json } from "@/utility/apiUtil";
 import {
-	expenseHistoryMonthKeySchema,
-	expenseHistorySortSchema,
+  expenseHistoryMonthKeySchema,
+  expenseHistorySortSchema,
 } from "@/utility/expenseHistoryContracts";
+
 import {
-	getExpenseDashboard,
-	getExpenseHistoryMonth,
-	getExpenseHistoryMonths,
-	getExpenseHistoryTransaction,
-	getExpenseOverviewSummary,
+  getExpenseDashboard,
+  getExpenseHistoryMonth,
+  getExpenseHistoryMonths,
+  getExpenseHistoryTransaction,
+  getExpenseOverviewSummary,
 } from "./getExpenseHistory";
 
 type ReadHttpDependencies = {
-	authorize: (request: Request) => Promise<boolean>;
-	getMonths: typeof getExpenseHistoryMonths;
-	getMonth: typeof getExpenseHistoryMonth;
-	getOverview: typeof getExpenseOverviewSummary;
-	getDashboard: typeof getExpenseDashboard;
-	getTransaction: typeof getExpenseHistoryTransaction;
+  authorize: (request: Request) => Promise<boolean>;
+  getMonths: typeof getExpenseHistoryMonths;
+  getMonth: typeof getExpenseHistoryMonth;
+  getOverview: typeof getExpenseOverviewSummary;
+  getDashboard: typeof getExpenseDashboard;
+  getTransaction: typeof getExpenseHistoryTransaction;
 };
 
-export function createExpenseHistoryReadHandlers(
-	overrides: Partial<ReadHttpDependencies> = {},
-) {
-	const dependencies: ReadHttpDependencies = {
-		authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
-		getMonths: getExpenseHistoryMonths,
-		getMonth: getExpenseHistoryMonth,
-		getOverview: getExpenseOverviewSummary,
-		getDashboard: getExpenseDashboard,
-		getTransaction: getExpenseHistoryTransaction,
-		...overrides,
-	};
-	return {
-		months: async (request: Request) => {
-			if (!(await dependencies.authorize(request))) {
-				return json({ error: "Unauthorized" }, { status: 401 });
-			}
-			return json(await dependencies.getMonths());
-		},
-		overview: async (request: Request) => {
-			if (!(await dependencies.authorize(request))) {
-				return json({ error: "Unauthorized" }, { status: 401 });
-			}
-			return json(await dependencies.getOverview());
-		},
-		dashboard: async (request: Request) => {
-			if (!(await dependencies.authorize(request))) {
-				return json({ error: "Unauthorized" }, { status: 401 });
-			}
-			return json(await dependencies.getDashboard());
-		},
-		month: async (request: Request, monthParam: string) => {
-			if (!(await dependencies.authorize(request))) {
-				return json({ error: "Unauthorized" }, { status: 401 });
-			}
-			const parsedMonth =
-				monthParam === "all"
-					? null
-					: expenseHistoryMonthKeySchema.safeParse(monthParam);
-			if (parsedMonth !== null && !parsedMonth.success) {
-				return json(
-					{ error: "Month must use YYYY-MM format." },
-					{ status: 400 },
-				);
-			}
-			const url = new URL(request.url);
-			const pagination = z
-				.object({
-					offset: z.coerce.number().pipe(z.int().nonnegative()).default(0),
-					limit: z.coerce.number().pipe(z.int().min(1).max(100)).default(50),
-				})
-				.safeParse({
-					offset: url.searchParams.get("offset") ?? undefined,
-					limit: url.searchParams.get("limit") ?? undefined,
-				});
-			if (!pagination.success) {
-				return json(
-					{
-						error:
-							"Pagination requires a non-negative offset and a limit from 1 to 100.",
-					},
-					{ status: 400 },
-				);
-			}
-			const hasSort = url.searchParams.has("sort");
-			const hasDirection = url.searchParams.has("direction");
-			const sort =
-				hasSort || hasDirection
-					? expenseHistorySortSchema.safeParse({
-							field: url.searchParams.get("sort"),
-							direction: url.searchParams.get("direction"),
-						})
-					: null;
-			if (sort !== null && !sort.success) {
-				return json(
-					{
-						error: "Sort requires a supported field and asc or desc direction.",
-					},
-					{ status: 400 },
-				);
-			}
-			const result = await dependencies.getMonth(parsedMonth?.data ?? null, {
-				...pagination.data,
-				sort: sort?.data,
-			});
-			if (!result) {
-				return json(
-					{
-						error: parsedMonth
-							? `No expense history exists for ${parsedMonth.data}.`
-							: "No expense history exists.",
-					},
-					{ status: 404 },
-				);
-			}
-			return json(result);
-		},
-		transaction: async (request: Request, idParam: string) => {
-			if (!(await dependencies.authorize(request))) {
-				return json({ error: "Unauthorized" }, { status: 401 });
-			}
-			const id = z.coerce.number().pipe(z.int().positive()).safeParse(idParam);
-			if (!id.success) {
-				return json({ error: "Invalid transaction id." }, { status: 400 });
-			}
-			const result = await dependencies.getTransaction(id.data);
-			if (!result) {
-				return json({ error: "Transaction not found." }, { status: 404 });
-			}
-			return json(result);
-		},
-	};
+export function createExpenseHistoryReadHandlers(overrides: Partial<ReadHttpDependencies> = {}) {
+  const dependencies: ReadHttpDependencies = {
+    authorize: (request) => isAuthenticatedAndAdmin(undefined, request),
+    getMonths: getExpenseHistoryMonths,
+    getMonth: getExpenseHistoryMonth,
+    getOverview: getExpenseOverviewSummary,
+    getDashboard: getExpenseDashboard,
+    getTransaction: getExpenseHistoryTransaction,
+    ...overrides,
+  };
+  return {
+    months: async (request: Request) => {
+      if (!(await dependencies.authorize(request))) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+      return json(await dependencies.getMonths());
+    },
+    overview: async (request: Request) => {
+      if (!(await dependencies.authorize(request))) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+      return json(await dependencies.getOverview());
+    },
+    dashboard: async (request: Request) => {
+      if (!(await dependencies.authorize(request))) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+      return json(await dependencies.getDashboard());
+    },
+    month: async (request: Request, monthParam: string) => {
+      if (!(await dependencies.authorize(request))) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const parsedMonth =
+        monthParam === "all" ? null : expenseHistoryMonthKeySchema.safeParse(monthParam);
+      if (parsedMonth !== null && !parsedMonth.success) {
+        return json({ error: "Month must use YYYY-MM format." }, { status: 400 });
+      }
+      const url = new URL(request.url);
+      const pagination = z
+        .object({
+          offset: z.coerce.number().pipe(z.int().nonnegative()).default(0),
+          limit: z.coerce.number().pipe(z.int().min(1).max(100)).default(50),
+        })
+        .safeParse({
+          offset: url.searchParams.get("offset") ?? undefined,
+          limit: url.searchParams.get("limit") ?? undefined,
+        });
+      if (!pagination.success) {
+        return json(
+          {
+            error: "Pagination requires a non-negative offset and a limit from 1 to 100.",
+          },
+          { status: 400 },
+        );
+      }
+      const hasSort = url.searchParams.has("sort");
+      const hasDirection = url.searchParams.has("direction");
+      const sort =
+        hasSort || hasDirection
+          ? expenseHistorySortSchema.safeParse({
+              field: url.searchParams.get("sort"),
+              direction: url.searchParams.get("direction"),
+            })
+          : null;
+      if (sort !== null && !sort.success) {
+        return json(
+          {
+            error: "Sort requires a supported field and asc or desc direction.",
+          },
+          { status: 400 },
+        );
+      }
+      const result = await dependencies.getMonth(parsedMonth?.data ?? null, {
+        ...pagination.data,
+        sort: sort?.data,
+      });
+      if (!result) {
+        return json(
+          {
+            error: parsedMonth
+              ? `No expense history exists for ${parsedMonth.data}.`
+              : "No expense history exists.",
+          },
+          { status: 404 },
+        );
+      }
+      return json(result);
+    },
+    transaction: async (request: Request, idParam: string) => {
+      if (!(await dependencies.authorize(request))) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const id = z.coerce.number().pipe(z.int().positive()).safeParse(idParam);
+      if (!id.success) {
+        return json({ error: "Invalid transaction id." }, { status: 400 });
+      }
+      const result = await dependencies.getTransaction(id.data);
+      if (!result) {
+        return json({ error: "Transaction not found." }, { status: 404 });
+      }
+      return json(result);
+    },
+  };
 }
 
 const readHandlers = createExpenseHistoryReadHandlers();

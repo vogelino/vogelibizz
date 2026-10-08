@@ -1,9 +1,12 @@
 pre-commit:
-  parallel: true
   commands:
-    biome:
+    oxfmt:
       glob: "*.{ts,tsx,js,jsx,json,css}"
-      run: bunx @biomejs/biome check --write {staged_files}
+      run: bunx oxfmt --write {staged_files}
+      stage_fixed: true
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: bunx oxlint --fix {staged_files}
       stage_fixed: true
     typecheck:
       run: bunx tsc --noEmit

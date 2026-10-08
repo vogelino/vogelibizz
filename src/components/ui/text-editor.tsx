@@ -5,22 +5,22 @@ import { type Ref, useMemo } from "react";
 import SimpleMDE, { type SimpleMDEReactProps } from "react-simplemde-editor";
 
 const TextareaEditor = ({
-	forwardedRef,
-	...props
+  forwardedRef,
+  ...props
 }: SimpleMDEReactProps & {
-	forwardedRef?: Ref<HTMLDivElement>;
+  forwardedRef?: Ref<HTMLDivElement>;
 }) => {
-	const options = useMemo(
-		() =>
-			({
-				autofocus: false,
-				spellChecker: false,
-				toolbar: false,
-			}) as SimpleMDEReactProps["options"],
-		[],
-	);
+  const options = useMemo(
+    () =>
+      ({
+        autofocus: false,
+        spellChecker: false,
+        toolbar: false,
+      }) as SimpleMDEReactProps["options"],
+    [],
+  );
 
-	return <SimpleMDE options={options} ref={forwardedRef} {...props} />;
+  return <SimpleMDE options={options} ref={forwardedRef} {...props} />;
 };
 
 TextareaEditor.displayName = "TextareaEditor";

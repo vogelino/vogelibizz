@@ -1,9 +1,6 @@
 import type { Register } from "@tanstack/react-router";
 import type { RequestHandler } from "@tanstack/react-start/server";
-import {
-  createStartHandler,
-  defaultStreamHandler,
-} from "@tanstack/react-start/server";
+import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
 import type { D1Env } from "./src/db/d1Types";
 
 const handler = createStartHandler(defaultStreamHandler);

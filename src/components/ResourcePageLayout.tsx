@@ -1,63 +1,53 @@
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+
 import ResourceCreateButton from "@/components/ResourceCreateButton";
 import { resourceIconMap } from "@/utility/resourceIcons";
 import type { RoutedResource } from "@/utility/routedResources";
 
-const ResourceActionsContext = createContext<
-	((actions: ReactNode | null) => void) | null
->(null);
+const ResourceActionsContext = createContext<((actions: ReactNode | null) => void) | null>(null);
 
 export function useResourceActions(actions: ReactNode | null) {
-	const setActions = useContext(ResourceActionsContext);
-	useEffect(() => {
-		if (!setActions) return;
-		setActions(actions);
-		return () => setActions(null);
-	}, [actions, setActions]);
+  const setActions = useContext(ResourceActionsContext);
+  useEffect(() => {
+    if (!setActions) return;
+    setActions(actions);
+    return () => setActions(null);
+  }, [actions, setActions]);
 }
 
 function ResourcePageLayout({
-	resource,
-	children,
-	showCreate = true,
-	headerContent,
+  resource,
+  children,
+  showCreate = true,
+  headerContent,
 }: {
-	resource: RoutedResource;
-	children: ReactNode;
-	showCreate?: boolean;
-	headerContent?: ReactNode;
+  resource: RoutedResource;
+  children: ReactNode;
+  showCreate?: boolean;
+  headerContent?: ReactNode;
 }) {
-	const [actions, setActions] = useState<ReactNode | null>(null);
-	const ResourceIcon = resourceIconMap[resource];
+  const [actions, setActions] = useState<ReactNode | null>(null);
+  const ResourceIcon = resourceIconMap[resource];
 
-	return (
-		<ResourceActionsContext.Provider value={setActions}>
-			<div className="px-6 md:px-10 sticky left-0 pt-6 md:pt-10">
-				<div className="flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center">
-					<h1 className="flex items-center min-h-9 gap-2 text-lg font-semibold uppercase antialiased">
-						<ResourceIcon
-							className="size-5 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						{resource}
-					</h1>
-					<div className="flex items-center gap-2">
-						{actions}
-						{showCreate && <ResourceCreateButton resource={resource} />}
-					</div>
-				</div>
-			</div>
-			{headerContent}
+  return (
+    <ResourceActionsContext.Provider value={setActions}>
+      <div className="px-6 md:px-10 sticky left-0 pt-6 md:pt-10">
+        <div className="flex justify-between gap-x-6 gap-y-2 flex-wrap mb-4 items-center">
+          <h1 className="flex items-center min-h-9 gap-2 text-lg font-semibold uppercase antialiased">
+            <ResourceIcon className="size-5 text-muted-foreground" aria-hidden="true" />
+            {resource}
+          </h1>
+          <div className="flex items-center gap-2">
+            {actions}
+            {showCreate && <ResourceCreateButton resource={resource} />}
+          </div>
+        </div>
+      </div>
+      {headerContent}
 
-			{children}
-		</ResourceActionsContext.Provider>
-	);
+      {children}
+    </ResourceActionsContext.Provider>
+  );
 }
 
 export default ResourcePageLayout;

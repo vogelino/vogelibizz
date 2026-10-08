@@ -2,69 +2,69 @@ import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+
 import { getNowInUTC } from "@/utility/timeUtil";
+
 import { projectsToClients } from "./projectsToClientsDbSchema";
 
 const clientLanguageEnumValues = ["en-US", "es-CL", "fr-CH", "de-DE"] as const;
 
 export const clientLanguageEnum = {
-	enumValues: clientLanguageEnumValues,
+  enumValues: clientLanguageEnumValues,
 };
 
 export const clients = sqliteTable("clients", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	name: text("name").notNull().unique(),
-	clientNumber: text("client_number"),
-	language: text("language", { enum: clientLanguageEnumValues })
-		.notNull()
-		.default("de-DE"),
-	legalName: text("legal_name"),
-	addressLine1: text("address_line_1"),
-	addressLine2: text("address_line_2"),
-	addressLine3: text("address_line_3"),
-	taxId: text("tax_id"),
-	svgLogoString: text("svg_logo_string"),
-	svgIconString: text("svg_icon_string"),
-	created_at: text("created_at")
-		.$defaultFn(() => getNowInUTC())
-		.notNull(),
-	last_modified: text("last_modified")
-		.$defaultFn(() => getNowInUTC())
-		.notNull(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  clientNumber: text("client_number"),
+  language: text("language", { enum: clientLanguageEnumValues }).notNull().default("de-DE"),
+  legalName: text("legal_name"),
+  addressLine1: text("address_line_1"),
+  addressLine2: text("address_line_2"),
+  addressLine3: text("address_line_3"),
+  taxId: text("tax_id"),
+  svgLogoString: text("svg_logo_string"),
+  svgIconString: text("svg_icon_string"),
+  created_at: text("created_at")
+    .$defaultFn(() => getNowInUTC())
+    .notNull(),
+  last_modified: text("last_modified")
+    .$defaultFn(() => getNowInUTC())
+    .notNull(),
 });
 
 const clientPureSchema = createSelectSchema(clients);
 export const clientSelectSchema = clientPureSchema.extend({
-	projects: z.object({ id: z.number(), name: z.string() }).array().optional(),
+  projects: z.object({ id: z.number(), name: z.string() }).array().optional(),
 });
 export type ClientType = z.infer<typeof clientSelectSchema>;
 
 export const clientInsertSchema = clientSelectSchema.partial().extend({
-	name: z.string(),
+  name: z.string(),
 });
 export type ClientInsertType = z.infer<typeof clientInsertSchema>;
 
 export const clientEditSchema = clientInsertSchema
-	.partial()
-	.omit({
-		created_at: true,
-		last_modified: true,
-	})
-	.extend(
-		z
-			.object({
-				last_modified: z
-					.string()
-					.optional()
-					.default(() => getNowInUTC()),
-			})
-			.partial().shape,
-	)
-	.extend({
-		id: z.number(),
-	});
+  .partial()
+  .omit({
+    created_at: true,
+    last_modified: true,
+  })
+  .extend(
+    z
+      .object({
+        last_modified: z
+          .string()
+          .optional()
+          .default(() => getNowInUTC()),
+      })
+      .partial().shape,
+  )
+  .extend({
+    id: z.number(),
+  });
 export type ClientEditType = z.infer<typeof clientEditSchema>;
 
 export const clientsRelations = relations(clients, ({ many }) => ({
-	projectsToClients: many(projectsToClients, { relationName: "projects" }),
+  projectsToClients: many(projectsToClients, { relationName: "projects" }),
 }));

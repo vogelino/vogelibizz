@@ -1,65 +1,64 @@
 "use client";
 import { Link, linkOptions } from "@tanstack/react-router";
+
 import { Button } from "@/components/ui/button";
 import type { RoutedResource } from "@/utility/routedResources";
 
 function ResourceCreateButton({ resource }: { resource: RoutedResource }) {
-	const createRoute = getCreateRoute(resource);
-	const maskRoute = getCreateMaskRoute(resource);
-	if (!createRoute) return null;
-	return (
-		<Button variant="outline" asChild>
-			{maskRoute ? (
-				<Link
-					{...createRoute}
-					mask={{
-						...maskRoute,
-						unmaskOnReload: true,
-					}}
-				>
-					Create {resource.toLocaleLowerCase().replace(/s$/, "")}
-				</Link>
-			) : (
-				<Link {...createRoute}>
-					Create {resource.toLocaleLowerCase().replace(/s$/, "")}
-				</Link>
-			)}
-		</Button>
-	);
+  const createRoute = getCreateRoute(resource);
+  const maskRoute = getCreateMaskRoute(resource);
+  if (!createRoute) return null;
+  return (
+    <Button variant="outline" asChild>
+      {maskRoute ? (
+        <Link
+          {...createRoute}
+          mask={{
+            ...maskRoute,
+            unmaskOnReload: true,
+          }}
+        >
+          Create {resource.toLocaleLowerCase().replace(/s$/, "")}
+        </Link>
+      ) : (
+        <Link {...createRoute}>Create {resource.toLocaleLowerCase().replace(/s$/, "")}</Link>
+      )}
+    </Button>
+  );
 }
 
 function getCreateRoute(resource: RoutedResource) {
-	switch (resource) {
-		case "clients":
-			return linkOptions({ to: "/clients/create/modal", search: true });
-		case "expenses":
-			return linkOptions({ to: "/expenses/create/modal", search: true });
-		case "projects":
-			return linkOptions({ to: "/projects/create/modal", search: true });
-		case "invoices":
-			return linkOptions({ to: "/invoices/create", search: true });
-		default: {
-			const _exhaustive: never = resource;
-			throw new Error(`Unhandled resource ${_exhaustive}`);
-		}
-	}
+  switch (resource) {
+    case "clients":
+      return linkOptions({ to: "/clients/create/modal", search: true });
+    case "expenses":
+      return linkOptions({ to: "/expenses/create/modal", search: true });
+    case "projects":
+      return linkOptions({ to: "/projects/create/modal", search: true });
+    case "invoices":
+      return linkOptions({ to: "/invoices/create", search: true });
+    default: {
+      const _exhaustive: never = resource;
+      throw new Error(`Unhandled resource ${_exhaustive}`);
+    }
+  }
 }
 
 function getCreateMaskRoute(resource: RoutedResource) {
-	switch (resource) {
-		case "clients":
-			return linkOptions({ to: "/clients/create", search: true });
-		case "expenses":
-			return linkOptions({ to: "/expenses/create", search: true });
-		case "projects":
-			return linkOptions({ to: "/projects/create", search: true });
-		case "invoices":
-			return null;
-		default: {
-			const _exhaustive: never = resource;
-			throw new Error(`Unhandled resource ${_exhaustive}`);
-		}
-	}
+  switch (resource) {
+    case "clients":
+      return linkOptions({ to: "/clients/create", search: true });
+    case "expenses":
+      return linkOptions({ to: "/expenses/create", search: true });
+    case "projects":
+      return linkOptions({ to: "/projects/create", search: true });
+    case "invoices":
+      return null;
+    default: {
+      const _exhaustive: never = resource;
+      throw new Error(`Unhandled resource ${_exhaustive}`);
+    }
+  }
 }
 
 export default ResourceCreateButton;

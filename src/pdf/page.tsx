@@ -1,3 +1,3 @@
 export default function PdfPage() {
-	return null;
+  return null;
 }

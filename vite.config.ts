@@ -9,21 +9,24 @@ import { defineConfig, type Plugin } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 function loadDevVars(): Record<string, string> {
-	try {
-		return Object.fromEntries(
-			readFileSync(".dev.vars", "utf-8")
-				.split("\n")
-				.filter((line) => /^\s*[A-Z_]+=/.test(line))
-				.map((line) => {
-					const eq = line.indexOf("=");
-					const key = line.slice(0, eq).trim();
-					const value = line.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
-					return [key, value];
-				}),
-		);
-	} catch {
-		return {};
-	}
+  try {
+    return Object.fromEntries(
+      readFileSync(".dev.vars", "utf-8")
+        .split("\n")
+        .filter((line) => /^\s*[A-Z_]+=/.test(line))
+        .map((line) => {
+          const eq = line.indexOf("=");
+          const key = line.slice(0, eq).trim();
+          const value = line
+            .slice(eq + 1)
+            .trim()
+            .replace(/^["']|["']$/g, "");
+          return [key, value];
+        }),
+    );
+  } catch {
+    return {};
+  }
 }
 
 const startStorageContextClient = fileURLToPath(
@@ -65,12 +68,7 @@ export default defineConfig(() => {
       dedupe: ["react", "react-dom", "echarts", "zrender"],
     },
     optimizeDeps: {
-      include: [
-        "echarts/charts",
-        "echarts/components",
-        "echarts/core",
-        "echarts/renderers",
-      ],
+      include: ["echarts/charts", "echarts/components", "echarts/core", "echarts/renderers"],
     },
     plugins: [
       clientOnlyAliases(),

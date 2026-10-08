@@ -1,48 +1,45 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
+
 import { COLORS, CONFIG, LABELS } from "../variables";
 
 export const HourlyRateNotice = ({
-	lang = "en-US",
-	hourlyRate = 50,
-	currency = "EUR",
+  lang = "en-US",
+  hourlyRate = 50,
+  currency = "EUR",
 }: {
-	lang?: keyof typeof LABELS;
-	hourlyRate?: number;
-	currency?: string;
+  lang?: keyof typeof LABELS;
+  hourlyRate?: number;
+  currency?: string;
 }) => {
-	const currencyFormatter = new Intl.NumberFormat(lang, {
-		style: "currency",
-		currency,
-	});
-	return (
-		<View style={styles.wrapper}>
-			<View style={styles.inner}>
-				<Text style={styles.description}>
-					{LABELS[lang].hourlyRateNoticeLabel}
-				</Text>
-				<Text style={styles.hourlyRate}>
-					{currencyFormatter.format(hourlyRate)}
-				</Text>
-			</View>
-		</View>
-	);
+  const currencyFormatter = new Intl.NumberFormat(lang, {
+    style: "currency",
+    currency,
+  });
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.inner}>
+        <Text style={styles.description}>{LABELS[lang].hourlyRateNoticeLabel}</Text>
+        <Text style={styles.hourlyRate}>{currencyFormatter.format(hourlyRate)}</Text>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-	wrapper: {
-		paddingLeft: CONFIG.contentLeftOffset,
-		marginTop: 16,
-	},
-	inner: {
-		flexDirection: "row",
-		gap: 8,
-		borderBottom: `0.5px solid ${COLORS.grayMed}`,
-		paddingBottom: 8,
-	},
-	description: {
-		fontWeight: 700,
-	},
-	hourlyRate: {
-		fontFamily: "IBM Plex Mono",
-	},
+  wrapper: {
+    paddingLeft: CONFIG.contentLeftOffset,
+    marginTop: 16,
+  },
+  inner: {
+    flexDirection: "row",
+    gap: 8,
+    borderBottom: `0.5px solid ${COLORS.grayMed}`,
+    paddingBottom: 8,
+  },
+  description: {
+    fontWeight: 700,
+  },
+  hourlyRate: {
+    fontFamily: "IBM Plex Mono",
+  },
 });
